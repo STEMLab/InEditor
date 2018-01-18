@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>IndoorGML-Editor</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="./css/bootstrap.min.css">
+  <link rel="stylesheet" href="./css/IndoorGML-Editor.css">
+
+  <!-- Fancytree CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" rel="stylesheet">
+
+  <!-- Fancytree JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.27.0/jquery.fancytree-all.js"></script>
+
+
+  <!-- Bootstrap JS -->
+  <script src="./lib/bootstrap.min.js"></script>
+
+  <!-- Golden Layout -->
+  <script type="text/javascript" src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css" />
+  <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-dark-theme.css" />
+  <!--    <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-light-theme.css" />-->
+
+
+  <script src="https://cdn.rawgit.com/konvajs/konva/1.7.6/konva.min.js"></script>
+  <script src="./js/Conditions.js"></script>
+  <!-- Add code to initialize the tree when the document is loaded: -->
+  <script type="text/javascript">
+    $(function() {
+      // Initialize Fancytree
+      $("#tree-view").fancytree({
+        extensions: ["glyph"],
+        selectMode: 1,
+        glyph: {
+          preset: "awesome4",
+          map: {}
+        },
+        icon: true,
+        source: [ // Typically we would load using ajax instead...
+          {
+            title: "Folder 3",
+            folder: true,
+            expanded: true,
+            children: [{
+                title: "Node 3.1",
+                key: "id3.1"
+              },
+              {
+                title: "Node 3.2",
+                selected: true
+              }
+            ]
+          }
+        ]
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <header>
+    <nav class="navbar navbar-expand navbar-dark fixed-top menubar ">
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">PROJECT</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" id="project-new">New</a>
+              <a class="dropdown-item" id="project-load">Load</a>
+              <a class="dropdown-item" id="project-save">Save</a>
+              <a class="dropdown-item" id="project-saveas">Save As...</a>
+              <hr>
+              <a class="dropdown-item" id="project-import">Import</a>
+              <a class="dropdown-item" id="project-export">Export</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SETTING</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" id="setting-">DUMMY</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">HELP</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" id="setting-">DUMMY</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <nav class="navbar navbar-expand navbar-dark staic-top toolbar">
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <img src="./assets/icon/floor_d.png" title="Add new Floor" id="floor-btn">
+          </li>
+          <li class="nav-item">
+            <img src="./assets//icon/cell_d.png" title="Add new Cell" id="cell-btn">
+          </li>
+          <li class="nav-item">
+            <img src="./assets//icon/cellboundary_d.png" title="Add new CellBoundary" id="cellboundary-btn">
+          </li>
+          <li class="nav-item">
+            <img src="./assets//icon/state_d.png" title="Add new State" id="state-btn">
+          </li>
+          <li class="nav-item">
+            <img src="./assets//icon/transition_d.png" title="Add new Transition" id="transition-btn">
+          </li>
+          <li class="nav-item">
+            <img src="./assets//icon/stair_d.png" title="Add new Stair" id="staire">
+          </li>
+        </ul>
+        <ul class="navbar-nav my-2 my-lg-0">
+          <li class="nav-item">
+            <img src="./assets//icon/go_viewer.png" title="go viewer" id="viewer-btn">
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+
+  </header>
+
+
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="sidebar">
+        <div class="h-50 tree-view-container" id="tree-view"></div>
+        <div class="h-25 property-container" id="property-container"></div>
+      </nav>
+
+      <main role="main" class="workspace">
+        <div id="workspace-container">
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script data-main="js/main" src="lib/require.js"></script>
+</body>
+
+</html>
