@@ -1,5 +1,5 @@
 define([
-  "./Subject.js"
+  "../../../Observer/Subject.js"
 ], function(
   Subject
 ) {

@@ -1,5 +1,5 @@
 define([
-  "./Observer.js"
+  "../../Observer/Observer.js"
 ], function(
   Observer
 ) {

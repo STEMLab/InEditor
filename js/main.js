@@ -8,12 +8,12 @@ require.config({
 
 
 require([
-  "./js/UI/UI.js",
+  "./js/UI/UIContainer.js",
   "./js/Storage/Storage.js",
   "./js/EventHandler/EventHandlerController.js",
   "./js/Manager/ManagerController.js"
 ], function(
-  UI,
+  UIContainer,
   Storage,
   EventHandlerController,
   ManagerController
@@ -22,7 +22,8 @@ require([
 
   console.log("main called");
 
-  var ui = new UI();
+  var uiContainer = new UIContainer();
+  window.uiContainer = uiContainer;
 
   var storage = new Storage();
   window.storage = storage;
@@ -32,6 +33,8 @@ require([
 
   var eventHandlerController = new EventHandlerController();
   window.eventHandlerController = eventHandlerController;
+
+
 
   console.log(window);
 });

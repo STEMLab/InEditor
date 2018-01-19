@@ -35,36 +35,7 @@
   <script src="https://cdn.rawgit.com/konvajs/konva/1.7.6/konva.min.js"></script>
   <script src="./js/Conditions.js"></script>
   <!-- Add code to initialize the tree when the document is loaded: -->
-  <script type="text/javascript">
-    $(function() {
-      // Initialize Fancytree
-      $("#tree-view").fancytree({
-        extensions: ["glyph"],
-        selectMode: 1,
-        glyph: {
-          preset: "awesome4",
-          map: {}
-        },
-        icon: true,
-        source: [ // Typically we would load using ajax instead...
-          {
-            title: "Folder 3",
-            folder: true,
-            expanded: true,
-            children: [{
-                title: "Node 3.1",
-                key: "id3.1"
-              },
-              {
-                title: "Node 3.2",
-                selected: true
-              }
-            ]
-          }
-        ]
-      });
-    });
-  </script>
+  
 </head>
 
 <body>
