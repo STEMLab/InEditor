@@ -3,9 +3,9 @@
 */
 
 define([
-  "../PubSub/Subscriber.js"
+  "./Manager.js"
 ],function(
-  Subscriber
+  Manager
 ) {
   'use strict';
 
@@ -15,12 +15,12 @@ define([
   */
   function UIManager() {
 
-    Subscriber.apply(this, arguments);
+    Manager.apply(this, arguments);
 
     this.init();
   }
 
-  UIManager.prototype = Object.create(Subscriber.prototype);
+  UIManager.prototype = Object.create(Manager.prototype);
 
   UIManager.prototype.init = function(){
 
@@ -28,12 +28,14 @@ define([
 
     this.addReq({
       'settreeview' : 'single',
-      'setpropertyview' : 'single'
+      'setpropertyview' : 'single',
+      'addnewfloor':'single'
     });
 
 
     this.addCallbackFun('settreeview', this.test );
     this.addCallbackFun('setpropertyview', this.test );
+    this.addCallbackFun('addnewfloor', this.test );
 
   }
 

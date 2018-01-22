@@ -7,6 +7,7 @@ define([], function() {
     /***************************************************************************************************/
 
     var config = {
+      // selectionEnabled: true,
       content: [{
         type: 'stack',
         content: [{

@@ -13,13 +13,7 @@ define([], function() {
 
     // thanks for brokerConnector, subscriber don't need to maintains subscribe function and broker.
     // this.broker =_broker;
-    this.reqs = {};
-    this.callbackFunctions = [];
     this.name;
-
-  }
-
-  Subscriber.prototype.init = function(){
 
   }
 
@@ -36,17 +30,6 @@ define([], function() {
 
   }
 
-  Subscriber.prototype.addCallbackFun = function(_req, _fun){
-
-    this.callbackFunctions[_req] = _fun;
-
-  }
-
-  Subscriber.prototype.addReq = function(obj){
-
-    this.reqs = obj;
-
-  }
 
   return Subscriber;
 

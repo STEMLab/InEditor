@@ -19,7 +19,8 @@ define([
   CellLayer.prototype = Object.create(Layer.prototype);
 
   CellLayer.prototype.init = function(){
-    this.addGroup(new CellGroup());
+    // this.addGroup(new CellGroup());
+    this.group = new CellGroup();
   }
 
   return CellLayer;

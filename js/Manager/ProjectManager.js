@@ -3,9 +3,9 @@
 */
 
 define([
-  "../PubSub/Subscriber.js"
+  "./Manager.js"
 ],function(
-  Subscriber
+  Manager
 ) {
   'use strict';
 
@@ -15,12 +15,12 @@ define([
   */
   function ProjectManager() {
 
-    Subscriber.apply(this, arguments);
+    Manager.apply(this, arguments);
 
     this.init();
   }
 
-  ProjectManager.prototype = Object.create(Subscriber.prototype);
+  ProjectManager.prototype = Object.create(Manager.prototype);
 
   ProjectManager.prototype.init = function(){
 

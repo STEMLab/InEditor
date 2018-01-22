@@ -1,15 +1,37 @@
-
 define([], function() {
   'use strict';
 
-  function Sidebar(){
+  function TreeView() {
 
-    this.setTree();
+    this.tree;
+    this.init();
 
   };
 
-  Sidebar.prototype.setTree = function(storage){
-    console.log(storage);
+  TreeView.prototype.init = function() {
+
+    $(function() {
+      // Initialize Fancytree
+
+    });
+
+    $("#tree-view").fancytree({
+      extensions: ["glyph"],
+      selectMode: 1,
+      glyph: {
+        preset: "awesome4",
+        map: {}
+      },
+      icon: true
+
+    });
+
+    this.tree = $("#tree-view").fancytree("getTree");
+
+
+  }
+
+  TreeView.prototype.setTree = function(storage) {
 
     $(function() {
       // Initialize Fancytree
@@ -25,14 +47,14 @@ define([], function() {
           {
             title: "Folder 3",
             folder: true,
-            expanded: true,
+            expanded: false,
             children: [{
                 title: "Node 3.1",
                 key: "id3.1"
               },
               {
                 title: "Node 3.2",
-                selected: true
+                selected: false
               }
             ]
           }
@@ -42,5 +64,6 @@ define([], function() {
 
   }
 
-  return Sidebar;
+
+  return TreeView;
 });

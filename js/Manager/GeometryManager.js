@@ -3,9 +3,9 @@
 */
 
 define([
-  "../PubSub/Subscriber.js"
+  "./Manager.js"
 ],function(
-  Subscriber
+  Manager
 ) {
   'use strict';
 
@@ -15,20 +15,20 @@ define([
   */
   function GeometryManager() {
 
-    Subscriber.apply(this, arguments);
+    Manager.apply(this, arguments);
 
     var currentObj = null;
 
     this.init();
   }
 
-  GeometryManager.prototype = Object.create(Subscriber.prototype);
+  GeometryManager.prototype = Object.create(Manager.prototype);
 
   /**
   * @override
   */
   GeometryManager.prototype.init = function(){
-
+    console.log(this);
     this.name = 'GeometryManager';
 
     this.addReq({

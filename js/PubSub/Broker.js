@@ -44,14 +44,17 @@ define([
 
   Broker.prototype.addTopic = function(_path, _topic, _obj){
 
-    if( _path[_topic] == null ) _path[_topic] = _obj;
-    else _path[_topic].add(_obj);
+    if( _path[_topic] == null ){
+      _path[_topic] = new Array();
+      _path[_topic].push(_obj);
+    }
+    else _path[_topic].push(_obj);
 
   }
 
   Broker.prototype.publish = function(_message){
 
-    console.log( _message.req + "published" );
+    console.log( _message.req + " published" );
 
     if( this.topic == null ){
       window.broker.publishMsg(window.broker.topic, _message);
@@ -65,11 +68,11 @@ define([
   Broker.prototype.publishMsg = function(_path, _message){
 
     var _topic = _message.req;
-    var len = _path[_topic].lenght;
+    var subscriber = _path[_topic];
 
-    for(var i = 0 ; i < len; i--){
+    for(var i = 0 ; i < subscriber.length; i++){
 
-      _path[_topic].run(_message);
+      _path[_topic][i].run(_message);
 
     }
 

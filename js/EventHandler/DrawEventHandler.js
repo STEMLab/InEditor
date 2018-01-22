@@ -14,9 +14,15 @@ define([
     handlerBinder['cell-btn'] = {
       'click': this.clickCellBtn
     };
+
     handlerBinder['test-floor'] = {
       'contentClick': this.addNewDot
     };
+
+    handlerBinder['floor-btn'] = {
+      'click': this.clickFloorBtn
+    };
+
   }
 
 
@@ -24,7 +30,7 @@ define([
 
     var result = {
       'result': false,
-      'msg': 'null'
+      'msg': null
     };
 
     switch (previousMsg) {
@@ -63,14 +69,40 @@ define([
 
   }
 
+  DrawEventHandler.prototype.clickFloorBtn = function(broker, previousMsg) {
+
+    var result = {
+      'result': false,
+      'msg': null
+    };
+
+    switch (previousMsg) {
+
+      case null:
+        broker.publish(new Message('addnewfloor', null));
+        result = {
+          'result': true,
+          'msg': null
+        };
+        break;
+
+      default:
+        result.msg = "wrong previous state : " + previousMsg;
+        break;
+    }
+
+    return result;
+
+  }
+
   /**
-   * This will call when stage clicked, so we need to distinguish which geometry will be added new dot by the previous run message.
+   * @desc This will call when stage clicked, so we need to distinguish which geometry will be added new dot by the previous run message.
    */
   DrawEventHandler.prototype.addNewDot = function(broker, previousMsg) {
 
     var result = {
       'result': false,
-      'msg': 'null'
+      'msg': null
     };
 
     switch (previousMsg) {

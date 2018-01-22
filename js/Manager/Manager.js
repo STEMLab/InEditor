@@ -3,30 +3,25 @@
 * @author suheeeee <lalune1120@hotmaile.com>
 */
 
-define([],function() {
+define([
+  "../PubSub/Subscriber.js"
+],function(
+  Subscriber
+) {
   'use strict';
 
-  /**
-  * @deprecated
-  */
   function Manager(){
 
-    this.name;
+    Subscriber.apply(this, arguments);
     this.reqs = {};
     this.callbackFunctions = [];
 
   }
 
+  Manager.prototype = Object.create(Subscriber.prototype);
+
   Manager.prototype.init = function(){
 
-  }
-
-  Manager.prototype.run = function(message, storage){
-
-    var req = message.request;
-    var reqObj = message.requestObj;
-
-    this.callbackFunctions[req](reqObj, storage);
   }
 
   Manager.prototype.addCallbackFun = function(req, callback){

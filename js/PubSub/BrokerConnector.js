@@ -3,12 +3,14 @@ define([
   "../Manager/GeometryManager.js",
   "../Manager/ProjectManager.js",
   "../Manager/PropertyManager.js",
+  "../Manager/UIManager.js",
   "../UI/UIContainer.js",
   "../UI/Workspace.js"
 ], function(
   GeometryManager,
   ProjectManager,
   PropertyManager,
+  UIManager,
   uiContainer,
   Workspace
 ){
@@ -25,6 +27,7 @@ define([
     this.managerSubscribe(new GeometryManager());
     this.managerSubscribe(new ProjectManager());
     this.managerSubscribe(new PropertyManager());
+    this.managerSubscribe(new UIManager());
 
     /********************************************************************************/
     /****************************** subscribe ui later ******************************/
