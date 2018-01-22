@@ -1,22 +1,35 @@
+/**
+* @author suheeeee <lalune1120@hotmaile.com>
+*/
+
 define([
-  "./Manager.js"
+  "../PubSub/Subscriber.js"
 ],function(
-  Manager
+  Subscriber
 ) {
   'use strict';
 
+  /**
+  * @classdesc
+  * @class
+  */
   function GeometryManager() {
 
-    Manager.apply(this, arguments);
+    Subscriber.apply(this, arguments);
 
     var currentObj = null;
 
     this.init();
   }
 
-  GeometryManager.prototype = Object.create(Manager.prototype);
+  GeometryManager.prototype = Object.create(Subscriber.prototype);
 
+  /**
+  * @override
+  */
   GeometryManager.prototype.init = function(){
+
+    this.name = 'GeometryManager';
 
     this.addReq({
       'start-geotest' : 'cycle',
@@ -31,6 +44,7 @@ define([
     this.addCallbackFun('end-geotest', this.endGeotest );
     this.addCallbackFun('singletest', this.singletest );
     // this.addCallbackFun('start-addNewCell', this.startAddNewCell );
+
 
   }
 

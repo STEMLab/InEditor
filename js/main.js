@@ -10,13 +10,15 @@ require.config({
 require([
   "./js/UI/UIContainer.js",
   "./js/Storage/Storage.js",
-  "./js/EventHandler/EventHandlerController.js",
-  "./js/Manager/ManagerController.js"
+  "./js/EventHandler/EventHandler.js",
+  "./js/Manager/ManagerController.js",
+  "./js/PubSub/Broker.js"
 ], function(
   UIContainer,
   Storage,
-  EventHandlerController,
-  ManagerController
+  EventHandler,
+  ManagerController,
+  Broker
 ) {
   'use strict';
 
@@ -28,13 +30,14 @@ require([
   var storage = new Storage();
   window.storage = storage;
 
-  var managerController = new ManagerController();
-  window.managerController = managerController;
 
-  var eventHandlerController = new EventHandlerController();
-  window.eventHandlerController = eventHandlerController;
+  var broker = new Broker();
+  window.broker = broker;
 
+  var eventHandler = new EventHandler(broker);
+  window.eventHandler = eventHandler;
 
 
   console.log(window);
+
 });

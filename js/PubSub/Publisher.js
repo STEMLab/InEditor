@@ -14,7 +14,16 @@ define([], function() {
 
   Publisher.prototype.publish = function(_message){
 
-    this.broker.publish(_message);
+    if(this.broker != null){
+
+      this.broker.publish(_message);
+
+    } else{
+
+      window.broker.publish(_message);
+
+    }
+
 
   }
 

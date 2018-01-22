@@ -3,7 +3,11 @@
 * @author suheeeee <lalune1120@hotmaile.com>
 */
 
-define([], function() {
+define([
+  "./BrokerConnector.js"
+], function(
+  BrokerConnector
+) {
   'use strict';
 
   /**
@@ -20,6 +24,8 @@ define([], function() {
     * @desc A message which just published before.
     */
     this.previousMsg = null;
+
+    this.brokerConnector = new BrokerConnector(this);
 
   }
 
@@ -48,7 +54,7 @@ define([], function() {
     console.log( _message.req + "published" );
 
     if( this.topic == null ){
-      window.broker.publishMsg(window.broker.topic, _ message);
+      window.broker.publishMsg(window.broker.topic, _message);
     }
     else{
       this.publishMsg(this.topic, _message);

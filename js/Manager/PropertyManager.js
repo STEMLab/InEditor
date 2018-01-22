@@ -1,19 +1,29 @@
+/**
+* @author suheeeee <lalune1120@hotmaile.com>
+*/
+
 define([
-  "./Manager.js"
+  "../PubSub/Subscriber.js"
 ],function(
-  Manager
+  Subscriber
 ) {
   'use strict';
 
+  /**
+  * @classdesc
+  * @class
+  */
   function PropertyManager() {
 
-    Manager.apply(this, arguments);
+    Subscriber.apply(this, arguments);
     this.init();
   }
 
-  PropertyManager.prototype = Object.create(Manager.prototype);
+  PropertyManager.prototype = Object.create(Subscriber.prototype);
 
   PropertyManager.prototype.init = function(){
+
+    this.name = 'PropertyManager';
 
     this.addReq({
       'start-proptest' : 'cycle',

@@ -1,8 +1,17 @@
+
+/**
+* @author suheeeee <lalune1120@hotmaile.com>
+*/
+
 define([],function() {
   'use strict';
 
+  /**
+  * @deprecated
+  */
   function Manager(){
 
+    this.name;
     this.reqs = {};
     this.callbackFunctions = [];
 
@@ -26,11 +35,6 @@ define([],function() {
 
   }
 
-  Manager.prototype.getReqList = function(){
-
-    return this.reqs;
-
-  }
 
   Manager.prototype.addReq = function(obj){
 

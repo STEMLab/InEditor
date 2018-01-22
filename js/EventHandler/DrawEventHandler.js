@@ -1,4 +1,8 @@
-define([], function() {
+define([
+  "../PubSub/Message.js"
+], function(
+  Message
+) {
   'use strict';
 
   function DrawEventHandler() {
@@ -16,10 +20,7 @@ define([], function() {
   }
 
 
-  /**
-   * @desc run-message : 'start-geotest'.<br>previous-message : null
-   */
-  DrawEventHandler.prototype.clickCellBtn = function(managerController, previousMsg) {
+  DrawEventHandler.prototype.clickCellBtn = function(broker, previousMsg) {
 
     var result = {
       'result': false,
@@ -29,10 +30,7 @@ define([], function() {
     switch (previousMsg) {
 
       case null:
-        managerController.run({
-          'request': 'start-geotest',
-          'requestObj': null
-        });
+        broker.publish(new Message('start-geotest', null));
 
         result = {
           'result': true,
@@ -41,10 +39,8 @@ define([], function() {
         break;
 
       case 'start-geotest':
-        managerController.run({
-          'request': 'end-geotest',
-          'requestObj': null
-        });
+
+        broker.publish(new Message('end-geotest', null));
 
         result.result = true;
         result.msg = 'end-geotest';
@@ -52,10 +48,7 @@ define([], function() {
 
       case 'geotest':
 
-        managerController.run({
-          'request': 'end-geotest',
-          'requestObj': null
-        });
+        broker.publish(new Message('end-geotest', null));
 
         result.result = true;
         result.msg = null;
@@ -73,7 +66,7 @@ define([], function() {
   /**
    * This will call when stage clicked, so we need to distinguish which geometry will be added new dot by the previous run message.
    */
-  DrawEventHandler.prototype.addNewDot = function(managerController, previousMsg) {
+  DrawEventHandler.prototype.addNewDot = function(broker, previousMsg) {
 
     var result = {
       'result': false,
@@ -83,10 +76,7 @@ define([], function() {
     switch (previousMsg) {
       case 'start-geotest':
 
-        managerController.run({
-          'request': 'geotest',
-          'requestObj': null
-        });
+        broker.publish(new Message('geotest', null));
 
         result = {
           'result': true,
@@ -97,10 +87,7 @@ define([], function() {
 
       case 'geotest':
 
-        managerController.run({
-          'request': 'geotest',
-          'requestObj': null
-        })
+        broker.publish(new Message('geotest', null));
 
         result = {
           'result': true,
