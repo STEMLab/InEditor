@@ -1,3 +1,7 @@
+/**
+* @author suheeeee <lalune1120@hotmaile.com>
+*/
+
 define([
   "./Manager.js"
 ],function(
@@ -5,6 +9,10 @@ define([
 ) {
   'use strict';
 
+  /**
+  * @classdesc
+  * @class
+  */
   function ProjectManager() {
 
     Manager.apply(this, arguments);
@@ -15,6 +23,8 @@ define([
   ProjectManager.prototype = Object.create(Manager.prototype);
 
   ProjectManager.prototype.init = function(){
+
+    this.name = 'ProjectManager';
 
     this.addReq({
       'start-projtest' : 'cycle',
@@ -35,7 +45,7 @@ define([
 
   }
 
-  
+
 
 
   return ProjectManager;

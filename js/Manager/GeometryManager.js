@@ -1,3 +1,7 @@
+/**
+* @author suheeeee <lalune1120@hotmaile.com>
+*/
+
 define([
   "./Manager.js"
 ],function(
@@ -5,6 +9,10 @@ define([
 ) {
   'use strict';
 
+  /**
+  * @classdesc
+  * @class
+  */
   function GeometryManager() {
 
     Manager.apply(this, arguments);
@@ -16,7 +24,12 @@ define([
 
   GeometryManager.prototype = Object.create(Manager.prototype);
 
+  /**
+  * @override
+  */
   GeometryManager.prototype.init = function(){
+    console.log(this);
+    this.name = 'GeometryManager';
 
     this.addReq({
       'start-geotest' : 'cycle',
@@ -31,6 +44,7 @@ define([
     this.addCallbackFun('end-geotest', this.endGeotest );
     this.addCallbackFun('singletest', this.singletest );
     // this.addCallbackFun('start-addNewCell', this.startAddNewCell );
+
 
   }
 

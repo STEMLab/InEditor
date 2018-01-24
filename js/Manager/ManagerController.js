@@ -9,6 +9,9 @@ define([
 ) {
   'use strict';
 
+  /**
+  * @deprecated
+  */
   function ManagerController() {
 
     this.managers = [];

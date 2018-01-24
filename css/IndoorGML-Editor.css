@@ -4,6 +4,7 @@
     --sidebar-bg-color: black;
     --treeview-bg-color: #222222;
     --workspace-bg-color: black;
+    --viewport-bg-color: #eaeaea;
 
     --sidebar-width: 17rem;
 }
@@ -125,7 +126,7 @@ body {
     padding-left: 0;
     overflow-x: hidden;
     overflow-y: auto;
-    background-color: black;
+    background-color: var(--workspace-bg-color);
 }
 
 #workspace-container{
@@ -137,6 +138,7 @@ body {
     width: 100%;
     height: 100%;
     position: absolute;
+    background-color : var(--viewport-bg-color);
 }
 
 .container {

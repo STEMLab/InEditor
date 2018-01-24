@@ -22,5 +22,9 @@ define([
     console.log(this);
   }
 
+  GeometryContainer.prototype.getElementById = function(){
+    
+  }
+
   return GeometryContainer;
 });

@@ -13,9 +13,9 @@ define([
 ) {
   'use strict';
 
-  function Stage(_id, _container, _width, _height){
+  function Stage(_id, _name, _container, _width, _height){
     this.id = _id;
-    this.name = _id;
+    this.name = _name;
 
     this.cellLayer = new CellLayer();
     this.cellBoundaryLayer = new CellBoundaryLayer();

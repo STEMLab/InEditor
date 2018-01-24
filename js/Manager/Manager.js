@@ -1,23 +1,27 @@
-define([],function() {
+
+/**
+* @author suheeeee <lalune1120@hotmaile.com>
+*/
+
+define([
+  "../PubSub/Subscriber.js"
+],function(
+  Subscriber
+) {
   'use strict';
 
   function Manager(){
 
+    Subscriber.apply(this, arguments);
     this.reqs = {};
     this.callbackFunctions = [];
 
   }
 
+  Manager.prototype = Object.create(Subscriber.prototype);
+
   Manager.prototype.init = function(){
 
-  }
-
-  Manager.prototype.run = function(message, storage){
-
-    var req = message.request;
-    var reqObj = message.requestObj;
-
-    this.callbackFunctions[req](reqObj, storage);
   }
 
   Manager.prototype.addCallbackFun = function(req, callback){
@@ -26,11 +30,6 @@ define([],function() {
 
   }
 
-  Manager.prototype.getReqList = function(){
-
-    return this.reqs;
-
-  }
 
   Manager.prototype.addReq = function(obj){
 
