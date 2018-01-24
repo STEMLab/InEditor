@@ -38,11 +38,11 @@ require([
   var broker = new Broker();
   window.broker = broker;
 
-  var eventHandler = new EventHandler(broker);
-  window.eventHandler = eventHandler;
-
   uiContainer.sidebar.treeview.init();
   uiContainer.sidebar.property.setPropertyTab("project", null, storage);
+
+  var eventHandler = new EventHandler(broker);
+  window.eventHandler = eventHandler;
 
   console.log(window);
 

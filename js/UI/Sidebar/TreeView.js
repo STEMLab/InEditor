@@ -25,7 +25,7 @@ define([], function() {
   TreeView.prototype.init = function() {
 
     var json = window.storage.propertyContainer.toJson();
-    console.log(json);
+    // console.log(json);
 
     $("#tree-view").fancytree({
       extensions: ["glyph"],
@@ -52,17 +52,20 @@ define([], function() {
     floorObj.title = newFloorProperty.name;
     floorObj.key = newFloorProperty.id;
     floorObj.folder = true;
+    floorObj.type = "floor";
     floorObj.children = new Array();
 
-    floorObj.children.push({"title" : "Cell", "key" : newFloorProperty.id+"-cell", "folder" : true});
-    floorObj.children.push({"title" : "CellBoundary", "key" : newFloorProperty.id+"-cellBoundary", "folder" : true});
-    floorObj.children.push({"title" : "State", "key" : newFloorProperty.id+"-state", "folder" : true});
-    floorObj.children.push({"title" : "Transition", "key" : newFloorProperty.id+"-transition", "folder" : true});
+    floorObj.children.push({"title" : "Cell", "key" : newFloorProperty.id+"-cell", "folder" : true, "type" : "cellFolder"});
+    floorObj.children.push({"title" : "CellBoundary", "key" : newFloorProperty.id+"-cellBoundary", "folder" : true, "type" : "cellBoundaryFolder"});
+    floorObj.children.push({"title" : "State", "key" : newFloorProperty.id+"-state", "folder" : true, "type" : "stateFolder"});
+    floorObj.children.push({"title" : "Transition", "key" : newFloorProperty.id+"-transition", "folder" : true, "type" : "transtitionFolder"});
 
     console.log(floorObj);
 
     var projectKey = window.storage.propertyContainer.getElementById('project').id;
     $("#tree-view").fancytree("getTree").getNodeByKey(projectKey).addChildren(floorObj);
+
+    $
     $("#tree-view").fancytree("getTree").activateKey(floorObj.key);
   }
 

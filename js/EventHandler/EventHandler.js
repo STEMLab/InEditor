@@ -5,17 +5,19 @@
 define([
   "./ProjectEventHandler.js",
   "./DrawEventHandler.js",
-  "./PropertyEventHandler.js"
+  "./PropertyEventHandler.js",
+  "./UIChangeEventHandler.js"
 ], function(
   ProjectEventHandler,
   DrawEventHandler,
-  PropertyEventHandler
+  PropertyEventHandler,
+  UIChangeEventHandler
 ) {
   'use strict';
 
   /**
-  * @exports EventHandler
-  */
+   * @exports EventHandler
+   */
   function EventHandler() {
 
     this.handlers = [];
@@ -33,13 +35,10 @@ define([
   }
 
   EventHandler.prototype.add = function() {
-    // this.handlers.push(new DrawEventHandler());
-    // this.handlers.push(new PropertyEventHandler());
-    // this.handlers.push(new ProjectEventHandler());
-
     this.handlers['drawEventHandler'] = new DrawEventHandler();
     this.handlers['propertyEventHandler'] = new PropertyEventHandler();
     this.handlers['projectEventHandler'] = new ProjectEventHandler();
+    this.handlers['uiChangeEventHandler'] = new UIChangeEventHandler();
 
   }
 
@@ -47,16 +46,25 @@ define([
 
     for (var key in this.handlerBinder) {
       for (var subkey in this.handlerBinder[key]) {
-        if (subkey == 'click' && document.getElementById(key) != null) { // event on other html element
 
-          document.getElementById(key).addEventListener('click', function(e) {
-            window.eventHandler.callHandler(e)
+        if (subkey == 'click' && document.getElementById(key) != null) {
+
+          // event on html ui element
+          document.getElementById(key).addEventListener('click', function(event) {
+            window.eventHandler.callHandler('html', event)
+          });
+
+        } else if (subkey == 'fancytreeclick') {
+
+          $("#tree-view").fancytree({
+            click: function(event, data) {
+              window.eventHandler.callHandler('tree', event, data)
+            }
           });
 
         }
       }
     }
-
 
   }
 
@@ -74,8 +82,8 @@ define([
 
           stage.stage.on(
             'contentClick',
-            function(e) {
-              window.eventHandler.callHandler(e)
+            function(event) {
+              window.eventHandler.callHandler('stage', event)
             });
         }
       }
@@ -90,27 +98,42 @@ define([
 
   }
 
-  EventHandler.prototype.callHandler = function(e) {
+
+  /**
+   * @param {String} _target html, stage, tree
+   * @param {Object} _event
+   * @param {Object} _data
+   */
+  EventHandler.prototype.callHandler = function(_target, _event, _data) {
 
     var target;
     var type;
     var message;
+    var data;
 
-    if (e.target != null) {
 
-      target = e.target.id;
-      type = e.type;
 
-    } else if (e.currentTarget != null) {
+    if(_target == 'html'){
+      target = _event.target.id;
+      type = _event.type;
 
-      target = e.currentTarget.attrs.id;
-      type = e.type;
+    }else if(_target == 'stage'){
+      target = _event.currentTarget.attrs.id;
+      type = _event.type;
+
+    }else if(_target == 'tree'){
+      target = _event.target.id;
+      type = _event.type;
+      data = _data;
 
     }
 
+
+
+
     var message = this.handlerBinder[target][type];
 
-    var result = this.handlerBinder[target][type](window.broker, window.broker.previousMsg);
+    var result = this.handlerBinder[target][type](window.broker, window.broker.previousMsg, data);
 
     if (result.result) {
       window.broker.previousMsg = result.msg;

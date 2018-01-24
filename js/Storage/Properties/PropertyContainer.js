@@ -80,10 +80,12 @@ define([
     if (this.floorProperties == null) {
       result.title = window.storage.projectProperty.name;
       result.key = window.storage.projectProperty.id;
+      result.type = "project";
       result.folder = true;
     } else {
       result.title = this.projectProperty.id;
       result.key = this.projectProperty.id;
+      result.type = "project";
       result.folder = true;
     }
 

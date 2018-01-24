@@ -32,7 +32,7 @@ define([
     });
 
     this.addCallbackFun('settreeview', this.test );
-    this.addCallbackFun('setpropertyview', this.test );
+    this.addCallbackFun('setpropertyview', this.setPropertyView );
     this.addCallbackFun('updateproperty', this.updateProperty );
   }
 
@@ -42,9 +42,21 @@ define([
 
   }
 
+  /**
+  * @param {Message.reqObj} reqObj type, id, updateContent
+  */
   UIManager.prototype.updateProperty = function(reqObj){
 
     window.uiContainer.sidebar.treeview.updateTitle(reqObj.id, reqObj.updateContent.name);
+
+  }
+
+  /**
+  * @param {Message.reqObj} reqObj type, id, storage
+  */
+  UIManager.prototype.setPropertyView = function(reqObj){
+
+    window.uiContainer.sidebar.property.setPropertyTab(reqObj.type, reqObj.id, window.storage);
 
   }
 

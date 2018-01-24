@@ -57,7 +57,7 @@ define([], function() {
     canvasDiv += "<tr><td class=\"title\">Resizing canvas</td><td class=\"value\"><input id=\"name-text\" type=\"button\" value=\"V\"></td></tr>";
     canvasDiv += "</table>";
 
-    var propertiesDiv = "<table>";
+    var propertiesDiv = "<table id=\"property-table\" type=\"floor\">";
     propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value="+floorProperty.id+" disabled></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value="+floorProperty.name+"></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">level</td><td class=\"value\"><input id=\"level-text\" type=\"text\" value="+floorProperty.level+"></td></tr>";
@@ -78,8 +78,6 @@ define([], function() {
       container.getElement().html("<div id=\"property-"+state.id+"\">"+divs[state.id]+"</div>");
 
     });
-
-    console.log(document.getElementById("property-canvas"));
 
     propertyLayout.init();
   }
@@ -123,6 +121,11 @@ define([], function() {
     };
 
     this.setFloorView(config, storage.propertyContainer.getElementById('floor', id));
+
+    document.getElementById('property-subimt-btn').addEventListener('click', function(e) {
+      window.eventHandler.callHandler(e)
+    });
+
   }
 
   /**

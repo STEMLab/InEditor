@@ -2,7 +2,11 @@
 * @author suheeeee <lalune1120@hotmaile.com>
 */
 
-define([],function() {
+define([
+  "../PubSub/Message.js"
+],function(
+  Message
+) {
   'use strict';
 
   /**
@@ -15,8 +19,33 @@ define([],function() {
 
   UIChangeEventHandler.prototype.setHandlerBinder = function(handlerBinder){
 
-    // handlerBinder['cell-btn'] = {'click' : this.startAddNewCell };
+    handlerBinder['tree-view'] = {'fancytreeclick' : this.clickTreeView };
 
+  }
+
+  UIChangeEventHandler.prototype.clickTreeView = function(broker, previousMsg, data){
+
+    var result = {
+      'result': false,
+      'msg': null
+    };
+
+    switch (previousMsg) {
+
+      case null:
+        broker.publish(new Message('setpropertyview', {'type' : data.node.type, 'id' : data.node.key, 'storage':window.storage}));
+        result = {
+          'result': true,
+          'msg': null
+        };
+        break;
+
+      default:
+        result.msg = "wrong previous state : " + previousMsg;
+        break;
+    }
+
+    return result;
   }
 
   return UIChangeEventHandler;
