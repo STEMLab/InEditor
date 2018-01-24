@@ -21,8 +21,8 @@ define([
     this.topic = [];
 
     /**
-    * @desc A message which just published before.
-    */
+     * @desc Save previous runned message for controll request cycle.<br>For example, if 'start-test' runned before next message must be 'test' or 'end-test'.
+     */
     this.previousMsg = null;
 
     this.brokerConnector = new BrokerConnector(this);

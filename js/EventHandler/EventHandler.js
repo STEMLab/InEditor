@@ -21,12 +21,6 @@ define([
     this.handlers = [];
     this.handlerBinder = [];
 
-    /**
-     * Save previous runned message for controll request cycle.
-     * For example, if 'start-test' runned before next message must be 'test' or 'end-test'.
-     */
-    this.previousMsg = null;
-
     this.init();
   }
 
@@ -116,10 +110,10 @@ define([
 
     var message = this.handlerBinder[target][type];
 
-    var result = this.handlerBinder[target][type](window.broker, window.eventHandler.previousMsg);
+    var result = this.handlerBinder[target][type](window.broker, window.broker.previousMsg);
 
     if (result.result) {
-      this.previousMsg = result.msg;
+      window.broker.previousMsg = result.msg;
     } else {
       console.log("error! " + result.msg);
     }
