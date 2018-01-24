@@ -6,8 +6,8 @@ define([],function() {
   'use strict';
 
   /**
-  * @classdesc This handler deal with events which request change ui.<br>e.g. click tree view content.
-  * @class
+  * @desc This handler deal with events which request change ui.<br>e.g. click tree view content.
+  * @exports UIChangeEventHandler
   */
   function UIChangeEventHandler() {
 

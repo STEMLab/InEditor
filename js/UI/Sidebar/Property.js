@@ -1,8 +1,15 @@
+/**
+* @author suheeeee <lalune1120@hotmaile.com>
+*/
+
 define([], function() {
   'use strict';
 
+  /**
+  * @exports Property
+  */
   function Property() {
-    this.setPropertyTab("project", null, null);
+
   };
 
   /**
@@ -11,7 +18,7 @@ define([], function() {
    * @param storage storage
    */
   Property.prototype.setPropertyTab = function(type, id, storage) {
-    console.log(">>> set property tab :", type, id, storage);
+    console.log(">>> set property tab :", type, id);
 
     if (type == "floor") this.setFloorProperty(id, storage);
     else if (type == "cell") this.setCellProperty(id, storage);
@@ -38,10 +45,49 @@ define([], function() {
     propertyLayout.init();
   }
 
+  Property.prototype.setFloorView = function(config, floorProperty){
+    $('#property-container').empty();
+
+    var propertyLayout = new GoldenLayout(config, $('#property-container'));
+
+    console.log(floorProperty);
+
+    var canvasDiv = "<table>";
+    canvasDiv += "<tr><td class=\"title\">Upload floor plan</td><td class=\"value\"><input id=\"floorplan-file\" type=\"file\"></td></tr>";
+    canvasDiv += "<tr><td class=\"title\">Resizing canvas</td><td class=\"value\"><input id=\"name-text\" type=\"button\" value=\"V\"></td></tr>";
+    canvasDiv += "</table>";
+
+    var propertiesDiv = "<table>";
+    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value="+floorProperty.id+" disabled></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value="+floorProperty.name+"></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">level</td><td class=\"value\"><input id=\"level-text\" type=\"text\" value="+floorProperty.level+"></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">lower corner</td><td class=\"value\"><input id=\"lower-corner-text\" type=\"text\" value="+floorProperty.lowerCorner+"></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">upper corner</td><td class=\"value\"><input id=\"upper-corner-text\" type=\"text\" value="+floorProperty.upperCorner+"></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">ground height</td><td class=\"value\"><input id=\"ground-height-text\" type=\"text\" value="+floorProperty.groundHeight+"></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">celing height</td><td class=\"value\"><input id=\"celing-height-text\" type=\"text\" value="+floorProperty.celingHeight+"></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">door height</td><td class=\"value\"><input id=\"door-height-text\" type=\"text\" value="+floorProperty.doorHeight+"></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">description</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">"+floorProperty.description+"</textarea></td></tr>";
+    propertiesDiv += "</table>";
+    propertiesDiv += "<tr><td><button id=\"property-subimt-btn\">submit</button></td></tr></table>";
+
+    var divs = { "cavas" : canvasDiv, "properties" : propertiesDiv };
+
+
+    propertyLayout.registerComponent('property-component', function(container, state) {
+
+      container.getElement().html("<div id=\"property-"+state.id+"\">"+divs[state.id]+"</div>");
+
+    });
+
+    console.log(document.getElementById("property-canvas"));
+
+    propertyLayout.init();
+  }
+
 
   /**
-   * @param id The id of floor object to be displayed in the property tab.
-   * @param storage storage
+   * @param {String} id The id of floor object to be displayed in the property tab.
+   * @param {Storage} storage storage
    * @desc Clears the contents of the property tab and creates a new tab for that floor.<br>Tabs consist of 'canvas' and 'property'.<br>The canvas tab allows you to resize the canvas or insert or remove the floor plan.<br>The property tab allows you to view/change the value of the floor's property(Level, Lower corner, Upper corner, Ground height, Celling height, Door height, description).
    */
   Property.prototype.setFloorProperty = function(id, storage) {
@@ -60,7 +106,7 @@ define([], function() {
             title: 'canvas',
             isClosable: false,
             componentState: {
-              id: 'propertiesCanvas'
+              id: 'cavas'
             }
           },
           {
@@ -69,16 +115,14 @@ define([], function() {
             title: 'properties',
             isClosable: false,
             componentState: {
-              id: 'propertiesProper'
+              id: 'properties'
             }
           }
         ]
       }]
     };
 
-    var divContent = "<div>floor properties</div>";
-
-    this.setView(config, divContent);
+    this.setFloorView(config, storage.propertyContainer.getElementById('floor', id));
   }
 
   /**
@@ -215,8 +259,8 @@ define([], function() {
 
 
   /**
-   * @param id The id of cell object to be displayed in the property tab.
-   * @param storage storage
+   * @param {String} id The id of cell object to be displayed in the property tab.
+   * @param {Storage} storage storage
    * @desc Clears the contents of the property tab and creates a new tab for that project.<br>Tab consist of property.<br>The property tab allows you to view/change the value of the project's property(name, date, author, description).
    */
   Property.prototype.setProjectProperty = function(id, storage) {
@@ -241,10 +285,21 @@ define([], function() {
       }]
     };
 
-    var divContent = "<div>project properties</div>";
+    var projectProperty = storage.propertyContainer.getElementById('project', id);
+
+    var divContent = "<table id=\"property-table\" type=\"project\">";
+    divContent += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + projectProperty.id + " disabled></td></tr>";
+    divContent += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + projectProperty.name +" ></td></tr>";
+    divContent += "<tr><td class=\"title\">date</td><td class=\"value\"><input id=\"date-text\" type=\"text\" value=" + projectProperty.date +" disabled></td></tr>";
+    divContent += "<tr><td class=\"title\">author</td><td class=\"value\"><input id=\"author-text\" type=\"text\" value=" + projectProperty.author +" ></td></tr>";
+    divContent += "<tr><td class=\"title\">description</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + projectProperty.description +"</textarea></td></tr>";
+    divContent += "<tr><td><button id=\"property-subimt-btn\">submit</button></td></tr></table>";
 
     this.setView(config, divContent);
 
+    document.getElementById('property-subimt-btn').addEventListener('click', function(e) {
+      window.eventHandler.callHandler(e)
+    });
   }
 
 

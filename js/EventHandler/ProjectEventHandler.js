@@ -1,6 +1,13 @@
+/**
+* @author suheeeee <lalune1120@hotmaile.com>
+*/
+
 define([],function() {
   'use strict';
 
+  /**
+  * @exports ProjectEventHandler
+  */
   function ProjectEventHandler() {
 
   }

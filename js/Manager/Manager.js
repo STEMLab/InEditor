@@ -1,4 +1,3 @@
-
 /**
 * @author suheeeee <lalune1120@hotmaile.com>
 */
@@ -10,23 +9,23 @@ define([
 ) {
   'use strict';
 
+  /**
+  * @exports Manager
+  */
   function Manager(){
 
     Subscriber.apply(this, arguments);
+
+    /**
+    *  requests
+    */
     this.reqs = {};
-    this.callbackFunctions = [];
 
   }
 
   Manager.prototype = Object.create(Subscriber.prototype);
 
   Manager.prototype.init = function(){
-
-  }
-
-  Manager.prototype.addCallbackFun = function(req, callback){
-
-    this.callbackFunctions[req] = callback;
 
   }
 

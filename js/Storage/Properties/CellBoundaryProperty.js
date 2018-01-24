@@ -4,6 +4,7 @@ define([],function() {
   function CellBoundaryProperty() {
     this.id;
     this.name;
+    this.description;
     this.duality;
     this.externalReference = [];
     this.partialboundedBy = [];

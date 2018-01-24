@@ -41,8 +41,8 @@ require([
   var eventHandler = new EventHandler(broker);
   window.eventHandler = eventHandler;
 
-  storage.canvasContainer.getElementById('test_floor');
-
+  uiContainer.sidebar.treeview.init();
+  uiContainer.sidebar.property.setPropertyTab("project", null, storage);
 
   console.log(window);
 

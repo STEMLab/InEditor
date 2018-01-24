@@ -1,4 +1,3 @@
-
 /**
 * @author suheeeee <lalune1120@hotmaile.com>
 */
@@ -12,6 +11,7 @@ define([
 
   /**
   * @desc Broker for pub-sub model. The difference from typical Broker is that this maintains message which just published before. The resason for this is descried in {@link Message}.
+  * @exports Broker
   */
   function Broker(){
 

@@ -1,3 +1,7 @@
+/**
+* @author suheeeee <lalune1120@hotmaile.com>
+*/
+
 define([
   "../PubSub/Message.js"
 ], function(
@@ -5,6 +9,9 @@ define([
 ) {
   'use strict';
 
+  /**
+  * @exports DrawEventHandler
+  */
   function DrawEventHandler() {
 
   }
@@ -49,7 +56,7 @@ define([
         broker.publish(new Message('end-geotest', null));
 
         result.result = true;
-        result.msg = 'end-geotest';
+        result.msg = null;
         break;
 
       case 'geotest':
@@ -142,7 +149,6 @@ define([
     return result;
 
   }
-
 
 
 

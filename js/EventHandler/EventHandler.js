@@ -14,9 +14,8 @@ define([
   'use strict';
 
   /**
-   * @classdesc This module is a main event handler
-   * @class
-   */
+  * @exports EventHandler
+  */
   function EventHandler() {
 
     this.handlers = [];
@@ -40,16 +39,21 @@ define([
   }
 
   EventHandler.prototype.add = function() {
-    this.handlers.push(new DrawEventHandler());
-    this.handlers.push(new PropertyEventHandler());
-    this.handlers.push(new ProjectEventHandler());
+    // this.handlers.push(new DrawEventHandler());
+    // this.handlers.push(new PropertyEventHandler());
+    // this.handlers.push(new ProjectEventHandler());
+
+    this.handlers['drawEventHandler'] = new DrawEventHandler();
+    this.handlers['propertyEventHandler'] = new PropertyEventHandler();
+    this.handlers['projectEventHandler'] = new ProjectEventHandler();
+
   }
 
   EventHandler.prototype.btnEvnetBind = function() {
 
     for (var key in this.handlerBinder) {
       for (var subkey in this.handlerBinder[key]) {
-        if (subkey == 'click') { // event on other html element
+        if (subkey == 'click' && document.getElementById(key) != null) { // event on other html element
 
           document.getElementById(key).addEventListener('click', function(e) {
             window.eventHandler.callHandler(e)

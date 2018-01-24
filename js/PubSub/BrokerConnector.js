@@ -1,3 +1,6 @@
+/**
+ * @author suheeeee <lalune1120@hotmaile.com>
+ */
 
 define([
   "../Manager/GeometryManager.js",
@@ -13,16 +16,19 @@ define([
   UIManager,
   uiContainer,
   Workspace
-){
+) {
 
-  function BrokerConnector(_broker){
+  /**
+   * @exports BrokerConnector
+   */
+  function BrokerConnector(_broker) {
 
     this.broker = _broker;
     this.fullSubscribe();
 
   }
 
-  BrokerConnector.prototype.fullSubscribe = function(){
+  BrokerConnector.prototype.fullSubscribe = function() {
 
     this.managerSubscribe(new GeometryManager());
     this.managerSubscribe(new ProjectManager());
@@ -35,15 +41,15 @@ define([
 
   }
 
-  BrokerConnector.prototype.managerSubscribe = function(_manager){
+  BrokerConnector.prototype.managerSubscribe = function(_manager) {
 
-    for(var key in _manager.reqs ){
-      this.subscribe( key, _manager);
+    for (var key in _manager.reqs) {
+      this.subscribe(key, _manager);
     }
 
   }
 
-  BrokerConnector.prototype.subscribe = function(_topic, _obj){
+  BrokerConnector.prototype.subscribe = function(_topic, _obj) {
 
     this.broker.subscribe(_topic, _obj);
 

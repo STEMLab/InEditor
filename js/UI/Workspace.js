@@ -1,45 +1,59 @@
+/**
+* @author suheeeee <lalune1120@hotmaile.com>
+*/
+
 define([], function() {
   'use strict';
 
+  /**
+  * @exports Workspace
+  */
   function Workspace() {
-    /***************************************************************************************************/
-    /***************************************** workspace ***********************************************/
-    /***************************************************************************************************/
 
+    // init
     var config = {
-      // selectionEnabled: true,
       content: [{
         type: 'stack',
-        content: [{
-          type: 'component',
-          title: 'test-floor',
-          componentName: 'workspace',
-          componentState: {
-            text: 'Component 1'
-          }
-        }]
+        isClosable: false
       }]
     };
 
-    var workspaceLayout = new GoldenLayout(config, $('#workspace-container'));
-    var viewport = "<div class=\"Panel\" id=\"viewport\" style=\"position:absoulte;\"><div id=\"container\" class=\"container\"></div></div>";
+    this.workspaceLayout = new GoldenLayout(config, $('#workspace-layout-container'));
 
-
-    workspaceLayout.registerComponent('workspace', function(container, state) {
-      container.getElement().html(viewport);
+    this.workspaceLayout.registerComponent('workspace', function(container, state) {
+      // container.getElement().html(viewport);
     });
 
+    this.workspaceLayout.init();
 
+    $(window).resize(function() {
+      window.uiContainer.workspace.workspaceLayout.updateSize();
 
+    });
+  }
 
-    workspaceLayout.init();
+  Workspace.prototype.a
 
+  Workspace.prototype.addNewWorkspace = function(_id, _name){
 
+    var newItemConfig = {
+        title: _name,
+        type: 'component',
+        componentName: 'workspace'
+    };
 
+    var contentItems = window.uiContainer.workspace.workspaceLayout.root.contentItems[0];
+    contentItems.addChild( newItemConfig );
+
+    var index = contentItems.contentItems.length-1;
+    contentItems.contentItems[index].element[0].id = _id;
+
+    var viewport = "<div class=\"Panel\" id=\"viewport\" style=\"position:absoulte;\"><div id="+_id+" class=\"container\"></div></div>";
+    contentItems.contentItems[index].element[0].innerHTML = viewport;
 
 
     $(window).resize(function() {
-      workspaceLayout.updateSize();
+      window.uiContainer.workspace.workspaceLayout.updateSize();
     });
 
   }

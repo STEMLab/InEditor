@@ -36,7 +36,7 @@ define([
   }
 
   /**
-  * @param message { 'request' : req-type, 'requestObj' : obj }
+  * @param message \{ 'request' \: req-type, 'requestObj' \: obj \}
   */
   ManagerController.prototype.run = function(message) {
 

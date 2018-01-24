@@ -4,6 +4,7 @@ define([],function() {
   function StateProperty() {
     this.id;
     this.name;
+    this.description;
     this.duality; // CellSpace
     this.connects = [];
   }

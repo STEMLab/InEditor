@@ -10,8 +10,7 @@ define([
   'use strict';
 
   /**
-  * @classdesc
-  * @class
+  * @exports Manager/GeometryManager
   */
   function GeometryManager() {
 
