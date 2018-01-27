@@ -35,10 +35,6 @@ define([
     this.managerSubscribe(new PropertyManager());
     this.managerSubscribe(new UIManager());
 
-    /********************************************************************************/
-    /****************************** subscribe ui later ******************************/
-    /********************************************************************************/
-
   }
 
   BrokerConnector.prototype.managerSubscribe = function(_manager) {

@@ -44,6 +44,4 @@ require([
   var eventHandler = new EventHandler(broker);
   window.eventHandler = eventHandler;
 
-  console.log(window);
-
 });

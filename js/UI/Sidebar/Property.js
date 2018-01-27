@@ -46,11 +46,10 @@ define([], function() {
   }
 
   Property.prototype.setFloorView = function(config, floorProperty){
+    
     $('#property-container').empty();
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
-
-    console.log(floorProperty);
 
     var canvasDiv = "<table>";
     canvasDiv += "<tr><td class=\"title\">Upload floor plan</td><td class=\"value\"><input id=\"floorplan-file\" type=\"file\"></td></tr>";
@@ -121,10 +120,6 @@ define([], function() {
     };
 
     this.setFloorView(config, storage.propertyContainer.getElementById('floor', id));
-
-    document.getElementById('property-subimt-btn').addEventListener('click', function(e) {
-      window.eventHandler.callHandler(e)
-    });
 
   }
 
@@ -300,9 +295,6 @@ define([], function() {
 
     this.setView(config, divContent);
 
-    document.getElementById('property-subimt-btn').addEventListener('click', function(e) {
-      window.eventHandler.callHandler(e)
-    });
   }
 
 

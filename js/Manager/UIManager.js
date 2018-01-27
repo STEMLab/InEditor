@@ -1,17 +1,18 @@
 /**
-* @author suheeeee <lalune1120@hotmaile.com>
-*/
+ * @author suheeeee <lalune1120@hotmaile.com>
+ */
 
 define([
   "./Manager.js"
-],function(
+], function(
   Manager
 ) {
   'use strict';
 
   /**
-  * @exports Manager/UIManager
-  */
+   * @desc Changes in the UI.
+   * @class UIManager
+   */
   function UIManager() {
 
     Manager.apply(this, arguments);
@@ -21,46 +22,68 @@ define([
 
   UIManager.prototype = Object.create(Manager.prototype);
 
-  UIManager.prototype.init = function(){
+  UIManager.prototype.init = function() {
 
     this.name = 'UIManager';
 
     this.addReq({
-      'settreeview' : 'single',
-      'setpropertyview' : 'single',
-      'updateproperty' : 'single'
+      'setpropertyview': 'single',
+      'updateproperty': 'single',
+      'zoomworkspace': 'single',
+      'setworkspaceview': 'single'
     });
 
-    this.addCallbackFun('settreeview', this.test );
-    this.addCallbackFun('setpropertyview', this.setPropertyView );
-    this.addCallbackFun('updateproperty', this.updateProperty );
+    this.addCallbackFun('setpropertyview', this.setPropertyView);
+    this.addCallbackFun('updateproperty', this.updateProperty);
+    this.addCallbackFun('zoomworkspace', this.zoomWorkspace);
+    this.addCallbackFun('setworkspaceview', this.setWorkspaceView);
   }
 
-  UIManager.prototype.test = function(reqObj){
+  UIManager.prototype.test = function(reqObj) {
 
     console.log("ui-manager test success");
 
   }
 
   /**
-  * @param {Message.reqObj} reqObj type, id, updateContent
-  */
-  UIManager.prototype.updateProperty = function(reqObj){
+   * @param {Message.reqObj} reqObj type, id, updateContent
+   */
+  UIManager.prototype.updateProperty = function(reqObj) {
 
     window.uiContainer.sidebar.treeview.updateTitle(reqObj.id, reqObj.updateContent.name);
 
   }
 
   /**
-  * @param {Message.reqObj} reqObj type, id, storage
-  */
-  UIManager.prototype.setPropertyView = function(reqObj){
+   * @param {Message.reqObj} reqObj type, id, storage
+   */
+  UIManager.prototype.setPropertyView = function(reqObj) {
 
     window.uiContainer.sidebar.property.setPropertyTab(reqObj.type, reqObj.id, window.storage);
 
   }
 
+  /**
+   * @param {Message.reqObj} reqObj id : state id<br>newScale<br>newPos
+   */
+  UIManager.prototype.zoomWorkspace = function(reqObj) {
 
+    window.storage.canvasContainer.stages[reqObj.id].stage.position(reqObj.newPos);
+    window.storage.canvasContainer.stages[reqObj.id].stage.scale({
+      x: reqObj.newScale,
+      y: reqObj.newScale
+    });
+    window.storage.canvasContainer.stages[reqObj.id].stage.batchDraw();
+
+  }
+
+  /**
+   * Converts the active tab of the workspace to the selected floor.
+   * @param {Message.reqObj} reqObj id : floor id
+   */
+  UIManager.prototype.setWorkspaceView = function(reqObj) {
+
+  }
 
 
   return UIManager;

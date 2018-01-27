@@ -187,12 +187,25 @@ body {
 #workspace-layout-container {
     height: 100%;
     width: 100%;
-    background-color : var(--viewport-bg-color);
+    overflow: hidden;
+}
+
+#workspace-layout-container .lm_items {
+    background-color : #222222;
+}
+
+#workspace-layout-container .lm_item_container{
+    overflow: hidden;
+}
+
+#workspace-layout-container .canvas{
+    background-color : black;
 }
 
 
 #workspace-layout-container .konvajs-content{
     width: inherit;
     height: inherit;
+    overflow: hidden;
     background-color : var(--viewport-bg-color);
 }

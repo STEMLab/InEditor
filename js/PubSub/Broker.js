@@ -31,8 +31,6 @@ define([
 
   Broker.prototype.subscribe = function(_topic, _obj){
 
-    console.log( _obj.name + " subscribe " + _topic );
-
     if( this.topic == null){
       window.broker.addTopic(window.broker.topic, _topic, _obj);
     }
@@ -54,7 +52,7 @@ define([
 
   Broker.prototype.publish = function(_message){
 
-    console.log( _message.req + " published" );
+    console.log( ">> " + _message.req + " published" );
 
     if( this.topic == null ){
       window.broker.publishMsg(window.broker.topic, _message);

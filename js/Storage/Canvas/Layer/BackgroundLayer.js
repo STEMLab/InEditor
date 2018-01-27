@@ -1,19 +1,18 @@
-define([],function() {
+define([], function() {
   'use strict';
 
 
-  function BackgroundLayer(){
+  function BackgroundLayer() {
 
     this.layer = new Konva.Layer();
     this.floorPlan = new Konva.Image();
-
   }
 
 
   // BackgroundLayer.prototype.setFloorplan = function(img){
   // }
 
-  BackgroundLayer.prototype.getLayer = function(){
+  BackgroundLayer.prototype.getLayer = function() {
     return this.layer;
   }
 

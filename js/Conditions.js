@@ -1,19 +1,44 @@
 /**
-* @author suheeeee <lalune1120@hotmaile.com>
-*/
+ * @author suheeeee <lalune1120@hotmaile.com>
+ */
 
-define([],function() {
+define([], function() {
   'use strict';
 
   /**
-  * @classdesc
-  * @class
-  */
+   * @desc
+   * @exports Conditions
+   */
   function Conditions() {
+
+    /**
+    * @desc Prefix of cell object
+    * @default C
+    */
     this.pre_cell = 'C';
+
+    /**
+    * @desc Prefix of cellBoundary object
+    * @default B
+    */
     this.pre_cellBoundary = 'B';
+
+    /**
+    * @desc Prefix of floor object
+    * @default F
+    */
     this.pre_floor = 'F';
+
+    /**
+    * @desc Prefix of state object
+    * @default S
+    */
     this.pre_state = 'S';
+
+    /**
+    * @desc Prefix of transtiion object
+    * @default T
+    */
     this.pre_transition = 'T';
 
     this.LAST_CELL_ID_NUM = 0;
@@ -21,6 +46,30 @@ define([],function() {
     this.LAST_FLOOR_ID_NUM = 0;
     this.LAST_STATE_ID_NUM = 0;
     this.LAST_TRANSITION_ID_NUM = 0;
+
+    /**
+    * @desc The aspect ratio used to create the stage
+    * @default { x : 4, y : 3 }
+    */
+    this.aspectRatio = { x : 4, y : 3 };
+
+    /**
+    * @desc scale factor
+    * @default 1.5
+    */
+    this.scaleFactor = 1.1;
+
+    /**
+    * @desc min scale
+    * @default 1
+    */
+    this.scaleMin = 1;
+
+    /**
+    * @desc max scale
+    * @default 50
+    */
+    this.scaleMax = 50;
   }
 
   Conditions.prototype.guid = function() {

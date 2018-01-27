@@ -62,6 +62,16 @@ define([
             }
           });
 
+        } else if ( subkey == 'wheel' ){
+
+          window.addEventListener('wheel', function(event, data){
+
+            if(event.target.tagName == 'CANVAS'){
+              window.eventHandler.callHandler('canvas', event);
+            }
+
+          });
+
         }
       }
     }
@@ -111,8 +121,6 @@ define([
     var message;
     var data;
 
-
-
     if(_target == 'html'){
       target = _event.target.id;
       type = _event.type;
@@ -126,16 +134,15 @@ define([
       type = _event.type;
       data = _data;
 
+    } else if(_target == 'canvas'){
+      target = 'canvas';
+      type = _event.type;
+      data = _event;
     }
-
-
-
-
-    var message = this.handlerBinder[target][type];
 
     var result = this.handlerBinder[target][type](window.broker, window.broker.previousMsg, data);
 
-    if (result.result) {
+    if ( result.result ) {
       window.broker.previousMsg = result.msg;
     } else {
       console.log("error! " + result.msg);

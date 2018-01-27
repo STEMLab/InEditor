@@ -1,20 +1,25 @@
 /**
-* @author suheeeee <lalune1120@hotmaile.com>
-*/
+ * @author suheeeee <lalune1120@hotmaile.com>
+ */
 
 define([], function() {
   'use strict';
 
   /**
-  * @exports Workspace
-  */
+   * @exports Workspace
+   */
   function Workspace() {
+
+    this.init();
+
+  }
+
+  Workspace.prototype.init = function(){
 
     // init
     var config = {
       content: [{
-        type: 'stack',
-        isClosable: false
+        type: 'stack'
       }]
     };
 
@@ -30,25 +35,25 @@ define([], function() {
       window.uiContainer.workspace.workspaceLayout.updateSize();
 
     });
+
+
   }
 
-  Workspace.prototype.a
-
-  Workspace.prototype.addNewWorkspace = function(_id, _name){
+  Workspace.prototype.addNewWorkspace = function(_id, _name) {
 
     var newItemConfig = {
-        title: _name,
-        type: 'component',
-        componentName: 'workspace'
+      title: _name,
+      type: 'component',
+      componentName: 'workspace'
     };
 
     var contentItems = window.uiContainer.workspace.workspaceLayout.root.contentItems[0];
-    contentItems.addChild( newItemConfig );
+    contentItems.addChild(newItemConfig);
 
-    var index = contentItems.contentItems.length-1;
+    var index = contentItems.contentItems.length - 1;
     contentItems.contentItems[index].element[0].id = _id;
 
-    var viewport = "<div class=\"Panel\" id=\"viewport\" style=\"position:absoulte;\"><div id="+_id+" class=\"container\"></div></div>";
+    var viewport = "<div class=\"Panel\" id=\"viewport\" style=\"position:absoulte;\"><div id=" + _id + " class=\"container\"></div></div>";
     contentItems.contentItems[index].element[0].innerHTML = viewport;
 
 

@@ -27,7 +27,7 @@ define([
   * @override
   */
   GeometryManager.prototype.init = function(){
-    console.log(this);
+    
     this.name = 'GeometryManager';
 
     this.addReq({

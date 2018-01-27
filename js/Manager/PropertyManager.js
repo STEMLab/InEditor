@@ -83,7 +83,6 @@ define([
     // refresh sidebar > property-view
     window.uiContainer.sidebar.property.setPropertyTab('floor', newFloorProperty.id, window.storage);
 
-    console.log(window);
   }
 
 

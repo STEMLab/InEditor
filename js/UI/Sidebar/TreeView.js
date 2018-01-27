@@ -60,12 +60,8 @@ define([], function() {
     floorObj.children.push({"title" : "State", "key" : newFloorProperty.id+"-state", "folder" : true, "type" : "stateFolder"});
     floorObj.children.push({"title" : "Transition", "key" : newFloorProperty.id+"-transition", "folder" : true, "type" : "transtitionFolder"});
 
-    console.log(floorObj);
-
     var projectKey = window.storage.propertyContainer.getElementById('project').id;
     $("#tree-view").fancytree("getTree").getNodeByKey(projectKey).addChildren(floorObj);
-
-    $
     $("#tree-view").fancytree("getTree").activateKey(floorObj.key);
   }
 
@@ -74,7 +70,7 @@ define([], function() {
   * @param {String} _name
   */
   TreeView.prototype.updateTitle = function(_key, _title){
-    console.log(_key, _title);
+
     $("#tree-view").fancytree("getTree").getNodeByKey(_key).setTitle(_title);
 
   }
