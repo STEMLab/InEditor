@@ -22,8 +22,13 @@ define([
     handlerBinder['tree-view'] = {
       'fancytreeclick': this.clickTreeView
     };
+
     handlerBinder['canvas'] = {
       'wheel': this.wheelCanavs
+    };
+
+    handlerBinder['floorplan-file'] = {
+      'change': this.floorplanUpload
     };
 
 
@@ -47,8 +52,8 @@ define([
         }));
 
         // Converts the active tab of the workspace to the selected floor.
-        if(data.node.type == 'floor'){
-          broker.publish(new Message('setworkspaceview',{
+        if (data.node.type == 'floor') {
+          broker.publish(new Message('setworkspaceview', {
             'id': data.node.key
           }));
         }
@@ -132,7 +137,11 @@ define([
 
         }
 
-        broker.publish(new Message('zoomworkspace', {'id' : target, 'newScale' : newScale, 'newPos':newPos}));
+        broker.publish(new Message('zoomworkspace', {
+          'id': target,
+          'newScale': newScale,
+          'newPos': newPos
+        }));
 
         result = {
           'result': true,
@@ -148,5 +157,80 @@ define([
     return result;
   }
 
+
+  UIChangeEventHandler.prototype.floorplanUpload = function(broker, previousMsg, data) {
+
+    var result = {
+      'result': false,
+      'msg': null
+    };
+
+    switch (previousMsg) {
+
+      case null:
+
+        // console.log(data);
+        //
+        // var file = document.querySelector('input[type=file]').files[0];
+        // var reader = new FileReader();
+        //
+        // reader.addEventListener("load", function() {
+        //
+        //   broker.publish(new Message('addfloorplan', {
+        //     'id': document.getElementById('id-text').value,
+        //     'img': reader.result
+        //   }));
+        // }, false);
+        //
+        // if (file) {
+        //   reader.readAsDataURL(file);
+        // }
+
+
+
+        // data.preventDefault();
+        // var file = document.getElementById(data.target.id).files[0];
+        // var reader = new FileReader();
+        //
+        // reader.onload = function(e) {
+        // broker.publish(new Message('addfloorplan', {
+        //   'id': document.getElementById('id-text').value,
+        //   'img':
+        // }));
+        // }
+
+        // var img = new Image();
+        // img.src = event.target.result;
+        // reader.readAsText(file);
+
+
+
+
+        // broker.publish(new Message('addfloorplan', {
+        //   'id': null,
+        //   'storage': null
+        // }));
+
+
+        broker.publish(new Message('addfloorplan', {
+          'id': document.getElementById('id-text').value,
+          'img': document.getElementById(data.target.id).files[0]
+        }));
+
+
+        result = {
+          'result': true,
+          'msg': null
+        };
+        break;
+
+      default:
+        result.msg = "wrong previous state : " + previousMsg;
+        break;
+    }
+
+    return result;
+
+  }
   return UIChangeEventHandler;
 });

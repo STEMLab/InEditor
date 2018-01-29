@@ -30,13 +30,15 @@ define([
       'setpropertyview': 'single',
       'updateproperty': 'single',
       'zoomworkspace': 'single',
-      'setworkspaceview': 'single'
+      'setworkspaceview': 'single',
+      'addfloorplan': 'single'
     });
 
     this.addCallbackFun('setpropertyview', this.setPropertyView);
     this.addCallbackFun('updateproperty', this.updateProperty);
     this.addCallbackFun('zoomworkspace', this.zoomWorkspace);
     this.addCallbackFun('setworkspaceview', this.setWorkspaceView);
+    this.addCallbackFun('addfloorplan', this.addFloorPlan);
   }
 
   UIManager.prototype.test = function(reqObj) {
@@ -83,6 +85,53 @@ define([
    */
   UIManager.prototype.setWorkspaceView = function(reqObj) {
 
+  }
+
+  /**
+   * @param {Message.reqObj} reqObj id : floor id,  img :
+   */
+  UIManager.prototype.addFloorPlan = function(reqObj) {
+
+    // save image to assets > floorplan
+    var xhr = new XMLHttpRequest();
+    var formData = new FormData();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status == 200) {
+
+        // success to save image
+        console.log(">>> succeed in saving image");
+        console.log(JSON.parse(xhr.response));
+
+        /// set background
+        var backgroundLayer = window.storage.canvasContainer.stages[reqObj.id].backgroundLayer.layer;
+
+        // clear layer before add new floorplan
+        backgroundLayer.clear();
+
+        var imageObj = new Image();
+        imageObj.onload = function() {
+
+          var floorplan = new Konva.Image({
+            x: 0,
+            y: 0,
+            image: imageObj,
+            width: window.storage.canvasContainer.stages[reqObj.id].stage.attrs.width,
+            height: window.storage.canvasContainer.stages[reqObj.id].stage.attrs.height
+          });
+
+          // add the shape to the layer
+          backgroundLayer.add(floorplan);
+          backgroundLayer.draw();
+
+        };
+        imageObj.src = JSON.parse(xhr.response);
+      }
+    }
+
+    xhr.open("POST", "http://127.0.0.1:8080/floorplan-upload", true);
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    formData.append("files", reqObj.img, reqObj.id);
+    xhr.send(formData);
   }
 
 

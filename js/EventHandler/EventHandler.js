@@ -35,6 +35,7 @@ define([
   }
 
   EventHandler.prototype.add = function() {
+
     this.handlers['drawEventHandler'] = new DrawEventHandler();
     this.handlers['propertyEventHandler'] = new PropertyEventHandler();
     this.handlers['projectEventHandler'] = new ProjectEventHandler();
@@ -51,7 +52,7 @@ define([
 
           // event on html ui element
           document.getElementById(key).addEventListener('click', function(event) {
-            window.eventHandler.callHandler('html', event)
+            window.eventHandler.callHandler('html', event);
           });
 
         } else if (subkey == 'fancytreeclick') {
@@ -72,6 +73,11 @@ define([
 
           });
 
+        } else if ( subkey == 'onchange' && document.getElementById(key) != null){
+          // document.getElementById(key).addEventListener('onchange', function(event){
+          //   console.log(window.getElementById(key));
+          //   window.eventHandler.callHandler('html', event)
+          // });
         }
       }
     }
@@ -136,6 +142,10 @@ define([
 
     } else if(_target == 'canvas'){
       target = 'canvas';
+      type = _event.type;
+      data = _event;
+    } else if(_target == 'file'){
+      target = 'floorplan-file';
       type = _event.type;
       data = _event;
     }
