@@ -16,7 +16,7 @@ define([
   'use strict';
 
   /**
-   * @exports EventHandler
+   * @class EventHandler
    */
   function EventHandler() {
 
@@ -63,21 +63,16 @@ define([
             }
           });
 
-        } else if ( subkey == 'wheel' ){
+        } else if (subkey == 'wheel') {
 
-          window.addEventListener('wheel', function(event, data){
+          window.addEventListener('wheel', function(event, data) {
 
-            if(event.target.tagName == 'CANVAS'){
+            if (event.target.tagName == 'CANVAS') {
               window.eventHandler.callHandler('canvas', event);
             }
 
           });
 
-        } else if ( subkey == 'onchange' && document.getElementById(key) != null){
-          // document.getElementById(key).addEventListener('onchange', function(event){
-          //   console.log(window.getElementById(key));
-          //   window.eventHandler.callHandler('html', event)
-          // });
         }
       }
     }
@@ -85,24 +80,23 @@ define([
   }
 
   /**
-   * @desc This function must called after add new floor and bind event handler to events on new stage.
-   * @param _id id of new floor
+   * @param {Obejct} obj new canvas object
    */
-  EventHandler.prototype.stageEventBind = function(_id) {
+  EventHandler.prototype.stageEventBind = function(_type, _id) {
 
-    for (var key in this.handlerBinder) {
-      for (var subkey in this.handlerBinder[key]) {
-        if (subkey == 'contentClick') { // event on canvas
+    for (var subkey in window.eventHandler.handlerBinder[_type]) {
 
-          var stage = window.storage.canvasContainer.getElementById('stage', _id);
+      if (subkey == 'contentClick') { // event on canvas
 
-          stage.stage.on(
-            'contentClick',
-            function(event) {
-              window.eventHandler.callHandler('stage', event)
-            });
-        }
+        var stage = window.storage.canvasContainer.getElementById('stage', _id);
+
+        stage.stage.on(
+          'contentClick',
+          function(event) {
+            window.eventHandler.callHandler('stage', event)
+          });
       }
+
     }
   }
 
@@ -127,32 +121,41 @@ define([
     var message;
     var data;
 
-    if(_target == 'html'){
+    if (_target == 'html') {
+
       target = _event.target.id;
       type = _event.type;
+      data = _event;
 
-    }else if(_target == 'stage'){
-      target = _event.currentTarget.attrs.id;
+    } else if (_target == 'stage') {
+      // target = _event.currentTarget.attrs.id;
+      target = 'stage';
       type = _event.type;
+      data = _event;
 
-    }else if(_target == 'tree'){
+    } else if (_target == 'tree') {
+
       target = _event.target.id;
       type = _event.type;
       data = _data;
 
-    } else if(_target == 'canvas'){
+    } else if (_target == 'canvas') {
+
       target = 'canvas';
       type = _event.type;
       data = _event;
-    } else if(_target == 'file'){
+
+    } else if (_target == 'file') {
+
       target = 'floorplan-file';
       type = _event.type;
       data = _event;
+
     }
 
     var result = this.handlerBinder[target][type](window.broker, window.broker.previousMsg, data);
 
-    if ( result.result ) {
+    if (result.result) {
       window.broker.previousMsg = result.msg;
     } else {
       console.log("error! " + result.msg);

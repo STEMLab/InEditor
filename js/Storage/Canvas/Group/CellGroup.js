@@ -9,19 +9,27 @@ define([
   function CellGroup(){
 
     this.cellGroup = new Konva.Group({ x: 0, y: 0 });
+    this.tmpGroup = new Konva.Group({x: 0, y: 0});
     this.cells = []; // Cell array
 
   }
 
-  CellGroup.prototype.addNewCell = function(){
+  /**
+  * @param {Cell} obj
+  */
+  CellGroup.prototype.addNewCell = function(obj){
 
-    console.log(Conditions.pre_cell+Conditins.LAST_CELL_ID_NUM);
-    cells.push(new Cell(Conditions.pre_cell+Conditins.LAST_CELL_ID_NUM));
-    console.log("add cell complete : ", this);
+    this.cells.push(obj);
+    this.cellGroup.add(this.cells[this.cells.length-1].getObject());
+
   }
 
-  CellGroup.prototype.getGroup = function(){
+  CellGroup.prototype.getCellGroup = function(){
     return this.cellGroup;
+  }
+
+  CellGroup.prototype.getTmpGroup = function(){
+    return this.tmpGroup;
   }
 
   return CellGroup;

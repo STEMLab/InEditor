@@ -49,11 +49,12 @@ define([
       }
     });
 
+    this.stage.add(this.backgroundLayer.getLayer());
     this.stage.add(this.cellLayer.getLayer());
     this.stage.add(this.cellBoundaryLayer.getLayer());
     this.stage.add(this.stateLayer.getLayer());
     this.stage.add(this.transitionLayer.getLayer());
-    this.stage.add(this.backgroundLayer.getLayer());
+
 
   }
 
@@ -105,6 +106,20 @@ define([
       x: newX,
       y: newY
     };
+  }
+
+  Stage.prototype.getAbsoluteCoor = function(floor){
+
+    var stage;
+
+    if( this.stage == null ){
+      stage = this.stage;
+    }else {
+      stage = window.storage.canvasContainer.stages[floor].stage;
+    }
+
+    var x = stage.getAbsolutePosition();
+    var y = stage.getAbsolutePosition();
   }
 
   return Stage;

@@ -169,49 +169,6 @@ define([
 
       case null:
 
-        // console.log(data);
-        //
-        // var file = document.querySelector('input[type=file]').files[0];
-        // var reader = new FileReader();
-        //
-        // reader.addEventListener("load", function() {
-        //
-        //   broker.publish(new Message('addfloorplan', {
-        //     'id': document.getElementById('id-text').value,
-        //     'img': reader.result
-        //   }));
-        // }, false);
-        //
-        // if (file) {
-        //   reader.readAsDataURL(file);
-        // }
-
-
-
-        // data.preventDefault();
-        // var file = document.getElementById(data.target.id).files[0];
-        // var reader = new FileReader();
-        //
-        // reader.onload = function(e) {
-        // broker.publish(new Message('addfloorplan', {
-        //   'id': document.getElementById('id-text').value,
-        //   'img':
-        // }));
-        // }
-
-        // var img = new Image();
-        // img.src = event.target.result;
-        // reader.readAsText(file);
-
-
-
-
-        // broker.publish(new Message('addfloorplan', {
-        //   'id': null,
-        //   'storage': null
-        // }));
-
-
         broker.publish(new Message('addfloorplan', {
           'id': document.getElementById('id-text').value,
           'img': document.getElementById(data.target.id).files[0]

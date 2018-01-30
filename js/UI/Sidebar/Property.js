@@ -1,21 +1,21 @@
 /**
-* @author suheeeee <lalune1120@hotmaile.com>
-*/
+ * @author suheeeee <lalune1120@hotmaile.com>
+ */
 
 define([], function() {
   'use strict';
 
   /**
-  * @exports Property
-  */
+   * @exports Property
+   */
   function Property() {
 
   };
 
   /**
    * @param type The type of object to be displayed in the property tab. 'floor', 'cell', 'cellboundry', 'state', 'transition'
-   * @param id The id of object to be displayed in the property tab.
-   * @param storage storage
+   * @param {String} id The id of object to be displayed in the property tab.
+   * @param {Storage} storage
    */
   Property.prototype.setPropertyTab = function(type, id, storage) {
     console.log(">>> set property tab :", type, id);
@@ -45,7 +45,7 @@ define([], function() {
     propertyLayout.init();
   }
 
-  Property.prototype.setFloorView = function(config, floorProperty){
+  Property.prototype.setFloorView = function(config, floorProperty) {
 
     $('#property-container').empty();
 
@@ -57,33 +57,91 @@ define([], function() {
     canvasDiv += "</table>";
 
     var propertiesDiv = "<table id=\"property-table\" type=\"floor\">";
-    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value="+floorProperty.id+" disabled></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value="+floorProperty.name+"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">level</td><td class=\"value\"><input id=\"level-text\" type=\"text\" value="+floorProperty.level+"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">lower corner</td><td class=\"value\"><input id=\"lower-corner-text\" type=\"text\" value="+floorProperty.lowerCorner+"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">upper corner</td><td class=\"value\"><input id=\"upper-corner-text\" type=\"text\" value="+floorProperty.upperCorner+"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">ground height</td><td class=\"value\"><input id=\"ground-height-text\" type=\"text\" value="+floorProperty.groundHeight+"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">celing height</td><td class=\"value\"><input id=\"celing-height-text\" type=\"text\" value="+floorProperty.celingHeight+"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">door height</td><td class=\"value\"><input id=\"door-height-text\" type=\"text\" value="+floorProperty.doorHeight+"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">description</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">"+floorProperty.description+"</textarea></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + floorProperty.id + " disabled></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + floorProperty.name + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">level</td><td class=\"value\"><input id=\"level-text\" type=\"text\" value=" + floorProperty.level + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">lower corner</td><td class=\"value\"><input id=\"lower-corner-text\" type=\"text\" value=" + floorProperty.lowerCorner + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">upper corner</td><td class=\"value\"><input id=\"upper-corner-text\" type=\"text\" value=" + floorProperty.upperCorner + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">ground height</td><td class=\"value\"><input id=\"ground-height-text\" type=\"text\" value=" + floorProperty.groundHeight + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">celing height</td><td class=\"value\"><input id=\"celing-height-text\" type=\"text\" value=" + floorProperty.celingHeight + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">door height</td><td class=\"value\"><input id=\"door-height-text\" type=\"text\" value=" + floorProperty.doorHeight + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">description</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + floorProperty.description + "</textarea></td></tr>";
     propertiesDiv += "</table>";
     propertiesDiv += "<tr><td><button id=\"property-subimt-btn\">submit</button></td></tr></table>";
 
-    var divs = { "cavas" : canvasDiv, "properties" : propertiesDiv };
+    var divs = {
+      "cavas": canvasDiv,
+      "properties": propertiesDiv
+    };
 
 
     propertyLayout.registerComponent('property-component', function(container, state) {
 
-      container.getElement().html("<div id=\"property-"+state.id+"\">"+divs[state.id]+"</div>");
+      container.getElement().html("<div id=\"property-" + state.id + "\">" + divs[state.id] + "</div>");
 
     });
 
     propertyLayout.init();
 
     // event binding
-    document.getElementById('floorplan-file').addEventListener('change', function(event){
+    document.getElementById('floorplan-file').addEventListener('change', function(event) {
       window.eventHandler.callHandler('file', event);
     });
+
+  }
+
+  Property.prototype.setViewWithRef = function(config, property) {
+
+    $('#property-container').empty();
+
+    var propertyLayout = new GoldenLayout(config, $('#property-container'));
+
+    var propertiesDiv = "<table id=\"property-table\" type=\"floor\">";
+    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">description</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">description </textarea></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" value=" + property.duality + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">external ref</td><td class=\"value\"><select id=\"externalRef-text\" style=\"width: 100%;\">";
+
+    for (var key in property.externalReference) {
+      var value = property.externalReference[key];
+      propertiesDiv += "<option value=\"" + value + "\">" + value + "</option>";
+    }
+
+    propertiesDiv += "</select></td></tr>";
+
+    propertiesDiv += "<tr><td class=\"title\">partialbounded by</td><td class=\"value\"><select id=\"partialboundedBy-text\" style=\"width: 100%;\">";
+
+    for (var key in property.partialboundedBy) {
+      var value = property.partialboundedBy[key];
+      propertiesDiv += "<option value=\"" + value + "\">" + value + "</option>";
+    }
+
+    propertiesDiv += "</table>";
+    propertiesDiv += "<tr><td><button id=\"property-subimt-btn\">submit</button></td></tr></table>";
+
+    var refDiv = "<table>";
+    refDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"ref-text\" type=\"text\" value=\"\"></td></tr>";
+    refDiv += "</table>";
+    refDiv += "<tr><td><button id=\"property-subimt-btn\">submit</button></td></tr></table>";
+
+    var divs = {
+      "properties": propertiesDiv,
+      "ref": refDiv
+    };
+
+    propertyLayout.registerComponent('property-component', function(container, state) {
+
+      container.getElement().html("<div id=\"property-" + state.id + "\">" + divs[state.id] + "</div>");
+
+    });
+
+    propertyLayout.init();
+
+    // event binding
+    // document.getElementById('floorplan-file').addEventListener('change', function(event) {
+    //   window.eventHandler.callHandler('file', event);
+    // });
   }
 
 
@@ -129,11 +187,12 @@ define([], function() {
   }
 
   /**
-   * @param id The id of cell object to be displayed in the property tab.
-   * @param storage storage
+   * @param {String} id The id of cell object to be displayed in the property tab.
+   * @param {Storage} storage
    * @desc Clears the contents of the property tab and creates a new tab for that cell.<br>Tab consist of property.<br>The property tab allows you to view/change the value of the cell's property(name, duality, description).
    */
   Property.prototype.setCellProperty = function(id, storage) {
+
 
     var config = {
       settings: {
@@ -144,23 +203,30 @@ define([], function() {
       content: [{
         type: 'stack',
         content: [{
-          type: 'component',
-          componentName: 'property-component',
-          title: 'properties',
-          isClosable: false,
-          componentState: {
-            id: 'propertiesProper'
+            type: 'component',
+            componentName: 'property-component',
+            title: 'properties',
+            isClosable: false,
+            componentState: {
+              id: 'properties'
+            }
+          },
+          {
+            type: 'component',
+            componentName: 'property-component',
+            title: 'ref',
+            isClosable: false,
+            componentState: {
+              id: 'ref'
+            }
           }
-        }]
+        ]
       }]
     };
 
-    var divContent = "<div>cell properties</div>";
-
-    this.setView(config, divContent);
+    this.setViewWithRef(config, storage.propertyContainer.getElementById('cell', id));
 
   }
-
 
   /**
    * @param id The id of cellboundary object to be displayed in the property tab.
@@ -254,7 +320,8 @@ define([], function() {
       }]
     };
 
-    var divContent = "<div>transition properties</div>";
+    var transitionProperty = storage.propertyContainer.getElementById('transition', id);
+
 
     this.setView(config, divContent);
 
@@ -292,10 +359,10 @@ define([], function() {
 
     var divContent = "<table id=\"property-table\" type=\"project\">";
     divContent += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + projectProperty.id + " disabled></td></tr>";
-    divContent += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + projectProperty.name +" ></td></tr>";
-    divContent += "<tr><td class=\"title\">date</td><td class=\"value\"><input id=\"date-text\" type=\"text\" value=" + projectProperty.date +" disabled></td></tr>";
-    divContent += "<tr><td class=\"title\">author</td><td class=\"value\"><input id=\"author-text\" type=\"text\" value=" + projectProperty.author +" ></td></tr>";
-    divContent += "<tr><td class=\"title\">description</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + projectProperty.description +"</textarea></td></tr>";
+    divContent += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + projectProperty.name + " ></td></tr>";
+    divContent += "<tr><td class=\"title\">date</td><td class=\"value\"><input id=\"date-text\" type=\"text\" value=" + projectProperty.date + " disabled></td></tr>";
+    divContent += "<tr><td class=\"title\">author</td><td class=\"value\"><input id=\"author-text\" type=\"text\" value=" + projectProperty.author + " ></td></tr>";
+    divContent += "<tr><td class=\"title\">description</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + projectProperty.description + "</textarea></td></tr>";
     divContent += "<tr><td><button id=\"property-subimt-btn\">submit</button></td></tr></table>";
 
     this.setView(config, divContent);

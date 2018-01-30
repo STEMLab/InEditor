@@ -30,12 +30,16 @@ define([
     var len = window.storage.propertyContainer.floorProperties.length;
     var result = null;
 
+    if (_type == 'stage'){
+      stageID = _id;
+    }
+
     // find stage id
     for (var i = 0; i < len && stageID == null; i++) {
 
       var clen = window.storage.propertyContainer.floorProperties[i].cellKey.length;
       var blen = window.storage.propertyContainer.floorProperties[i].cellBoundaryKey.length;
-      var slen = window.storage.propertyContainer.floorProperties[i].stateyKey.length;
+      var slen = window.storage.propertyContainer.floorProperties[i].stateKey.length;
       var tlen = window.storage.propertyContainer.floorProperties[i].transitionKey.length;
 
       switch (_type) {
@@ -114,7 +118,7 @@ define([
         }
         break;
       case 'stage':
-        result = window.storage.canvasContainer.stage[stageID];
+        result = window.storage.canvasContainer.stages[stageID];
         break;
       default:
     }

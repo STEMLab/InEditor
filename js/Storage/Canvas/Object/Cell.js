@@ -11,11 +11,12 @@ define([
     this.id = id;
     this.name = id;
 
-    this.corners = Konva.Group({x:0, y:0});
+    this.corners = new Konva.Group({x:0, y:0});
     this.poly = new Konva.Line({
           points:[],
           fill: '#00D2FF',
           stroke: 'black',
+          opacity: 0.3,
           strokeWidth: 1,
           closed : true
     });
@@ -23,10 +24,10 @@ define([
 
   Cell.prototype = Object.create(Subject.prototype);
 
-  Cell.prototype.addCorner = function(_x, _y){
+  Cell.prototype.addCorner = function(coor){
     var rect = new Konva.Rect({
-      x: _x,
-      y: _y,
+      x: coor.x,
+      y: coor.y,
       width: 5,
       height: 5,
       fill: 'white',
@@ -36,7 +37,13 @@ define([
 
     this.corners.add(rect);
 
-    this.poly.points().push(_x, _y);
+    this.poly.points().push(coor.x, coor.y);
+  }
+
+  Cell.prototype.getObject = function(){
+
+    return this.corners, this.poly;
+
   }
 
 

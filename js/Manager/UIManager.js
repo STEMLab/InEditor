@@ -12,6 +12,7 @@ define([
   /**
    * @desc Changes in the UI.
    * @class UIManager
+   * @augments Manager
    */
   function UIManager() {
 
@@ -22,6 +23,10 @@ define([
 
   UIManager.prototype = Object.create(Manager.prototype);
 
+  /**
+   * @memberof UIManager
+   * @override
+   */
   UIManager.prototype.init = function() {
 
     this.name = 'UIManager';
@@ -31,7 +36,10 @@ define([
       'updateproperty': 'single',
       'zoomworkspace': 'single',
       'setworkspaceview': 'single',
-      'addfloorplan': 'single'
+      'addfloorplan': 'single',
+      'start-addnewcell': 'cycle',
+      'addnewcell': 'cycle',
+      'end-addnewcell': 'cycle'
     });
 
     this.addCallbackFun('setpropertyview', this.setPropertyView);
@@ -39,6 +47,10 @@ define([
     this.addCallbackFun('zoomworkspace', this.zoomWorkspace);
     this.addCallbackFun('setworkspaceview', this.setWorkspaceView);
     this.addCallbackFun('addfloorplan', this.addFloorPlan);
+
+    this.addCallbackFun('start-addnewcell', this.startAddNewCell);
+    this.addCallbackFun('addnewcell', this.addNewCell);
+    this.addCallbackFun('end-addnewcell', this.endAddNewCell);
   }
 
   UIManager.prototype.test = function(reqObj) {
@@ -48,6 +60,8 @@ define([
   }
 
   /**
+   * @desc Change title of node in tree view which representing reqObj.id
+   * @memberof UIManager
    * @param {Message.reqObj} reqObj type, id, updateContent
    */
   UIManager.prototype.updateProperty = function(reqObj) {
@@ -57,6 +71,7 @@ define([
   }
 
   /**
+   * @memberof UIManager
    * @param {Message.reqObj} reqObj type, id, storage
    */
   UIManager.prototype.setPropertyView = function(reqObj) {
@@ -65,7 +80,9 @@ define([
 
   }
 
+
   /**
+   * @memberof UIManager
    * @param {Message.reqObj} reqObj id : state id<br>newScale<br>newPos
    */
   UIManager.prototype.zoomWorkspace = function(reqObj) {
@@ -79,16 +96,20 @@ define([
 
   }
 
+
   /**
    * Converts the active tab of the workspace to the selected floor.
+   * @memberof UIManager
    * @param {Message.reqObj} reqObj id : floor id
    */
   UIManager.prototype.setWorkspaceView = function(reqObj) {
 
   }
 
+
   /**
-   * @param {Message.reqObj} reqObj id : floor id,  img :
+   * @memberof UIManager
+   * @param {Message.reqObj} reqObj id : floor id,  img : file
    */
   UIManager.prototype.addFloorPlan = function(reqObj) {
 
@@ -132,6 +153,46 @@ define([
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     formData.append("files", reqObj.img, reqObj.id);
     xhr.send(formData);
+  }
+
+
+  /**
+   * @memberof UIManager
+   * @param {Message.reqObj} reqObj id : new obj id<br>floor : id of the floor where the new object will be created
+   */
+  UIManager.prototype.startAddNewCell = function(reqObj) {
+
+    // change floor btn color
+    document.getElementById('cell-btn').src = "../../assets/icon/cell_a.png";
+
+  }
+
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.addNewCell = function(reqObj) {
+
+    console.log("UIManager.addNewCell called ... ");
+
+  }
+
+
+  /**
+   * @param {Message.reqObj} reqObj id : new obj id<br>floor : id of the floor where the new object will be created
+   * @memberof UIManager
+   */
+  UIManager.prototype.endAddNewCell = function(reqObj) {
+
+    // set sidebar > property
+    window.uiContainer.sidebar.property.setPropertyTab('cell', reqObj.id, window.storage);
+
+    // change floor btn color
+    document.getElementById('cell-btn').src = "../../assets/icon/cell_d.png";
+
+    // refresh tree view
+    window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
+
   }
 
 

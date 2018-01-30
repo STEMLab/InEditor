@@ -7,7 +7,10 @@ define([
 ) {
   'use strict';
 
-
+  /**
+  * @class StateLayer
+  * @augments Layer
+  */
   function StateLayer(){
 
     Layer.apply(this, arguments);

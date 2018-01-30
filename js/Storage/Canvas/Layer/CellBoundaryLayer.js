@@ -7,7 +7,10 @@ define([
 ) {
   'use strict';
 
-
+  /**
+  * @class CellBoundaryLayer
+  * @augments Layer
+  */
   function CellBoundaryLayer(){
 
     Layer.apply(this, arguments);

@@ -10,7 +10,7 @@ define([
   'use strict';
 
   /**
-  * @exports Manager
+  * @class Manager
   */
   function Manager(){
 

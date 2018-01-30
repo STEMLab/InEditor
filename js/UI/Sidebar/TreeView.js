@@ -75,5 +75,23 @@ define([], function() {
 
   }
 
+  /**
+  * @param {String} id
+  * @param {String} floor
+  */
+  TreeView.prototype.addCell = function(id, floor){
+
+
+    $("#tree-view").fancytree("getTree").getNodeByKey(floor+"-cell").addChildren({
+      title : id,
+      key : id,
+      folder : false,
+      type : 'cell'
+    });
+
+    $("#tree-view").fancytree("getTree").activateKey(id);
+
+  }
+
   return TreeView;
 });

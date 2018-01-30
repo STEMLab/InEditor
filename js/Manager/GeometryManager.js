@@ -3,14 +3,17 @@
 */
 
 define([
-  "./Manager.js"
+  "./Manager.js",
+  "../Storage/Canvas/Object/Cell.js"
 ],function(
-  Manager
+  Manager,
+  Cell
 ) {
   'use strict';
 
   /**
-  * @exports Manager/GeometryManager
+  * @class GeometryManager
+  * @augments Manager
   */
   function GeometryManager() {
 
@@ -24,26 +27,29 @@ define([
   GeometryManager.prototype = Object.create(Manager.prototype);
 
   /**
-  * @override
+  * @override Manager
   */
   GeometryManager.prototype.init = function(){
-    
+
     this.name = 'GeometryManager';
 
     this.addReq({
       'start-geotest' : 'cycle',
       'geotest' : 'cycle',
       'end-geotest' : 'cycle',
-      'singletest' : 'single'
-      // 'start-addNewCell' : 'cycle'
+      'singletest' : 'single',
+      'start-addnewcell' : 'cycle',
+      'addnewcell' : 'cycle',
+      'end-addnewcell' : 'cycle'
     });
 
     this.addCallbackFun('start-geotest', this.startGeotest );
     this.addCallbackFun('geotest', this.geotest );
     this.addCallbackFun('end-geotest', this.endGeotest );
     this.addCallbackFun('singletest', this.singletest );
-    // this.addCallbackFun('start-addNewCell', this.startAddNewCell );
-
+    this.addCallbackFun('start-addnewcell', this.startAddNewCell );
+    this.addCallbackFun('addnewcell', this.addNewCell );
+    this.addCallbackFun('end-addnewcell', this.endAddNewCell );
 
   }
 
@@ -73,8 +79,61 @@ define([
   }
 
 
+  /**
+   * @memberof GeometryManager
+   */
+  GeometryManager.prototype.startAddNewCell = function(){
 
+    var tmpObj = new Cell('tmpObj');
+    window.tmpObj = tmpObj;
 
+  }
+
+  /**
+   * @memberof GeometryManager
+   * @param {Object} reqObj floor: floor id
+   */
+  GeometryManager.prototype.addNewCell = function(reqObj){
+
+    // if tmpObj havn't floor data, add floor data in it.
+    if( window.tmpObj.floor == null ){
+
+      window.tmpObj.floor = reqObj.floor;
+      window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.destroyChildren();
+      window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.add(window.tmpObj.poly, window.tmpObj.corners);
+
+    }
+
+    // add corner
+    window.tmpObj.addCorner( window.storage.canvasContainer.stages[reqObj.floor].stage.getPointerPosition());
+
+    // draw group
+    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.draw();
+
+  }
+
+  /**
+   * @param {Object} reqObj id<br>floor: floor id
+   * @memberof GeometryManager
+   */
+  GeometryManager.prototype.endAddNewCell = function(reqObj){
+
+    // destroy tmpGroup children
+    var tmpObj = window.tmpObj;
+    window.tmpObj = null;
+    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.destroyChildren();
+
+    tmpObj.id = reqObj.id;
+    tmpObj.name = reqObj.id;
+
+    // add cell using tmpObj
+    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.addNewCell(tmpObj);
+
+    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.layer.draw();
+
+    // add state
+
+  }
 
   return GeometryManager;
 });

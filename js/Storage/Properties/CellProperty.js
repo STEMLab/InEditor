@@ -1,10 +1,10 @@
 define([],function() {
   'use strict';
 
-  function CellProperty() {
-    this.id;
-    this.name;
-    this.description;
+  function CellProperty(_id) {
+    this.id = _id;
+    this.name = _id;
+    this.description = "";
     this.duality;
     this.externalReference = [];
     this.partialboundedBy = [];
