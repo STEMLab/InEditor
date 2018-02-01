@@ -26,23 +26,15 @@ define([
     this.name = 'ProjectManager';
 
     this.addReq({
-      'start-projtest' : 'cycle',
-      'projtest' : 'cycle',
-      'end-projtest' : 'cycle'
+
     });
 
 
-    this.addCallbackFun('start-protest', this.test );
-    this.addCallbackFun('protest', this.test );
-    this.addCallbackFun('end-protest', this.test );
+
 
   }
 
-  ProjectManager.prototype.test = function(reqObj){
 
-    console.log("project-manager test success");
-
-  }
 
 
 

@@ -11,12 +11,15 @@ define([
 
   /**
    * @desc This handler deal with events which request change ui.<br>e.g. click tree view content.
-   * @exports UIChangeEventHandler
+   * @class UIChangeEventHandler
    */
   function UIChangeEventHandler() {
 
   }
 
+  /**
+   * @memberof PropertyEventHandler
+   */
   UIChangeEventHandler.prototype.setHandlerBinder = function(handlerBinder) {
 
     handlerBinder['tree-view'] = {
@@ -31,9 +34,12 @@ define([
       'change': this.floorplanUpload
     };
 
-
   }
 
+  /**
+   * @desc When tree view clicked `activateworkspace` and `setpropertyview` can publish.
+   * @memberof PropertyEventHandler
+   */
   UIChangeEventHandler.prototype.clickTreeView = function(broker, previousMsg, data) {
 
     var result = {
@@ -41,38 +47,44 @@ define([
       'msg': null
     };
 
-    switch (previousMsg) {
+    if (data.node.type == 'floor') {
 
-      case null:
-        // Converts the contents of the sidebar > property to the contents of the selected element.
+      if (broker.isPublishable('activateworkspace') && broker.isPublishable('setpropertyview')) {
+
+        broker.publish(new Message('activateworkspace', {
+          'id': data.node.key
+        }));
+
         broker.publish(new Message('setpropertyview', {
           'type': data.node.type,
           'id': data.node.key,
           'storage': window.storage
         }));
 
-        // Converts the active tab of the workspace to the selected floor.
-        if (data.node.type == 'floor') {
-          broker.publish(new Message('setworkspaceview', {
-            'id': data.node.key
-          }));
-        }
+      }
 
-        result = {
-          'result': true,
-          'msg': null
-        };
-        break;
+    } else if (broker.isPublishable('setpropertyview')) {
 
-      default:
-        result.msg = "wrong previous state : " + previousMsg;
-        break;
+      // Converts the contents of the sidebar > property to the contents of the selected element.
+      broker.publish(new Message('setpropertyview', {
+        'type': data.node.type,
+        'id': data.node.key,
+        'storage': window.storage
+      }));
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to setpropertyview.";
+
     }
 
     return result;
   }
 
-
+  /**
+   * @desc When tree view clicked `zoomworkspace` can publish.
+   * @memberof PropertyEventHandler
+   */
   UIChangeEventHandler.prototype.wheelCanavs = function(broker, previousMsg, data) {
 
     var result = {
@@ -80,33 +92,29 @@ define([
       'msg': null
     };
 
-    switch (previousMsg) {
+    if (broker.isPublishable('zoomworkspace')) {
 
-      case null:
-        data.preventDefault();
+      data.preventDefault();
 
-        var target = data.path[2].id;
-        var oldScale = window.storage.canvasContainer.stages[target].stage.scaleX();
+      var target = data.path[2].id;
+      var oldScale = window.storage.canvasContainer.stages[target].stage.scaleX();
 
-        if (data.deltaY > 0 && oldScale < window.conditions.scaleMin) {
+      if (data.deltaY > 0 && oldScale < window.conditions.scaleMin) {
 
-          result = {
-            'result': false,
-            'msg': "size of canvas is already minimum size."
-          };
+        result = {
+          'result': false,
+          'msg': "size of canvas is already minimum size."
+        };
 
-          break;
 
-        } else if (data.deltaY < 0 && oldScale > window.conditions.scaleMax) {
+      } else if (data.deltaY < 0 && oldScale > window.conditions.scaleMax) {
 
-          result = {
-            'result': false,
-            'msg': "size of canvas is already maximum size."
-          };
+        result = {
+          'result': false,
+          'msg': "size of canvas is already maximum size."
+        };
 
-          break;
-
-        }
+      } else {
 
         var mousePoint = {
           x: window.storage.canvasContainer.stages[target].stage.getPointerPosition().x / oldScale - window.storage.canvasContainer.stages[target].stage.x() / oldScale,
@@ -147,17 +155,26 @@ define([
           'result': true,
           'msg': null
         };
-        break;
 
-      default:
-        result.msg = "wrong previous state : " + previousMsg;
-        break;
+      }
+
+
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to zoomworkspace.";
+
     }
 
     return result;
   }
 
 
+
+  /**
+   * @desc When tree view clicked `addfloorplan` can publish.
+   * @memberof PropertyEventHandler
+   */
   UIChangeEventHandler.prototype.floorplanUpload = function(broker, previousMsg, data) {
 
     var result = {
@@ -165,29 +182,28 @@ define([
       'msg': null
     };
 
-    switch (previousMsg) {
+    if (broker.isPublishable('addfloorplan')) {
 
-      case null:
-
-        broker.publish(new Message('addfloorplan', {
-          'id': document.getElementById('id-text').value,
-          'img': document.getElementById(data.target.id).files[0]
-        }));
+      broker.publish(new Message('addfloorplan', {
+        'id': document.getElementById('id-text').value,
+        'img': document.getElementById(data.target.id).files[0]
+      }));
 
 
-        result = {
-          'result': true,
-          'msg': null
-        };
-        break;
+      result = {
+        'result': true,
+        'msg': null
+      };
 
-      default:
-        result.msg = "wrong previous state : " + previousMsg;
-        break;
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to addfloorplan.";
+
     }
 
     return result;
 
   }
+
   return UIChangeEventHandler;
 });

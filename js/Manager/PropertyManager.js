@@ -37,14 +37,16 @@ define([
     this.name = 'PropertyManager';
 
     this.addReq({
-      'addnewfloor': 'single',
-      'updateproperty': 'single',
-      'end-addnewcell': 'cycle'
+      'addnewfloor' : null,
+      'updateproperty' : null,
+      'end-addnewcell' : null,
+      'updaterefdata' : null
     });
 
     this.addCallbackFun('addnewfloor', this.addNewFloor);
     this.addCallbackFun('updateproperty', this.updateProperty);
     this.addCallbackFun('end-addnewcell', this.endAddNewCell);
+    this.addCallbackFun('updaterefdata', this.updateRefProperty);
 
   }
 
@@ -85,12 +87,15 @@ define([
 
   }
 
+
+
   /**
    * @param {Message.reqObj} reqObj type, id, updateContent
    */
   PropertyManager.prototype.updateProperty = function(reqObj) {
 
     var obj = window.storage.propertyContainer.getElementById(reqObj.type, reqObj.id);
+
 
     switch (reqObj.type) {
       case 'project':
@@ -131,6 +136,16 @@ define([
 
   }
 
+  /**
+   * @param {Message.reqObj} reqObj type, id, updateContent
+   */
+  PropertyManager.prototype.updateRefProperty = function(reqObj) {
+
+    var obj = window.storage.propertyContainer.getElementById(reqObj.type, reqObj.id);
+    obj.externalReference.push(reqObj.updateContent.externalRef);
+
+  }
+
 
   /**
    * @memberof PropertyManager
@@ -142,9 +157,6 @@ define([
     window.storage.propertyContainer.cellProperties.push(
       new CellProperty(reqObj.id)
     );
-
-    console.log(reqObj.floor);
-    console.log(window.storage.propertyContainer.getElementById('floor',reqObj.floor));
 
     // add cell key in floor property
     window.storage.propertyContainer.getElementById('floor', reqObj.floor).cellKey.push(

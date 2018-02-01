@@ -26,6 +26,9 @@ define([
     this.init();
   }
 
+  /**
+   * @memberof EventHandler
+   */
   EventHandler.prototype.init = function() {
 
     this.add();
@@ -34,6 +37,9 @@ define([
 
   }
 
+  /**
+   * @memberof EventHandler
+   */
   EventHandler.prototype.add = function() {
 
     this.handlers['drawEventHandler'] = new DrawEventHandler();
@@ -43,6 +49,9 @@ define([
 
   }
 
+  /**
+   * @memberof EventHandler
+   */
   EventHandler.prototype.btnEvnetBind = function() {
 
     for (var key in this.handlerBinder) {
@@ -81,6 +90,7 @@ define([
 
   /**
    * @param {Obejct} obj new canvas object
+   * @memberof EventHandler
    */
   EventHandler.prototype.stageEventBind = function(_type, _id) {
 
@@ -100,6 +110,10 @@ define([
     }
   }
 
+
+  /**
+   * @memberof EventHandler
+   */
   EventHandler.prototype.setHandlerBinder = function() {
 
     for (var key in this.handlers) {
@@ -113,6 +127,7 @@ define([
    * @param {String} _target html, stage, tree
    * @param {Object} _event
    * @param {Object} _data
+   * @memberof EventHandler
    */
   EventHandler.prototype.callHandler = function(_target, _event, _data) {
 
@@ -156,9 +171,13 @@ define([
     var result = this.handlerBinder[target][type](window.broker, window.broker.previousMsg, data);
 
     if (result.result) {
+
       window.broker.previousMsg = result.msg;
+
     } else {
+
       console.log("error! " + result.msg);
+
     }
 
   }

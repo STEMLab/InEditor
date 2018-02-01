@@ -10,12 +10,15 @@ define([
   'use strict';
 
   /**
-   * @exports DrawEventHandler
+   * @class DrawEventHandler
    */
   function DrawEventHandler() {
 
   }
 
+  /**
+   * @memberof DrawEventHandler
+   */
   DrawEventHandler.prototype.setHandlerBinder = function(handlerBinder) {
 
     handlerBinder['cell-btn'] = {
@@ -32,7 +35,10 @@ define([
 
   }
 
-
+  /**
+   * @desc When cell btn clicked `start-addnewcell` or `end-addnewcell` can publish.
+   * @memberof DrawEventHandler
+   */
   DrawEventHandler.prototype.clickCellBtn = function(broker, previousMsg) {
 
     var result = {
@@ -40,70 +46,30 @@ define([
       'msg': null
     };
 
-    switch (previousMsg) {
+    if (broker.isPublishable('start-addnewcell')) {
 
-      case null:
+      // reqObj.floor will be active workspace
+      broker.publish(new Message('start-addnewcell', null));
 
-        // reqObj.floor will be active workspace
-        broker.publish(new Message('start-addnewcell', null));
+      result = {
+        'result': true,
+        'msg': 'start-addnewcell'
+      };
 
-        result = {
-          'result': true,
-          'msg': 'start-addnewcell'
-        };
-        break;
-
-      case 'start-addnewcell':
-
-        broker.publish(new Message('end-addnewcell', {
-          'id' : window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
-          'floor' : window.tmpObj.floor
-        }));
-
-        result.result = true;
-        result.msg = null;
-        break;
-
-      case 'addnewcell':
+    } else if (broker.isPublishable('end-addnewcell')) {
 
       broker.publish(new Message('end-addnewcell', {
-        'id' : window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
-        'floor' : window.tmpObj.floor
+        'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+        'floor': window.tmpObj.floor
       }));
 
       result.result = true;
       result.msg = null;
-      break;
 
-      default:
-        result.msg = "wrong previous state : " + previousMsg;
-        break;
-    }
+    } else {
 
-    return result;
+      result.msg = "wrong state transition : " + previousMsg + " to start-addnewcell, end-addnewcell.";
 
-  }
-
-  DrawEventHandler.prototype.clickFloorBtn = function(broker, previousMsg) {
-
-    var result = {
-      'result': false,
-      'msg': null
-    };
-
-    switch (previousMsg) {
-
-      case null:
-        broker.publish(new Message('addnewfloor', null));
-        result = {
-          'result': true,
-          'msg': null
-        };
-        break;
-
-      default:
-        result.msg = "wrong previous state : " + previousMsg;
-        break;
     }
 
     return result;
@@ -111,7 +77,37 @@ define([
   }
 
   /**
-   * @desc This will call when stage clicked, so we need to distinguish which geometry will be added new dot by the previous run message.
+   * @desc When floor btn clicked `addnewfloor` can publish.
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickFloorBtn = function(broker, previousMsg) {
+
+    var result = {
+      'result': false,
+      'msg': null
+    };
+
+    if (broker.isPublishable('addnewfloor')) {
+
+      broker.publish(new Message('addnewfloor', null));
+      result = {
+        'result': true,
+        'msg': null
+      };
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to addnewfloor.";
+
+    }
+
+    return result;
+
+  }
+
+  /**
+   * @desc This will call when stage clicked, so we need to distinguish which geometry will be added new dot by the previous run message.<br>This can publish `addnewcell`,
+   * @memberof DrawEventHandler
    */
   DrawEventHandler.prototype.addNewDot = function(broker, previousMsg, data) {
 
@@ -120,20 +116,12 @@ define([
       'msg': null
     };
 
-    console.log(data);
+    if (broker.isPublishable('addnewcell')) {
 
-    switch (previousMsg) {
-      case 'start-addnewcell':
+      var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
+      var isFirstClick = (window.tmpObj.floor == null);
 
-        if (data.currentTarget.attrs.id != window.tmpObj.floor && window.tmpObj.floor != null) {
-
-          result = {
-            'result': false,
-            'msg': 'you clicked different floor!'
-          };
-
-          break;
-        }
+      if (isFirstClick || (!isFirstClick && isSameFloor)) {
 
         broker.publish(new Message('addnewcell', {
           'floor': data.currentTarget.attrs.id
@@ -144,38 +132,15 @@ define([
           'msg': 'addnewcell'
         };
 
-        break;
+      } else if (!isFirstClick && !isSameFloor) {
 
-      case 'addnewcell':
+        result.msg = "you clicked different floor!";
 
-        if (data.currentTarget.attrs.id != window.tmpObj.floor) {
+      } else {
 
-          result = {
-            'result': false,
-            'msg': 'you clicked different floor!'
-          };
+        result.msg = "wrong state transition : " + previousMsg + " to addnewfloor.";
 
-          break;
-        }
-
-        broker.publish(new Message('addnewcell', {
-          'floor': data.currentTarget.attrs.id
-        }));
-
-        result = {
-          'result': true,
-          'msg': 'addnewcell'
-        };
-
-        break;
-
-      default:
-        result = {
-          'resutl': false,
-          'msg': 'no match function !'
-        };
-
-        break;
+      }
 
 
     }

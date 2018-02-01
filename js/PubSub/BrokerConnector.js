@@ -19,7 +19,8 @@ define([
 ) {
 
   /**
-   * @exports BrokerConnector
+   * @desc
+   * @class BrokerConnector
    */
   function BrokerConnector(_broker) {
 

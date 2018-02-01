@@ -4,10 +4,12 @@
 
 define([
   "./Manager.js",
-  "../Storage/Canvas/Object/Cell.js"
+  "../Storage/Canvas/Object/Cell.js",
+  "../Storage/Geometries/CellGeometry.js"
 ],function(
   Manager,
-  Cell
+  Cell,
+  CellGeometry
 ) {
   'use strict';
 
@@ -18,8 +20,6 @@ define([
   function GeometryManager() {
 
     Manager.apply(this, arguments);
-
-    var currentObj = null;
 
     this.init();
   }
@@ -34,47 +34,14 @@ define([
     this.name = 'GeometryManager';
 
     this.addReq({
-      'start-geotest' : 'cycle',
-      'geotest' : 'cycle',
-      'end-geotest' : 'cycle',
-      'singletest' : 'single',
-      'start-addnewcell' : 'cycle',
-      'addnewcell' : 'cycle',
-      'end-addnewcell' : 'cycle'
+      'start-addnewcell' : null,
+      'addnewcell' : null,
+      'end-addnewcell' : null
     });
 
-    this.addCallbackFun('start-geotest', this.startGeotest );
-    this.addCallbackFun('geotest', this.geotest );
-    this.addCallbackFun('end-geotest', this.endGeotest );
-    this.addCallbackFun('singletest', this.singletest );
     this.addCallbackFun('start-addnewcell', this.startAddNewCell );
     this.addCallbackFun('addnewcell', this.addNewCell );
     this.addCallbackFun('end-addnewcell', this.endAddNewCell );
-
-  }
-
-
-  GeometryManager.prototype.startGeotest = function(reqObj, storage){
-
-    console.log("startGeotest success", storage);
-
-  }
-
-  GeometryManager.prototype.geotest = function(reqObj, storage){
-
-    console.log("geotest success", storage);
-
-  }
-
-  GeometryManager.prototype.endGeotest = function(reqObj, storage){
-
-    console.log("endGeotest success", storage);
-
-  }
-
-  GeometryManager.prototype.singletest = function(reqObj, storage){
-
-    console.log("singletest success", storage);
 
   }
 
@@ -118,10 +85,8 @@ define([
    */
   GeometryManager.prototype.endAddNewCell = function(reqObj){
 
-    // destroy tmpGroup children
     var tmpObj = window.tmpObj;
     window.tmpObj = null;
-    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.destroyChildren();
 
     tmpObj.id = reqObj.id;
     tmpObj.name = reqObj.id;
@@ -129,11 +94,23 @@ define([
     // add cell using tmpObj
     window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.addNewCell(tmpObj);
 
+    // destroy tmpGroup children
+    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.destroyChildren();
+
+    // set corner to invisible
+    var obj = window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.cells[window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.cells.length - 1];
+    obj.corners.visible(false);
+
+    // redraw cellLayer
     window.storage.canvasContainer.stages[reqObj.floor].cellLayer.layer.draw();
+
+    //add cell data in geometry canvasContainer
+    window.storage.geometryContainer.cellGeometry.push(new CellGeometry(reqObj.id, obj.getPointsOfCorners()));
 
     // add state
 
   }
+
 
   return GeometryManager;
 });

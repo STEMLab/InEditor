@@ -66,7 +66,7 @@ define([], function() {
     propertiesDiv += "<tr><td class=\"title\">celing height</td><td class=\"value\"><input id=\"celing-height-text\" type=\"text\" value=" + floorProperty.celingHeight + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">door height</td><td class=\"value\"><input id=\"door-height-text\" type=\"text\" value=" + floorProperty.doorHeight + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">description</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + floorProperty.description + "</textarea></td></tr>";
-    propertiesDiv += "</table>";
+    propertiesDiv += "</table><br>";
     propertiesDiv += "<tr><td><button id=\"property-subimt-btn\">submit</button></td></tr></table>";
 
     var divs = {
@@ -96,11 +96,11 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=\"floor\">";
+    var propertiesDiv = "<table id=\"property-table\" type=\"cell\">";
     propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">description</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">description </textarea></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" value=" + property.duality + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">description</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\"></textarea></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">external ref</td><td class=\"value\"><select id=\"externalRef-text\" style=\"width: 100%;\">";
 
     for (var key in property.externalReference) {
@@ -114,16 +114,16 @@ define([], function() {
 
     for (var key in property.partialboundedBy) {
       var value = property.partialboundedBy[key];
-      propertiesDiv += "<option value=\"" + value + "\">" + value + "</option>";
+      propertiesDiv += "<option value=\"" + value + "\"></option>";
     }
 
-    propertiesDiv += "</table>";
+    propertiesDiv += "</table><br>";
     propertiesDiv += "<tr><td><button id=\"property-subimt-btn\">submit</button></td></tr></table>";
 
-    var refDiv = "<table>";
-    refDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"ref-text\" type=\"text\" value=\"\"></td></tr>";
-    refDiv += "</table>";
-    refDiv += "<tr><td><button id=\"property-subimt-btn\">submit</button></td></tr></table>";
+    var refDiv = "<table id =\"property-ref-table\" type=\"ref\">";
+    refDiv += "<tr><td class=\"title\">ref</td><td class=\"value\"><input id=\"ref-text\" type=\"text\" value=\"\"></td></tr>";
+    refDiv += "</table><br>";
+    refDiv += "<tr><td><button id=\"property-ref-subimt-btn\">submit</button></td></tr></table>";
 
     var divs = {
       "properties": propertiesDiv,
@@ -139,9 +139,13 @@ define([], function() {
     propertyLayout.init();
 
     // event binding
-    // document.getElementById('floorplan-file').addEventListener('change', function(event) {
-    //   window.eventHandler.callHandler('file', event);
-    // });
+    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
+      window.eventHandler.callHandler('html', event);
+    });
+
+    document.getElementById('property-ref-subimt-btn').addEventListener('click', function(event) {
+      window.eventHandler.callHandler('html', event);
+    });
   }
 
 
@@ -363,9 +367,14 @@ define([], function() {
     divContent += "<tr><td class=\"title\">date</td><td class=\"value\"><input id=\"date-text\" type=\"text\" value=" + projectProperty.date + " disabled></td></tr>";
     divContent += "<tr><td class=\"title\">author</td><td class=\"value\"><input id=\"author-text\" type=\"text\" value=" + projectProperty.author + " ></td></tr>";
     divContent += "<tr><td class=\"title\">description</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + projectProperty.description + "</textarea></td></tr>";
-    divContent += "<tr><td><button id=\"property-subimt-btn\">submit</button></td></tr></table>";
+    divContent += "<br><tr><td><button id=\"property-subimt-btn\">submit</button></td></tr></table>";
 
     this.setView(config, divContent);
+
+    // event binding
+    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
+      window.eventHandler.callHandler('html', event);
+    });
 
   }
 

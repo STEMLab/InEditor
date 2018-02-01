@@ -32,25 +32,26 @@ define([
     this.name = 'UIManager';
 
     this.addReq({
-      'setpropertyview': 'single',
-      'updateproperty': 'single',
-      'zoomworkspace': 'single',
-      'setworkspaceview': 'single',
-      'addfloorplan': 'single',
-      'start-addnewcell': 'cycle',
-      'addnewcell': 'cycle',
-      'end-addnewcell': 'cycle'
+      'setpropertyview' : null,
+      'updateproperty' : null,
+      'zoomworkspace' : null,
+      'addfloorplan' : null,
+      'start-addnewcell' : null,
+      'addnewcell' : null,
+      'end-addnewcell' : null,
+      'updaterefdata' : null
     });
 
     this.addCallbackFun('setpropertyview', this.setPropertyView);
     this.addCallbackFun('updateproperty', this.updateProperty);
     this.addCallbackFun('zoomworkspace', this.zoomWorkspace);
-    this.addCallbackFun('setworkspaceview', this.setWorkspaceView);
     this.addCallbackFun('addfloorplan', this.addFloorPlan);
 
     this.addCallbackFun('start-addnewcell', this.startAddNewCell);
     this.addCallbackFun('addnewcell', this.addNewCell);
     this.addCallbackFun('end-addnewcell', this.endAddNewCell);
+
+    this.addCallbackFun('updaterefdata', this.updateRefProperty);
   }
 
   UIManager.prototype.test = function(reqObj) {
@@ -98,16 +99,6 @@ define([
 
 
   /**
-   * Converts the active tab of the workspace to the selected floor.
-   * @memberof UIManager
-   * @param {Message.reqObj} reqObj id : floor id
-   */
-  UIManager.prototype.setWorkspaceView = function(reqObj) {
-
-  }
-
-
-  /**
    * @memberof UIManager
    * @param {Message.reqObj} reqObj id : floor id,  img : file
    */
@@ -121,7 +112,7 @@ define([
 
         // success to save image
         console.log(">>> succeed in saving image");
-        console.log(JSON.parse(xhr.response));
+        // console.log(JSON.parse(xhr.response));
 
         /// set background
         var backgroundLayer = window.storage.canvasContainer.stages[reqObj.id].backgroundLayer.layer;
@@ -192,6 +183,23 @@ define([
 
     // refresh tree view
     window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
+
+  }
+
+
+  /**
+   * @memberof UIManager
+   * @param {Message.reqObj} reqObj type<br>id<br>updateContent: externalRef
+   */
+  UIManager.prototype.updateRefProperty = function(reqObj) {
+
+    // $('externalRef-text').append("<option value=" + reqObj.updateContent.externalRef + "></option>");
+
+    var option = document.createElement("option");
+    option.text = reqObj.updateContent.externalRef;
+    option.value = reqObj.updateContent.externalRef;
+    var select = document.getElementById("externalRef-text");
+    select.appendChild(option);
 
   }
 

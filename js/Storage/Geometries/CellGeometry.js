@@ -1,18 +1,15 @@
 define([
-  "../../Observer/Observer.js"
 ], function(
   Observer
 ) {
   'use strict';
 
-  function CellGeometry() {
-    Observer.apply(this, arguments);
+  function CellGeometry(_id, _points) {
 
-    this.id;
-    this.points = [];
+    this.id = _id;
+    this.points = _points;
+
   }
-
-  CellGeometry.prototype = Object.create(Observer.prototype);
 
   return CellGeometry;
 });

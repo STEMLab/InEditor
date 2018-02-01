@@ -12,10 +12,10 @@ define([
   'use strict';
 
   function GeometryContainer() {
-    this.cellGeometry = new CellGeometry();
-    this.cellBoundaryGeometry = new CellBoundaryGeometry();
-    this.stateGeometry = new StateGeometry();
-    this.transitionGeometry = new TransitionGeometry();
+    this.cellGeometry = [];
+    this.cellBoundaryGeometry = [];
+    this.stateGeometry = [];
+    this.transitionGeometry = [];
   }
 
   GeometryContainer.prototype.show = function(){
@@ -23,7 +23,7 @@ define([
   }
 
   GeometryContainer.prototype.getElementById = function(){
-    
+
   }
 
   return GeometryContainer;

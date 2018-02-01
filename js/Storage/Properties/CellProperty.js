@@ -5,7 +5,7 @@ define([],function() {
     this.id = _id;
     this.name = _id;
     this.description = "";
-    this.duality;
+    this.duality = "";
     this.externalReference = [];
     this.partialboundedBy = [];
   }

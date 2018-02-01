@@ -14,7 +14,6 @@ define([],function() {
 
   ProjectEventHandler.prototype.setHandlerBinder = function(handlerBinder){
 
-    // handlerBinder['cell-btn'] = {'click' : this.startAddNewCell };
 
   }
 
