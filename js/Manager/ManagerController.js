@@ -10,7 +10,7 @@ define([
   'use strict';
 
   /**
-  * @deprecated
+  * @deprecated manager no more controlled by this module.
   */
   function ManagerController() {
 

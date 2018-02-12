@@ -4,10 +4,12 @@
 
 define([
   "./BrokerConnector.js",
-  "./MessageSpec.js"
+  "./MessageSpec.js",
+  "../History/History.js"
 ], function(
   BrokerConnector,
-  MessageSpec
+  MessageSpec,
+  History
 ) {
   'use strict';
 
@@ -15,7 +17,7 @@ define([
    * @desc Broker for pub-sub model. The difference from typical Broker is that this maintains message which just published before. The resason for this is descried in {@link Message}.
    * @class Broker
    */
-  function Broker() {
+  function Broker(storage) {
 
     /**
      * @desc This table stores subscribers who are subscribing to each topic.<br>Key is `message.req` and value is a subscriber object array.
@@ -32,12 +34,13 @@ define([
     /**
      * @memberof Broker
      */
-    this.brokerConnector = new BrokerConnector(this);
+    this.brokerConnector = new BrokerConnector(this, storage);
 
     /**
      * @memberof Broker
      */
     this.reqSpecList = {};
+
 
     this.addReqs();
 
@@ -73,12 +76,16 @@ define([
    */
   Broker.prototype.publish = function(_message) {
 
-    console.log(">> " + _message.req + " published");
+    log.info(_message.req + " published");
 
     if (this.topic == null) {
+
       window.broker.publishMsg(window.broker.topic, _message);
+
     } else {
+
       this.publishMsg(this.topic, _message);
+
     }
 
   }
@@ -90,10 +97,10 @@ define([
 
     var _topic = _message.req;
     var subscriber = _path[_topic];
+    var uuid = window.conditions.guid();
 
     for (var i = 0; i < subscriber.length; i++) {
-
-      _path[_topic][i].run(_message);
+      _path[_topic][i].run(_message, uuid);
 
     }
 
@@ -104,15 +111,16 @@ define([
    */
   Broker.prototype.addReqs = function() {
 
-    this.reqSpecList['addnewfloor'] = new MessageSpec('single', 'including', null);
-    this.reqSpecList['updateproperty'] = new MessageSpec('single', 'including', null);
-    this.reqSpecList['setpropertyview'] = new MessageSpec('single', 'including', null);
-    this.reqSpecList['zoomworkspace'] = new MessageSpec('single', 'including', ['draw']);
-    this.reqSpecList['addfloorplan'] = new MessageSpec('single', 'including', null);
-    this.reqSpecList['start-addnewcell'] = new MessageSpec('cycle', 'including', ['draw']);
-    this.reqSpecList['addnewcell'] = new MessageSpec('cycle', 'including', ['draw']);
-    this.reqSpecList['end-addnewcell'] = new MessageSpec('cycle', 'including', ['draw']);
-    this.reqSpecList['updaterefdata'] = new MessageSpec('single', 'including', null);
+    this.reqSpecList['addnewfloor'] = new MessageSpec('single', 'including', null, true);
+    this.reqSpecList['updateproperty'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['setpropertyview'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['zoomworkspace'] = new MessageSpec('single', 'including', ['draw'], false);
+    this.reqSpecList['addfloorplan'] = new MessageSpec('single', 'including', null, true);
+    this.reqSpecList['start-addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['end-addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['updaterefdata'] = new MessageSpec('single', 'including', null,false);
+    this.reqSpecList['activateworkspace'] = new MessageSpec('single', 'excluding', ['draw'], false);
 
   }
 
@@ -127,12 +135,12 @@ define([
     var previousSpec = this.reqSpecList[this.previousMsg];
     var result = false;
 
-    if (this.previousMsg == null) {
+    if (this.reqSpecList[req] == null) {
 
-      // If there is no message which published before, can publish any message.
-      result = true;
+      log.warn("no math reqSpecList with " + req);
+      result = false;
 
-    } else if (previousSpec.cycle == 'single') {
+    } else if (previousSpec != null && previousSpec.cycle == 'single') {
 
       // If ths cycle of previous published message is `single`, can publish any message.
       // Actually, single type cycle message didn't save in Broker.previousMsg and Broker.previousMsg setted null.
@@ -140,67 +148,88 @@ define([
       // If you call this line in your code, check event handler that publish previousMsg.
       result = true;
 
-    } else if (previousSpec.cycle == 'cycle' && spec.cycle == 'single') {
+    } else if (spec.cycle == 'single') {
 
-      // If the cycle of previous published message is `cycle` and the cycle of req is 'single',
-      if (spec.including == 'including' && spec.codes.indexOf(previousSpec.codes) != -1) {
+      if (this.previousMsg == null) {
 
-        // If the including value of req is `including` and codes of spec includes code of previousMsg, can publish req.
+        // If there is no message which published before, can publish any message.
         result = true;
 
-      } else if (spec.including == 'excluding' && spec.codes.indexOf(previousSpec.codes) == -1) {
+      } else if (previousSpec.cycle == 'cycle') {
 
-        // If the including value of req is `excluding` and codes of spec not includes code of previousMsg, can publish req.
-        result = true;
+        // If the cycle of previous published message is `cycle` and the cycle of req is 'single',
+        if (spec.including == 'including' && spec.codes.indexOf(previousSpec.codes[0]) != -1) {
 
+          // If the including value of req is `including` and codes of spec includes code of previousMsg, can publish req.
+          result = true;
+
+        } else if (spec.including == 'excluding' && spec.codes.indexOf(previousSpec.codes[0]) == -1) {
+
+          // If the including value of req is `excluding` and codes of spec not includes code of previousMsg, can publish req.
+          result = true;
+
+        }
       }
-    } else if (previousSpec.cycle == 'cycle' && spec.cycle == 'cycle') {
+
+    } else if (spec.cycle == 'cycle') {
 
       // If the cycle of previous published message is `cycle` and the cycle of req is 'cycle',
       // only the message which included in same cycle can publish.
       var splitReq = req.split("-");
-      var splitPreReq = this.previousMsg.split("-");
+      var splitPreReq = null;
 
-      if (splitPreReq.length == 2 && splitReq.length == 2) {
+      if(this.previousMsg != null) splitPreReq = this.previousMsg.split("-");
 
-        // start-somemsg -> end-somemsg
-        if (splitReq[0] == 'start' && splitPreReq[0] == 'end' && splitPreReq[1] == splitReq[1]) {
+      if (this.previousMsg == null && splitReq[0] == 'start') {
 
-          result = true;
+        result = true;
 
-        }
+      } else if (this.previousMsg != null && previousSpec.cycle == 'cycle') {
 
-      } else if (splitPreReq.length == 2 && splitReq.length == 1) {
+        if (splitPreReq.length == 2 && splitReq.length == 2) {
 
-        // start-somemsg -> somemsg
-        if (splitPreReq[0] == 'start' && splitPreReq[1] == splitReq[0]) {
+          // start-somemsg -> end-somemsg
+          if (splitReq[0] == 'start' && splitPreReq[0] == 'end' && splitPreReq[1] == splitReq[1]) {
 
-          result = true;
+            result = true;
 
-        }
+          }
 
-      } else if (splitPreReq.length == 1 && splitReq.length == 1) {
+        } else if (splitPreReq.length == 2 && splitReq.length == 1) {
 
-        // somemsg -> somemsg
-        if (splitPreReq[0] == splitReq[0]) {
+          // start-somemsg -> somemsg
+          if (splitPreReq[0] == 'start' && splitPreReq[1] == splitReq[0]) {
 
-          result = true;
+            result = true;
 
-        }
+          }
 
-      } else if (splitPreReq.length == 1 && splitReq.length == 2) {
+        } else if (splitPreReq.length == 1 && splitReq.length == 1) {
 
-        // somemsg -> end-somemsg
-        if (splitReq[0] == 'end' && splitPreReq[0] == splitReq[1]) {
+          // somemsg -> somemsg
+          if (splitPreReq[0] == splitReq[0]) {
 
-          result = true;
+            result = true;
+
+          }
+
+        } else if (splitPreReq.length == 1 && splitReq.length == 2) {
+
+          // somemsg -> end-somemsg
+          if (splitReq[0] == 'end' && splitPreReq[0] == splitReq[1]) {
+
+            result = true;
+
+          }
 
         }
 
       }
 
-
     }
+
+
+
 
     return result;
 

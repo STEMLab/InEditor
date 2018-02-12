@@ -3,9 +3,11 @@
  */
 
 define([
-  "../PubSub/Message.js"
+  "../PubSub/Message.js",
+  "../PubSub/Result.js"
 ], function(
-  Message
+  Message,
+  Result
 ) {
   'use strict';
 
@@ -45,6 +47,8 @@ define([
       'result': false,
       'msg': null
     };
+
+    var result = new Result();
 
     if (broker.isPublishable('start-addnewcell')) {
 
@@ -95,6 +99,7 @@ define([
         'msg': null
       };
 
+
     } else {
 
       result.msg = "wrong state transition : " + previousMsg + " to addnewfloor.";
@@ -127,10 +132,9 @@ define([
           'floor': data.currentTarget.attrs.id
         }));
 
-        result = {
-          'result': true,
-          'msg': 'addnewcell'
-        };
+        result.result = true;
+        result.msg = 'addnewcell';
+
 
       } else if (!isFirstClick && !isSameFloor) {
 
@@ -142,6 +146,10 @@ define([
 
       }
 
+
+    } else {
+
+      result.msg = "no match function.";
 
     }
 

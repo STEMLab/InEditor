@@ -2,7 +2,11 @@
  * @author suheeeee <lalune1120@hotmaile.com>
  */
 
-define([], function() {
+define([
+  "./RequestFunctions.js"
+], function(
+  RequestFunctions
+) {
   'use strict';
 
   /**
@@ -13,6 +17,7 @@ define([], function() {
 
     // thanks for brokerConnector, subscriber don't need to maintains subscribe function and broker.
     // this.broker =_broker;
+
     this.name;
 
     /**
@@ -28,15 +33,27 @@ define([], function() {
   //
   // }
 
-  Subscriber.prototype.run = function(_message) {
+  Subscriber.prototype.run = function(_message, uuid) {
 
-    this.callbackFunctions[_message.req](_message.reqObj, window.storage);
+    if( this.callbackFunctions[_message.req].undo != undefined ){
+
+      window.myhistory.push(
+        uuid,
+        this.name,
+        _message.req, this.callbackFunctions[_message.req].createHistoryObjData(_message.reqObj, uuid, this.name),
+        this.callbackFunctions[_message.req].undo
+      );
+
+    }
+
+    this.callbackFunctions[_message.req].run(_message.reqObj, window.storage);
 
   }
 
-  Subscriber.prototype.addCallbackFun = function(req, callback){
+  Subscriber.prototype.addCallbackFun = function(req, publish, createHistoryObjData, undo){
 
-    this.callbackFunctions[req] = callback;
+    // this.callbackFunctions[req] = callback;
+    this.callbackFunctions[req] = new RequestFunctions(publish, createHistoryObjData, undo);
 
   }
 

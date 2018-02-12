@@ -3,32 +3,28 @@
 */
 
 define([
-  "./Manager.js"
+  "../PubSub/Subscriber.js"
 ],function(
-  Manager
+  Subscriber
 ) {
   'use strict';
 
   /**
-  * @exports Manager/ProjectManager
-  */
+   * @class ProjectManager
+   * @augments Subscriber
+   */
   function ProjectManager() {
 
-    Manager.apply(this, arguments);
+    Subscriber.apply(this, arguments);
 
     this.init();
   }
 
-  ProjectManager.prototype = Object.create(Manager.prototype);
+  ProjectManager.prototype = Object.create(Subscriber.prototype);
 
   ProjectManager.prototype.init = function(){
 
     this.name = 'ProjectManager';
-
-    this.addReq({
-
-    });
-
 
 
 

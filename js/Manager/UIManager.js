@@ -3,62 +3,50 @@
  */
 
 define([
-  "./Manager.js"
+  "../Storage/Canvas/Stage.js",
+  "../PubSub/Subscriber.js"
 ], function(
-  Manager
+  Stage,
+  Subscriber
 ) {
   'use strict';
 
   /**
    * @desc Changes in the UI.
    * @class UIManager
-   * @augments Manager
+   * @augments Subscriber
    */
   function UIManager() {
 
-    Manager.apply(this, arguments);
+    Subscriber.apply(this, arguments);
 
     this.init();
   }
 
-  UIManager.prototype = Object.create(Manager.prototype);
+  UIManager.prototype = Object.create(Subscriber.prototype);
 
   /**
    * @memberof UIManager
-   * @override
    */
   UIManager.prototype.init = function() {
 
     this.name = 'UIManager';
 
-    this.addReq({
-      'setpropertyview' : null,
-      'updateproperty' : null,
-      'zoomworkspace' : null,
-      'addfloorplan' : null,
-      'start-addnewcell' : null,
-      'addnewcell' : null,
-      'end-addnewcell' : null,
-      'updaterefdata' : null
-    });
-
     this.addCallbackFun('setpropertyview', this.setPropertyView);
     this.addCallbackFun('updateproperty', this.updateProperty);
     this.addCallbackFun('zoomworkspace', this.zoomWorkspace);
-    this.addCallbackFun('addfloorplan', this.addFloorPlan);
+    this.addCallbackFun('addfloorplan', this.addFloorPlan, this.addFloorPlan_makeHistoryObj, this.addFloorPlan_undo);
+
+    this.addCallbackFun('addnewfloor', this.addNewFloor);
 
     this.addCallbackFun('start-addnewcell', this.startAddNewCell);
-    this.addCallbackFun('addnewcell', this.addNewCell);
     this.addCallbackFun('end-addnewcell', this.endAddNewCell);
 
     this.addCallbackFun('updaterefdata', this.updateRefProperty);
+
+    this.addCallbackFun('activateworkspace', this.activateWorkspace);
   }
 
-  UIManager.prototype.test = function(reqObj) {
-
-    console.log("ui-manager test success");
-
-  }
 
   /**
    * @desc Change title of node in tree view which representing reqObj.id
@@ -104,6 +92,8 @@ define([
    */
   UIManager.prototype.addFloorPlan = function(reqObj) {
 
+    if(reqObj.img == null ) window.myhistory.undo();
+
     // save image to assets > floorplan
     var xhr = new XMLHttpRequest();
     var formData = new FormData();
@@ -111,18 +101,19 @@ define([
       if (xhr.readyState === 4 && xhr.status == 200) {
 
         // success to save image
-        console.log(">>> succeed in saving image");
+        log.info(">>> succeed in saving image");
         // console.log(JSON.parse(xhr.response));
 
         /// set background
         var backgroundLayer = window.storage.canvasContainer.stages[reqObj.id].backgroundLayer.layer;
 
         // clear layer before add new floorplan
-        backgroundLayer.clear();
+        backgroundLayer.destroyChildren();
 
         var imageObj = new Image();
-        imageObj.onload = function() {
 
+        imageObj.onload = function() {
+          // log.info("on load called...");
           var floorplan = new Konva.Image({
             x: 0,
             y: 0,
@@ -136,14 +127,131 @@ define([
           backgroundLayer.draw();
 
         };
-        imageObj.src = JSON.parse(xhr.response);
+
+        // window.open(JSON.parse(xhr.response));
+        var timestamp = new Date().getTime();
+        imageObj.src = JSON.parse(xhr.response)+"?"+timestamp;
       }
+
     }
 
     xhr.open("POST", "http://127.0.0.1:8080/floorplan-upload", true);
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     formData.append("files", reqObj.img, reqObj.id);
     xhr.send(formData);
+  }
+
+  /**
+   * @memberof UIManager
+   * @desc Create HistoryObj.obj for 'addfloorplan'.
+   * @param {Message.reqObj} reqObj id : floor id,  img : file
+   * @param {String} uuid
+   */
+  UIManager.prototype.addFloorPlan_makeHistoryObj = function(reqObj, uuid, manager) {
+
+    // log.info(window.storage.canvasContainer.stages[reqObj.id].backgroundLayer.layer);
+
+    // If there is no existing floorplan, null is returned.
+    if (window.storage.canvasContainer.stages[reqObj.id].backgroundLayer.layer.children.length == 0) {
+
+      return {
+        'floor': reqObj.id,
+      };
+
+    }
+
+    var obj = new Object();
+    // save image to assets > floorplan
+    var xhr = new XMLHttpRequest();
+    var filename = null;
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status == 200) {
+
+        window.myhistory.pushHistoryObj(uuid, manager, { 'floor' : reqObj.id, 'filename' : JSON.parse(xhr.response).result});
+        // log.info(">>> succeed save copy image : " + JSON.parse(xhr.response).result);
+
+      }
+    }
+
+    xhr.open("POST", "http://127.0.0.1:8080/floorplan-create-historyobj", true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(JSON.stringify({
+      id: reqObj.id
+    }));
+
+    return {
+      'floor': reqObj.id,
+      'filename': filename
+    };
+
+  }
+
+  UIManager.prototype.addFloorPlan_undo = function(obj) {
+
+    var condition = {};
+    // log.info(obj);
+
+    if (obj.filename == null) {
+
+      window.storage.canvasContainer.stages[obj.floor].backgroundLayer.layer.destroyChildren();
+      window.storage.canvasContainer.stages[obj.floor].backgroundLayer.layer.draw();
+      condition['mode'] = "delete only";
+      condition['floor'] = obj.floor;
+
+      log.info(">>>>> addFloorPlan_undo");
+
+    } else {
+
+      condition['mode'] = "delete and rename";
+      condition['floor'] = obj.floor;
+      condition['filename'] = obj.filename;
+
+    }
+
+    var xhr = new XMLHttpRequest();
+    var filename = null;
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status == 200) {
+
+        if (condition.mode == "delete and rename") {
+
+          /// set background
+          var backgroundLayer = window.storage.canvasContainer.stages[obj.floor].backgroundLayer.layer;
+
+          // clear layer before add new floorplan
+          backgroundLayer.destroyChildren();
+
+          var imageObj = new Image();
+
+          imageObj.onload = function() {
+            // log.info("on load called...");
+            var floorplan = new Konva.Image({
+              x: 0,
+              y: 0,
+              image: imageObj,
+              width: window.storage.canvasContainer.stages[obj.floor].stage.attrs.width,
+              height: window.storage.canvasContainer.stages[obj.floor].stage.attrs.height
+            });
+
+            // add the shape to the layer
+            backgroundLayer.add(floorplan);
+            backgroundLayer.draw();
+
+          }
+          var timestamp = new Date().getTime();
+          imageObj.src = JSON.parse(xhr.response).filename+"?"+timestamp;
+
+          log.info(">>>>> addFloorPlan_undo : " + JSON.parse(xhr.response).result);
+        }
+
+      }
+    }
+
+    // log.info(">>>>> send : ", condition);
+    xhr.open("POST", "http://127.0.0.1:8080/floorplan-undo", true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(JSON.stringify(condition));
+
   }
 
 
@@ -200,6 +308,47 @@ define([
     option.value = reqObj.updateContent.externalRef;
     var select = document.getElementById("externalRef-text");
     select.appendChild(option);
+
+  }
+
+  /**
+   * @memberof UIManager
+   * @param {Message.reqObj} reqObj null
+   */
+  UIManager.prototype.addNewFloor = function(reqObj) {
+
+    var newFloorProperty = window.storage.propertyContainer.floorProperties[window.storage.propertyContainer.floorProperties.length - 1];
+
+    // add new workspace
+    window.uiContainer.workspace.addNewWorkspace(newFloorProperty.id, newFloorProperty.name);
+
+    // add new stage
+    window.storage.canvasContainer.stages[newFloorProperty.id] = new Stage(
+      newFloorProperty.id,
+      newFloorProperty.name,
+      newFloorProperty.id,
+      document.getElementById(newFloorProperty.id).clientWidth,
+      document.getElementById(newFloorProperty.id).clientHeight
+    );
+
+    // bind stage click event
+    window.eventHandler.stageEventBind('stage', newFloorProperty.id);
+
+    // refresh sidebar > tree-view
+    window.uiContainer.sidebar.treeview.addFloor(newFloorProperty);
+
+    // refresh sidebar > property-view
+    window.uiContainer.sidebar.property.setPropertyTab('floor', newFloorProperty.id, window.storage);
+
+  }
+
+  /**
+   * @memberof UIManager
+   * @param {Message.reqObj} reqObj id : floor id
+   */
+  UIManager.prototype.activateWorkspace = function(reqObj) {
+
+    window.uiContainer.workspace.activateWorkspace(reqObj.id);
 
   }
 

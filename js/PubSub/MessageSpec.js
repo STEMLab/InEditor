@@ -8,7 +8,7 @@ define([], function() {
   /**
    * @class MessageSpec
    */
-  function MessageSpec(_cycle, _including, _codes) {
+  function MessageSpec(_cycle, _including, _codes, _saveable) {
 
     /**
     * @desc `sigle` or `cycle`.
@@ -23,6 +23,8 @@ define([], function() {
     this.including = _including;
 
     this.codes = _codes;
+
+    this.saveable = _saveable;
 
   }
 

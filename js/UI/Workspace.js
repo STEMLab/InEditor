@@ -6,7 +6,7 @@ define([], function() {
   'use strict';
 
   /**
-   * @exports Workspace
+   * @class Workspace
    */
   function Workspace() {
 
@@ -14,6 +14,9 @@ define([], function() {
 
   }
 
+  /**
+  * @memberof Workspace
+  */
   Workspace.prototype.init = function(){
 
     // init
@@ -39,6 +42,9 @@ define([], function() {
 
   }
 
+  /**
+  * @memberof Workspace
+  */
   Workspace.prototype.addNewWorkspace = function(_id, _name) {
 
     var newItemConfig = {
@@ -62,6 +68,27 @@ define([], function() {
     });
 
   }
+
+  /**
+  * @memberof Workspace
+  * @param {String} id floor id
+  */
+  Workspace.prototype.activateWorkspace = function(id){
+
+    var tabs = window.uiContainer.workspace.workspaceLayout.root.contentItems[0].header.tabs;
+
+    var index = 0;
+    while( tabs[index].contentItem.config.title != id){
+
+      index++;
+
+    }
+    window.uiContainer.workspace.workspaceLayout.root.contentItems[0].setActiveContentItem(window.uiContainer.workspace.workspaceLayout.root.contentItems[0].contentItems[index]);
+    window.uiContainer.workspace.workspaceLayout.root.contentItems[0].header.setActiveContentItem(tabs[index].contentItem);
+
+  }
+
+
 
   return Workspace;
 

@@ -34,6 +34,7 @@ define([
     this.add();
     this.setHandlerBinder();
     this.btnEvnetBind();
+    this.keyEventBind();
 
   }
 
@@ -110,6 +111,17 @@ define([
     }
   }
 
+  EventHandler.prototype.keyEventBind = function() {
+
+    $(window).keypress(function(event) {
+
+      if(event.keyCode == 26 && event.ctrlKey){
+        window.myhistory.undo();
+      }
+    });
+
+  }
+
 
   /**
    * @memberof EventHandler
@@ -168,7 +180,7 @@ define([
 
     }
 
-    var result = this.handlerBinder[target][type](window.broker, window.broker.previousMsg, data);
+    var result = this.handlerBinder[target][type](window.broker, window.myhistory.getPreviousMsg(), data);
 
     if (result.result) {
 
@@ -176,7 +188,7 @@ define([
 
     } else {
 
-      console.log("error! " + result.msg);
+      log.error(result.msg);
 
     }
 

@@ -18,7 +18,7 @@ define([], function() {
    * @param {Storage} storage
    */
   Property.prototype.setPropertyTab = function(type, id, storage) {
-    console.log(">>> set property tab :", type, id);
+    log.info("> set property tab :", type, id);
 
     if (type == "floor") this.setFloorProperty(id, storage);
     else if (type == "cell") this.setCellProperty(id, storage);
@@ -167,19 +167,19 @@ define([], function() {
         content: [{
             type: 'component',
             componentName: 'property-component',
-            title: 'canvas',
+            title: 'properties',
             isClosable: false,
             componentState: {
-              id: 'cavas'
+              id: 'properties'
             }
           },
           {
             type: 'component',
             componentName: 'property-component',
-            title: 'properties',
+            title: 'cavas',
             isClosable: false,
             componentState: {
-              id: 'properties'
+              id: 'cavas'
             }
           }
         ]

@@ -13,18 +13,20 @@ require([
   "./js/EventHandler/EventHandler.js",
   "./js/Manager/ManagerController.js",
   "./js/PubSub/Broker.js",
-  "./js/Conditions.js"
+  "./js/Conditions.js",
+  "./js/History/History.js"
 ], function(
   UIContainer,
   Storage,
   EventHandler,
   ManagerController,
   Broker,
-  Conditions
+  Conditions,
+  History
 ) {
   'use strict';
 
-  console.log("main called");
+  log.enableAll();
 
   var conditions = new Conditions();
   window.conditions = conditions;
@@ -35,7 +37,7 @@ require([
   var storage = new Storage();
   window.storage = storage;
 
-  var broker = new Broker();
+  var broker = new Broker(storage);
   window.broker = broker;
 
   uiContainer.sidebar.treeview.init();
@@ -43,5 +45,8 @@ require([
 
   var eventHandler = new EventHandler(broker);
   window.eventHandler = eventHandler;
+
+  var myhistory = new History();
+  window.myhistory = myhistory;
 
 });

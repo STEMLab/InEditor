@@ -61,6 +61,8 @@ define([
           'storage': window.storage
         }));
 
+        result.result = true;
+
       }
 
     } else if (broker.isPublishable('setpropertyview')) {

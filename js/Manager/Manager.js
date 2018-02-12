@@ -17,7 +17,8 @@ define([
     Subscriber.apply(this, arguments);
 
     /**
-    *  requests
+    * requests
+    * @deprecated
     */
     this.reqs = {};
 
@@ -29,7 +30,10 @@ define([
 
   }
 
-
+  /**
+  * requests
+  * @deprecated
+  */
   Manager.prototype.addReq = function(obj){
 
     this.reqs = obj;

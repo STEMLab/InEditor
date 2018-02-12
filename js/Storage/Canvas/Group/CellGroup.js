@@ -51,14 +51,21 @@ define([
    */
   CellGroup.prototype.copyCorner = function(obj, myobj) {
 
-    /********************************************************************************
-    ********************** 수정 ******************************************************
-    *********************************************************************************/
     var direction = 'counterclockwise';
 
+
     // Checks whether the object is drawn clockwise.
-    if (obj.children.length > 1 && obj.children[0].attrs.x < obj.children[1].attrs.x) {
-      direction = 'clockwise';
+    if (obj.children.length >= 3 ) {
+      var p = [obj.children[0].attrs.x, obj.children[0].attrs.y, 0];
+      var q = [obj.children[1].attrs.x, obj.children[1].attrs.y, 0];
+      var r = [obj.children[2].attrs.x, obj.children[2].attrs.y, 0];
+
+      var pq = [ q[0]-p[0], q[1]-p[1], 0];
+      var qr = [ r[0]-q[0], r[1]-q[1], 0];
+      var cross = [ pq[1]*qr[2] - pq[2]*qr[1], pq[2]*qr[0] - pq[0]*qr[2], pq[0]*qr[1] - pq[1]*qr[0]];
+
+      if( cross < 0 ) direction = 'clockwise';
+
     }
 
     var len = obj.children.length;

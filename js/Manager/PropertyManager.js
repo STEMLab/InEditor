@@ -3,45 +3,45 @@
  */
 
 define([
-  "./Manager.js",
   "../Storage/Properties/FloorProperty.js",
   "../Storage/Canvas/Stage.js",
-  "../Storage/Properties/CellProperty.js"
+  "../Storage/Properties/CellProperty.js",
+  "../PubSub/Subscriber.js"
 ], function(
-  Manager,
   FloorProperty,
   Stage,
-  CellProperty
+  CellProperty,
+  Subscriber
 ) {
   'use strict';
 
   /**
    * @class PropertyManager
-   * @augments Manager
+   * @augments Subscriber
    */
   function PropertyManager() {
 
-    Manager.apply(this, arguments);
+    Subscriber.apply(this, arguments);
 
     this.init();
 
   }
 
-  PropertyManager.prototype = Object.create(Manager.prototype);
+  PropertyManager.prototype = Object.create(Subscriber.prototype);
 
   /**
-   * @override
+   * @memberof PropertyManager
    */
   PropertyManager.prototype.init = function() {
 
     this.name = 'PropertyManager';
 
-    this.addReq({
-      'addnewfloor' : null,
-      'updateproperty' : null,
-      'end-addnewcell' : null,
-      'updaterefdata' : null
-    });
+    // this.addReq({
+    //   'addnewfloor' : null,
+    //   'updateproperty' : null,
+    //   'end-addnewcell' : null,
+    //   'updaterefdata' : null
+    // });
 
     this.addCallbackFun('addnewfloor', this.addNewFloor);
     this.addCallbackFun('updateproperty', this.updateProperty);
@@ -52,38 +52,14 @@ define([
 
   /**
    * @param {Message.reqObj} reqObj null
+   * @memberof PropertyManager
    */
   PropertyManager.prototype.addNewFloor = function(reqObj) {
-
-    /*********************************************************************************************
-     ******* move funciton after `add new property` to UIManager *********************************
-     *********************************************************************************************/
 
     var newFloorProperty = new FloorProperty();
 
     // add new property
     window.storage.propertyContainer.floorProperties.push(newFloorProperty);
-
-    // add new workspace
-    window.uiContainer.workspace.addNewWorkspace(newFloorProperty.id, newFloorProperty.name);
-
-    // add new stage
-    window.storage.canvasContainer.stages[newFloorProperty.id] = new Stage(
-      newFloorProperty.id,
-      newFloorProperty.name,
-      newFloorProperty.id,
-      document.getElementById(newFloorProperty.id).clientWidth,
-      document.getElementById(newFloorProperty.id).clientHeight
-    );
-
-    // bind stage click event
-    window.eventHandler.stageEventBind('stage', newFloorProperty.id);
-
-    // refresh sidebar > tree-view
-    window.uiContainer.sidebar.treeview.addFloor(newFloorProperty);
-
-    // refresh sidebar > property-view
-    window.uiContainer.sidebar.property.setPropertyTab('floor', newFloorProperty.id, window.storage);
 
   }
 
@@ -91,6 +67,7 @@ define([
 
   /**
    * @param {Message.reqObj} reqObj type, id, updateContent
+   * @memberof PropertyManager
    */
   PropertyManager.prototype.updateProperty = function(reqObj) {
 
@@ -138,6 +115,7 @@ define([
 
   /**
    * @param {Message.reqObj} reqObj type, id, updateContent
+   * @memberof PropertyManager
    */
   PropertyManager.prototype.updateRefProperty = function(reqObj) {
 

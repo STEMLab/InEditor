@@ -70,6 +70,12 @@ define([], function() {
     * @default 50
     */
     this.scaleMax = 50;
+
+    /**
+    * @default 10
+    */
+    this.maxHistoryLen = 10;
+    
   }
 
   Conditions.prototype.guid = function() {

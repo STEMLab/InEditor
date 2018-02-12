@@ -45,7 +45,8 @@ define([
       id: _id,
       draggable: true,
       dragBoundFunc: function(pos) {
-        if (window.storage.canvasContainer.stages[_id].stage.attrs.scaleX > 1) return window.storage.canvasContainer.stages[_id].zoomFun(_id, pos);
+        if (window.storage.canvasContainer.stages[_id].stage.attrs.scaleX > 1)
+        return window.storage.canvasContainer.stages[_id].zoomFun(_id, pos);
       }
     });
 
