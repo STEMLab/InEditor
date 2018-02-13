@@ -10,7 +10,7 @@ define([
   'use strict';
 
   /**
-  * @deprecated
+  * @deprecated manager no more controlled by this module.
   */
   function ManagerController() {
 
@@ -36,7 +36,7 @@ define([
   }
 
   /**
-  * @param message { 'request' : req-type, 'requestObj' : obj }
+  * @param message \{ 'request' \: req-type, 'requestObj' \: obj \}
   */
   ManagerController.prototype.run = function(message) {
 

@@ -1,3 +1,6 @@
+/**
+ * @author suheeeee <lalune1120@hotmaile.com>
+ */
 
 define([
   "../Manager/GeometryManager.js",
@@ -13,41 +16,104 @@ define([
   UIManager,
   uiContainer,
   Workspace
-){
+) {
 
-  function BrokerConnector(_broker){
+  /**
+   * @class BrokerConnector
+   */
+  function BrokerConnector(_broker) {
 
     this.broker = _broker;
-    this.fullSubscribe();
+    this.fullConnect();
 
   }
 
-  BrokerConnector.prototype.fullSubscribe = function(){
+  /**
+   * @memberof BrokerConnector
+   */
+  BrokerConnector.prototype.fullConnect = function(){
 
-    this.managerSubscribe(new GeometryManager());
-    this.managerSubscribe(new ProjectManager());
-    this.managerSubscribe(new PropertyManager());
-    this.managerSubscribe(new UIManager());
+    var managers = [
+      new GeometryManager(),
+      new ProjectManager(),
+      new PropertyManager(),
+      new UIManager()
+    ];
 
-    /********************************************************************************/
-    /****************************** subscribe ui later ******************************/
-    /********************************************************************************/
+    this.fullSubscribe(managers);
+    this.connectFullUndoFun(managers);
 
   }
 
-  BrokerConnector.prototype.managerSubscribe = function(_manager){
+  /**
+   * @memberof BrokerConnector
+   */
+  BrokerConnector.prototype.fullSubscribe = function(managers) {
 
-    for(var key in _manager.reqs ){
-      this.subscribe( key, _manager);
+    for(var key in managers){
+
+      this.managerSubscribe(managers[key]);
+
     }
 
   }
 
-  BrokerConnector.prototype.subscribe = function(_topic, _obj){
+  /**
+   * @memberof BrokerConnector
+   */
+  BrokerConnector.prototype.managerSubscribe = function(manager) {
 
-    this.broker.subscribe(_topic, _obj);
+    var key = Object.keys(manager.callbackFunctions);
+
+    for (var i = 0 ; i < key.length ; i++ ) {
+      this.subscribe(key[i], manager);
+    }
 
   }
+
+  /**
+   * @memberof BrokerConnector
+   */
+  BrokerConnector.prototype.subscribe = function(topic, obj) {
+
+    this.broker.subscribe(topic, obj);
+
+  }
+
+  /**
+   * @memberof BrokerConnector
+   */
+  BrokerConnector.prototype.connectFullUndoFun = function(managers){
+
+    for(var key in managers){
+
+      this.managerHistoryConnect(managers[key]);
+
+    }
+
+  }
+
+  /**
+   * @memberof BrokerConnector
+   */
+  BrokerConnector.prototype.managerHistoryConnect = function(manager){
+
+    for (var key in manager.undo) {
+      this.connectHistory(key, manager.undo[key]);
+    }
+
+  }
+
+  /**
+   * @memberof BrokerConnector
+   */
+  BrokerConnector.prototype.connectHistory = function(req, fun){
+
+    this.broker.history.addCallBackFun(req, fun);
+
+  }
+
+
 
   return BrokerConnector;
 

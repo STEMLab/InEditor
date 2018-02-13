@@ -1,3 +1,7 @@
+/**
+* @author suheeeee <lalune1120@hotmaile.com>
+*/
+
 define([
   "./Layer.js",
   "../Group/CellGroup.js"
@@ -8,6 +12,10 @@ define([
   'use strict';
 
 
+  /**
+  * @class CellLayer
+  * @augments Layer
+  */
   function CellLayer(){
 
     Layer.apply(this, arguments);
@@ -19,8 +27,13 @@ define([
   CellLayer.prototype = Object.create(Layer.prototype);
 
   CellLayer.prototype.init = function(){
+
     // this.addGroup(new CellGroup());
     this.group = new CellGroup();
+
+    this.layer.add(this.group.getCellGroup());
+    this.layer.add(this.group.getTmpGroup());
+
   }
 
   return CellLayer;

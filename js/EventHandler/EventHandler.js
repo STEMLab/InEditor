@@ -5,85 +5,127 @@
 define([
   "./ProjectEventHandler.js",
   "./DrawEventHandler.js",
-  "./PropertyEventHandler.js"
+  "./PropertyEventHandler.js",
+  "./UIChangeEventHandler.js"
 ], function(
   ProjectEventHandler,
   DrawEventHandler,
-  PropertyEventHandler
+  PropertyEventHandler,
+  UIChangeEventHandler
 ) {
   'use strict';
 
   /**
-   * @classdesc This module is a main event handler
-   * @class
+   * @class EventHandler
    */
   function EventHandler() {
 
     this.handlers = [];
     this.handlerBinder = [];
 
-    /**
-     * Save previous runned message for controll request cycle.
-     * For example, if 'start-test' runned before next message must be 'test' or 'end-test'.
-     */
-    this.previousMsg = null;
-
     this.init();
   }
 
+  /**
+   * @memberof EventHandler
+   */
   EventHandler.prototype.init = function() {
 
     this.add();
     this.setHandlerBinder();
     this.btnEvnetBind();
+    this.keyEventBind();
 
   }
 
+  /**
+   * @memberof EventHandler
+   */
   EventHandler.prototype.add = function() {
-    this.handlers.push(new DrawEventHandler());
-    this.handlers.push(new PropertyEventHandler());
-    this.handlers.push(new ProjectEventHandler());
+
+    this.handlers['drawEventHandler'] = new DrawEventHandler();
+    this.handlers['propertyEventHandler'] = new PropertyEventHandler();
+    this.handlers['projectEventHandler'] = new ProjectEventHandler();
+    this.handlers['uiChangeEventHandler'] = new UIChangeEventHandler();
+
   }
 
+  /**
+   * @memberof EventHandler
+   */
   EventHandler.prototype.btnEvnetBind = function() {
 
     for (var key in this.handlerBinder) {
       for (var subkey in this.handlerBinder[key]) {
-        if (subkey == 'click') { // event on other html element
 
-          document.getElementById(key).addEventListener('click', function(e) {
-            window.eventHandler.callHandler(e)
+        if (subkey == 'click' && document.getElementById(key) != null) {
+
+          // event on html ui element
+          document.getElementById(key).addEventListener('click', function(event) {
+            window.eventHandler.callHandler('html', event);
+          });
+
+        } else if (subkey == 'fancytreeclick') {
+
+          $("#tree-view").fancytree({
+            click: function(event, data) {
+              window.eventHandler.callHandler('tree', event, data)
+            }
+          });
+
+        } else if (subkey == 'wheel') {
+
+          window.addEventListener('wheel', function(event, data) {
+
+            if (event.target.tagName == 'CANVAS') {
+              window.eventHandler.callHandler('canvas', event);
+            }
+
           });
 
         }
       }
     }
 
-
   }
 
   /**
-   * @desc This function must called after add new floor and bind event handler to events on new stage.
-   * @param _id id of new floor
+   * @param {Obejct} obj new canvas object
+   * @memberof EventHandler
    */
-  EventHandler.prototype.stageEventBind = function(_id) {
+  EventHandler.prototype.stageEventBind = function(_type, _id) {
 
-    for (var key in this.handlerBinder) {
-      for (var subkey in this.handlerBinder[key]) {
-        if (subkey == 'contentClick') { // event on canvas
+    for (var subkey in window.eventHandler.handlerBinder[_type]) {
 
-          var stage = window.storage.canvasContainer.getElementById('stage', _id);
+      if (subkey == 'contentClick') { // event on canvas
 
-          stage.stage.on(
-            'contentClick',
-            function(e) {
-              window.eventHandler.callHandler(e)
-            });
-        }
+        var stage = window.storage.canvasContainer.getElementById('stage', _id);
+
+        stage.stage.on(
+          'contentClick',
+          function(event) {
+            window.eventHandler.callHandler('stage', event)
+          });
       }
+
     }
   }
 
+  EventHandler.prototype.keyEventBind = function() {
+
+    $(window).keypress(function(event) {
+
+      if(event.keyCode == 26 && event.ctrlKey){
+        window.myhistory.undo();
+      }
+    });
+
+  }
+
+
+  /**
+   * @memberof EventHandler
+   */
   EventHandler.prototype.setHandlerBinder = function() {
 
     for (var key in this.handlers) {
@@ -92,32 +134,62 @@ define([
 
   }
 
-  EventHandler.prototype.callHandler = function(e) {
+
+  /**
+   * @param {String} _target html, stage, tree
+   * @param {Object} _event
+   * @param {Object} _data
+   * @memberof EventHandler
+   */
+  EventHandler.prototype.callHandler = function(_target, _event, _data) {
 
     var target;
     var type;
     var message;
+    var data;
 
-    if (e.target != null) {
+    if (_target == 'html') {
 
-      target = e.target.id;
-      type = e.type;
+      target = _event.target.id;
+      type = _event.type;
+      data = _event;
 
-    } else if (e.currentTarget != null) {
+    } else if (_target == 'stage') {
+      // target = _event.currentTarget.attrs.id;
+      target = 'stage';
+      type = _event.type;
+      data = _event;
 
-      target = e.currentTarget.attrs.id;
-      type = e.type;
+    } else if (_target == 'tree') {
+
+      target = _event.target.id;
+      type = _event.type;
+      data = _data;
+
+    } else if (_target == 'canvas') {
+
+      target = 'canvas';
+      type = _event.type;
+      data = _event;
+
+    } else if (_target == 'file') {
+
+      target = 'floorplan-file';
+      type = _event.type;
+      data = _event;
 
     }
 
-    var message = this.handlerBinder[target][type];
-
-    var result = this.handlerBinder[target][type](window.broker, window.eventHandler.previousMsg);
+    var result = this.handlerBinder[target][type](window.broker, window.myhistory.getPreviousMsg(), data);
 
     if (result.result) {
-      this.previousMsg = result.msg;
+
+      window.broker.previousMsg = result.msg;
+
     } else {
-      console.log("error! " + result.msg);
+
+      log.error(result.msg);
+
     }
 
   }

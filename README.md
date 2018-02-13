@@ -5,7 +5,8 @@ IndoorGML-Editor is an open source Javascript program that provides tools for si
 
 
 ## Getting Started
-Clone this project and open `index.html` on browser.
+Clone this project and install module by excuting `npm install`.<br>
+Start server by executing `node app.js` and launch a web browser and open the editor(http://127.0.0.1:8080).
 
 
 ## License

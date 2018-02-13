@@ -1,48 +1,94 @@
+/**
+ * @author suheeeee <lalune1120@hotmaile.com>
+ */
+
 define([], function() {
   'use strict';
 
+  /**
+   * @class Workspace
+   */
   function Workspace() {
-    /***************************************************************************************************/
-    /***************************************** workspace ***********************************************/
-    /***************************************************************************************************/
 
+    this.init();
+
+  }
+
+  /**
+  * @memberof Workspace
+  */
+  Workspace.prototype.init = function(){
+
+    // init
     var config = {
-      // selectionEnabled: true,
       content: [{
-        type: 'stack',
-        content: [{
-          type: 'component',
-          title: 'test-floor',
-          componentName: 'workspace',
-          componentState: {
-            text: 'Component 1'
-          }
-        }]
+        type: 'stack'
       }]
     };
 
-    var workspaceLayout = new GoldenLayout(config, $('#workspace-container'));
-    var viewport = "<div class=\"Panel\" id=\"viewport\" style=\"position:absoulte;\"><div id=\"container\" class=\"container\"></div></div>";
+    this.workspaceLayout = new GoldenLayout(config, $('#workspace-layout-container'));
 
+    this.workspaceLayout.registerComponent('workspace', function(container, state) {
+      // container.getElement().html(viewport);
+    });
 
-    workspaceLayout.registerComponent('workspace', function(container, state) {
-      container.getElement().html(viewport);
+    this.workspaceLayout.init();
+
+    $(window).resize(function() {
+      window.uiContainer.workspace.workspaceLayout.updateSize();
+
     });
 
 
+  }
 
+  /**
+  * @memberof Workspace
+  */
+  Workspace.prototype.addNewWorkspace = function(_id, _name) {
 
-    workspaceLayout.init();
+    var newItemConfig = {
+      title: _name,
+      type: 'component',
+      componentName: 'workspace'
+    };
 
+    var contentItems = window.uiContainer.workspace.workspaceLayout.root.contentItems[0];
+    contentItems.addChild(newItemConfig);
 
+    var index = contentItems.contentItems.length - 1;
+    contentItems.contentItems[index].element[0].id = _id;
 
+    var viewport = "<div class=\"Panel\" id=\"viewport\" style=\"position:absoulte;\"><div id=" + _id + " class=\"container\"></div></div>";
+    contentItems.contentItems[index].element[0].innerHTML = viewport;
 
 
     $(window).resize(function() {
-      workspaceLayout.updateSize();
+      window.uiContainer.workspace.workspaceLayout.updateSize();
     });
 
   }
+
+  /**
+  * @memberof Workspace
+  * @param {String} id floor id
+  */
+  Workspace.prototype.activateWorkspace = function(id){
+
+    var tabs = window.uiContainer.workspace.workspaceLayout.root.contentItems[0].header.tabs;
+
+    var index = 0;
+    while( tabs[index].contentItem.config.title != id){
+
+      index++;
+
+    }
+    window.uiContainer.workspace.workspaceLayout.root.contentItems[0].setActiveContentItem(window.uiContainer.workspace.workspaceLayout.root.contentItems[0].contentItems[index]);
+    window.uiContainer.workspace.workspaceLayout.root.contentItems[0].header.setActiveContentItem(tabs[index].contentItem);
+
+  }
+
+
 
   return Workspace;
 

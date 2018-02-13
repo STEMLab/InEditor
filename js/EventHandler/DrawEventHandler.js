@@ -1,31 +1,46 @@
+/**
+ * @author suheeeee <lalune1120@hotmaile.com>
+ */
+
 define([
-  "../PubSub/Message.js"
+  "../PubSub/Message.js",
+  "../PubSub/Result.js"
 ], function(
-  Message
+  Message,
+  Result
 ) {
   'use strict';
 
+  /**
+   * @class DrawEventHandler
+   */
   function DrawEventHandler() {
 
   }
 
+  /**
+   * @memberof DrawEventHandler
+   */
   DrawEventHandler.prototype.setHandlerBinder = function(handlerBinder) {
 
     handlerBinder['cell-btn'] = {
       'click': this.clickCellBtn
     };
 
-    handlerBinder['test-floor'] = {
-      'contentClick': this.addNewDot
-    };
-
     handlerBinder['floor-btn'] = {
       'click': this.clickFloorBtn
     };
 
+    handlerBinder['stage'] = {
+      'contentClick': this.addNewDot
+    };
+
   }
 
-
+  /**
+   * @desc When cell btn clicked `start-addnewcell` or `end-addnewcell` can publish.
+   * @memberof DrawEventHandler
+   */
   DrawEventHandler.prototype.clickCellBtn = function(broker, previousMsg) {
 
     var result = {
@@ -33,62 +48,32 @@ define([
       'msg': null
     };
 
-    switch (previousMsg) {
+    var result = new Result();
 
-      case null:
-        broker.publish(new Message('start-geotest', null));
+    if (broker.isPublishable('start-addnewcell')) {
 
-        result = {
-          'result': true,
-          'msg': 'start-geotest'
-        };
-        break;
+      // reqObj.floor will be active workspace
+      broker.publish(new Message('start-addnewcell', null));
 
-      case 'start-geotest':
+      result = {
+        'result': true,
+        'msg': 'start-addnewcell'
+      };
 
-        broker.publish(new Message('end-geotest', null));
+    } else if (broker.isPublishable('end-addnewcell')) {
 
-        result.result = true;
-        result.msg = 'end-geotest';
-        break;
+      broker.publish(new Message('end-addnewcell', {
+        'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+        'floor': window.tmpObj.floor
+      }));
 
-      case 'geotest':
+      result.result = true;
+      result.msg = null;
 
-        broker.publish(new Message('end-geotest', null));
+    } else {
 
-        result.result = true;
-        result.msg = null;
-        break;
+      result.msg = "wrong state transition : " + previousMsg + " to start-addnewcell, end-addnewcell.";
 
-      default:
-        result.msg = "wrong previous state : " + previousMsg;
-        break;
-    }
-
-    return result;
-
-  }
-
-  DrawEventHandler.prototype.clickFloorBtn = function(broker, previousMsg) {
-
-    var result = {
-      'result': false,
-      'msg': null
-    };
-
-    switch (previousMsg) {
-
-      case null:
-        broker.publish(new Message('addnewfloor', null));
-        result = {
-          'result': true,
-          'msg': null
-        };
-        break;
-
-      default:
-        result.msg = "wrong previous state : " + previousMsg;
-        break;
     }
 
     return result;
@@ -96,46 +81,28 @@ define([
   }
 
   /**
-   * @desc This will call when stage clicked, so we need to distinguish which geometry will be added new dot by the previous run message.
+   * @desc When floor btn clicked `addnewfloor` can publish.
+   * @memberof DrawEventHandler
    */
-  DrawEventHandler.prototype.addNewDot = function(broker, previousMsg) {
+  DrawEventHandler.prototype.clickFloorBtn = function(broker, previousMsg) {
 
     var result = {
       'result': false,
       'msg': null
     };
 
-    switch (previousMsg) {
-      case 'start-geotest':
+    if (broker.isPublishable('addnewfloor')) {
 
-        broker.publish(new Message('geotest', null));
+      broker.publish(new Message('addnewfloor', null));
+      result = {
+        'result': true,
+        'msg': null
+      };
 
-        result = {
-          'result': true,
-          'msg': 'geotest'
-        };
 
-        break;
+    } else {
 
-      case 'geotest':
-
-        broker.publish(new Message('geotest', null));
-
-        result = {
-          'result': true,
-          'msg': 'geotest'
-        };
-
-        break;
-
-      default:
-        result = {
-          'resutl': false,
-          'msg': 'no match function !'
-        };
-
-        break;
-
+      result.msg = "wrong state transition : " + previousMsg + " to addnewfloor.";
 
     }
 
@@ -143,6 +110,52 @@ define([
 
   }
 
+  /**
+   * @desc This will call when stage clicked, so we need to distinguish which geometry will be added new dot by the previous run message.<br>This can publish `addnewcell`,
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.addNewDot = function(broker, previousMsg, data) {
+
+    var result = {
+      'result': false,
+      'msg': null
+    };
+
+    if (broker.isPublishable('addnewcell')) {
+
+      var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
+      var isFirstClick = (window.tmpObj.floor == null);
+
+      if (isFirstClick || (!isFirstClick && isSameFloor)) {
+
+        broker.publish(new Message('addnewcell', {
+          'floor': data.currentTarget.attrs.id
+        }));
+
+        result.result = true;
+        result.msg = 'addnewcell';
+
+
+      } else if (!isFirstClick && !isSameFloor) {
+
+        result.msg = "you clicked different floor!";
+
+      } else {
+
+        result.msg = "wrong state transition : " + previousMsg + " to addnewfloor.";
+
+      }
+
+
+    } else {
+
+      result.msg = "no match function.";
+
+    }
+
+    return result;
+
+  }
 
 
 

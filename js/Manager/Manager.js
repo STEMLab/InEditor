@@ -1,4 +1,3 @@
-
 /**
 * @author suheeeee <lalune1120@hotmaile.com>
 */
@@ -10,11 +9,18 @@ define([
 ) {
   'use strict';
 
+  /**
+  * @class Manager
+  */
   function Manager(){
 
     Subscriber.apply(this, arguments);
+
+    /**
+    * requests
+    * @deprecated
+    */
     this.reqs = {};
-    this.callbackFunctions = [];
 
   }
 
@@ -24,13 +30,10 @@ define([
 
   }
 
-  Manager.prototype.addCallbackFun = function(req, callback){
-
-    this.callbackFunctions[req] = callback;
-
-  }
-
-
+  /**
+  * requests
+  * @deprecated
+  */
   Manager.prototype.addReq = function(obj){
 
     this.reqs = obj;

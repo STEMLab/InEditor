@@ -11,9 +11,10 @@ define([],function() {
   */
   function ProjectProperty() {
     this.id = window.conditions.guid();
-    this.data = window.conditions.getDate();
+    this.name = this.id;
+    this.date = window.conditions.getDate();
     this.author = new String();
-    this.descript = new String();
+    this.description = new String();
     this.savePath = null;
   }
 

@@ -7,7 +7,10 @@ define([
 ) {
   'use strict';
 
-
+  /**
+  * @class TransitionLayer
+  * @augments Layer
+  */
   function TransitionLayer(){
 
     Layer.apply(this, arguments);
