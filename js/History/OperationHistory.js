@@ -14,7 +14,7 @@ define([
   */
   function OperationHistory(cycle_name){
 
-    this.cycle_name = null;
+    this.cycle_name = cycle_name;
 
     this.opq = new Deque();
 

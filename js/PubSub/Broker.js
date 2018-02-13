@@ -29,7 +29,7 @@ define([
      * @desc Save previous runned message for controll request cycle.<br>For example, if 'start-test' runned before next message must be 'test' or 'end-test'.
      * @memberof Broker
      */
-    this.previousMsg = null;
+    // this.previousMsg = null;
 
     /**
      * @memberof Broker
@@ -131,8 +131,10 @@ define([
    */
   Broker.prototype.isPublishable = function(req) {
 
+    var previousMsg = window.myhistory.getPreviousMsg();
+
     var spec = this.reqSpecList[req];
-    var previousSpec = this.reqSpecList[this.previousMsg];
+    var previousSpec = this.reqSpecList[previousMsg];
     var result = false;
 
     if (this.reqSpecList[req] == null) {
@@ -150,7 +152,7 @@ define([
 
     } else if (spec.cycle == 'single') {
 
-      if (this.previousMsg == null) {
+      if (previousMsg == null) {
 
         // If there is no message which published before, can publish any message.
         result = true;
@@ -178,13 +180,13 @@ define([
       var splitReq = req.split("-");
       var splitPreReq = null;
 
-      if(this.previousMsg != null) splitPreReq = this.previousMsg.split("-");
+      if(previousMsg != null) splitPreReq = previousMsg.split("-");
 
-      if (this.previousMsg == null && splitReq[0] == 'start') {
+      if (previousMsg == null && splitReq[0] == 'start') {
 
         result = true;
 
-      } else if (this.previousMsg != null && previousSpec.cycle == 'cycle') {
+      } else if (previousMsg != null && previousSpec.cycle == 'cycle') {
 
         if (splitPreReq.length == 2 && splitReq.length == 2) {
 
@@ -216,8 +218,8 @@ define([
         } else if (splitPreReq.length == 1 && splitReq.length == 2) {
 
           // somemsg -> end-somemsg
-          if (splitReq[0] == 'end' && splitPreReq[0] == splitReq[1]) {
-
+          if (splitReq[0] == 'end' && splitPreReq[0] == splitReq[1] ) {
+            
             result = true;
 
           }

@@ -19,6 +19,7 @@ define([
       x: 0,
       y: 0
     });
+    
     this.tmpGroup = new Konva.Group({
       x: 0,
       y: 0

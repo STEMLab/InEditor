@@ -27,6 +27,7 @@ define([
 
     /**
      * @memberof History
+     * @deprecated
      */
     this.operationQueue = {
       cycle_name: null,
@@ -55,16 +56,17 @@ define([
   /**
    * @memberof History
    */
-   History.prototype.getPreviousMsg = function(){
+  History.prototype.getPreviousMsg = function() {
 
-     if(this.operationQueue.cycle_name != null){
-       return cycle_name;
-     }
-     else{
-       return null;
-     }
+    if(this.history.empty()){
+      return null;
+    } else if(this.history.back().cycle_name != null){
+      return this.history.back().cycle_name;
+    } else {
+      return null;
+    }
 
-   }
+  }
 
 
   /**
@@ -80,34 +82,25 @@ define([
     var isStartOperation = this.isStartOperation(msg);
     var isOperation = this.isOperation(msg);
     var isEndOperation = this.isEndOperation(msg);
-    var isOverflow = this.isOverflow();
 
     if (isStartOperation) {
 
-      var msgarr = msg.split();
-
-      this.operationQueue.opq = new Deque();
-      this.operationQueue.cycle_name = msgarr[1];
-
-    } else if (isOperation && isOverflow) {
-
-      this.operationQueue.flag = true;
-      this.pushOp(uuid, msg, obj, undofun);
-
-      log.info(">>>> history : operation " + msg + " saved.");
+      // If the msg is start-something.
+      var msgarr = msg.split("-");
+      var operationHistory = new OperationHistory(msgarr[1]);
+      this.history.push_back(operationHistory);
 
     } else if (isOperation) {
 
-      this.pushOp(uuid, msg, obj, undoun);
+      this.pushOp(uuid, manager, msg, obj, undofun);
 
       log.info(">>>> history : operation " + msg + " saved.");
 
     } else if (isEndOperation) {
 
-      this.operationQueue.opq = null;
-      this.operationQueue.flas = false;
+      if(this.history.back().uuid != uuid) this.history.pop_back();
 
-      var msgarr = msg.split();
+      var msgarr = msg.split("-");
 
       this.pushHistory(uuid, manager, msgarr[1], obj, undofun);
 
@@ -120,6 +113,8 @@ define([
 
     }
 
+    log.trace(this.history);
+
   }
 
   /**
@@ -129,7 +124,7 @@ define([
 
     if (!this.history.empty() && this.history.back().uuid == uuid) {
 
-      this.history.back().push(obj, undoFun);
+      this.history.back().push(manager, obj, undofun);
 
     } else {
 
@@ -141,11 +136,11 @@ define([
 
   }
 
-  History.prototype.pushHistoryObj = function(uuid, manager, obj){
+  History.prototype.pushHistoryObj = function(uuid, manager, obj) {
 
     var historyQ = this.history.to_array();
-    for(var i in historyQ){
-      if(historyQ[i].uuid == uuid)
+    for (var i in historyQ) {
+      if (historyQ[i].uuid == uuid)
         this.history.at(i).pushObj(manager, obj);
     }
   }
@@ -153,14 +148,20 @@ define([
   /**
    * @memberof History
    */
-  History.prototype.pushOp = function(uuid, msg, obj, undofun) {
+  History.prototype.pushOp = function(uuid, manager, msg, obj, undofun) {
 
-    if( !this.operationQueue.opq.empty() && this.operationQueue.opq.back().uuid == uuid){
-      this.operationQueue.opq.back().push(obj, undoFun);
+    if (!this.history.back().opq.empty() && this.history.back().opq.back().uuid == uuid) {
+
+      // same msg, different manager
+      if( !this.this.history.back().flag && this.this.history.back().opq.is_full()) this.this.history.back().flag = true;
+      this.history.back().opq.back().push(manager, obj, undoFun);
+
     } else {
+
       var historyObj = new HistoryObj(uuid, msg);
-      historyObj.push(obj, undofun);
-      this.operationQueue.opq.push_back(historyObj);
+      historyObj.push(manager, obj, undofun);
+      this.history.back().opq.push_back(historyObj);
+
     }
 
   }
@@ -199,9 +200,27 @@ define([
    */
   History.prototype.isStartOperation = function(msg) {
 
-    var arr = msg.split(msg);
+    var arr = msg.split('-');
 
-    if (window.broker.reqSpecList[msg].cycle == 'cycle' && arr.length == 2 && arr[1] == 'start') {
+    if (window.broker.reqSpecList[msg].cycle == 'cycle' && arr.length == 2 && arr[0] == 'start') {
+
+      return true;
+
+    }
+
+    return false;
+
+  }
+
+  /**
+   * @memberof History
+   * @deprecated
+   */
+  History.prototype.isOperation = function(msg) {
+
+    var arr = msg.split("-");
+
+    if (window.broker.reqSpecList[msg].cycle == 'cycle' && arr.length == 1) {
 
       return true;
 
@@ -214,28 +233,11 @@ define([
   /**
    * @memberof History
    */
-  History.prototype.isOperation = function(msg) {
-
-    var arr = msg.split(msg);
-
-    if (window.broker.reqSpecList[msg].cycle == 'cycle' && arr.length == 1) {
-
-      return true
-
-    }
-
-    return false;
-
-  }
-
-  /**
-   * @memberof History
-   */
   History.prototype.isEndOperation = function(msg) {
 
-    var arr = msg.split(msg);
+    var arr = msg.split('-');
 
-    if (window.broker.reqSpecList[msg].cycle == 'cycle' && arr.length == 2 && arr[1] == 'end') {
+    if (window.broker.reqSpecList[msg].cycle == 'cycle' && arr.length == 2 && arr[0] == 'end') {
 
       return true
 
@@ -250,7 +252,7 @@ define([
    */
   History.prototype.isOverflow = function(isOperation) {
 
-    if (isOperation && operationQueue.opq.is_full()) {
+    if (isOperation && ( this.history.back().flag || this.history.back().opq.is_full())) {
 
       return true;
 
@@ -266,7 +268,18 @@ define([
    */
   History.prototype.undo = function() {
 
-    var undo = this.history.pop_back();
+    // Is the last element of history is operation history object?
+    var isOpq = (this.history.back().cycle_name != null);
+    var undo;
+
+    if (isOpq) {
+      if (this.history.back().opq.empty())
+        return;
+      else
+        undo = this.history.back().opq.pop_back();
+    } else {
+      undo = this.history.pop_back();
+    }
 
     for (var i in undo.undoObj) {
 

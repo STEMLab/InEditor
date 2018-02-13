@@ -6,7 +6,7 @@ define([], function() {
   'use strict';
 
   /**
-   * @exports Property
+   * @class Property
    */
   function Property() {
 
@@ -16,6 +16,7 @@ define([], function() {
    * @param type The type of object to be displayed in the property tab. 'floor', 'cell', 'cellboundry', 'state', 'transition'
    * @param {String} id The id of object to be displayed in the property tab.
    * @param {Storage} storage
+   * @memberof Property
    */
   Property.prototype.setPropertyTab = function(type, id, storage) {
     log.info("> set property tab :", type, id);
@@ -32,6 +33,7 @@ define([], function() {
   /**
    * @param config
    * @param divContent
+   * @memberof Property
    */
   Property.prototype.setView = function(config, divContent) {
     $('#property-container').empty();
@@ -45,6 +47,9 @@ define([], function() {
     propertyLayout.init();
   }
 
+  /**
+  * @memberof Property
+  */
   Property.prototype.setFloorView = function(config, floorProperty) {
 
     $('#property-container').empty();
@@ -90,6 +95,9 @@ define([], function() {
 
   }
 
+  /**
+  * @memberof Property
+  */
   Property.prototype.setViewWithRef = function(config, property) {
 
     $('#property-container').empty();
@@ -153,6 +161,7 @@ define([], function() {
    * @param {String} id The id of floor object to be displayed in the property tab.
    * @param {Storage} storage storage
    * @desc Clears the contents of the property tab and creates a new tab for that floor.<br>Tabs consist of 'canvas' and 'property'.<br>The canvas tab allows you to resize the canvas or insert or remove the floor plan.<br>The property tab allows you to view/change the value of the floor's property(Level, Lower corner, Upper corner, Ground height, Celling height, Door height, description).
+   * @memberof Property
    */
   Property.prototype.setFloorProperty = function(id, storage) {
 
@@ -194,6 +203,7 @@ define([], function() {
    * @param {String} id The id of cell object to be displayed in the property tab.
    * @param {Storage} storage
    * @desc Clears the contents of the property tab and creates a new tab for that cell.<br>Tab consist of property.<br>The property tab allows you to view/change the value of the cell's property(name, duality, description).
+   * @memberof Property
    */
   Property.prototype.setCellProperty = function(id, storage) {
 
@@ -236,6 +246,7 @@ define([], function() {
    * @param id The id of cellboundary object to be displayed in the property tab.
    * @param storage storage
    * @desc Clears the contents of the property tab and creates a new tab for that cellboundary.<br>Tab consist of property.<br>The property tab allows you to view/change the value of the cellboundary's property(name, duality, description).
+   * @memberof Property
    */
   Property.prototype.setCellBoundaryProperty = function(id, storage) {
 
@@ -267,6 +278,7 @@ define([], function() {
    * @param id The id of state object to be displayed in the property tab.
    * @param storage storage
    * @desc Clears the contents of the property tab and creates a new tab for that state.<br>Tab consist of property.<br>The property tab allows you to view/change the value of the state's property(name, duality, connects, description).
+   * @memberof Property
    */
   Property.prototype.setStateProperty = function(id, storage) {
 
@@ -301,6 +313,7 @@ define([], function() {
    * @param id The id of transition object to be displayed in the property tab.
    * @param storage storage
    * @desc Clears the contents of the property tab and creates a new tab for that transition.<br>Tab consist of property.<br>The property tab allows you to view/change the value of the transition's property(name, duality, weight, connects, description).
+   * @memberof Property
    */
   Property.prototype.setTransitionProperty = function(id, storage) {
 
@@ -326,7 +339,6 @@ define([], function() {
 
     var transitionProperty = storage.propertyContainer.getElementById('transition', id);
 
-
     this.setView(config, divContent);
 
   }
@@ -336,6 +348,7 @@ define([], function() {
    * @param {String} id The id of cell object to be displayed in the property tab.
    * @param {Storage} storage storage
    * @desc Clears the contents of the property tab and creates a new tab for that project.<br>Tab consist of property.<br>The property tab allows you to view/change the value of the project's property(name, date, author, description).
+   * @memberof Property
    */
   Property.prototype.setProjectProperty = function(id, storage) {
 
@@ -375,6 +388,15 @@ define([], function() {
     document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
       window.eventHandler.callHandler('html', event);
     });
+
+  }
+
+  /**
+  * @memberof Property
+  */
+  Property.prototype.clear = function(){
+
+    document.getElementById('property-container').innerHTML = "";
 
   }
 

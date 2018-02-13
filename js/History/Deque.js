@@ -29,7 +29,7 @@ define([], function(){
    * @memberof Deque
    */
   Deque.prototype.empty = function(){
-    return this.size() == 0;
+    return this.size()==0;
   }
 
   /**

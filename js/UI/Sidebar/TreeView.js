@@ -6,14 +6,14 @@ define([], function() {
   'use strict';
 
   /**
-  * @desc
-  * @exports TreeView
+  * @class TreeView
   */
   function TreeView() {
 
     /**
     * fancytree
     * @see {@link https://github.com/mar10/fancytree}
+    * @memberof TreeView
     */
     this.tree = null;
 
@@ -21,6 +21,7 @@ define([], function() {
 
   /**
   * Read All value from storage and appear in tree view.
+  * @memberof TreeView
   */
   TreeView.prototype.init = function() {
 
@@ -45,6 +46,7 @@ define([], function() {
   /**
   * Read All value from storage and appear in tree view.
   * @param {FloorProperty} newFloorProperty
+  * @memberof TreeView
   */
   TreeView.prototype.addFloor = function(newFloorProperty) {
 
@@ -68,6 +70,7 @@ define([], function() {
   /**
   * @param {String} _key
   * @param {String} _name
+  * @memberof TreeView
   */
   TreeView.prototype.updateTitle = function(_key, _title){
 
@@ -78,6 +81,7 @@ define([], function() {
   /**
   * @param {String} id
   * @param {String} floor
+  * @memberof TreeViews
   */
   TreeView.prototype.addCell = function(id, floor){
 
@@ -91,6 +95,14 @@ define([], function() {
 
     $("#tree-view").fancytree("getTree").activateKey(id);
 
+  }
+
+  /**
+  * @param {String} id
+  * @memberof TreeView
+  */
+  TreeView.prototype.reomveNode = function(id){
+    $("#tree-view").fancytree("getTree").getNodeByKey(id).remove();
   }
 
   return TreeView;

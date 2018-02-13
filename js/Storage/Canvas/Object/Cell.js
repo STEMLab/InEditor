@@ -118,6 +118,13 @@ define([
     return points;
   }
 
+  Cell.prototype.destory = function(){
+
+    this.corners.destroy();
+    this.poly.destroy();
+
+  }
+
 
   return Cell;
 

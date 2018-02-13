@@ -39,9 +39,10 @@ define([
     //   'end-addnewcell' : null
     // });
 
-    this.addCallbackFun('start-addnewcell', this.startAddNewCell );
+    this.addCallbackFun('start-addnewcell', this.startAddNewCell, function(){}, function(){} );
     this.addCallbackFun('addnewcell', this.addNewCell, this.addNewCell_makeHistoryObj, this.addNewCell_undo );
-    this.addCallbackFun('end-addnewcell', this.endAddNewCell );
+    this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.endAddNewCell_makeHistoryObj, this.endAddNewCell_undo );
+    this.addCallbackFun('canceladdnewcell', this.cancelAddNewCell);
 
   }
 
@@ -52,6 +53,7 @@ define([
   GeometryManager.prototype.startAddNewCell = function(){
 
     var tmpObj = new Cell('tmpObj');
+    tmpObj.type = 'cell';
     window.tmpObj = tmpObj;
 
   }
@@ -102,7 +104,7 @@ define([
 
      window.tmpObj.deleteLastCorner();
      window.tmpObj.deleteLastPolyLine();
-     window.storage.canvasContainer.stages[undoObj.floor].cellLayer.group.tmpGroup.draw();
+     window.storage.canvasContainer.stages[undoObj.floor].cellLayer.layer.draw();
 
    }
 
@@ -110,6 +112,7 @@ define([
   /**
    * @param {Object} reqObj id<br>floor: floor id
    * @memberof GeometryManager
+   * @desc draw new cell object in canvas
    */
   GeometryManager.prototype.endAddNewCell = function(reqObj){
 
@@ -138,6 +141,59 @@ define([
     // add state
 
   }
+
+  /**
+   * @param {Object} reqObj id<br>floor: floor id
+   * @memberof GeometryManager
+   * @return cell id
+   */
+   GeometryManager.prototype.endAddNewCell_makeHistoryObj = function(reqObj){
+
+     return reqObj;
+
+   }
+
+   /**
+    * @param {Object} undoObj id<br>floor: floor id
+    * @memberof GeometryManager
+    * @desc Remove cell object in canvasContainer which id is undoObj.id
+    */
+    GeometryManager.prototype.endAddNewCell_undo = function(undoObj){
+
+      // remove  cell in canvasContainer
+      var cells = window.storage.canvasContainer.stages[undoObj.floor].cellLayer.group.cells;
+
+      for(var key in cells){
+        if(cells[key].id == undoObj.id){
+          cells[key].corners.destroy();
+          cells[key].poly.destroy();
+          window.storage.canvasContainer.stages[undoObj.floor].cellLayer.layer.draw();
+          cells.splice(key,1);
+        }
+      }
+
+      // remove cell in geometryContainer
+      cells = window.storage.geometryContainer.cellGeometry;
+      for(var key in cells){
+        if(cells[key].id == undoObj.id){
+          cells.splice(key,1);
+        }
+      }
+
+    }
+
+    /**
+    * @param {Object} reqObj type<br>floor
+    * @memberof GeometryManager
+    * @desc set tmpObj to null
+    */
+    GeometryManager.prototype.cancelAddNewCell = function(reqObj){
+
+      window.tmpObj = null;
+      window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.destroyChildren();
+      window.storage.canvasContainer.stages[reqObj.floor].cellLayer.layer.draw();
+
+    }
 
 
   return GeometryManager;

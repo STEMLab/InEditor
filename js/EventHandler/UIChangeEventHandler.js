@@ -18,7 +18,7 @@ define([
   }
 
   /**
-   * @memberof PropertyEventHandler
+   * @memberof UIChangeEventHandler
    */
   UIChangeEventHandler.prototype.setHandlerBinder = function(handlerBinder) {
 
@@ -38,7 +38,7 @@ define([
 
   /**
    * @desc When tree view clicked `activateworkspace` and `setpropertyview` can publish.
-   * @memberof PropertyEventHandler
+   * @memberof UIChangeEventHandler
    */
   UIChangeEventHandler.prototype.clickTreeView = function(broker, previousMsg, data) {
 
@@ -85,7 +85,7 @@ define([
 
   /**
    * @desc When tree view clicked `zoomworkspace` can publish.
-   * @memberof PropertyEventHandler
+   * @memberof UIChangeEventHandler
    */
   UIChangeEventHandler.prototype.wheelCanavs = function(broker, previousMsg, data) {
 
@@ -175,7 +175,7 @@ define([
 
   /**
    * @desc When tree view clicked `addfloorplan` can publish.
-   * @memberof PropertyEventHandler
+   * @memberof UIChangeEventHandler
    */
   UIChangeEventHandler.prototype.floorplanUpload = function(broker, previousMsg, data) {
 

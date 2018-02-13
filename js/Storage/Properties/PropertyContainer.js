@@ -9,7 +9,7 @@ define([
   'use strict';
 
   /**
-   * @exports PropertyContainer
+   * @class PropertyContainer
    */
   function PropertyContainer() {
     this.floorProperties = [];

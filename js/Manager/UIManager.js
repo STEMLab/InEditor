@@ -40,11 +40,13 @@ define([
     this.addCallbackFun('addnewfloor', this.addNewFloor);
 
     this.addCallbackFun('start-addnewcell', this.startAddNewCell);
-    this.addCallbackFun('end-addnewcell', this.endAddNewCell);
+    this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.endAddNewCell_makeHistoryObj, this.removeObj);
 
     this.addCallbackFun('updaterefdata', this.updateRefProperty);
 
     this.addCallbackFun('activateworkspace', this.activateWorkspace);
+
+    this.addCallbackFun('cancelAddNewCell', this.cancelAddNewCell);
   }
 
 
@@ -294,6 +296,28 @@ define([
 
   }
 
+  /**
+  * @param {Message.reqObj} reqObj id<br>floor
+  * @memberof UIManager
+  */
+  UIManager.prototype.endAddNewCell_makeHistoryObj = function(reqObj){
+    var obj = reqObj;
+    obj['type'] = 'cell';
+
+    return obj;
+  }
+
+  /**
+  * @param {Object} undoObj id<br>floor<br>type
+  * @memberof UIManager
+  */
+  UIManager.prototype.removeObj = function(undoObj){
+
+    // remove tree view content
+    window.uiContainer.sidebar.treeview.reomveNode(undoObj.id);
+    window.uiContainer.sidebar.property.clear();
+
+  }
 
   /**
    * @memberof UIManager
@@ -349,6 +373,17 @@ define([
   UIManager.prototype.activateWorkspace = function(reqObj) {
 
     window.uiContainer.workspace.activateWorkspace(reqObj.id);
+
+  }
+
+  /**
+  * @param {Object} reqObj type<br>floor
+  * @memberof UIManager
+  * @desc change floor btn color
+  */
+  UIManager.prototype.cancelAddNewCell = function(reqObj){
+
+    document.getElementById('cell-btn').src = "../../assets/icon/cell_d.png";
 
   }
 

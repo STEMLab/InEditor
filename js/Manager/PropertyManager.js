@@ -45,7 +45,7 @@ define([
 
     this.addCallbackFun('addnewfloor', this.addNewFloor);
     this.addCallbackFun('updateproperty', this.updateProperty);
-    this.addCallbackFun('end-addnewcell', this.endAddNewCell);
+    this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.endAddNewCell_makeHistoryObj, this.endAddNewCell_undo);
     this.addCallbackFun('updaterefdata', this.updateRefProperty);
 
   }
@@ -72,7 +72,6 @@ define([
   PropertyManager.prototype.updateProperty = function(reqObj) {
 
     var obj = window.storage.propertyContainer.getElementById(reqObj.type, reqObj.id);
-
 
     switch (reqObj.type) {
       case 'project':
@@ -142,6 +141,44 @@ define([
     );
 
   }
+
+  /**
+   * @param {Object} reqObj id<br>floor: floor id
+   * @memberof PropertyManager
+   * @return cell id
+   */
+   PropertyManager.prototype.endAddNewCell_makeHistoryObj = function(reqObj){
+
+     return reqObj;
+
+   }
+
+   /**
+    * @param {Object} undoObj id<br>floor: floor id
+    * @memberof PropertyManager
+    * @return cell id
+    */
+    PropertyManager.prototype.endAddNewCell_undo = function(undoObj){
+
+      // remove new cellproperty object in storage.propertyContainer
+      var cells = window.storage.propertyContainer.cellProperites;
+
+      for(var key in cells){
+        if(cells.id == undoObj.id)
+          cells.splice(key,1);
+      }
+
+      // add cell key in floor property
+      var floors = window.storage.propertyContainer.floorProperties;
+
+      for(var key in floors){
+        if(floors[key].id == undoObj.floor){
+          floors[key].cellKey.splice(floors[key].cellKey.indexOf(undoObj.id), 1);
+        }
+      }
+
+    }
+
 
 
 
