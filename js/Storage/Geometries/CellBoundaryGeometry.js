@@ -1,19 +1,30 @@
-define([
-  "../../Observer/Observer.js"
-], function(
-  Observer
-) {
+/**
+* @author suheeeee<lalune1120@hotmail.com>
+*/
+
+define([], function() {
   'use strict';
 
+  /**
+  * @class CellBoundaryGeometry
+  */
   function CellBoundaryGeometry() {
-    Observer.apply(this, arguments);
 
+    /**
+    * @memberof CellBoundaryGeometry
+    */
     this.id;
+
+    /**
+    * @memberof CellBoundaryGeometry
+    */
     this.cellRef; // id of CellGeometry
+
+    /**
+    * @memberof CellBoundaryGeometry
+    */
     this.index;
   }
-
-  CellBoundaryGeometry.prototype = Object.create(Observer.prototype);
 
   return CellBoundaryGeometry;
 });

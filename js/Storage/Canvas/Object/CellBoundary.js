@@ -1,3 +1,7 @@
+/**
+* @author suheeeee<lalune1120@hotmail.com>
+*/
+
 define([
   "../../../Observer/Subject.js"
 ], function(
@@ -5,6 +9,9 @@ define([
 ) {
   'use strict';
 
+  /**
+  * @class CellBoundary
+  */
   function CellBoundary(){
     Subject.apply(this, arguments);
 

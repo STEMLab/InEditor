@@ -1,19 +1,25 @@
 /**
- * @author suheeeee <lalune1120@hotmaile.com>
- */
+* @author suheeeee<lalune1120@hotmail.com>
+*/
 
 define([], function() {
   'use strict';
 
   /**
-   * @exports Publisher
+   * @class Publisher
    */
   function Publisher(_broker) {
 
+    /**
+    * @memberof Publisher
+    */
     this.broker = _broker;
 
   }
 
+  /**
+  * @memberof Publisher
+  */
   Publisher.prototype.publish = function(_message) {
 
     if (this.broker != null) {

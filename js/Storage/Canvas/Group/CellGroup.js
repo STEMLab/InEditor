@@ -1,6 +1,6 @@
 /**
- * @author suheeeee <lalune1120@hotmaile.com>
- */
+* @author suheeeee<lalune1120@hotmail.com>
+*/
 
 define([
   "../Object/Cell.js"
@@ -10,7 +10,6 @@ define([
   'use strict';
 
   /**
-   * @desc
    * @class CellGroup
    */
   function CellGroup() {
@@ -19,7 +18,7 @@ define([
       x: 0,
       y: 0
     });
-    
+
     this.tmpGroup = new Konva.Group({
       x: 0,
       y: 0

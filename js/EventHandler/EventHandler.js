@@ -1,5 +1,5 @@
 /**
- * @author suheeeee <lalune1120@hotmaile.com>
+ * @author suheeeee <lalune1120@hotmail.com>
  */
 
 define([

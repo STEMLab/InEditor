@@ -1,3 +1,6 @@
+/**
+* @author suheeeee<lalune1120@hotmail.com>
+*/
 
 define([
   "./TreeView.js",
@@ -8,9 +11,19 @@ define([
 ) {
   'use strict';
 
+  /**
+  * @class Sidebar
+  */
   function Sidebar(){
 
+    /**
+    * @memberof Sidebar
+    */
     this.treeview = new TreeView();
+
+    /**
+    * @memberof Sidebar
+    */
     this.property = new Property();
 
   };

@@ -1,6 +1,6 @@
 /**
- * @author suheeeee <lalune1120@hotmaile.com>
- */
+* @author suheeeee<lalune1120@hotmail.com>
+*/
 
 define([
   "./RequestFunctions.js"
@@ -11,7 +11,7 @@ define([
 
   /**
    * @desc Subscriber for pub-sub model.
-   * @exports Manager
+   * @class Subscriber
    */
   function Subscriber() {
 

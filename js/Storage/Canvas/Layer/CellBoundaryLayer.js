@@ -1,3 +1,6 @@
+/**
+* @author suheeeee<lalune1120@hotmail.com>
+*/
 define([
   "./Layer.js",
   "../Group/CellBoundaryGroup.js"

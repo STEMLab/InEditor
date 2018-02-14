@@ -1,6 +1,6 @@
 /**
- * @author suheeeee <lalune1120@hotmaile.com>
- */
+* @author suheeeee<lalune1120@hotmail.com>
+*/
 
 define([
   "./BrokerConnector.js",
@@ -241,6 +241,19 @@ define([
 
   }
 
+  /**
+  * @memberof Broker
+  */
+  Broker.prototype.getManager = function(msg, managerName){
+    var managers = this.topic[msg];
+
+    for(var key in managers){
+      if(managers[key].name == managerName)
+        return managers[key];
+    }
+
+    return null;
+  }
 
   return Broker;
 

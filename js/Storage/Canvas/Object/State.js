@@ -1,12 +1,14 @@
-define([
-  "../../../Observer/Subject.js"
-], function(
-  Subject
-) {
+/**
+* @author suheeeee<lalune1120@hotmail.com>
+*/
+
+define([], function() {
   'use strict';
 
+  /**
+  * @class State
+  */
   function State(_x, _y) {
-    Subject.apply(this, arguments);
     this.id = null;
 
     this.circle = new Konva.Circle({
@@ -19,8 +21,6 @@ define([
     });
 
   }
-
-  State.prototype = Object.create(Subject.prototype);
 
   return State;
 

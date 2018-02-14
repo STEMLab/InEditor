@@ -11,7 +11,6 @@ require([
   "./js/UI/UIContainer.js",
   "./js/Storage/Storage.js",
   "./js/EventHandler/EventHandler.js",
-  "./js/Manager/ManagerController.js",
   "./js/PubSub/Broker.js",
   "./js/Conditions.js",
   "./js/History/History.js"
@@ -19,7 +18,6 @@ require([
   UIContainer,
   Storage,
   EventHandler,
-  ManagerController,
   Broker,
   Conditions,
   History

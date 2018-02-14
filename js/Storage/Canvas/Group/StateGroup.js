@@ -1,3 +1,7 @@
+/**
+* @author suheeeee<lalune1120@hotmail.com>
+*/
+
 define([
   "../Object/State.js"
 ],function(
@@ -5,6 +9,9 @@ define([
 ) {
   'use strict';
 
+  /**
+  * @class StateGroup
+  */
   function StateGroup(){
 
     this.stateGroup = new Konva.Group({ x: 0, y: 0 });
