@@ -4,7 +4,7 @@
 
 define([
   "../PubSub/Message.js",
-  "../PubSub/Result.js"
+  "./Result.js"
 ], function(
   Message,
   Result
@@ -35,6 +35,14 @@ define([
       'contentClick': this.addNewDot
     };
 
+    handlerBinder['Escape'] = {
+      'keyup' : this.cancelDraw
+    };
+
+    handlerBinder['Enter'] = {
+      'keyup' : this.finishDraw
+    }
+
   }
 
   /**
@@ -43,14 +51,11 @@ define([
    */
   DrawEventHandler.prototype.clickCellBtn = function(broker, previousMsg) {
 
-    var result = {
-      'result': false,
-      'msg': null
-    };
-
     var result = new Result();
 
-    if (broker.isPublishable('start-addnewcell')) {
+    var isFloorExist = (window.storage.propertyContainer.floorProperties.length!=0);
+
+    if (isFloorExist && broker.isPublishable('start-addnewcell')) {
 
       // reqObj.floor will be active workspace
       broker.publish(new Message('start-addnewcell', null));
@@ -70,6 +75,10 @@ define([
       result.result = true;
       result.msg = null;
 
+    } else if(!isFloorExist){
+
+      result.msg = "There is no floor ...";
+
     } else {
 
       result.msg = "wrong state transition : " + previousMsg + " to start-addnewcell, end-addnewcell.";
@@ -86,10 +95,7 @@ define([
    */
   DrawEventHandler.prototype.clickFloorBtn = function(broker, previousMsg) {
 
-    var result = {
-      'result': false,
-      'msg': null
-    };
+    var result = new Result();
 
     if (broker.isPublishable('addnewfloor')) {
 
@@ -116,10 +122,7 @@ define([
    */
   DrawEventHandler.prototype.addNewDot = function(broker, previousMsg, data) {
 
-    var result = {
-      'result': false,
-      'msg': null
-    };
+    var result = new Result();
 
     if (broker.isPublishable('addnewcell')) {
 
@@ -157,6 +160,92 @@ define([
 
   }
 
+  /**
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.cancelDraw = function(broker, previousMsg) {
+
+    var result = new Result();
+
+    // The results of the broker.isPublishable function are the same in all cases,
+    // because addnewcell, addnewcellboundary, addnewstate, and addnewtransition all belong to the `draw` code.
+    // Therefore, proceed to the isPublishable test for any one msg(canceladdnewcell).
+
+    if (broker.isPublishable('canceladdnewcell')) {
+      switch (previousMsg) {
+        case 'addnewcell':
+          broker.publish(new Message('canceladdnewcell', {
+            'floor': window.tmpObj.floor
+          }));
+
+          result.result = true;
+          result.msg = 'canceladdnewcell';
+          break;
+        case 'addnewcellboundary':
+          broker.publish(new Message('canceladdnewcellboundary', {
+            'floor': window.tmpObj.floor
+          }));
+
+          result.result = true;
+          result.msg = 'canceladdnewcellboundary';
+          break;
+        case 'addnewstate':
+          broker.publish(new Message('canceladdnewstate', {
+            'floor': window.tmpObj.floor
+          }));
+
+          result.result = true;
+          result.msg = 'canceladdnewstate';
+          break;
+        case 'addnewtransition':
+          broker.publish(new Message('canceladdnewtransition', {
+            'floor': window.tmpObj.floor
+          }));
+
+          result.result = true;
+          result.msg = 'canceladdnewtransition';
+          break;
+        default:
+          result.msg = "no match function.";
+      }
+    } else {
+      result.msg = "wrong state transition : " + previousMsg + " to canceladdnewcell, canceladdnewcellboundary, canceladdnewtransition or canceladdnewtransition.";
+    }
+
+    return result;
+
+  }
+
+  /**
+   * @memberof DrawEventHandler
+   */
+   DrawEventHandler.prototype.finishDraw = function(broker, previousMsg){
+
+     var result = new Result();
+
+     if(broker.isPublishable('end-addnewcell')){
+
+       broker.publish(new Message('end-addnewcell', {
+         'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+         'floor': window.tmpObj.floor
+       }));
+
+       result.result = true;
+       result.msg = null;
+
+     } else if(broker.isPublishable('end-addnewcellboundary')){
+
+     } else if(broker.isPublishable('end-addnewstate')){
+
+     } else if(broker.isPublishable('end-addnewtrasition')){
+
+     } else{
+       result.mgs = "no match function."
+     }
+
+     return result;
+
+   }
 
 
 

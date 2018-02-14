@@ -268,8 +268,14 @@ define([
    */
   History.prototype.undo = function() {
 
+    if( this.history.empty() ) {
+      log.info("history is empty...");
+      return;
+    }
+
     // Is the last element of history is operation history object?
     var isOpq = (this.history.back().cycle_name != null);
+
     var undo;
 
     if (isOpq) {
@@ -277,7 +283,7 @@ define([
         return;
       else
         undo = this.history.back().opq.pop_back();
-    } else {
+    } else if(isHistoryExist) {
       undo = this.history.pop_back();
     }
 
@@ -287,7 +293,7 @@ define([
 
     }
 
-    log.trace(this);
+    // log.trace(this);
 
   }
 

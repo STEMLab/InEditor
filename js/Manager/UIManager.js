@@ -46,7 +46,7 @@ define([
 
     this.addCallbackFun('activateworkspace', this.activateWorkspace);
 
-    this.addCallbackFun('cancelAddNewCell', this.cancelAddNewCell);
+    this.addCallbackFun('canceladdnewcell', this.cancelAddNewCell);
   }
 
 
@@ -188,6 +188,10 @@ define([
 
   }
 
+
+  /**
+   * @memberof UIManager
+   */
   UIManager.prototype.addFloorPlan_undo = function(obj) {
 
     var condition = {};

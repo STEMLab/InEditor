@@ -183,7 +183,7 @@ define([
     }
 
     /**
-    * @param {Object} reqObj type<br>floor
+    * @param {Object} reqObj floor
     * @memberof GeometryManager
     * @desc set tmpObj to null
     */
@@ -192,6 +192,8 @@ define([
       window.tmpObj = null;
       window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.destroyChildren();
       window.storage.canvasContainer.stages[reqObj.floor].cellLayer.layer.draw();
+
+      window.myhistory.history.pop_back();
 
     }
 

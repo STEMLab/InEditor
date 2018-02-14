@@ -121,6 +121,10 @@ define([
     this.reqSpecList['end-addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['updaterefdata'] = new MessageSpec('single', 'including', null,false);
     this.reqSpecList['activateworkspace'] = new MessageSpec('single', 'excluding', ['draw'], false);
+    this.reqSpecList['canceladdnewcell'] = new MessageSpec('single', 'including', ['draw'], false);
+    this.reqSpecList['canceladdnewcellboundary'] = new MessageSpec('single', 'including', ['draw'], false);
+    this.reqSpecList['canceladdnewstate'] = new MessageSpec('single', 'including', ['draw'], false);
+    this.reqSpecList['canceladdnewtransition'] = new MessageSpec('single', 'including', ['draw'], false);
 
   }
 
@@ -219,7 +223,7 @@ define([
 
           // somemsg -> end-somemsg
           if (splitReq[0] == 'end' && splitPreReq[0] == splitReq[1] ) {
-            
+
             result = true;
 
           }

@@ -114,9 +114,16 @@ define([
   EventHandler.prototype.keyEventBind = function() {
 
     $(window).keypress(function(event) {
-
-      if(event.keyCode == 26 && event.ctrlKey){
+      if (event.keyCode == 26 && event.ctrlKey) {
         window.myhistory.undo();
+      }
+    });
+
+    $(document).keyup(function(event) {
+      if (event.key == 'Escape') {
+        window.eventHandler.callHandler('keyboard', event);
+      } else if(event.key == 'Enter'){
+        window.eventHandler.callHandler('keyboard', event);
       }
     });
 
@@ -178,15 +185,16 @@ define([
       type = _event.type;
       data = _event;
 
+    } else if(_target == 'keyboard'){
+
+      target = _event.key;
+      type = _event.type;
+
     }
 
     var result = this.handlerBinder[target][type](window.broker, window.myhistory.getPreviousMsg(), data);
 
-    if (result.result) {
-
-      window.broker.previousMsg = result.msg;
-
-    } else {
+    if (!result.result) {
 
       log.error(result.msg);
 
