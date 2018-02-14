@@ -283,7 +283,7 @@ define([
         return;
       else
         undo = this.history.back().opq.pop_back();
-    } else if(isHistoryExist) {
+    } else {
       undo = this.history.pop_back();
     }
 

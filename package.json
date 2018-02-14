@@ -4,27 +4,24 @@
   "description": "IndoorGML-Editor\r =============",
   "main": "app.js",
   "directories": {
-    "doc": "doc",
     "lib": "lib"
-  },
-  "dependencies": {
-    "docdash": "^0.4.0",
-    "docco": "^0.8.0",
-    "egjs-jsdoc-template": "^1.4.4",
-    "doxie": "^0.2.4",
-    "ink-docstrap": "^1.3.2",
-    "jsdoc": "^3.5.5",
-    "kitsune-jsdoc-template": "^1.0.3",
-    "minami": "^1.2.3",
-    "simple-jsdoc": "^0.0.4"
-  },
-  "devDependencies": {
-    "express": "^4.16.2",
-    "express-fileupload": "^0.4.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/STEMLab/IndoorGML-Editor.git"
+  },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/STEMLab/IndoorGML-Editor/issues"
+  },
+  "homepage": "https://github.com/STEMLab/IndoorGML-Editor#readme",
+  "devDependencies": {
+    "express": "^4.16.2",
+    "express-fileupload": "^0.4.0",
+    "locks": "^0.2.2"
+  }
 }
