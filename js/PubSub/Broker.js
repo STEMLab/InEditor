@@ -125,6 +125,7 @@ define([
     this.reqSpecList['canceladdnewcellboundary'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['canceladdnewstate'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['canceladdnewtransition'] = new MessageSpec('single', 'including', ['draw'], false);
+    this.reqSpecList['exporttojson'] = new MessageSpec('single', 'including', null, false);
 
   }
 

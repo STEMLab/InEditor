@@ -52,7 +52,15 @@ define([
    * @memberof CellFormat
    */
   CellFormat.prototype.setCoordinates = function(coordinates) {
-    this.geometry2d.coordinates = coordinates;
+
+    var len = coordinates.length;
+
+    for (var i = 0; i < len; i = i + 2) {
+
+      this.geometry2d.coordinates.push([coordinates[i], coordinates[i + 1]]);
+
+    }
+
   }
 
   return CellFormat;

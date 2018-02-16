@@ -1,11 +1,13 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
-  "../PubSub/Subscriber.js"
-],function(
-  Subscriber
+  "../PubSub/Subscriber.js",
+  "../JsonFormat/CellFormat.js"
+], function(
+  Subscriber,
+  CellFormat
 ) {
   'use strict';
 
@@ -22,9 +24,11 @@ define([
 
   ProjectManager.prototype = Object.create(Subscriber.prototype);
 
-  ProjectManager.prototype.init = function(){
+  ProjectManager.prototype.init = function() {
 
     this.name = 'ProjectManager';
+
+    this.addCallbackFun('exporttojson', this.exportToJson);
 
   }
 
@@ -32,43 +36,55 @@ define([
    * @param {Message.reqObj} reqObj null
    * @memberof ProjectManager
    */
-   ProjectManager.prototype.exportToJson = function(reqObj){
+  ProjectManager.prototype.exportToJson = function(reqObj) {
 
-     var manager = window.broker.getManager('exporttojson', 'ProjectManager');
-     var result = manager.celldataToJson();
-     log.info(result);
+    var manager = window.broker.getManager('exporttojson', 'ProjectManager');
 
-   }
+    var cell = { "CellSpace" : manager.celldataToJson() };
 
-   /**
-    * @memberof ProjectManager
-    */
-   ProjectManager.prototype.celldataToJson = function(){
+    var xhr = new XMLHttpRequest();
+    var filename = null;
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status == 200) {
+        log.info(">>>> succeed to exporting json");
+      }
+    }
 
-     var result;
+    xhr.open("POST", "http://127.0.0.1:8080/export-json", true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(JSON.stringify(cell));
 
-     var geometries = window.storage.geometryContainer.cellGeometry;
+  }
 
-     for( var key in geometries ){
+  /**
+   * @memberof ProjectManager
+   */
+  ProjectManager.prototype.celldataToJson = function() {
 
-       var tmp = new CellFormat();
-       tmp.setCoordinates(geometries[key].points);
-       result[geometries[key].id] = tmp;
+    var result = {};
 
-     }
+    var geometries = window.storage.geometryContainer.cellGeometry;
 
-     var properties = window.storage.propertyContainer.cellProperties;
+    for (var key in geometries) {
 
-     for( var key in properties ){
+      var tmp = new CellFormat();
+      tmp.setCoordinates(geometries[key].points);
+      result[geometries[key].id] = tmp;
 
-       result[properties[key].id].setName(properties[key].name);
-       result[properties[key].id].setDesc(properties[key].description);
+    }
 
-     }
+    var properties = window.storage.propertyContainer.cellProperties;
 
-     return result;
+    for (var key in properties) {
 
-   }
+      result[properties[key].id].setName(properties[key].name);
+      result[properties[key].id].setDesc(properties[key].description);
+
+    }
+
+    return result;
+
+  }
 
 
 
