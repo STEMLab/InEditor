@@ -9,6 +9,10 @@
     --property-tab-title-color : #eaeaea;
 
     --sidebar-width: 17rem;
+
+    --property-container-width: 16.5rem;
+    --property-container-title-width: 5rem;
+    --property-container-value-width: 11.5rem;
 }
 
 * {
@@ -117,51 +121,67 @@ body {
     overflow-y: auto;
 }
 
-/* custom scrollbar */
-/* width */
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-    background: #888;
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
 .property-container table{
-    width: 100%;
+    width: var(--property-container-width);
     margin-top: 0.5rem;
 }
 
 .property-container table tr{
-    width: 100%;
+  width: var(--property-container-width);
 }
 
 .property-container button{
     background-color : var(--treeview-bg-color);
     color : white;
     border : solid 0.001rem #5e5e5e;
-
-    width:100%;
 }
+
+.property-container .inner-tag{
+    font-weight: bold;
+}
+
 
 .property-container .title{
     color : var(--property-tab-title-color);
     font-weight : bold;
     text-align: right;
     padding-right: 0.5rem;
+    width: var(--property-container-title-width);
 }
 
+.property-container .value{
+    color : var(--property-tab-title-color);
+    font-weight : bold;
+    text-align: right;
+    padding-right: 0.5rem;
+    width: var(--property-container-value-width);
+}
+
+#property-table {
+  width: 0.1rem;
+}
+
+
+/* custom scrollbar */
+/* width */
+::-webkit-scrollbar {
+    width: 0.5rem;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: var(--treeview-bg-color);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #333;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 
 
 /*

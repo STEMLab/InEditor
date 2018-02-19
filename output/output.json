@@ -1,0 +1,20 @@
+{
+	"CellSpace": {
+		"C1": {
+			"type": "CellSpace",
+			"attributes": {
+				"name": "C1",
+				"description": ""
+			},
+			"geometry2d": {
+				"type": "Polygon",
+				"coordinates": [
+					[0,0],
+					[0,0],
+					[0,0],
+					[0,0]
+				]
+			}
+		}
+	}
+}

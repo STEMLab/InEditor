@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
   "./Sidebar/Sidebar.js",
@@ -12,19 +12,27 @@ define([
   'use strict';
 
   /**
-  * @class UIContainer
-  */
-  function UIContainer(){
+   * @class UIContainer
+   */
+  function UIContainer() {
 
     /**
-    * @memberof UIContainer
-    */
+     * @memberof UIContainer
+     */
     this.sidebar = new Sidebar();
 
     /**
-    * @memberof UIContainer
-    */
+     * @memberof UIContainer
+     */
     this.workspace = new Workspace();
+
+  }
+
+  UIContainer.prototype.resize = function() {
+
+    window.uiContainer.workspace.workspaceLayout.updateSize();
+    // window.uiContainer.sidebar.property.resize();
+
   }
 
   return UIContainer;

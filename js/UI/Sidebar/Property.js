@@ -12,6 +12,20 @@ define([], function() {
 
   };
 
+  Property.prototype.resize = function(){
+
+    var sidebarH = document.getElementById('property-container').parentElement.clientHeight;
+    var treeviewH = document.getElementById('tree-view').clientHeight
+    log.info("sidebarH : " + sidebarH);
+    log.info("treeviewH : " + treeviewH);
+    log.info("sidebarH - treeviewH : " + (sidebarH - treeviewH));
+    log.info("property-container : " + document.getElementById('property-container').style);
+    document.getElementById('property-container').style.height = sidebarH - treeviewH;
+    log.info(document.getElementById('property-container').style.height);
+    log.info(document.getElementById('property-container').clientHeight)
+
+  }
+
   /**
    * @param type The type of object to be displayed in the property tab. 'floor', 'cell', 'cellboundry', 'state', 'transition'
    * @param {String} id The id of object to be displayed in the property tab.
@@ -27,6 +41,7 @@ define([], function() {
     else if (type == "state") this.setStateProperty(id, storage);
     else if (type == "transition") this.setTransitionProperty(id, storage);
     else if (type == "project") this.setProjectProperty(id, storage);
+
 
   }
 
@@ -65,13 +80,15 @@ define([], function() {
     propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + floorProperty.id + " disabled></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + floorProperty.name + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">level</td><td class=\"value\"><input id=\"level-text\" type=\"text\" value=" + floorProperty.level + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">lower corner</td><td class=\"value\"><input id=\"lower-corner-text\" type=\"text\" value=" + floorProperty.lowerCorner + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">upper corner</td><td class=\"value\"><input id=\"upper-corner-text\" type=\"text\" value=" + floorProperty.upperCorner + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">Lower<br>Left<br>Corner</td><td class=\"value\"></td>";
+    propertiesDiv += "<td><table><tr class=\"value\"><td class=\"inner-tag\">x</td><td class=\"inner-value\"><input value="+floorProperty.lowerCorner[0]+"></td></tr>";
+    propertiesDiv += "<tr><td class=\"inner-tag\">y</td><td class=\"inner-value\><input value="+floorProperty.lowerCorner[1]+"></td></tr></table></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">Upper<br>Right<br>Corner</td><td class=\"value\"><input id=\"upper-corner-text\" type=\"text\" value=" + floorProperty.upperCorner[0] + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">ground height</td><td class=\"value\"><input id=\"ground-height-text\" type=\"text\" value=" + floorProperty.groundHeight + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">celing height</td><td class=\"value\"><input id=\"celing-height-text\" type=\"text\" value=" + floorProperty.celingHeight + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">door height</td><td class=\"value\"><input id=\"door-height-text\" type=\"text\" value=" + floorProperty.doorHeight + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">description</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + floorProperty.description + "</textarea></td></tr>";
-    propertiesDiv += "</table><br>";
+    propertiesDiv += "<br>";
     propertiesDiv += "<tr><td><button id=\"property-subimt-btn\">submit</button></td></tr></table>";
 
     var divs = {

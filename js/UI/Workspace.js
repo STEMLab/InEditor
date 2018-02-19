@@ -35,7 +35,7 @@ define([], function() {
     this.workspaceLayout.init();
 
     $(window).resize(function() {
-      window.uiContainer.workspace.workspaceLayout.updateSize();
+      window.uiContainer.resize();
 
     });
 
@@ -64,7 +64,7 @@ define([], function() {
 
 
     $(window).resize(function() {
-      window.uiContainer.workspace.workspaceLayout.updateSize();
+      window.uiContainer.resize();
     });
 
   }

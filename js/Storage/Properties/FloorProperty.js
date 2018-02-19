@@ -28,12 +28,12 @@ define([],function() {
     /**
     * @memberof FloorProperty
     */
-    this.lowerCorner = [0, 0, 0];
+    this.lowerCorner = [0, 0];
 
     /**
     * @memberof FloorProperty
     */
-    this.upperCorner = [0, 0, 0];
+    this.upperCorner = [0, 0];
 
     /**
     * @memberof FloorProperty

@@ -25,7 +25,7 @@ define([
     * @memberof Sidebar
     */
     this.property = new Property();
-
+    
   };
   return Sidebar;
 });

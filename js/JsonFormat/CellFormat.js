@@ -50,8 +50,9 @@ define([
 
   /**
    * @memberof CellFormat
+   * @param coordinates 1 * n array
    */
-  CellFormat.prototype.setCoordinates = function(coordinates) {
+  CellFormat.prototype.pushCoordinates = function(coordinates) {
 
     var len = coordinates.length;
 
@@ -60,6 +61,27 @@ define([
       this.geometry2d.coordinates.push([coordinates[i], coordinates[i + 1]]);
 
     }
+
+  }
+
+  /**
+  * @memberof CellFormat
+  * @param coordinates 1 * n array
+  */
+  CellFormat.prototype.setCoordinates = function(coordinates){
+
+    this.geometry2d.coordinates = [];
+
+    this.pushCoordinates(coordinates);
+
+  }
+
+ /**
+ * return coordinates array
+ */
+  CellFormat.prototype.getCoordinates = function(){
+
+    return this.geometry2d.coordinates;
 
   }
 
