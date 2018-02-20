@@ -11,7 +11,7 @@
     --sidebar-width: 17rem;
 
     --property-container-width: 16.5rem;
-    --property-container-title-width: 5rem;
+    --property-container-title-width: 3rem;
     --property-container-value-width: 11.5rem;
 }
 
@@ -29,10 +29,15 @@
     user-select: none;
 }
 
+html {
+  height: 100%;
+}
+
 
 body {
     padding-top: 1.8rem;
     font-size: 12px;
+    height: 100%;
 }
 
 
@@ -109,6 +114,7 @@ body {
 }
 
 .property-container{
+    position: relative;
     background: #606060;
     min-height: 2.0rem;
     margin:0.5rem;
@@ -121,19 +127,40 @@ body {
     overflow-y: auto;
 }
 
-.property-container table{
-    width: var(--property-container-width);
-    margin-top: 0.5rem;
+.property-table{
+    position: absolute;
+    table-layout: fixed;
+    width: inherit;
 }
 
-.property-container table tr{
-  width: var(--property-container-width);
+input[id="floorplan-file"]{
+    width: inherit;
+    overflow-x: hidden;
+}
+
+input{
+  width: inherit;
+}
+
+textarea{
+  width: inherit;
+}
+
+.value{
+    width: 70%;
+}
+
+.title{
+    width: 30%;
 }
 
 .property-container button{
     background-color : var(--treeview-bg-color);
     color : white;
     border : solid 0.001rem #5e5e5e;
+    width: 90%;
+    left: 5%;
+    margin: 0.2rem;
 }
 
 .property-container .inner-tag{
@@ -146,7 +173,6 @@ body {
     font-weight : bold;
     text-align: right;
     padding-right: 0.5rem;
-    width: var(--property-container-title-width);
 }
 
 .property-container .value{
@@ -154,17 +180,13 @@ body {
     font-weight : bold;
     text-align: right;
     padding-right: 0.5rem;
-    width: var(--property-container-value-width);
 }
-
-#property-table {
-  width: 0.1rem;
-}
-
 
 /* custom scrollbar */
 /* width */
 ::-webkit-scrollbar {
+    position : absolute;
+    right: 0;
     width: 0.5rem;
 }
 
