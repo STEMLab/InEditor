@@ -49,8 +49,6 @@ define([
    */
   PropertyManager.prototype.addNewFloor = function(reqObj) {
 
-    log.info(window.broker);
-
     var newFloorProperty = new FloorProperty();
 
     // add new property

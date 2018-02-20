@@ -115,7 +115,7 @@ body {
 
 .property-container{
     position: relative;
-    background: #606060;
+    background: var(--treeview-bg-color);
     min-height: 2.0rem;
     margin:0.5rem;
     border-radius: 0.1rem;
