@@ -84,6 +84,8 @@ define([], function() {
     */
     this.maxHistoryLen = 10;
 
+    this.ctrlDown = false;
+
   }
 
   /**
