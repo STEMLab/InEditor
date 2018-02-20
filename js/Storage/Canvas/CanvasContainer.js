@@ -1,3 +1,7 @@
+/**
+* @author suheeeee<lalune1120@hotmail.com>
+*/
+
 define([
   "./Stage.js"
 ], function(
@@ -5,6 +9,9 @@ define([
 ) {
   'use strict';
 
+  /**
+  * @class CanvasContainer
+  */
   function CanvasContainer() {
     this.stages = [];
 

@@ -1,6 +1,7 @@
 /**
- * @author suheeeee <lalune1120@hotmaile.com>
- */
+* @author suheeeee<lalune1120@hotmail.com>
+*/
+
 define([
   "./ProjectProperty.js"
 ], function(
@@ -12,11 +13,35 @@ define([
    * @class PropertyContainer
    */
   function PropertyContainer() {
+
+    /**
+    * @memberof PropertyContainer
+    */
     this.floorProperties = [];
+
+    /**
+    * @memberof PropertyContainer
+    */
     this.cellProperties = [];
+
+    /**
+    * @memberof PropertyContainer
+    */
     this.cellBoundaryProperties = [];
+
+    /**
+    * @memberof PropertyContainer
+    */
     this.stateProperties = [];
+
+    /**
+    * @memberof PropertyContainer
+    */
     this.transitionProperties = [];
+
+    /**
+    * @memberof PropertyContainer
+    */
     this.projectProperty = new ProjectProperty();
   }
 

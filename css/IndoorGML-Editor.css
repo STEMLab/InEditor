@@ -1,0 +1,258 @@
+:root {
+    --menubar-bg-color: black;
+    --toolbar-bg-color: black;
+    --sidebar-bg-color: black;
+    --treeview-bg-color: #222222;
+    --workspace-bg-color: black;
+    --viewport-bg-color: #eaeaea;
+
+    --property-tab-title-color : #eaeaea;
+
+    --sidebar-width: 17rem;
+
+    --property-container-width: 16.5rem;
+    --property-container-title-width: 3rem;
+    --property-container-value-width: 11.5rem;
+}
+
+* {
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+.Panel {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+html {
+  height: 100%;
+}
+
+
+body {
+    padding-top: 1.8rem;
+    font-size: 12px;
+    height: 100%;
+}
+
+
+.navbar {
+    max-height: 1.8rem;
+}
+
+.navbar img{
+    max-height: 1.5rem;
+    margin-right: 0.4rem;
+}
+
+/**
+* menu bar
+*/
+.menubar{
+    background-color: var(--menubar-bg-color);
+
+}
+
+.toolbar {
+    max-height: 2.0rem;
+    border-top: solid 0.01rem #e5e5e5f5;
+    background-color: var(--toolbar-bg-color);
+}
+
+.navbar-expand .navbar-nav .dropdown-menu{
+    background-color: #fefefefe;
+    font-size: 11px;
+    border-radius: 0px;
+}
+
+
+/*
+ * Sidebar
+ */
+
+.sidebar {
+    background-color: var(--sidebar-bg-color);
+    position: fixed;
+    top: 3.8rem;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    padding-top : 0.7rem;
+    padding-bottom: 0.7rem;
+    padding-right: 0.8rem;
+    padding-left: 0;
+    width: var(--sidebar-width);
+    overflow-x: auto;
+    overflow-y: auto;
+    border: none;
+}
+
+
+.tree-view-container{
+    background: var(--treeview-bg-color);
+    min-height: 2.0rem;
+    margin:0.5rem;
+    border-radius: 0.3rem;
+    max-height: 50rem;
+    padding-top: 0.5rem;
+    overflow-y: auto;
+}
+
+.tree-view-container ul{
+    list-style : none;
+    padding-left: 0.8rem;
+    color: #e5e5e5;
+}
+
+.fancytree-icon{
+    margin-right: 0.3rem;
+}
+
+.property-container{
+    position: relative;
+    background: var(--treeview-bg-color);
+    min-height: 2.0rem;
+    margin:0.5rem;
+    border-radius: 0.1rem;
+}
+
+.property-container .lm_content{
+    color : #e5e5e5;
+    box-shadow: none;
+    overflow-y: auto;
+}
+
+.property-table {
+    position: absolute;
+    table-layout: fixed;
+    width: 100%;
+}
+
+input[id="floorplan-file"]{
+    width: inherit;
+    overflow-x: hidden;
+}
+
+td input{
+  width: 90%;
+  left: 0;
+}
+
+td select{
+  width: 50%;
+  left: 0;
+}
+
+.property-table .submit-btn{
+    background-color : var(--treeview-bg-color);
+    color : white;
+    border : solid 0.001rem #5e5e5e;
+    width: 90%;
+    margin: 0.2rem;
+    text-align: center;
+}
+
+.property-table .inner-tag{
+    font-weight: bold;
+    text-align: center;
+    width: 10%;
+}
+
+.property-table .inner-value{
+    width: 60%;
+}
+
+.property-table .title{
+    color : var(--property-tab-title-color);
+    font-weight : bold;
+    text-align: right;
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+    width: 30%;
+}
+
+.property-table .value{
+    color : var(--property-tab-title-color);
+    font-weight : bold;
+    text-align: left;
+    width: 70%;
+}
+
+.property-table textarea{
+  width: 90%;
+}
+
+/* custom scrollbar */
+/* width */
+::-webkit-scrollbar {
+    position : absolute;
+    right: 0;
+    width: 0.5rem;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: var(--treeview-bg-color);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #333;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+
+/*
+ * Workspace
+ */
+
+.workspace{
+    position: fixed;
+    left: 17rem;
+    right: 0;
+    top: 2.14rem;
+    bottom: 0;
+    z-index: 1000;
+    padding-top : 0.7rem;
+    padding-bottom: 0.7rem;
+    padding-right: 0.8rem;
+    padding-left: 0;
+    overflow-x: auto;
+    overflow-y: auto;
+    background-color: var(--workspace-bg-color);
+}
+
+#workspace-layout-container {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+#workspace-layout-container .lm_items {
+    background-color : #222222;
+}
+
+#workspace-layout-container .lm_item_container{
+    overflow: hidden;
+}
+
+#workspace-layout-container .canvas{
+    background-color : black;
+}
+
+
+#workspace-layout-container .konvajs-content{
+    width: inherit;
+    height: inherit;
+    overflow: hidden;
+    background-color : var(--viewport-bg-color);
+}

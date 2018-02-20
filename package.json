@@ -22,6 +22,10 @@
   "devDependencies": {
     "express": "^4.16.2",
     "express-fileupload": "^0.4.0",
+    "json-format": "^1.0.1",
     "locks": "^0.2.2"
+  },
+  "dependencies": {
+    "js2uml": "^0.2.3"
   }
 }

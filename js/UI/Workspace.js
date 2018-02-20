@@ -1,6 +1,6 @@
 /**
- * @author suheeeee <lalune1120@hotmaile.com>
- */
+* @author suheeeee<lalune1120@hotmail.com>
+*/
 
 define([], function() {
   'use strict';
@@ -35,7 +35,7 @@ define([], function() {
     this.workspaceLayout.init();
 
     $(window).resize(function() {
-      window.uiContainer.workspace.workspaceLayout.updateSize();
+      window.uiContainer.resize();
 
     });
 
@@ -64,7 +64,7 @@ define([], function() {
 
 
     $(window).resize(function() {
-      window.uiContainer.workspace.workspaceLayout.updateSize();
+      window.uiContainer.resize();
     });
 
   }

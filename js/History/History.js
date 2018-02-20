@@ -1,6 +1,6 @@
 /**
- * @author suheeeee <lalune1120@hotmaile.com>
- */
+* @author suheeeee<lalune1120@hotmail.com>
+*/
 
 define([
   "./Deque.js",
@@ -113,7 +113,7 @@ define([
 
     }
 
-    log.trace(this.history);
+    // log.trace(this.history);
 
   }
 

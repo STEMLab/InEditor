@@ -1,3 +1,7 @@
+/**
+* @author suheeeee<lalune1120@hotmail.com>
+*/
+
 define([
   "./CellGeometry.js",
   "./CellBoundaryGeometry.js",

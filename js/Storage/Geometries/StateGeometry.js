@@ -1,18 +1,25 @@
-define([
-  "../../Observer/Observer.js"
-], function(
-  Observer
-) {
+/**
+* @author suheeeee<lalune1120@hotmail.com>
+*/
+
+define([], function() {
   'use strict';
 
+  /**
+  * @class StateGeometry
+  */
   function StateGeometry() {
-    Observer.apply(this, arguments);
 
+    /**
+    * @memberof StateGeometry
+    */
     this.id;
+
+    /**
+    * @memberof StateGeometry
+    */
     this.points = new Array(2);
   }
-
-  StateGeometry.prototype = Object.create(Observer.prototype);
 
   return StateGeometry;
 });

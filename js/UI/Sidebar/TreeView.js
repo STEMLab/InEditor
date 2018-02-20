@@ -1,5 +1,5 @@
 /**
-* @author suheeeee <lalune1120@hotmaile.com>
+* @author suheeeee<lalune1120@hotmail.com>
 */
 
 define([], function() {
@@ -55,6 +55,7 @@ define([], function() {
     floorObj.key = newFloorProperty.id;
     floorObj.folder = true;
     floorObj.type = "floor";
+    floorObj.icon = '../../assets/tree-icon/floor.png'
     floorObj.children = new Array();
 
     floorObj.children.push({"title" : "Cell", "key" : newFloorProperty.id+"-cell", "folder" : true, "type" : "cellFolder"});
@@ -90,7 +91,8 @@ define([], function() {
       title : id,
       key : id,
       folder : false,
-      type : 'cell'
+      type : 'cell',
+      icon : '../../assets/tree-icon/cell.png'
     });
 
     $("#tree-view").fancytree("getTree").activateKey(id);

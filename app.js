@@ -3,6 +3,7 @@ var fileUpload = require("express-fileupload");
 var bodyParser = require('body-parser');
 var locks = require('locks');
 var path = require("path");
+var jsonFormat = require("json-format");
 var fs = require("fs");
 var app = express();
 
@@ -117,7 +118,6 @@ app.post('/floorplan-create-historyobj', function(req, res) {
 
 });
 
-
 app.post('/floorplan-undo', function(req, res) {
 
   mutex.lock(function() {
@@ -128,7 +128,7 @@ app.post('/floorplan-undo', function(req, res) {
     var mode = req.body.mode;
     var floor = req.body.floor;
 
-    if(mode == "delete only"){
+    if (mode == "delete only") {
       fs.readdir("./assets/floorplan/", function(err, files) {
         // console.log("> delete only : fs.readdir");
 
@@ -139,7 +139,9 @@ app.post('/floorplan-undo', function(req, res) {
             fs.unlink("./assets/floorplan/" + files[i], function(err) {
               // console.log("> delete only : " + files[i] + " fs.unlink");
               if (err) throw err;
-              res.json({ result: "delete success" });
+              res.json({
+                result: "delete success"
+              });
 
               console.log('----- unlock : floorplan-undo ------------------');
               mutex.unlock();
@@ -148,7 +150,7 @@ app.post('/floorplan-undo', function(req, res) {
           }
         }
       });
-    } else if(mode == "delete and rename"){
+    } else if (mode == "delete and rename") {
       fs.readdir("./assets/floorplan/", function(err, files) {
         // console.log("> delete and rename : fs.readdir");
         for (var i = 0; i < files.length; i++) {
@@ -163,7 +165,10 @@ app.post('/floorplan-undo', function(req, res) {
               // console.log("> extention : " + extention);
               fs.rename(req.body.filename, "./assets/floorplan/" + req.body.floor + "." + extention, function() {
                 // console.log("> delete and rename : " + files[i] + " fs.rename");
-                res.json({ result: "delete and rename success", filename :  "./assets/floorplan/" + req.body.floor + "." + extention});
+                res.json({
+                  result: "delete and rename success",
+                  filename: "./assets/floorplan/" + req.body.floor + "." + extention
+                });
 
                 // console.log('> rename : ' + req.body.filename + ' to ' + req.body.floor + "." + extention );
                 console.log('----- unlock : floorplan-undo ------------------');
@@ -178,4 +183,27 @@ app.post('/floorplan-undo', function(req, res) {
     }
 
   });
+});
+
+app.post('/export-json', function(req, res) {
+
+  mutex.lock(function() {
+
+    console.log('----- lock : export-json -------------------');
+    console.log(req.body);
+
+    fs.writeFile('./output/output.json', jsonFormat(req.body), 'utf8', function(err) {
+
+      if (err) return res.status(500).send(err);
+
+      res.json('success');
+
+      console.log('----- unlock : export-json -------------------');
+
+      mutex.unlock();
+
+    });
+
+  });
+
 });

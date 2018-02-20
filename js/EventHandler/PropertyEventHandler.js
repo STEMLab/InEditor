@@ -1,6 +1,6 @@
 /**
- * @author suheeeee <lalune1120@hotmaile.com>
- */
+* @author suheeeee<lalune1120@hotmail.com>
+*/
 
 define([
   "../PubSub/Message.js"
@@ -119,8 +119,8 @@ define([
         result = {
           'name': document.getElementById("name-text").value,
           'level': document.getElementById("level-text").value,
-          'lowerCorner': document.getElementById("lower-corner-text").value,
-          'upperCorner': document.getElementById("upper-corner-text").value,
+          'lowerCorner': [ document.getElementById("lower-corner-x").value, document.getElementById("lower-corner-y").value ],
+          'upperCorner': [ document.getElementById("upper-corner-x").value, document.getElementById("upper-corner-y").value],
           'groundHeight': document.getElementById("ground-height-text").value,
           'celingHeight': document.getElementById("celing-height-text").value,
           'doorHeight': document.getElementById("door-height-text").value,

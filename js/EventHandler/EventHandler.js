@@ -1,5 +1,5 @@
 /**
- * @author suheeeee <lalune1120@hotmaile.com>
+ * @author suheeeee <lalune1120@hotmail.com>
  */
 
 define([
@@ -113,19 +113,32 @@ define([
 
   EventHandler.prototype.keyEventBind = function() {
 
-    $(window).keypress(function(event) {
-      if (event.keyCode == 26 && event.ctrlKey) {
+    $(document).keydown(function(event) {
+      if ( event.ctrlKey ) {
+        window.conditions.ctrlDown = true;
+      }
+
+      if (window.conditions.ctrlDown == true && event.keyCode == 90) {
+        event.preventDefault();
         window.myhistory.undo();
       }
     });
 
     $(document).keyup(function(event) {
+
       if (event.key == 'Escape') {
         window.eventHandler.callHandler('keyboard', event);
-      } else if(event.key == 'Enter'){
+      } else if (event.key == 'Enter') {
         window.eventHandler.callHandler('keyboard', event);
       }
+
+      if( event.key == 'Control' ) {
+        window.conditions.ctrlDown = false;
+      }
     });
+
+
+
 
   }
 
@@ -185,7 +198,7 @@ define([
       type = _event.type;
       data = _event;
 
-    } else if(_target == 'keyboard'){
+    } else if (_target == 'keyboard') {
 
       target = _event.key;
       type = _event.type;

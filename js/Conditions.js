@@ -1,13 +1,12 @@
 /**
- * @author suheeeee <lalune1120@hotmaile.com>
- */
+* @author suheeeee<lalune1120@hotmail.com>
+*/
 
 define([], function() {
   'use strict';
 
   /**
-   * @desc
-   * @exports Conditions
+   * @class Conditions
    */
   function Conditions() {
 
@@ -19,24 +18,28 @@ define([], function() {
 
     /**
     * @desc Prefix of cellBoundary object
+    * @memberof Conditions
     * @default B
     */
     this.pre_cellBoundary = 'B';
 
     /**
     * @desc Prefix of floor object
+    * @memberof Conditions
     * @default F
     */
     this.pre_floor = 'F';
 
     /**
     * @desc Prefix of state object
+    * @memberof Conditions
     * @default S
     */
     this.pre_state = 'S';
 
     /**
     * @desc Prefix of transtiion object
+    * @memberof Conditions
     * @default T
     */
     this.pre_transition = 'T';
@@ -49,35 +52,45 @@ define([], function() {
 
     /**
     * @desc The aspect ratio used to create the stage
+    * @memberof Conditions
     * @default { x : 4, y : 3 }
     */
     this.aspectRatio = { x : 4, y : 3 };
 
     /**
     * @desc scale factor
+    * @memberof Conditions
     * @default 1.5
     */
     this.scaleFactor = 1.1;
 
     /**
     * @desc min scale
+    * @memberof Conditions
     * @default 1
     */
     this.scaleMin = 1;
 
     /**
     * @desc max scale
+    * @memberof Conditions
     * @default 50
     */
     this.scaleMax = 50;
 
     /**
+    * @memberof Conditions
     * @default 10
     */
     this.maxHistoryLen = 10;
-    
+
+    this.ctrlDown = false;
+
   }
 
+  /**
+  * @memberof Conditions
+  */
   Conditions.prototype.guid = function() {
     function s4() {
       return ((1 + Math.random()) * 0x10000 | 0).toString(16).substring(1);
@@ -85,6 +98,9 @@ define([], function() {
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
   }
 
+  /**
+  * @memberof Conditions
+  */
   Conditions.prototype.getDate = function() {
     var d = new Date();
 
@@ -96,6 +112,9 @@ define([], function() {
     return s;
   }
 
+  /**
+  * @memberof Conditions
+  */
   Conditions.prototype.leadingZeros = function(n, digits) {
     var zero = '';
     n = n.toString();

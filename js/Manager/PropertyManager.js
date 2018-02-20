@@ -1,6 +1,6 @@
 /**
- * @author suheeeee <lalune1120@hotmaile.com>
- */
+* @author suheeeee<lalune1120@hotmail.com>
+*/
 
 define([
   "../Storage/Properties/FloorProperty.js",
@@ -35,13 +35,6 @@ define([
   PropertyManager.prototype.init = function() {
 
     this.name = 'PropertyManager';
-
-    // this.addReq({
-    //   'addnewfloor' : null,
-    //   'updateproperty' : null,
-    //   'end-addnewcell' : null,
-    //   'updaterefdata' : null
-    // });
 
     this.addCallbackFun('addnewfloor', this.addNewFloor);
     this.addCallbackFun('updateproperty', this.updateProperty);
