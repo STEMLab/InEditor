@@ -127,10 +127,10 @@ body {
     overflow-y: auto;
 }
 
-.property-table{
+.property-table {
     position: absolute;
     table-layout: fixed;
-    width: inherit;
+    width: 100%;
 }
 
 input[id="floorplan-file"]{
@@ -138,48 +138,53 @@ input[id="floorplan-file"]{
     overflow-x: hidden;
 }
 
-input{
-  width: inherit;
+td input{
+  width: 90%;
+  left: 0;
 }
 
-textarea{
-  width: inherit;
+td select{
+  width: 50%;
+  left: 0;
 }
 
-.value{
-    width: 70%;
-}
-
-.title{
-    width: 30%;
-}
-
-.property-container button{
+.property-table .submit-btn{
     background-color : var(--treeview-bg-color);
     color : white;
     border : solid 0.001rem #5e5e5e;
     width: 90%;
-    left: 5%;
     margin: 0.2rem;
+    text-align: center;
 }
 
-.property-container .inner-tag{
+.property-table .inner-tag{
     font-weight: bold;
+    text-align: center;
+    width: 10%;
 }
 
+.property-table .inner-value{
+    width: 60%;
+}
 
-.property-container .title{
+.property-table .title{
     color : var(--property-tab-title-color);
     font-weight : bold;
     text-align: right;
     padding-right: 0.5rem;
+    padding-left: 0.5rem;
+    width: 30%;
 }
 
-.property-container .value{
+.property-table .value{
     color : var(--property-tab-title-color);
     font-weight : bold;
-    text-align: right;
-    padding-right: 0.5rem;
+    text-align: left;
+    width: 70%;
+}
+
+.property-table textarea{
+  width: 90%;
 }
 
 /* custom scrollbar */
