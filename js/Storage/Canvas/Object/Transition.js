@@ -21,6 +21,10 @@ define([], function() {
 
   }
 
+  Transition.prototype.getLineObject = function(){
+    return this.line;
+  }
+
   return Transition;
 
 });

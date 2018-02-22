@@ -23,6 +23,7 @@ define([
       x: 0,
       y: 0
     });
+
     this.cells = []; // Cell array
 
   }
@@ -47,6 +48,7 @@ define([
 
   /**
    * @memberof CellGroup
+   * @desc copy obj to myobj.
    * @param {Konva.Group} obj
    */
   CellGroup.prototype.copyCorner = function(obj, myobj) {

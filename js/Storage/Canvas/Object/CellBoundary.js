@@ -2,18 +2,13 @@
 * @author suheeeee<lalune1120@hotmail.com>
 */
 
-define([
-  "../../../Observer/Subject.js"
-], function(
-  Subject
-) {
+define([], function() {
   'use strict';
 
   /**
   * @class CellBoundary
   */
   function CellBoundary(){
-    Subject.apply(this, arguments);
 
     this.id = null;
     this.name = null;
@@ -25,8 +20,6 @@ define([
           strokeWidth: 5
     });
   }
-
-  CellBoundary.prototype = Object.create(Subject.prototype);
 
   CellBoundary.prototype.addCorner = function(_x, _y){
     var rect = new Konva.Rect({
@@ -42,6 +35,10 @@ define([
     this.corners.add(rect);
 
     this.line.points().push(_x, _y);
+  }
+
+  CellBoundary.prototype.getCornersObject = function(){
+    return this.corners;
   }
 
 

@@ -7,18 +7,21 @@ define([
   "./Layer/CellBoundaryLayer.js",
   "./Layer/StateLayer.js",
   "./Layer/TransitionLayer.js",
-  "./Layer/BackgroundLayer.js"
+  "./Layer/BackgroundLayer.js",
+  "./Layer/TmpLayer.js"
 ], function(
   CellLayer,
   CellBoundaryLayer,
   StateLayer,
   TransitionLayer,
-  BackgroundLayer
+  BackgroundLayer,
+  TmpLayer
 ) {
   'use strict';
 
   /**
-   * @classdesc Container object of [stage]{@link https://konvajs.github.io/api/Konva.Stage.html}
+   * @class Stage
+   * @desc Container object of [stage]{@link https://konvajs.github.io/api/Konva.Stage.html}
    * @class Stage
    * @param {String} _id id of new stage
    * @param {String} _name name of new stage
@@ -28,16 +31,44 @@ define([
    */
   function Stage(_id, _name, _container, _width, _height) {
 
+    /**
+    * @memberof Stage
+    */
     this.id = _id;
 
+    /**
+    * @memberof Stage
+    */
     this.name = _name;
 
-    this.cellLayer = new CellLayer();
-    this.cellBoundaryLayer = new CellBoundaryLayer();
-    this.stateLayer = new StateLayer();
-    this.transitionLayer = new TransitionLayer();
+    /**
+    * @memberof Stage
+    */
     this.backgroundLayer = new BackgroundLayer();
+    /**
+    * @memberof Stage
+    */
+    this.cellLayer = new CellLayer();
+    /**
+    * @memberof Stage
+    */
+    this.cellBoundaryLayer = new CellBoundaryLayer();
+    /**
+    * @memberof Stage
+    */
+    this.stateLayer = new StateLayer();
+    /**
+    * @memberof Stage
+    */
+    this.transitionLayer = new TransitionLayer();
+    /**
+    * @memberof Stage
+    */
+    this.tmpLayer = null;
 
+    /**
+    * @memberof Stage
+    */
     this.stage = new Konva.Stage({
       container: _container,
       width: _width,
@@ -56,11 +87,11 @@ define([
     this.stage.add(this.stateLayer.getLayer());
     this.stage.add(this.transitionLayer.getLayer());
 
-
   }
 
   /**
    * @desc Calculate the height using the aspect ratio stored in the Consitions and the input width.
+   * @memberof Stage
    * @param {Number} _width width of container
    * @returns _width * (aspect-ratio.height / aspect-ratio.width)
    */
@@ -72,6 +103,7 @@ define([
 
   /**
    * @desc Zoomming function
+   * @memberof Stage
    * @param {String} _id
    * @param {Object} pos
    * @returns {Object} { x : newX, y : newY }
@@ -109,6 +141,9 @@ define([
     };
   }
 
+  /**
+  * @memberof Stage
+  */
   Stage.prototype.getAbsoluteCoor = function(floor){
 
     var stage;
@@ -121,6 +156,27 @@ define([
 
     var x = stage.getAbsolutePosition();
     var y = stage.getAbsolutePosition();
+  }
+
+  /**
+  * @memberof Stage
+  */
+  Stage.prototype.addTmpObj = function(type){
+
+    this.tmpLayer = new TmpLayer(type);
+    this.stage.add(this.tmpLayer.getLayer());
+
+  }
+
+  /**
+  * @memberof Stage
+  */
+  Stage.prototype.removeTmpObj = function(type){
+
+    this.tmpLayer.getLayer().destroy();
+    this.tmpLayer = null;
+    this.stage.draw();
+
   }
 
   return Stage;
