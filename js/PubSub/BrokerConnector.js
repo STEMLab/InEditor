@@ -7,6 +7,7 @@ define([
   "../Manager/ProjectManager.js",
   "../Manager/PropertyManager.js",
   "../Manager/UIManager.js",
+  "../Manager/DotFoolManager.js",
   "../UI/UIContainer.js",
   "../UI/Workspace.js"
 ], function(
@@ -14,7 +15,8 @@ define([
   ProjectManager,
   PropertyManager,
   UIManager,
-  uiContainer,
+  DotFoolManager,
+  UIContainer,
   Workspace
 ) {
 
@@ -37,7 +39,8 @@ define([
       new GeometryManager(),
       new ProjectManager(),
       new PropertyManager(),
-      new UIManager()
+      new UIManager(),
+      new DotFoolManager()
     ];
 
     this.fullSubscribe(managers);

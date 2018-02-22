@@ -39,13 +39,32 @@ define([], function() {
       strokeWidth: 1,
       closed: true
     });
+
+    /**
+    * @memberof Cell
+    */
+    this.dots = [];
   }
 
   /**
   * @memberof Cell
   * @param {Object} x, y
   */
-  Cell.prototype.addCorner = function(coor) {
+  Cell.prototype.addCorner = function( uuid ){
+
+    this.addNewDot(uuid);
+
+    // Modify the connect value of the input dot if there is a point added just before it.
+    this.addCornerObj( uuid, window.storage.dotFoolContainer.getDotById(uuid).getCoor());
+
+  }
+
+  /**
+  * @memberof Cell
+  * @param {Object} cor x, y
+  * @param String uuid of dot
+  */
+  Cell.prototype.addCornerObj = function(uuid, coor) {
     var rect = new Konva.Rect({
       x: coor.x,
       y: coor.y,
@@ -55,6 +74,8 @@ define([], function() {
       stroke: 'black',
       strokeWidth: 1
     });
+
+    rect.uuid = uuid;
 
     this.corners.add(rect);
 
@@ -114,6 +135,9 @@ define([], function() {
     return points;
   }
 
+  /**
+  * @memberof Cell
+  */
   Cell.prototype.destory = function(){
 
     this.corners.destroy();
@@ -121,6 +145,14 @@ define([], function() {
 
   }
 
+  /**
+  * @memberof Cell
+  */
+  Cell.prototype.addNewDot = function( uuid ){
+
+    this.dots.push(uuid);
+
+  }
 
   return Cell;
 

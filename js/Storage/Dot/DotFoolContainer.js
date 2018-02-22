@@ -3,9 +3,9 @@
 */
 
 define([
-  "./DotFool.js"
+  "./Dot.js"
 ], function(
-  DotFool
+  Dot
 ) {
   'use strict';
 
@@ -17,24 +17,41 @@ define([
     /**
     * @memberof DotFoolContainer
     */
-    this.floor = [];
+    this.dotFool = {};
 
   }
 
   /**
   * @memberof DotFoolContainer
-  * @param String floorId id of floor
-  * @return true : successed to add new dot fool<br>false : fail to add new dot fool
+  * @return true : successed to add new dot<br>false : fail to add new dot
   */
-  DotFoolContainer.prototype.add = function( floorId ) {
+  DotFoolContainer.prototype.addNewDot = function( dot ) {
 
-    if( this.floor[floorId] != null ) return false;
-
-    this.floor[floorId] = new DotFool();
+    this.dotFool[ dot.uuid ] = dot;
 
   }
 
+  /**
+  * @memberof DotFoolContainer
+  * @param String floor id
+  * @return Object key : uuid<br>value : Dot
+  */
+  DotFoolContainer.prototype.getAllDotInFloor = function( floor ){
 
+    var keys = Object.keys(this.dotFool);
+    var result = {};
+
+    for( var key in keys ){
+      if( this.dotFool[key].floor == floor ) result[key] = this.dotFool[key];
+    }
+
+    return result;
+
+  }
+
+  DotFoolContainer.prototype.getDotById = function( uuid ){
+    return this.dotFool[uuid];
+  }
 
 
   return DotFoolContainer;

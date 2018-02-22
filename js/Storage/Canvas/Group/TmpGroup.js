@@ -43,20 +43,22 @@ define([
 
     if (type == 'cell') {
 
-      this.obj = new Cell();
+      this.obj = new Cell('tmpObj');
+      this.obj.type = 'cell';
+      window.tmpObj = this.obj;
       this.tmpGroup.add(this.obj.getCornersObject());
       this.tmpGroup.add(this.obj.getPolyObject());
 
     } else if (type == 'cellBoundary') {
 
-      this.obj = new CellBoundary();
+      this.obj = new CellBoundary('tmpObj');
       this.tmpGroup.add(this.obj.getCornersObject());
 
       // get polyline
 
     } else if (type == 'transition') {
 
-      this.obj = new Transition();
+      this.obj = new Transition('tmpObj');
       this.tmpGroup.add(this.obj.getLineObject());
 
     }
@@ -67,7 +69,7 @@ define([
   * @memberof TmpGroup
   */
   TmpGroup.prototype.getGroup = function() {
-    return this.stateGroup;
+    return this.tmpGroup;
   }
 
   return TmpGroup;

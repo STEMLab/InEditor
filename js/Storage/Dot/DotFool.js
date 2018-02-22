@@ -17,7 +17,7 @@ define([
     /**
     * @memberof DotFool
     */
-    this.dots = [];
+    this.dots = {};
 
   }
 

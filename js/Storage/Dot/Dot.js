@@ -8,7 +8,7 @@ define([], function() {
   /**
    * @class Dot
    */
-  function Dot( _x, _y ) {
+  function Dot( floor, _x, _y ) {
     /**
     * @memberof Dot
     */
@@ -23,13 +23,23 @@ define([], function() {
     * @memberof Dot
     * @desc key : uuid of connected dot<br>value : relation with connected dot, e.g Cell, CellBoundary ...
     */
-    connects = {};
+    this.connects = {};
+
+    /**
+    * @memberof Dot
+    */
+    this.floor = floor;
   }
 
   /**
   * @memberof Dot
   */
   Dot.prototype.connect = function( dot, relation ){
+
+    if( this.floor != dot.floor ) {
+      info.error(this.uuid + " and " + dot.uuid + " is on different floor !");
+      return false;
+    }
 
     if(this.isConnected(dot.uuid, type)){
       this.connect[dot.uuid] = relation;
@@ -50,6 +60,11 @@ define([], function() {
     return false;
 
   }
+
+  Dot.prototype.getCoor = function(){
+    return this.point;
+  }
+
 
   return Dot;
 });

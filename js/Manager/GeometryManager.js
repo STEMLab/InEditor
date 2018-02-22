@@ -5,11 +5,13 @@
 define([
   "../Storage/Canvas/Object/Cell.js",
   "../Storage/Geometries/CellGeometry.js",
-  "../PubSub/Subscriber.js"
+  "../PubSub/Subscriber.js",
+  "../Storage/Dot/Dot.js"
 ],function(
   Cell,
   CellGeometry,
-  Subscriber
+  Subscriber,
+  Dot
 ) {
   'use strict';
 
@@ -31,13 +33,10 @@ define([
    */
   GeometryManager.prototype.init = function(){
 
+    /**
+    * @memberof GeometryManager
+    */
     this.name = 'GeometryManager';
-
-    // this.addReq({
-    //   'start-addnewcell' : null,
-    //   'addnewcell' : null,
-    //   'end-addnewcell' : null
-    // });
 
     this.addCallbackFun('start-addnewcell', this.startAddNewCell, function(){}, function(){} );
     this.addCallbackFun('addnewcell', this.addNewCell, this.addNewCell_makeHistoryObj, this.addNewCell_undo );
@@ -50,7 +49,7 @@ define([
   /**
    * @memberof GeometryManager
    */
-  GeometryManager.prototype.startAddNewCell = function(){
+  GeometryManager.prototype.startAddNewCell = function(reqobj){
 
     var tmpObj = new Cell('tmpObj');
     tmpObj.type = 'cell';
@@ -62,7 +61,7 @@ define([
    * @memberof GeometryManager
    * @param {Object} reqObj floor: floor id
    */
-  GeometryManager.prototype.addNewCell = function(reqObj){
+  GeometryManager.prototype.addNewCell0 = function(reqObj){
 
     // if tmpObj havn't floor data, add floor data in it.
     if( window.tmpObj.floor == null ){
@@ -85,6 +84,38 @@ define([
 
     // draw group
     window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.draw();
+
+  }
+
+  /**
+   * @memberof GeometryManager
+   * @param {Object} reqObj floor: floor id
+   */
+  GeometryManager.prototype.addNewCell = function(reqObj){
+
+    // If this is the first `addnewcell` msg for this cycle, set TmpLayer in stage.
+    if( window.storage.canvasContainer.stages[reqObj.floor].tmpLayer == null ){
+
+      window.storage.canvasContainer.stages[reqObj.floor].addTmpObj('cell');
+      window.tmpObj.floor = reqObj.floor;
+
+    }
+
+    // add corner
+    var point = window.storage.canvasContainer.stages[reqObj.floor].stage.getPointerPosition();
+    point.x = point.x - window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.x;
+    point.x = point.x / window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleX;
+
+    point.y = point.y - window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.y;
+    point.y = point.y / window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleY;
+
+    var newDot = new Dot(reqObj.floor, point.x, point.y);
+    window.storage.dotFoolContainer.addNewDot(newDot);
+
+    window.tmpObj.addCorner( newDot.uuid );
+
+    // draw group
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.tmpGroup.draw();
 
   }
 

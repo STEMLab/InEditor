@@ -5,11 +5,13 @@
 define([
   "./Geometries/GeometryContainer.js",
   "./Properties/PropertyContainer.js",
-  "./Canvas/CanvasContainer.js"
+  "./Canvas/CanvasContainer.js",
+  "./Dot/DotFoolContainer.js"
 ],function(
   GeometryContainer,
   PropertyContainer,
-  CanvasContainer
+  CanvasContainer,
+  DotFoolContainer
 ) {
   'use strict';
 
@@ -35,10 +37,17 @@ define([
     * @see CanvasContainer
     */
     this.canvasContainer = new CanvasContainer();
+
+    /**
+    * @memberof Storage
+    * @see DotFoolContainer
+    */
+    this.dotFoolContainer = new DotFoolContainer();
+
   }
 
   Storage.prototype.show = function(){
-    console.log(this);
+    log.info(this);
   }
 
   return Storage;
