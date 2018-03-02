@@ -47,6 +47,8 @@ define([
     this.addCallbackFun('activateworkspace', this.activateWorkspace);
 
     this.addCallbackFun('canceladdnewcell', this.cancelAddNewCell);
+
+    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary);
   }
 
 
@@ -389,6 +391,13 @@ define([
 
     document.getElementById('cell-btn').src = "../../assets/icon/cell_d.png";
 
+  }
+
+  /**
+   * @memberof GeometryManager
+   */
+  UIManager.prototype.endAddNewCellBoundary = function(reqObj) {
+    log.info('UIManager.endAddNewCellBoundary called');
   }
 
 

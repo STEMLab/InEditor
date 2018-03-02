@@ -106,6 +106,16 @@ define([
           function(event) {
             window.eventHandler.callHandler('stage', event)
           });
+      } else if( subkey == 'contentMousemove' ){
+
+        var stage = window.storage.canvasContainer.getElementById('stage', _id);
+
+        stage.stage.on(
+          'contentMousemove',
+          function(event) {
+            window.eventHandler.callHandler('stage', event)
+          });
+
       }
 
     }

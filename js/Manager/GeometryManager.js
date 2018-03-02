@@ -43,7 +43,15 @@ define([
     this.addCallbackFun('start-addnewcell', this.startAddNewCell, function() {}, function() {});
     this.addCallbackFun('addnewcell', this.addNewCell, this.addNewCell_makeHistoryObj, this.addNewCell_undo);
     this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.endAddNewCell_makeHistoryObj, this.endAddNewCell_undo);
+
     this.addCallbackFun('canceladdnewcell', this.cancelAddNewCell);
+
+    this.addCallbackFun('start-addnewcellboundary', this.startAddNewCellBoundary);
+    this.addCallbackFun('addnewcellboundary', this.addNewCellBoundary);
+    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary);
+
+
+    this.addCallbackFun('snapping', this.snappingMousePointer);
 
   }
 
@@ -405,6 +413,60 @@ define([
 
     return minimum_point;
   }
+
+  /**
+   * @memberof GeometryManager
+   */
+  GeometryManager.prototype.startAddNewCellBoundary = function(reqObj) {
+    log.info('GeometryManager.startAddNewCellBoundary called');
+  }
+
+  /**
+   * @memberof GeometryManager
+   */
+  GeometryManager.prototype.addNewCellBoundary = function(reqObj) {
+    log.info('GeometryManager.addNewCellBoundary called');
+  }
+
+  /**
+   * @memberof GeometryManager
+   */
+  GeometryManager.prototype.endAddNewCellBoundary = function(reqObj) {
+    log.info('GeometryManager.endAddNewCellBoundary called');
+  }
+
+  /**
+  * @memberof GeometryManager
+  * @param {Object} reqObj floor, point
+  */
+  GeometryManager.prototype.snappingMousePointer = function(reqObj){
+
+    if(window.cursor == null){
+      window.cursor = { coor : { x : NaN, y : NaN} };
+    }
+
+
+    var point = reqObj.point;
+    point.x = point.x - window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.x;
+    point.x = point.x / window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleX;
+
+    point.y = point.y - window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.y;
+    point.y = point.y / window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleY;
+
+    var manager = window.broker.getManager('snapping', 'GeometryManager');
+    var dots = Object.values(window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDots());
+    var connections = window.storage.canvasContainer.stages[reqObj.floor].getConnection();
+
+    var snapping = manager.snapping(dots, connections, point);
+    dot = new Dot(snapping.x, snapping.y);
+
+
+
+
+    log.info(reqObj, point);
+  }
+
+
 
 
   return GeometryManager;

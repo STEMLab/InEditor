@@ -23,24 +23,32 @@ define([
    */
   DrawEventHandler.prototype.setHandlerBinder = function(handlerBinder) {
 
+    handlerBinder['floor-btn'] = {
+      'click': this.clickFloorBtn
+    };
+
     handlerBinder['cell-btn'] = {
       'click': this.clickCellBtn
     };
 
-    handlerBinder['floor-btn'] = {
-      'click': this.clickFloorBtn
-    };
+    handlerBinder['cellboundary-btn'] = {
+      'click': this.clickCellBoundaryBtn
+    }
 
     handlerBinder['stage'] = {
       'contentClick': this.addNewDot
     };
 
+    handlerBinder['stage'] = {
+      'contentMousemove': this.snapping
+    }
+
     handlerBinder['Escape'] = {
-      'keyup' : this.cancelDraw
+      'keyup': this.cancelDraw
     };
 
     handlerBinder['Enter'] = {
-      'keyup' : this.finishDraw
+      'keyup': this.finishDraw
     }
 
   }
@@ -53,7 +61,7 @@ define([
 
     var result = new Result();
 
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length!=0);
+    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
 
     if (isFloorExist && broker.isPublishable('start-addnewcell')) {
 
@@ -75,7 +83,7 @@ define([
       result.result = true;
       result.msg = null;
 
-    } else if(!isFloorExist){
+    } else if (!isFloorExist) {
 
       result.msg = "There is no floor ...";
 
@@ -99,7 +107,9 @@ define([
 
     if (broker.isPublishable('addnewfloor')) {
 
-      broker.publish(new Message('addnewfloor', {'floor' : window.conditions.pre_floor + (++window.conditions.LAST_FLOOR_ID_NUM)}));
+      broker.publish(new Message('addnewfloor', {
+        'floor': window.conditions.pre_floor + (++window.conditions.LAST_FLOOR_ID_NUM)
+      }));
       result = {
         'result': true,
         'msg': null
@@ -113,6 +123,22 @@ define([
     }
 
     return result;
+
+  }
+
+  /**
+   * @desc When cellboundary btn clicked `start-addnewcellboundary` or `end-addnewcellboundary` can publish.
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickCellBoundaryBtn = function(broker, previousMsg) {
+
+    var result = new Result();
+
+    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
+
+    if (isFloorExist && broker.isPublishable('start-addnewcellboundary')) {
+
+    }
 
   }
 
@@ -219,35 +245,61 @@ define([
   /**
    * @memberof DrawEventHandler
    */
-   DrawEventHandler.prototype.finishDraw = function(broker, previousMsg){
+  DrawEventHandler.prototype.finishDraw = function(broker, previousMsg) {
 
-     var result = new Result();
+    var result = new Result();
 
-     if(broker.isPublishable('end-addnewcell')){
+    if (broker.isPublishable('end-addnewcell')) {
 
-       broker.publish(new Message('end-addnewcell', {
-         'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
-         'floor': window.tmpObj.floor
-       }));
+      broker.publish(new Message('end-addnewcell', {
+        'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+        'floor': window.tmpObj.floor
+      }));
 
-       result.result = true;
-       result.msg = null;
+      result.result = true;
+      result.msg = null;
 
-     } else if(broker.isPublishable('end-addnewcellboundary')){
+    } else if (broker.isPublishable('end-addnewcellboundary')) {
 
-     } else if(broker.isPublishable('end-addnewstate')){
+    } else if (broker.isPublishable('end-addnewstate')) {
 
-     } else if(broker.isPublishable('end-addnewtrasition')){
+    } else if (broker.isPublishable('end-addnewtrasition')) {
 
-     } else{
-       result.mgs = "no match function."
-     }
+    } else {
+      result.mgs = "no match function."
+    }
 
-     return result;
+    return result;
 
-   }
+  }
+
+  /**
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.snapping = function(broker, previousMsg, data) {
+    log.info("DrawEventHandler.snapping called ", data);
+
+    var result = new Result();
+
+    if (previousMsg == 'addnewcell' && broker.isPublishable('snapping')) {
+
+      broker.publish(new Message('snapping', {
+        'floor': data.currentTarget.attrs.id,
+        'point': { x : data.evt.pageX, y : data.evt.pageY }
+      }));
+
+      result.result = true;
+      result.msg = 'snapping';
+
+    } else {
+
+      result.msg = "no match function.";
+
+    }
 
 
+    return result;
+  }
 
   return DrawEventHandler;
 });
