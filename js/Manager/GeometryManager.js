@@ -317,9 +317,10 @@ define([
    */
   GeometryManager.prototype.cancelAddNewCell = function(reqObj) {
 
+    // clear tmp obj
     window.tmpObj = null;
-    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.destroyChildren();
-    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.layer.draw();
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.destroy();
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer = null;
 
     window.myhistory.history.pop_back();
 
@@ -333,7 +334,7 @@ define([
    * @return {Object} { x : coordinate of x, y : coordinate of y } or null
    */
   GeometryManager.prototype.snapping = function(dots, connections, point) {
-    log.info(dots, connections, point);
+    // log.info(dots, connections, point);
 
     var minimum_d = window.conditions.snappingThreshold;
     var minimum_connection = null;
