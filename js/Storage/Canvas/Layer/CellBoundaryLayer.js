@@ -22,10 +22,23 @@ define([
 
   }
 
+  /**
+  * @memberof CellBoundaryLayer
+  */
   CellBoundaryLayer.prototype = Object.create(Layer.prototype);
 
+  /**
+  * @memberof CellBoundaryLayer
+  */
   CellBoundaryLayer.prototype.init = function(){
     this.addGroup(new CellBoundaryGroup());
+  }
+
+  /**
+  * @memberof CellBoundaryLayer
+  */
+  CellBoundaryLayer.prototype.getConnection = function(){
+    return this.group.getConnection();
   }
 
   return CellBoundaryLayer;

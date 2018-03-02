@@ -44,12 +44,12 @@ define([
   }
 
   /**
-   * @param {Message.reqObj} reqObj null
+   * @param {Message.reqObj} reqObj floor
    * @memberof PropertyManager
    */
   PropertyManager.prototype.addNewFloor = function(reqObj) {
 
-    var newFloorProperty = new FloorProperty();
+    var newFloorProperty = new FloorProperty(reqObj.floor);
 
     // add new property
     window.storage.propertyContainer.floorProperties.push(newFloorProperty);

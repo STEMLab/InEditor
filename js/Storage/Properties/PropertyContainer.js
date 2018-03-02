@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
   "./ProjectProperty.js"
@@ -15,33 +15,33 @@ define([
   function PropertyContainer() {
 
     /**
-    * @memberof PropertyContainer
-    */
+     * @memberof PropertyContainer
+     */
     this.floorProperties = [];
 
     /**
-    * @memberof PropertyContainer
-    */
+     * @memberof PropertyContainer
+     */
     this.cellProperties = [];
 
     /**
-    * @memberof PropertyContainer
-    */
+     * @memberof PropertyContainer
+     */
     this.cellBoundaryProperties = [];
 
     /**
-    * @memberof PropertyContainer
-    */
+     * @memberof PropertyContainer
+     */
     this.stateProperties = [];
 
     /**
-    * @memberof PropertyContainer
-    */
+     * @memberof PropertyContainer
+     */
     this.transitionProperties = [];
 
     /**
-    * @memberof PropertyContainer
-    */
+     * @memberof PropertyContainer
+     */
     this.projectProperty = new ProjectProperty();
   }
 
@@ -94,6 +94,38 @@ define([
     return result;
   }
 
+
+  /**
+   * @param {String} _type
+   * @param {String} _id
+   * @returns {String} floor id or null
+   */
+  PropertyContainer.prototype.getFloorById = function(_type, _id) {
+
+    for (var key in this.floorProperties) {
+
+      switch (_type) {
+        case 'cell':
+          if (this.floorProperties[key].cellKey.getIndexOf(_id) != -1) return this.floorProperties[key].id;
+          break;
+        case 'cellBoundary':
+          if (this.floorProperties[key].cellBoundaryKey.getIndexOf(_id) != -1) return this.floorProperties[key].id;
+          break;
+        case 'state':
+          if (this.floorProperties[key].stateKey.getIndexOf(_id) != -1) return this.floorProperties[key].id;
+          break;
+        case 'transition':
+          if (this.floorProperties[key].transitionKey.getIndexOf(_id) != -1) return this.floorProperties[key].id;
+          break;
+        default:
+
+      }
+    }
+
+    log.warn("There is no object which id is " + _id + " !");
+
+    return null;
+  }
 
   /**
    * @desc Converts information of stored object to json for tree view and returns it.

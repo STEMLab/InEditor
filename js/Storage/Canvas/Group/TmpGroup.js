@@ -29,7 +29,7 @@ define([
     /**
     * @memberof TmpGroup
     */
-    this.obj; // states array
+    this.obj; 
 
     this.newObj(type);
   }

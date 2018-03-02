@@ -86,6 +86,15 @@ define([], function() {
 
     this.ctrlDown = false;
 
+    /**
+    * @memberof Conditions
+    */
+    this.coordinateThreshold = 5;
+
+    /**
+    * @memberof Conditions
+    */
+    this.snappingThreshold = 10;
   }
 
   /**

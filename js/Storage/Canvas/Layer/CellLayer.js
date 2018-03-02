@@ -36,6 +36,10 @@ define([
 
   }
 
+  CellLayer.prototype.getConnection = function(){
+    return this.group.getConnection();
+  }
+
   return CellLayer;
 
 });

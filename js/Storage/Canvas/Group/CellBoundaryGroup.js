@@ -14,11 +14,21 @@ define([
   */
   function CellBoundaryGroup(){
 
+    /**
+    * @memberof CellBoundaryGroup
+    */
     this.cellBoundaryGroup = new Konva.Group({ x: 0, y: 0 });
+
+    /**
+    * @memberof CellBoundaryGroup
+    */
     this.cellBoundaries = []; // Cell array
 
   }
 
+  /**
+  * @memberof CellBoundaryGroup
+  */
   CellBoundaryGroup.prototype.addCellBoundary = function(){
 
     cellBoundaries.push(new CellBoundary());
@@ -26,8 +36,21 @@ define([
     console.log("add cellBoundaries complete : ", this);
   }
 
+  /**
+  * @memberof CellBoundaryGroup
+  */
   CellBoundaryGroup.prototype.getGroup = function(){
     return this.cellBoundaryGroup;
+  }
+
+  /**
+  * @memberof CellBoundaryGroup
+  */
+  CellBoundaryGroup.prototype.getConnection = function(){
+    /**
+    * need to develop
+    */
+    return [];
   }
 
   return CellBoundaryGroup;

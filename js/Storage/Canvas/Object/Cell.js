@@ -50,12 +50,12 @@ define([], function() {
   * @memberof Cell
   * @param {Object} x, y
   */
-  Cell.prototype.addCorner = function( uuid ){
+  Cell.prototype.addCorner = function( dot ){
 
-    this.addNewDot(uuid);
+    this.addNewDot(dot);
 
     // Modify the connect value of the input dot if there is a point added just before it.
-    this.addCornerObj( uuid, window.storage.dotFoolContainer.getDotById(uuid).getCoor());
+    this.addCornerObj( dot.uuid, dot.getCoor());
 
   }
 
@@ -87,6 +87,7 @@ define([], function() {
   */
   Cell.prototype.deleteLastCorner = function(){
 
+    this.dots.splice(this.dots.length-1, 1);
     this.corners.children[this.corners.children.length-1].destroy();
 
   }
@@ -138,20 +139,61 @@ define([], function() {
   /**
   * @memberof Cell
   */
-  Cell.prototype.destory = function(){
+  Cell.prototype.destory = function(floor){
 
     this.corners.destroy();
     this.poly.destroy();
+
+    if(floor != null){
+      for(var key in this.dots){
+        window.storage.dotFoolContainer.getDotFool(floor).deleteDotFromObj(this.dots[key].uuid, this.id);
+      }
+    }
+
 
   }
 
   /**
   * @memberof Cell
   */
-  Cell.prototype.addNewDot = function( uuid ){
+  Cell.prototype.addNewDot = function( dot ){
 
-    this.dots.push(uuid);
+    dot.participateObj(this.id, 'cell');
 
+    this.dots.push(dot);
+
+  }
+
+  /**
+  * @memberof Cell
+  */
+  Cell.prototype.addObjectFromDots = function(){
+
+    this.corners.destroyChildren();
+    this.poly.attrs.points = [];
+
+    for(var key in this.dots){
+      this.addCornerObj(this.dots[key].uuid, this.dots[key].getCoor());
+    }
+
+  }
+
+  /**
+  * @memberof Cell
+  */
+  Cell.prototype.getDots = function(){
+    return this.dots;
+  }
+
+  /**
+  * @memberof Cell
+  */
+  Cell.prototype.getDotIndex = function(uuid){
+    for(var key in this.dots){
+      if(this.dots[key].uuid == uuid) return key;
+    }
+
+    return -1;
   }
 
   return Cell;

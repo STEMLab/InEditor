@@ -1,11 +1,11 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
-  "./Dot.js"
+  "./DotFool.js"
 ], function(
-  Dot
+  DotFool
 ) {
   'use strict';
 
@@ -15,44 +15,58 @@ define([
   function DotFoolContainer() {
 
     /**
-    * @memberof DotFoolContainer
-    */
+     * @memberof DotFoolContainer
+     * @type Obeject
+     * @desc key : floor id<br>value : dot fool
+     */
     this.dotFool = {};
 
   }
 
   /**
-  * @memberof DotFoolContainer
-  * @return true : successed to add new dot<br>false : fail to add new dot
-  */
-  DotFoolContainer.prototype.addNewDot = function( dot ) {
+   * @memberof DotFoolContainer
+   * @param String floor id
+   * @desc Make a dot fool for the floor
+   */
+  DotFoolContainer.prototype.addNewDotFool = function(floor) {
 
-    this.dotFool[ dot.uuid ] = dot;
+    if (this.dotFool[floor] != null) log.info("Dot Fool for " + floor + " is alreay exist !");
+    else this.dotFool[floor] = new DotFool(floor);
+  }
+
+  /**
+   * @memberof DotFoolContainer
+   * @param String floor id
+   */
+  DotFoolContainer.prototype.getDotFool = function(floor) {
+
+    // if there is no parameter, return all dot fool
+    if (floor == null) return this.dotFool;
+
+    return this.dotFool[floor];
 
   }
 
   /**
-  * @memberof DotFoolContainer
-  * @param String floor id
-  * @return Object key : uuid<br>value : Dot
-  */
-  DotFoolContainer.prototype.getAllDotInFloor = function( floor ){
+   * @memberof DotFoolContainer
+   * @param {String} uuid
+   * @param {String} floor
+   */
+  DotFoolContainer.prototype.getDotById = function(uuid, floor) {
 
-    var keys = Object.keys(this.dotFool);
-    var result = {};
-
-    for( var key in keys ){
-      if( this.dotFool[key].floor == floor ) result[key] = this.dotFool[key];
+    if (floor == null) {
+      var keys = Object.keys(this.dotFool);
+      for (var key in this.dotFool) {
+        if (this.dotFool[key] != null &&
+            this.dotFool[key].dots[uuid] != null)
+            return this.dotFool[key].dots[uuid];
+      }
+    } else {
+      return this.dotFool[floor].dots[uuid];
     }
 
-    return result;
-
+    log.error("There is no dot which uuid is " + uuid);
   }
-
-  DotFoolContainer.prototype.getDotById = function( uuid ){
-    return this.dotFool[uuid];
-  }
-
 
   return DotFoolContainer;
 });

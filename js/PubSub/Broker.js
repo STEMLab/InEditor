@@ -100,10 +100,12 @@ define([
     var uuid = window.conditions.guid();
 
     for (var i = 0; i < subscriber.length; i++) {
-      _path[_topic][i].run(_message, uuid);
-
+      if(_path[_topic][i].run(_message, uuid) == false){
+        if( window.myhistory.history.back().msg == _message ){
+          window.myhistory.undo();
+        }
+      }
     }
-
   }
 
   /**

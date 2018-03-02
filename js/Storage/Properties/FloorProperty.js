@@ -8,12 +8,12 @@ define([],function() {
   /**
   * @class FloorProperty
   */
-  function FloorProperty() {
+  function FloorProperty(id) {
 
     /**
     * @memberof FloorProperty
     */
-    this.id = window.conditions.pre_floor + (++window.conditions.LAST_FLOOR_ID_NUM);
+    this.id = id;
 
     /**
     * @memberof FloorProperty

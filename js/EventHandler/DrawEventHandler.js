@@ -99,7 +99,7 @@ define([
 
     if (broker.isPublishable('addnewfloor')) {
 
-      broker.publish(new Message('addnewfloor', null));
+      broker.publish(new Message('addnewfloor', {'floor' : window.conditions.pre_floor + (++window.conditions.LAST_FLOOR_ID_NUM)}));
       result = {
         'result': true,
         'msg': null

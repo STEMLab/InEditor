@@ -341,11 +341,11 @@ define([
 
   /**
    * @memberof UIManager
-   * @param {Message.reqObj} reqObj null
+   * @param {Message.reqObj} reqObj floor
    */
   UIManager.prototype.addNewFloor = function(reqObj) {
 
-    var newFloorProperty = window.storage.propertyContainer.floorProperties[window.storage.propertyContainer.floorProperties.length - 1];
+    var newFloorProperty = window.storage.propertyContainer.getElementById('floor', reqObj.floor);
 
     // add new workspace
     window.uiContainer.workspace.addNewWorkspace(newFloorProperty.id, newFloorProperty.name);

@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
   "./Layer/CellLayer.js",
@@ -32,43 +32,43 @@ define([
   function Stage(_id, _name, _container, _width, _height) {
 
     /**
-    * @memberof Stage
-    */
+     * @memberof Stage
+     */
     this.id = _id;
 
     /**
-    * @memberof Stage
-    */
+     * @memberof Stage
+     */
     this.name = _name;
 
     /**
-    * @memberof Stage
-    */
+     * @memberof Stage
+     */
     this.backgroundLayer = new BackgroundLayer();
     /**
-    * @memberof Stage
-    */
+     * @memberof Stage
+     */
     this.cellLayer = new CellLayer();
     /**
-    * @memberof Stage
-    */
+     * @memberof Stage
+     */
     this.cellBoundaryLayer = new CellBoundaryLayer();
     /**
-    * @memberof Stage
-    */
+     * @memberof Stage
+     */
     this.stateLayer = new StateLayer();
     /**
-    * @memberof Stage
-    */
+     * @memberof Stage
+     */
     this.transitionLayer = new TransitionLayer();
     /**
-    * @memberof Stage
-    */
+     * @memberof Stage
+     */
     this.tmpLayer = null;
 
     /**
-    * @memberof Stage
-    */
+     * @memberof Stage
+     */
     this.stage = new Konva.Stage({
       container: _container,
       width: _width,
@@ -77,7 +77,7 @@ define([
       draggable: true,
       dragBoundFunc: function(pos) {
         if (window.storage.canvasContainer.stages[_id].stage.attrs.scaleX > 1)
-        return window.storage.canvasContainer.stages[_id].zoomFun(_id, pos);
+          return window.storage.canvasContainer.stages[_id].zoomFun(_id, pos);
       }
     });
 
@@ -108,7 +108,7 @@ define([
    * @param {Object} pos
    * @returns {Object} { x : newX, y : newY }
    */
-  Stage.prototype.zoomFun = function( _id, pos ) {
+  Stage.prototype.zoomFun = function(_id, pos) {
 
     // console.log(document.getElementById(_id));
 
@@ -142,15 +142,15 @@ define([
   }
 
   /**
-  * @memberof Stage
-  */
-  Stage.prototype.getAbsoluteCoor = function(floor){
+   * @memberof Stage
+   */
+  Stage.prototype.getAbsoluteCoor = function(floor) {
 
     var stage;
 
-    if( this.stage == null ){
+    if (this.stage == null) {
       stage = this.stage;
-    }else {
+    } else {
       stage = window.storage.canvasContainer.stages[floor].stage;
     }
 
@@ -159,9 +159,9 @@ define([
   }
 
   /**
-  * @memberof Stage
-  */
-  Stage.prototype.addTmpObj = function(type){
+   * @memberof Stage
+   */
+  Stage.prototype.addTmpObj = function(type) {
 
     this.tmpLayer = new TmpLayer(type);
     this.stage.add(this.tmpLayer.getLayer());
@@ -169,14 +169,40 @@ define([
   }
 
   /**
-  * @memberof Stage
-  */
-  Stage.prototype.removeTmpObj = function(type){
+   * @memberof Stage
+   */
+  Stage.prototype.removeTmpObj = function(type) {
 
     this.tmpLayer.getLayer().destroy();
     this.tmpLayer = null;
     this.stage.draw();
 
+  }
+
+  /**
+   * @memberof Stage
+   */
+  Stage.prototype.getConnection = function() {
+    var cellConnection = this.cellLayer.getConnection();
+    var cellBoundaryConnection = this.cellBoundaryLayer.getConnection();
+    // state is only dot
+    // transition should not be snapping target
+
+    var connection = cellConnection.concat(cellBoundaryConnection);
+
+    var reduced = [];
+
+    var reduced = connection.reduce(function(a, b) {
+      if (a.indexOf({'dot1':b.dot2, 'dot2':b.dot1}) > -1 ) {
+        // do nothing
+      }
+      else if (a.indexOf(b) < 0){
+        a.push(b);
+      }
+      return a;
+    }, []);
+
+    return reduced;
   }
 
   return Stage;
