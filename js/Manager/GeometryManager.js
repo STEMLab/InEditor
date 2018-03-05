@@ -75,35 +75,6 @@ define([
 
   }
 
-  /**
-   * @memberof GeometryManager
-   * @param {Object} reqObj floor: floor id
-   */
-  GeometryManager.prototype.addNewCell0 = function(reqObj) {
-
-    // if tmpObj havn't floor data, add floor data in it.
-    if (window.tmpObj.floor == null) {
-
-      window.tmpObj.floor = reqObj.floor;
-      window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.destroyChildren();
-      window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.add(window.tmpObj.poly, window.tmpObj.corners);
-
-    }
-
-    // add corner
-    var point = window.storage.canvasContainer.stages[reqObj.floor].stage.getPointerPosition();
-    point.x = point.x - window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.x;
-    point.x = point.x / window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleX;
-
-    point.y = point.y - window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.y;
-    point.y = point.y / window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleY;
-
-    window.tmpObj.addCorner(point);
-
-    // draw group
-    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.draw();
-
-  }
 
   /**
    * @memberof GeometryManager
@@ -163,44 +134,6 @@ define([
 
     window.storage.dotFoolContainer.getDotFool(undoObj.floor).deleteDotFromObj(tmpObj.dots[window.tmpObj.dots.length - 1].uuid, tmpObj.id);
     window.storage.canvasContainer.stages[undoObj.floor].tmpLayer.layer.draw();
-
-  }
-
-
-  /**
-   * @param {Object} reqObj id<br>floor: floor id
-   * @memberof GeometryManager
-   * @desc draw new cell object in canvas
-   */
-  GeometryManager.prototype.endAddNewCell0 = function(reqObj) {
-
-    var tmpObj = window.tmpObj;
-    window.tmpObj = null;
-
-    tmpObj.id = reqObj.id;
-    tmpObj.name = reqObj.id;
-
-    // add cell using tmpObj
-    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.addNewCell(tmpObj);
-
-    // destroy tmpGroup children
-    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.tmpGroup.destroyChildren();
-
-    // set corner to invisible
-    var obj = window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.cells[window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.cells.length - 1];
-    obj.corners.visible(false);
-
-    // redraw cellLayer
-    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.layer.draw();
-
-    //add cell data in geometry canvasContainer
-    window.storage.geometryContainer.cellGeometry.push(new CellGeometry(reqObj.id, obj.getPointsOfCorners()));
-
-    // add state
-
-
-    log.trace(window.storage.canvasContainer);
-    log.trace(window.storage.geometryContainer);
 
   }
 
