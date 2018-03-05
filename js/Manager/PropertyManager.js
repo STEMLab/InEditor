@@ -125,6 +125,10 @@ define([
    */
   PropertyManager.prototype.endAddNewCell = function(reqObj) {
 
+    if(reqObj.isEmpty != null ){
+      return;
+    }
+
     // add new cellproperty object in storage.propertyContainer
     window.storage.propertyContainer.cellProperties.push(
       new CellProperty(reqObj.id)

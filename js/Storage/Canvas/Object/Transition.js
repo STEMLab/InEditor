@@ -51,6 +51,13 @@ define([], function() {
     return this.dots;
   }
 
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.isEmpty = function(){
+    log.error(' YOU NEED TO DEVELOP IS-EMPTY FUNCTION FOR TRANSITION OBJ ! ');
+  }
+
   return Transition;
 
 });

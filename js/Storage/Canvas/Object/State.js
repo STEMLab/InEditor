@@ -22,6 +22,13 @@ define([], function() {
 
   }
 
+  /**
+  * @memberof State
+  */
+  State.prototype.isEmpty = function(){
+    log.error(' YOU NEED TO DEVELOP IS-EMPTY FUNCTION FOR STATE OBJ ! ');
+  }
+
   return State;
 
 });

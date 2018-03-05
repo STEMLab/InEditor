@@ -84,6 +84,15 @@ define([], function() {
     return -1;
   }
 
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.isEmpty = function(){
+    if(this.dots.length == 0) return true;
+
+    return false;
+  }
+
   return CellBoundary;
 
 });

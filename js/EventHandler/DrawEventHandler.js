@@ -72,10 +72,22 @@ define([
 
     } else if (broker.isPublishable('end-addnewcell')) {
 
-      broker.publish(new Message('end-addnewcell', {
-        'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
-        'floor': window.tmpObj.floor
-      }));
+      if (window.tmpObj.isEmpty()) {
+
+        broker.publish(new Message('end-addnewcell', {
+          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+          'floor': window.tmpObj.floor,
+          'isEmpty': true
+        }));
+
+      } else {
+
+        broker.publish(new Message('end-addnewcell', {
+          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+          'floor': window.tmpObj.floor
+        }));
+
+      }
 
       result.result = true;
       result.msg = null;
@@ -248,10 +260,24 @@ define([
 
     if (broker.isPublishable('end-addnewcell')) {
 
-      broker.publish(new Message('end-addnewcell', {
-        'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
-        'floor': window.tmpObj.floor
-      }));
+      if (window.tmpObj.isEmpty()) {
+
+        broker.publish(new Message('end-addnewcell', {
+          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+          'floor': window.tmpObj.floor,
+          'isEmpty': true
+        }));
+
+      } else {
+
+        broker.publish(new Message('end-addnewcell', {
+          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+          'floor': window.tmpObj.floor
+        }));
+        
+      }
+
+
 
       result.result = true;
       result.msg = null;
@@ -282,7 +308,10 @@ define([
 
       broker.publish(new Message('snapping', {
         'floor': data.currentTarget.attrs.id,
-        'point': { x : data.evt.clientX - rect.left, y : data.evt.clientY - rect.top }
+        'point': {
+          x: data.evt.clientX - rect.left,
+          y: data.evt.clientY - rect.top
+        }
       }));
 
       result.result = true;

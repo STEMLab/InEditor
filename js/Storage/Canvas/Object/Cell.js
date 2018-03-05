@@ -196,6 +196,15 @@ define([], function() {
     return -1;
   }
 
+  /**
+  * @memberof Cell
+  */
+  Cell.prototype.isEmpty = function(){
+    if(this.dots.length == 0) return true;
+
+    return false;
+  }
+
   return Cell;
 
 });

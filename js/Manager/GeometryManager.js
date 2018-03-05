@@ -117,13 +117,7 @@ define([
     }
 
     // add corner
-    var point = window.storage.canvasContainer.stages[reqObj.floor].stage.getPointerPosition();
-    point.x = point.x - window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.x;
-    point.x = point.x / window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleX;
-
-    point.y = point.y - window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.y;
-    point.y = point.y / window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleY;
-
+    var point = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor.coor;
 
     var isDotExist = window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDotByPoint({
       x: point.x,
@@ -132,12 +126,7 @@ define([
     var dot;
 
     if (isDotExist == null) {
-      var manager = window.broker.getManager('addnewcell', 'GeometryManager');
-      var dots = Object.values(window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDots());
-      var connections = window.storage.canvasContainer.stages[reqObj.floor].getConnection();
-
-      var snapping = manager.snapping(dots, connections, point);
-      dot = new Dot(snapping.x, snapping.y);
+      dot = new Dot(point.x, point.y);
       window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(dot);
     } else {
       dot = isDotExist;
@@ -221,6 +210,11 @@ define([
    * @desc draw new cell object in canvas
    */
   GeometryManager.prototype.endAddNewCell = function(reqObj) {
+
+    if(reqObj.isEmpty != null ){
+      window.tmpObj = null;
+      return;
+    }
 
     var tmpObj = window.tmpObj;
 
@@ -453,10 +447,7 @@ define([
 
     var cursor = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.getCursor();
 
-    if( !cursor.setCoor(snapping) ){
-      cursor.setCoor(reqObj.point);
-
-    }
+    cursor.setCoor(snapping);
     cursor.setVisible(true);
 
     window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();

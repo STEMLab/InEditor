@@ -29,9 +29,7 @@ define([
     this.addGroup(new TmpGroup());
   }
 
-  TmpLayer.prototype.removeObj = function(){
-    log.info(this);
-  }
+
 
   return TmpLayer;
 

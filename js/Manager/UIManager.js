@@ -291,12 +291,16 @@ define([
    */
   UIManager.prototype.endAddNewCell = function(reqObj) {
 
-    // set sidebar > property
-    window.uiContainer.sidebar.property.setPropertyTab('cell', reqObj.id, window.storage);
-
     // change floor btn color
     document.getElementById('cell-btn').src = "../../assets/icon/cell_d.png";
 
+    if(reqObj.isEmpty != null ){
+      return;
+    }
+
+    // set sidebar > property
+    window.uiContainer.sidebar.property.setPropertyTab('cell', reqObj.id, window.storage);
+a
     // refresh tree view
     window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
 
