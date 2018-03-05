@@ -19,14 +19,18 @@ define([
 
     Layer.apply(this, arguments);
 
-    this.init(type);
+    this.init();
 
   }
 
   TmpLayer.prototype = Object.create(Layer.prototype);
 
-  TmpLayer.prototype.init = function(type){
-    this.addGroup(new TmpGroup(type));
+  TmpLayer.prototype.init = function(){
+    this.addGroup(new TmpGroup());
+  }
+
+  TmpLayer.prototype.removeObj = function(){
+    log.info(this);
   }
 
   return TmpLayer;

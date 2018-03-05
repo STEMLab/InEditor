@@ -36,12 +36,9 @@ define([
     }
 
     handlerBinder['stage'] = {
-      'contentClick': this.addNewDot
-    };
-
-    handlerBinder['stage'] = {
+      'contentClick': this.addNewDot,
       'contentMousemove': this.snapping
-    }
+    };
 
     handlerBinder['Escape'] = {
       'keyup': this.cancelDraw
@@ -277,15 +274,15 @@ define([
    * @memberof DrawEventHandler
    */
   DrawEventHandler.prototype.snapping = function(broker, previousMsg, data) {
-    log.info("DrawEventHandler.snapping called ", data);
 
     var result = new Result();
+    var rect = window.storage.canvasContainer.stages[data.currentTarget.attrs.id].stage.content.getBoundingClientRect();
 
-    if (previousMsg == 'addnewcell' && broker.isPublishable('snapping')) {
+    if (broker.isPublishable('snapping')) {
 
       broker.publish(new Message('snapping', {
         'floor': data.currentTarget.attrs.id,
-        'point': { x : data.evt.pageX, y : data.evt.pageY }
+        'point': { x : data.evt.clientX - rect.left, y : data.evt.clientY - rect.top }
       }));
 
       result.result = true;

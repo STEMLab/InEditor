@@ -94,7 +94,17 @@ define([], function() {
     /**
     * @memberof Conditions
     */
-    this.snappingThreshold = 10;
+    this.snappingThreshold = 20;
+
+    /**
+    * @memberof Conditions
+    */
+    this.cursorrSize = 5;
+
+    /**
+    * @memberof Conditions
+    */
+    this.cursorColor = 'red';
   }
 
   /**

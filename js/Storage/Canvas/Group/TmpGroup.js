@@ -5,18 +5,20 @@
 define([
   "../Object/Cell.js",
   "../Object/CellBoundary.js",
-  "../Object/Transition.js"
+  "../Object/Transition.js",
+  "../Object/Cursor.js"
 ], function(
   Cell,
   CellBoundary,
-  Transition
+  Transition,
+  Cursor
 ) {
   'use strict';
 
   /**
    * @class TmpGroup
    */
-  function TmpGroup(type) {
+  function TmpGroup() {
 
     /**
     * @memberof TmpGroup
@@ -29,17 +31,22 @@ define([
     /**
     * @memberof TmpGroup
     */
-    this.obj; 
+    this.obj = null;
 
-    this.newObj(type);
+    /**
+    * @memberof TmpGroup
+    */
+    this.cursor = new Cursor({x : 0, y : 0});
+    this.tmpGroup.add(this.cursor.getObject());
+
   }
 
   /**
   * @memberof TmpGroup
   */
-  TmpGroup.prototype.newObj = function(type) {
+  TmpGroup.prototype.addNewObj = function(type) {
 
-    this.tmpGroup.destroyChildren();
+    // this.tmpGroup.destroyChildren();
 
     if (type == 'cell') {
 
@@ -71,6 +78,28 @@ define([
   TmpGroup.prototype.getGroup = function() {
     return this.tmpGroup;
   }
+
+  TmpGroup.prototype.getCursor = function(){
+    return this.cursor;
+  }
+
+  TmpGroup.prototype.removeObj = function(){
+
+    log.info(this.tmpGroup.children);
+
+    this.obj = null;
+
+    var len = this.tmpGroup.children.length;
+
+    for(var i = 0; i < len; i++){
+      if( this.tmpGroup.children[i].nodeType == "Group" || this.tmpGroup.children[i].className != "Circle"){
+        this.tmpGroup.children.splice(i, 1);
+        i--;
+        len--;
+      }
+    }
+  }
+
 
   return TmpGroup;
 

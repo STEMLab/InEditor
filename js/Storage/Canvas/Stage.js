@@ -64,7 +64,7 @@ define([
     /**
      * @memberof Stage
      */
-    this.tmpLayer = null;
+    this.tmpLayer = new TmpLayer();
 
     /**
      * @memberof Stage
@@ -81,11 +81,15 @@ define([
       }
     });
 
+    this.stage.setAttr('x', 0);
+    this.stage.setAttr('y', 0);
+
     this.stage.add(this.backgroundLayer.getLayer());
     this.stage.add(this.cellLayer.getLayer());
     this.stage.add(this.cellBoundaryLayer.getLayer());
     this.stage.add(this.stateLayer.getLayer());
     this.stage.add(this.transitionLayer.getLayer());
+    this.stage.add(this.tmpLayer.getLayer());
 
   }
 
@@ -160,6 +164,7 @@ define([
 
   /**
    * @memberof Stage
+   * @deprecated
    */
   Stage.prototype.addTmpObj = function(type) {
 

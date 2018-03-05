@@ -12,6 +12,8 @@ define([], function() {
     this.layer = new Konva.Layer();
     this.group = null;
 
+    this.layer.clearBeforeDraw(true);
+
   }
 
   Layer.prototype.getLayer = function() {

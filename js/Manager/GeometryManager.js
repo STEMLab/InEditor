@@ -111,12 +111,9 @@ define([
    */
   GeometryManager.prototype.addNewCell = function(reqObj) {
 
-    // If this is the first `addnewcell` msg for this cycle, set TmpLayer in stage.
-    if (window.storage.canvasContainer.stages[reqObj.floor].tmpLayer == null) {
-
-      window.storage.canvasContainer.stages[reqObj.floor].addTmpObj('cell');
+    if ( window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.obj == null ){
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.addNewObj('cell');
       window.tmpObj.floor = reqObj.floor;
-
     }
 
     // add corner
@@ -149,9 +146,9 @@ define([
     window.tmpObj.addCorner(dot);
 
     // draw group
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.tmpGroup.draw();
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+    // window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
 
-    // log.trace(window.storage.canvasContainer);
     // log.trace(window.storage.dotFoolContainer);
 
   }
@@ -229,8 +226,8 @@ define([
 
     // clear tmp obj
     window.tmpObj = null;
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.destroy();
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer = null;
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.removeObj();
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
     for (var key in tmpObj.dots) {
       tmpObj.dots[key].leaveObj('tmpObj');
@@ -397,14 +394,14 @@ define([
 
           var dotP = dotProduct(V1, V3);
 
-          log.info(V3Unit.x * dotP, V3Unit.y * dotP);
+          // log.info(V3Unit.x * dotP, V3Unit.y * dotP);
 
           minimum_point = {
             x: connections[i].dot1.point.x + V3Unit.x * dotP,
             y: connections[i].dot1.point.y + V3Unit.y * dotP
           };
 
-          log.info("minimum_point updated : ", minimum_point);
+          // log.info("minimum_point updated : ", minimum_point);
 
           minimum_connection = connections[i];
         }
@@ -441,11 +438,6 @@ define([
   */
   GeometryManager.prototype.snappingMousePointer = function(reqObj){
 
-    if(window.cursor == null){
-      window.cursor = { coor : { x : NaN, y : NaN} };
-    }
-
-
     var point = reqObj.point;
     point.x = point.x - window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.x;
     point.x = point.x / window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleX;
@@ -458,12 +450,19 @@ define([
     var connections = window.storage.canvasContainer.stages[reqObj.floor].getConnection();
 
     var snapping = manager.snapping(dots, connections, point);
-    dot = new Dot(snapping.x, snapping.y);
 
+    var cursor = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.getCursor();
 
+    if( !cursor.setCoor(snapping) ){
+      cursor.setCoor(reqObj.point);
 
+    }
+    cursor.setVisible(true);
 
-    log.info(reqObj, point);
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+    // window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+
+    // log.info(window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.tmpGroup);
   }
 
 
