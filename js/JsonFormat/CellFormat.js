@@ -83,6 +83,14 @@ define([
 
   }
 
+
+  CellFormat.prototype.getCoordinate = function(i){
+
+    if(this.geometry.coordinates.length > i){
+      return this.geometry.coordinates[i];
+    }
+  }
+
   /**
    * @memberof CellFormat
    */
@@ -131,6 +139,12 @@ define([
       this.updateCoordinates(i, 'x', coordinates[i][0]);
       this.updateCoordinates(i, 'y', coordinates[i][1]);
     }
+
+  }
+
+  CellFormat.prototype.pushCoordinate = function(coor){
+
+    this.geometry.coordinates.push(coor);
 
   }
 

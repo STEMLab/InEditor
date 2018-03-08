@@ -113,6 +113,8 @@ define([
           result[cells[index]].updateCoordinates(i, 'z', groundHeight*1);
         }
 
+        result[cells[index]].pushCoordinate(result[cells[index]].getCoordinate(0));
+
       }
 
     }
