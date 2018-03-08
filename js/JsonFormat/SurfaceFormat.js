@@ -8,18 +8,26 @@ define([], function(){
   /**
   * @class SurfaceFormat
   */
-  function SurfaceFormat(){
+  function SurfaceFormat(id){
 
     /**
     * @memberof SurfaceFormat
     */
-    this.type = "Polygon";
+    this.type = "Surface";
 
     /**
     * @memberof SurfaceFormat
     */
     this.coordinates = [];
 
+    /**
+    * @memberof SurfaceFormat
+    */
+    this.properties = {
+      "id" : id,
+      "extrude" : "true",
+      "height" : 0
+    }
   }
 
   return SurfaceFormat;

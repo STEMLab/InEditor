@@ -67,8 +67,8 @@ define([
     // copy geometry coordinates
     for (var key in geometries) {
 
-      var tmp = new CellFormat();
-      tmp.pushCoordinates(geometries[key].points);
+      var tmp = new CellFormat("CG-"+geometries[key].id);
+      tmp.pushCoordinatesFromDots(geometries[key].points);
       result[geometries[key].id] = tmp;
 
     }
@@ -85,6 +85,7 @@ define([
 
     // pixel to real world coordinates
     var floorProperties = window.storage.propertyContainer.floorProperties;
+    var manager = window.broker.getManager('exporttojson', 'ProjectManager');
 
     for(var key in floorProperties){
 
@@ -93,15 +94,24 @@ define([
 
       var widthScale = floorProperties[key].upperCorner[0] / stage.getAttr('width');
       var heightScale = floorProperties[key].upperCorner[1] / stage.getAttr('height');
-      var widthTrans = floorProperties[key].upperCorner[0] - stage.getAttr('width');
-      var heightTrans = floorProperties[key].upperCorner[1] - stage.getAttr('height');
-      var matrix = math.matrix([[widthScale, 0, 0], [0, heightScale, 0], [widthTrans, heightTrans, 1]]);
+      var widthTrans = floorProperties[key].lowerCorner[0]*1;
+      var heightTrans = floorProperties[key].lowerCorner[1]*1;
+      var matrix = math.matrix([[widthScale, 0, widthTrans], [0, heightScale, heightTrans], [0, 0, 0]]);
 
       for( var index in cells ){
 
-        result[cells[key]].setCoordinates(
-          window.broker.getManager('exporttojson', 'ProjectManager').pixel2realSurface(matrix, result[cells[key]].getCoordinates())
+        result[cells[index]].pushCoordinatesFrom2DArray(
+          manager.pixel2realSurface(matrix, result[cells[index]].getCoordinates())
         );
+
+        result[cells[index]].setHeight(floorProperties[key].celingHeight);
+
+        var coorLen = result[cells[index]].getCoordinatesLen();
+        var groundHeight = floorProperties[key].groundHeight;
+
+        for( var i = 0 ; i < coorLen ; i++){
+          result[cells[index]].updateCoordinates(i, 'z', groundHeight*1);
+        }
 
       }
 
@@ -125,9 +135,9 @@ define([
 
     for(var i = 0; i < len; i++){
 
-      var pixelMatrix = math.matrix([pixel[i][0], pixel[i][1], 0]);
+      var pixelMatrix = math.matrix([pixel[i][0], pixel[i][1], 1]);
       var result = math.multiply(matrix, pixelMatrix);
-      matrixTrans.push(result._data[0], result._data[1]);
+      matrixTrans.push([result._data[0], result._data[1]]);
 
     }
 

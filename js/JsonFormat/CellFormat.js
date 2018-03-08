@@ -12,7 +12,7 @@ define([
   /**
    * @class CellFormat
    */
-  function CellFormat() {
+  function CellFormat(cgid) {
 
     /**
      * @memberof CellFormat
@@ -31,7 +31,7 @@ define([
      * @memberof CellFormat
      * @desc Surface
      */
-    this.geometry2d = new SurfaceFormat();
+    this.geometry = new SurfaceFormat(cgid);
   }
 
   /**
@@ -52,38 +52,88 @@ define([
    * @memberof CellFormat
    * @param coordinates 1 * n array
    */
-  CellFormat.prototype.pushCoordinates = function(coordinates) {
+  CellFormat.prototype.pushCoordinatesFromDots = function(dots) {
 
-    var len = coordinates.length;
+    var len = dots.length;
 
-    for (var i = 0; i < len; i = i + 2) {
+    for (var i = 0; i < len; i++) {
 
-      this.geometry2d.coordinates.push([coordinates[i], coordinates[i + 1]]);
+      this.geometry.coordinates.push([dots[i].point.x, dots[i].point.y, 0]);
 
     }
 
   }
 
   /**
-  * @memberof CellFormat
-  * @param coordinates 1 * n array
-  */
-  CellFormat.prototype.setCoordinates = function(coordinates){
+   * @memberof CellFormat
+   * @param coordinates 1 * n array
+   */
+  CellFormat.prototype.setCoordinates = function(coordinates) {
 
-    this.geometry2d.coordinates = [];
-
-    this.pushCoordinates(coordinates);
+    this.pushCoordinatesFrom2DArray(coordinates);
 
   }
 
- /**
- * return coordinates array
- */
-  CellFormat.prototype.getCoordinates = function(){
+  /**
+   * @return coordinates array
+   */
+  CellFormat.prototype.getCoordinates = function() {
 
-    return this.geometry2d.coordinates;
+    return this.geometry.coordinates;
 
   }
+
+  /**
+   * @memberof CellFormat
+   */
+  CellFormat.prototype.setHeight = function(height) {
+    this.geometry.properties.height = height;
+  }
+
+  /**
+   * @memberof CellFormat
+   */
+  CellFormat.prototype.updateCoordinates = function(index, position, value) {
+
+    if (position == 'x') {
+
+      this.geometry.coordinates[index][0] = value;
+
+    } else if (position == 'y') {
+
+      this.geometry.coordinates[index][1] = value;
+
+    } else if (position == 'z') {
+
+      this.geometry.coordinates[index][2] = value;
+
+    }
+
+  }
+
+  /**
+   * @memberof CellFormat
+   */
+  CellFormat.prototype.getCoordinatesLen = function() {
+    return this.geometry.coordinates.length;
+  }
+
+  CellFormat.prototype.changeCoordinates = function(coordinates) {
+
+    this.geometry.coordinates = coordinates;
+
+  }
+
+  CellFormat.prototype.pushCoordinatesFrom2DArray = function(coordinates){
+
+    var len = coordinates.length;
+    for(var i = 0; i < len; i++){
+      this.updateCoordinates(i, 'x', coordinates[i][0]);
+      this.updateCoordinates(i, 'y', coordinates[i][1]);
+    }
+
+  }
+
 
   return CellFormat;
 
