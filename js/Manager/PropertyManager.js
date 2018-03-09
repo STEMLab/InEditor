@@ -6,12 +6,14 @@ define([
   "../Storage/Properties/FloorProperty.js",
   "../Storage/Canvas/Stage.js",
   "../Storage/Properties/CellProperty.js",
-  "../PubSub/Subscriber.js"
+  "../PubSub/Subscriber.js",
+  "../Storage/Properties/CellBoundaryProperty.js"
 ], function(
   FloorProperty,
   Stage,
   CellProperty,
-  Subscriber
+  Subscriber,
+  CellBoundaryProperty
 ) {
   'use strict';
 
@@ -41,7 +43,7 @@ define([
     this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.endAddNewCell_makeHistoryObj, this.endAddNewCell_undo);
     this.addCallbackFun('updaterefdata', this.updateRefProperty);
 
-    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary);
+    this.addCallbackFun('end-addnewcellboundarybtw', this.endAddNewCellBoundaryBtw);
 
   }
 
@@ -185,6 +187,26 @@ define([
     log.info('PropertyManager.endAddNewCellBoundary called');
   }
 
+  /**
+  * @memberof GeometryManager
+  * @param {Object} reqObj { id, floor, isEmpty }
+  */
+  PropertyManager.prototype.endAddNewCellBoundaryBtw = function(reqObj){
+
+    if(reqObj.isEmpty != null ){ return; }
+
+    // add new cellspace boundary property(=CellBoundaryProperty) in stage.propertyContainer
+    window.storage.propertyContainer.cellBoundaryProperties.push(
+      new CellBoundaryProperty(reqObj.id)
+    );
+
+    // add key in floor property
+    window.storage.propertyContainer.getElementById('floor', reqObj.floor).cellBoundaryKey.push(
+      reqObj.id
+    );
+
+    // log.trace(window.storage.propertyContainer);
+  }
 
   return PropertyManager;
 });

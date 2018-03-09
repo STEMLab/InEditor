@@ -59,6 +59,9 @@ define([
     } else if (type == 'cellBoundary') {
 
       this.obj = new CellBoundary('tmpObj');
+      this.obj.type = 'cellBoundary'
+      window.tmpObj = this.obj;
+      this.tmpGroup.add(this.obj.getLineObject());
       this.tmpGroup.add(this.obj.getCornersObject());
 
       // get polyline

@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
   "../Storage/Canvas/Stage.js",
@@ -47,8 +47,10 @@ define([
     this.addCallbackFun('activateworkspace', this.activateWorkspace);
 
     this.addCallbackFun('canceladdnewcell', this.cancelAddNewCell);
+    this.addCallbackFun('canceladdnewcellboundary', this.cancelAddNewCellBoundary);
 
-    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary);
+    this.addCallbackFun('start-addnewcellboundarybtw', this.startAddNewCellBoundaryBtw);
+    this.addCallbackFun('end-addnewcellboundarybtw', this.endAddNewCellBoundaryBtw);
   }
 
 
@@ -96,7 +98,7 @@ define([
    */
   UIManager.prototype.addFloorPlan = function(reqObj) {
 
-    if(reqObj.img == null ) window.myhistory.undo();
+    if (reqObj.img == null) window.myhistory.undo();
 
     // save image to assets > floorplan
     var xhr = new XMLHttpRequest();
@@ -134,7 +136,7 @@ define([
 
         // window.open(JSON.parse(xhr.response));
         var timestamp = new Date().getTime();
-        imageObj.src = JSON.parse(xhr.response)+"?"+timestamp;
+        imageObj.src = JSON.parse(xhr.response) + "?" + timestamp;
       }
 
     }
@@ -171,7 +173,10 @@ define([
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status == 200) {
 
-        window.myhistory.pushHistoryObj(uuid, manager, { 'floor' : reqObj.id, 'filename' : JSON.parse(xhr.response).result});
+        window.myhistory.pushHistoryObj(uuid, manager, {
+          'floor': reqObj.id,
+          'filename': JSON.parse(xhr.response).result
+        });
         // log.info(">>> succeed save copy image : " + JSON.parse(xhr.response).result);
 
       }
@@ -247,7 +252,7 @@ define([
 
           }
           var timestamp = new Date().getTime();
-          imageObj.src = JSON.parse(xhr.response).filename+"?"+timestamp;
+          imageObj.src = JSON.parse(xhr.response).filename + "?" + timestamp;
 
           log.info(">>>>> addFloorPlan_undo : " + JSON.parse(xhr.response).result);
         }
@@ -291,37 +296,39 @@ define([
    */
   UIManager.prototype.endAddNewCell = function(reqObj) {
 
-    // change floor btn color
+    // change cell btn color
     document.getElementById('cell-btn').src = "../../assets/icon/cell_d.png";
 
-    if(reqObj.isEmpty != null ){
+    if (reqObj.isEmpty != null) {
       return;
     }
 
     // set sidebar > property
     window.uiContainer.sidebar.property.setPropertyTab('cell', reqObj.id, window.storage);
-a
+
     // refresh tree view
     window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
 
   }
 
+
   /**
-  * @param {Message.reqObj} reqObj id<br>floor
-  * @memberof UIManager
-  */
-  UIManager.prototype.endAddNewCell_makeHistoryObj = function(reqObj){
+   * @param {Message.reqObj} reqObj id<br>floor
+   * @memberof UIManager
+   */
+  UIManager.prototype.endAddNewCell_makeHistoryObj = function(reqObj) {
     var obj = reqObj;
     obj['type'] = 'cell';
 
     return obj;
   }
 
+
   /**
-  * @param {Object} undoObj id<br>floor<br>type
-  * @memberof UIManager
-  */
-  UIManager.prototype.removeObj = function(undoObj){
+   * @param {Object} undoObj id<br>floor<br>type
+   * @memberof UIManager
+   */
+  UIManager.prototype.removeObj = function(undoObj) {
 
     // remove tree view content
     window.uiContainer.sidebar.treeview.reomveNode(undoObj.id);
@@ -376,6 +383,7 @@ a
 
   }
 
+
   /**
    * @memberof UIManager
    * @param {Message.reqObj} reqObj id : floor id
@@ -387,22 +395,57 @@ a
   }
 
   /**
-  * @param {Object} reqObj type<br>floor
-  * @memberof UIManager
-  * @desc change floor btn color
-  */
-  UIManager.prototype.cancelAddNewCell = function(reqObj){
+   * @param {Object} reqObj type<br>floor
+   * @memberof UIManager
+   * @desc change floor btn color
+   */
+  UIManager.prototype.cancelAddNewCell = function(reqObj) {
 
     document.getElementById('cell-btn').src = "../../assets/icon/cell_d.png";
 
   }
 
+
   /**
-   * @memberof GeometryManager
+   * @memberof UIManager
+   * @param {Object} reqObj empty
    */
-  UIManager.prototype.endAddNewCellBoundary = function(reqObj) {
-    log.info('UIManager.endAddNewCellBoundary called');
+  UIManager.prototype.startAddNewCellBoundaryBtw = function(reqObj){
+
+    // change floor btn color
+    document.getElementById('cellboundary_btw_btn').src = "../../assets/icon/cellboundary_btw_a.png";
+
   }
+
+
+  /**
+   * @memberof UIManager
+   * @param {Object} reqObj { id, floor, isEmpty }
+   */
+  UIManager.prototype.endAddNewCellBoundaryBtw = function(reqObj) {
+
+    // change cellboundary_btw color
+    document.getElementById('cellboundary_btw_btn').src = "../../assets/icon/cellboundary_btw_d.png";
+
+    if(reqObj.isEmpty != null) return;
+
+    // set sidebar > propertyContainer
+    window.uiContainer.sidebar.property.setPropertyTab('cellBoundary', reqObj.id, window.storage);
+
+    // refresh tree view
+    window.uiContainer.sidebar.treeview.addCellBoundary(reqObj.id, reqObj.floor);
+  }
+
+  /**
+  * @memberof UIManager
+  * @param {Object} reqObj null
+  */
+  UIManager.prototype.cancelAddNewCellBoundary = function(reqObj){
+
+    document.getElementById('cellboundary_btw_btn').src = "../../assets/icon/cellboundary_btw_d.png";
+
+  }
+
 
 
   return UIManager;

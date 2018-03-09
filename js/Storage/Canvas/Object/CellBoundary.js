@@ -23,7 +23,10 @@ define([], function() {
     /**
     * @memberof CellBoundary
     */
-    this.corners = Konva.Group({x:0, y:0});
+    this.corners = new Konva.Group({
+      x: 0,
+      y: 0
+    });
 
     /**
     * @memberof CellBoundary
@@ -31,22 +34,45 @@ define([], function() {
     this.line = new Konva.Line({
           points:[],
           stroke: 'black',
-          strokeWidth: 5
+          strokeWidth: 4
     });
 
     /**
     * @memberof CellBoundary
     */
     this.dots = [];
+
+    /**
+    * @memberof CellBoundary
+    */
+    this.associationCell = null;
   }
 
   /**
   * @memberof CellBoundary
   */
-  CellBoundary.prototype.addCorner = function(_x, _y){
+  CellBoundary.prototype.addCorner = function( dot ){
+
+    this.addNewDot(dot);
+
+    this.addCornerObj(dot.uuid, dot.getCoor());
+
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.addNewDot = function(dot){
+    dot.participateObj(this.id, 'cellBoundary');
+
+    this.dots.push(dot);
+  }
+
+  CellBoundary.prototype.addCornerObj = function(uuid, coor){
+
     var rect = new Konva.Rect({
-      x: _x,
-      y: _y,
+      x: coor.x,
+      y: coor.y,
       width: 5,
       height: 5,
       fill: 'white',
@@ -54,9 +80,12 @@ define([], function() {
       strokeWidth: 1
     });
 
+    rect.uuid = uuid;
+
     this.corners.add(rect);
 
-    this.line.points().push(_x, _y);
+    this.line.points().push(coor.x, coor.y);
+
   }
 
   /**
@@ -64,6 +93,13 @@ define([], function() {
   */
   CellBoundary.prototype.getCornersObject = function(){
     return this.corners;
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.getLineObject = function(){
+    return this.line;
   }
 
   /**
@@ -92,6 +128,29 @@ define([], function() {
 
     return false;
   }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.addObjectFromDots = function(){
+
+    this.corners.destroyChildren();
+    this.line.attrs.points = [];
+
+    for(var key in this.dots){
+      this.addCornerObj(this.dots[key].uuid, this.dots[key].getCoor());
+    }
+
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.setCornersVisible = function(visible){
+    this.corners.visible(visible);
+  }
+
+
 
   return CellBoundary;
 

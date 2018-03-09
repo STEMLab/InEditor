@@ -89,7 +89,7 @@ define([
 
     switch (_type) {
       case 'cell':
-        var cells = window.storage.canvasContainer.stage[stageID].cellLayer.group.cells;
+        var cells = window.storage.canvasContainer.stages[stageID].cellLayer.group.cells;
         for (var key in cells) {
           if (cells[key].id == _id) {
             result = cells[key];
@@ -98,7 +98,7 @@ define([
         }
         break;
       case 'cellboundary':
-        var cellboundaries = window.storage.canvasContainer.stage[stageID].cellBoundaryLayer.group.cellBoundaries;
+        var cellboundaries = window.storage.canvasContainer.stages[stageID].cellBoundaryLayer.group.cellBoundaries;
         for (var key in cellboundaries) {
           if (cellboundaries[key].id == _id) {
             result = cellboundaries[key];
@@ -107,7 +107,7 @@ define([
         }
         break;
       case 'state':
-        var states = window.storage.canvasContainer.stage[stageID].stateLayer.group.states;
+        var states = window.storage.canvasContainer.stages[stageID].stateLayer.group.states;
         for (var key in states) {
           if (states[key].id == _id) {
             result = states[key];
@@ -116,7 +116,7 @@ define([
         }
         break;
       case 'transition':
-        var transitions = window.storage.canvasContainer.stage[stageID].transitionLayer.group.transitions;
+        var transitions = window.storage.canvasContainer.stages[stageID].transitionLayer.group.transitions;
         for (var key in transitions) {
           if (transitions[key].id == _id) {
             result = transitions[key];

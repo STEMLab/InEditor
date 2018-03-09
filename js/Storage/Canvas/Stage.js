@@ -211,6 +211,15 @@ define([
     return reduced;
   }
 
+  /**
+  * @memberof Stage
+  * @return {Array} Object array. key of attribute is connection { dot1, dot2 }, value of attribute is array of cell id which is contain the line consisting of key.
+  */
+  Stage.prototype.getCellConnectionWithID = function(){
+    var cellConnections = this.cellLayer.getBoundaries();
+    return cellConnections;
+  }
+
   return Stage;
 
 });

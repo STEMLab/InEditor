@@ -86,7 +86,6 @@ define([], function() {
   */
   TreeView.prototype.addCell = function(id, floor){
 
-
     $("#tree-view").fancytree("getTree").getNodeByKey(floor+"-cell").addChildren({
       title : id,
       key : id,
@@ -105,6 +104,24 @@ define([], function() {
   */
   TreeView.prototype.reomveNode = function(id){
     $("#tree-view").fancytree("getTree").getNodeByKey(id).remove();
+  }
+
+
+  /**
+  * @memberof TreeView
+  */
+  TreeView.prototype.addCellBoundary = function(id, floor){
+
+    $("#tree-view").fancytree("getTree").getNodeByKey(floor+"-cellBoundary").addChildren({
+      title : id,
+      key : id,
+      folder : false,
+      type : 'cellBoundary',
+      icon : '../../assets/tree-icon/cellBoundary.png'
+    });
+
+    $("#tree-view").fancytree("getTree").activateKey(id);
+
   }
 
   return TreeView;

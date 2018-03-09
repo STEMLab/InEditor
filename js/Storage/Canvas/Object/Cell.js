@@ -1,4 +1,4 @@
-/**
+  /**
 * @author suheeeee<lalune1120@hotmail.com>
 */
 
@@ -33,7 +33,7 @@ define([], function() {
     */
     this.poly = new Konva.Line({
       points: [],
-      fill: '#00D2FF',
+      fill: Konva.Util.getRandomColor(),
       stroke: 'black',
       opacity: 0.3,
       strokeWidth: 1,
@@ -48,7 +48,7 @@ define([], function() {
 
   /**
   * @memberof Cell
-  * @param {Object} x, y
+  * @param {Dot} dot
   */
   Cell.prototype.addCorner = function( dot ){
 
@@ -204,6 +204,74 @@ define([], function() {
 
     return false;
   }
+
+  /**
+  * @memberof Cell
+  * @param {Object} point1
+  * @param {Object} point2
+  * @desc Plz sure that inputed values are already snapping.
+  */
+  Cell.prototype.isPartOf = function(point1, point2){
+
+    function isSame(A, B){
+      var isSameX = (Math.abs(A.x - B.x) <= 0.0001);
+      var isSameY = (Math.abs(A.y - B.y) <= 0.0001);
+
+      return (isSameX && isSameY);
+    }
+
+    var len = this.dots.length;
+
+    for(var i = 0 ; i < len ; i ++ ){
+      var line;
+      if( i == len - 1 ) line = { 'dot1' : this.dots[i], 'dot2' : this.dots[0] };
+      else line = { 'dot1' : this.dots[i], 'dot2' : this.dots[i + 1] };
+
+      // dot1 -> dot2
+      var V1 = {
+        x: line.dot2.point.x - line.dot1.point.x,
+        y: line.dot2.point.y - line.dot1.point.y
+      };
+
+      var V2;
+
+      if( point2 == null ){
+
+        // dot1 -> point1
+        V2 = {
+          x: point1.x - line.dot1.point.x,
+          y: point1.y - line.dot1.point.y
+        };
+
+      } else {
+
+        // point1 -> point2
+        V2 = {
+          x: point2.x - point1.x,
+          y: point2.y - point1.y
+        };
+
+      }
+
+      var cos = (V1.x * V2.x + V1.y * V2.y) /
+                ( Math.sqrt(Math.pow(V1.x, 2) + Math.pow(V1.y, 2))
+                  * Math.sqrt(Math.pow(V2.x, 2) + Math.pow(V2.y, 2)));
+
+      var threshold = 0.0000001;
+
+      if( ( 1 - threshold <= cos && cos <= 1 + threshold ) || ( (-1) - threshold <= cos && cos <= (-1) + threshold ) ){
+
+        // if point1 is part of this line.
+        return { 'result' : true, 'connection' : line };
+
+      }
+
+    }
+
+    return { 'result' : false };
+
+  }
+
 
   return Cell;
 

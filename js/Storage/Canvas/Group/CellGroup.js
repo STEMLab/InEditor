@@ -41,7 +41,7 @@ define([
    * @memberof CellGroup
    * @param {Cell} obj
    */
-  CellGroup.prototype.addNewCell = function(obj) {
+  CellGroup.prototype.add = function(obj) {
 
     var newCell = new Cell(obj.id);
 
@@ -178,6 +178,7 @@ define([
         } else {
           newConnection = {'dot1' : this.cells[key].dots[dotkey], 'dot2' : this.cells[key].dots[dotkey+1]};
         }
+
         if(result.indexOf({'dot1':newConnection.dot2, 'dot2':newConnection.dot1}) == -1 ){
           result.push(newConnection);
         }
@@ -185,6 +186,37 @@ define([
     }
 
     return result;
+  }
+
+  CellGroup.prototype.getBoundaries = function(){
+
+    var result = [];
+
+    for(var key in this.cells){
+      var oneCell = {'cell': this.cells[key].id, 'connection': []};
+
+      for(var dotkey in this.cells){
+
+        var newConnection;
+
+        if ( dotkey == this.cells[key].dots.length-1){
+          newConnection = {'dot1' : this.cells[key].dots[dotkey], 'dot2' : this.cells[key].dots[0] };
+        } else {
+          newConnection = {'dot1' : this.cells[key].dots[dotkey], 'dot2' : this.cells[key].dots[dotkey+1]};
+        }
+
+        oneCell[connection].push(newConnection);
+        result.push(newConnection);
+
+      }
+    }
+
+    return result;
+
+  }
+
+  CellGroup.prototype.getCells = function(){
+    return this.cells;
   }
 
   return CellGroup;

@@ -40,6 +40,10 @@ define([
     return this.group.getConnection();
   }
 
+  CellLayer.prototype.getBoundaries = function(){
+    return this.group.getBoundaries();
+  }
+
   return CellLayer;
 
 });

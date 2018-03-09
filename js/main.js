@@ -47,4 +47,6 @@ require([
   var myhistory = new History();
   window.myhistory = myhistory;
 
+  log.info(window.storage);
+
 });

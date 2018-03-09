@@ -8,22 +8,18 @@ define([], function() {
   /**
   * @class CellBoundaryGeometry
   */
-  function CellBoundaryGeometry() {
+  function CellBoundaryGeometry(id, dots) {
 
     /**
     * @memberof CellBoundaryGeometry
     */
-    this.id;
+    this.id = id;
 
     /**
     * @memberof CellBoundaryGeometry
     */
-    this.cellRef; // id of CellGeometry
+    this.dost = dots;
 
-    /**
-    * @memberof CellBoundaryGeometry
-    */
-    this.index;
   }
 
   return CellBoundaryGeometry;

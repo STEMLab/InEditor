@@ -48,6 +48,10 @@ define([
       'keyup': this.finishDraw
     }
 
+    handlerBinder['cellboundary_btw_btn'] = {
+      'click': this.clickCellBoundaryBtwBtn
+    }
+
   }
 
   /**
@@ -119,11 +123,9 @@ define([
       broker.publish(new Message('addnewfloor', {
         'floor': window.conditions.pre_floor + (++window.conditions.LAST_FLOOR_ID_NUM)
       }));
-      result = {
-        'result': true,
-        'msg': null
-      };
 
+      result.result = true;
+      result.msg = null;
 
     } else {
 
@@ -147,7 +149,44 @@ define([
 
     if (isFloorExist && broker.isPublishable('start-addnewcellboundary')) {
 
+      broker.publish(new Message('start-addnewcellboundary', {}));
+
+      result.result = true;
+      result.msg = null;
+
+    } else if (broker.isPublishable('end-addnewcellboundary')) {
+
+      if (window.tmpObj.isEmpty()) {
+
+        broker.publish(new Message('end-addnewcellboundary', {
+          'id': window.conditions.pre_cellboundary + (++window.conditions.LAST_CELLBOUNDARY_ID_NUM),
+          'floor': window.tmpObj.floor,
+          'isEmpty': true
+        }));
+
+      } else {
+
+        broker.publish(new Message('end-addnewcellboundary', {
+          'id': window.conditions.pre_cellboundary + (++window.conditions.LAST_CELLBOUNDARY_ID_NUM),
+          'floor': window.tmpObj.floor
+        }));
+
+      }
+
+      result.result = true;
+      result.msg = null;
+
+    } else if (!isFloorExist) {
+
+      result.msg = "There is no floor ...";
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to start-addnewcellboundary or end-addnewcellboundary.";
+
     }
+
+    return result;
 
   }
 
@@ -184,6 +223,42 @@ define([
 
       }
 
+
+    } else if (broker.isPublishable('addnewcellboundarybtw')) {
+
+      var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
+      var isFirstClick = (window.tmpObj.affiliatedCell == null);
+      var isTwoCellExist = (window.storage.propertyContainer.getElementById('floor', data.currentTarget.attrs.id).cellKey.length >= 2);
+
+      if (!isTwoCellExist) {
+
+        broker.publish(new Message('canceladdnewcellboundary', {
+          'floor': data.currentTarget.attrs.id
+        }));
+
+        log.warn("This floor have less then two cell ... You can't draw cellspacebounday here !");
+
+        result.result = true;
+        result.msg = 'canceladdnewcellboundary';
+
+      } else if (isFirstClick || (!isFirstClick && isSameFloor)) {
+
+        broker.publish(new Message('addnewcellboundarybtw', {
+          'floor': data.currentTarget.attrs.id
+        }));
+
+        result.result = true;
+        result.msg = 'addnewcellboundarybtw';
+
+      } else if (!isFirstClick && !isSameFloor) {
+
+        result.msg = "you clicked different floor!";
+
+      } else {
+
+        result.msg = "wrong state transition : " + previousMsg + " to addnewcellboundary.";
+
+      }
 
     } else {
 
@@ -263,8 +338,6 @@ define([
       if (window.tmpObj.isEmpty()) {
 
         broker.publish(new Message('end-addnewcell', {
-          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
-          'floor': window.tmpObj.floor,
           'isEmpty': true
         }));
 
@@ -274,15 +347,31 @@ define([
           'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
           'floor': window.tmpObj.floor
         }));
-        
+
       }
-
-
 
       result.result = true;
       result.msg = null;
 
-    } else if (broker.isPublishable('end-addnewcellboundary')) {
+    } else if (broker.isPublishable('end-addnewcellboundarybtw')) {
+
+      if (window.tmpObj.isEmpty()) {
+
+        broker.publish(new Message('end-addnewcellboundarybtw', {
+          'isEmpty': true
+        }));
+
+      } else {
+
+        broker.publish(new Message('end-addnewcellboundarybtw', {
+          'id': window.conditions.pre_cellBoundary + (++window.conditions.LAST_CELLBOUNDARY_ID_NUM),
+          'floor': window.tmpObj.floor
+        }));
+
+      }
+
+      result.result = true;
+      result.msg = null;
 
     } else if (broker.isPublishable('end-addnewstate')) {
 
@@ -325,6 +414,57 @@ define([
 
 
     return result;
+  }
+
+  /**
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickCellBoundaryBtwBtn = function(broker, previousMsg) {
+
+    var result = new Result();
+
+    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
+    var isCellExist = (window.storage.propertyContainer.cellProperties.length != 0);
+
+    if (!isFloorExist) {
+      result.msg = "There is no floor ...";
+    } else if (!isCellExist) {
+      result.msg = "There is no cell ...";
+    } else if (broker.isPublishable('start-addnewcellboundarybtw')) {
+
+      broker.publish(new Message('start-addnewcellboundarybtw', null));
+
+      result = {
+        'result': true,
+        'msg': 'start-addnewcellboundarybtw'
+      };
+
+    } else if (broker.isPublishable('end-addnewcellboundarybtw')) {
+
+      if (window.tmpObj.isEmpty()) {
+
+        broker.publish(new Message('end-addnewcellboundarybtw', {
+          'isEmpty': true
+        }));
+
+      } else {
+
+        broker.publish(new Message('end-addnewcellboundarybtw', {
+          'id': window.conditions.pre_cellBoundary + (++window.conditions.LAST_CELLBOUNDARY_ID_NUM),
+          'floor': window.tmpObj.floor
+        }));
+
+      }
+
+      result.result = true;
+      result.msg = null;
+
+    } else {
+      result.msg = "wrong c transition : " + previousMsg + " to start-addnewcellboundarybtw, end-addnewcellboundarybtw.";
+    }
+
+    return result;
+
   }
 
   return DrawEventHandler;

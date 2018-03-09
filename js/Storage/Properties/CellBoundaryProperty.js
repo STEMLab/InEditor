@@ -8,27 +8,27 @@ define([],function() {
   /**
   * @class CellBoundaryProperty
   */
-  function CellBoundaryProperty() {
+  function CellBoundaryProperty(id) {
 
     /**
     * @memberof CellBoundaryProperty
     */
-    this.id;
+    this.id = id;
 
     /**
     * @memberof CellBoundaryProperty
     */
-    this.name;
+    this.name = id;
 
     /**
     * @memberof CellBoundaryProperty
     */
-    this.description;
+    this.description = "";
 
     /**
     * @memberof CellBoundaryProperty
     */
-    this.duality;
+    this.duality = null;
 
     /**
     * @memberof CellBoundaryProperty
