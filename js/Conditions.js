@@ -105,6 +105,93 @@ define([], function() {
     * @memberof Conditions
     */
     this.cursorColor = 'red';
+
+    /**
+    * @memberof Conditions
+    * @desc If the value is 'true', the attribute will included json which exported.
+    */
+    this.exportConditions = {
+      'CellSpace' : {
+        'properties' : {
+          'name' : true,
+          'description' : true,
+          'partialboundedBy' : true,
+          'externalReference' : true,
+          'duality' : true
+        },
+        'geometry' : {
+          'extrude' : true
+        }
+      },
+      'CellSpaceBoundary' : {
+        'properties' : {
+          'name' : true,
+          'description' : true,
+          'externalReference' : true,
+          'duality' : true
+        },
+        'geometry' : {
+          'extrude' : true
+        }
+      },
+      'State' : {
+        'properties' : {
+          'name' : true,
+          'description' : true,
+          'duality' : true,
+          'connected': true
+        }
+      },
+      'Transition':{
+        'properties' : {
+          'name' : true,
+          'description' : true,
+          'duality' : true,
+          'weight': true
+        }
+      }
+    };
+
+    /**
+    * @memberof Conditions
+    * @desc This this value is true, the attribute will remain even it's value is null("").
+    */
+    this.exportSimplifyCondition = {
+      'CellSpace' : {
+        'properties' : {
+          'name' : true,
+          'description' : true,
+          'partialboundedBy' : false,
+          'externalReference' : false,
+          'duality' : true
+        }
+      },
+      'CellSpaceBoundary' : {
+        'properties' : {
+          'name' : true,
+          'description' : true,
+          'externalReference' : false,
+          'duality' : true
+        }
+      },
+      'State' : {
+        'properties' : {
+          'name' : true,
+          'description' : true,
+          'duality' : true,
+          'connected': true
+        }
+      },
+      'Transition':{
+        'properties' : {
+          'name' : true,
+          'description' : true,
+          'duality' : true,
+          'weight': false
+        }
+      }
+    };
+
   }
 
   /**
