@@ -24,6 +24,10 @@ define([
       'click': this.exportToViewer
     };
 
+    handlerBinder['project-export'] = {
+      'click': this.exportToFactory
+    };
+
   }
 
   ExportEventHandler.prototype.exportToViewer = function(broker, previousMsg) {
@@ -32,6 +36,22 @@ define([
 
     if (broker.isPublishable('exporttoviewer')) {
       broker.publish(new Message('exporttoviewer', null));
+      result.result = true;
+      result.msg = null;
+    } else {
+      result.msg = "wrong state transition : " + previousMsg + " to exporttojson.";
+    }
+
+    return result;
+
+  }
+
+  ExportEventHandler.prototype.exportToFactory = function(broker, previousMsg) {
+
+    var result = new Result();
+
+    if (broker.isPublishable('exporttofactory')) {
+      broker.publish(new Message('exporttofactory', null));
       result.result = true;
       result.msg = null;
     } else {

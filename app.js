@@ -189,7 +189,7 @@ app.post('/save-json', function(req, res) {
 
   mutex.lock(function() {
 
-    console.log('----- lock : export-json -------------------');
+    console.log('----- lock : save-json -------------------');
     console.log(req.body);
 
     fs.writeFile('./output/output.json', jsonFormat(req.body), 'utf8', function(err) {
@@ -198,7 +198,7 @@ app.post('/save-json', function(req, res) {
 
       res.json('success');
 
-      console.log('----- unlock : export-json -------------------');
+      console.log('----- unlock : save-json -------------------');
 
       mutex.unlock();
 

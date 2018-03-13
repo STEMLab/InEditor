@@ -19,14 +19,15 @@ define(["./Feature"], function(Feature) {
       'coordinates': [],
       'properties': {
         'id': "",
-        'height': ""
+        'height': "",
+        'extrude' : ""
       }
     };
 
     this.properties = {};
 
-    if (conditions.geometry.extrude) this.geometry.properties.extrude = "true";
-    else this.geometry.properties.extrude = "false";
+    if (conditions.geometry.extrude) this.geometry.properties['extrude'] = "true";
+    else tthis.geometry.properties['extrude'] = "false";
 
     if (conditions.properties.name) this.properties['name'] = "";
     if (conditions.properties.description) this.properties['description'] = "";
@@ -107,7 +108,7 @@ define(["./Feature"], function(Feature) {
    */
   CellSpace.prototype.pushCoordinatesFromDots = function(dots) {
 
-    var len = dots.lenght;
+    var len = dots.length;
 
     for (var i = 0; i < len; i++) {
 
@@ -170,6 +171,7 @@ define(["./Feature"], function(Feature) {
     this.geometry.properties.height = height;
 
   }
+
 
 
   return CellSpace;
