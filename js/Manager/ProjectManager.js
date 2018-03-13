@@ -28,7 +28,7 @@ define([
 
     this.name = 'ProjectManager';
 
-    this.addCallbackFun('exporttojson', this.exportToJson);
+    // this.addCallbackFun('exporttojson', this.exportToJson);
 
   }
 

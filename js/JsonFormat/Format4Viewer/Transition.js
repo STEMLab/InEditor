@@ -9,7 +9,7 @@ define(["./Feature"], function(Feature) {
   * @class Transition
   * @augments Feature
   */
-  function Transition(conditions) {
+  function Transition(){
 
     Feature.apply(this, arguments);
 

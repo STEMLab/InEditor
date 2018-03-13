@@ -9,7 +9,7 @@ define(["./Feature"], function(Feature) {
    * @class CellSpaceBoundary
    * @augments Feature
    */
-  function CellSpaceBoundary(conditions) {
+  function CellSpaceBoundary() {
 
     Feature.apply(this, arguments);
 

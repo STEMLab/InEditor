@@ -127,10 +127,10 @@ define([
     this.reqSpecList['canceladdnewcellboundary'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['canceladdnewstate'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['canceladdnewtransition'] = new MessageSpec('single', 'including', ['draw'], false);
-    this.reqSpecList['exporttojson'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['start-addnewcellboundarybtw'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['addnewcellboundarybtw'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['end-addnewcellboundarybtw'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['exporttoviewer'] = new MessageSpec('single', 'including', null, false);
 
 
 

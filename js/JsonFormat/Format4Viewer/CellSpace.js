@@ -9,7 +9,7 @@ define(["./Feature"], function(Feature) {
    * @class CellSpace
    * @augments Feature
    */
-  function CellSpace(conditions) {
+  function CellSpace() {
 
     Feature.apply(this, arguments);
 
@@ -53,7 +53,7 @@ define(["./Feature"], function(Feature) {
 
     } else {
 
-      this.properties.partialboundedBy = partialboundedBy;
+      this.attributes.partialboundedBy = partialboundedBy;
 
     }
 
@@ -69,7 +69,7 @@ define(["./Feature"], function(Feature) {
       return Object.prototype.toString.call(o) === '[object Array]';
     }
 
-    if (this.properties == null || this.properties.externalReference == null) {
+    if (this.attributes == null || this.attributes.externalReference == null) {
 
       log.warn("The given conditions said you don't need to need to set externalReference of Cell.");
 
@@ -81,7 +81,7 @@ define(["./Feature"], function(Feature) {
 
       } else {
 
-        this.properties.externalReference = externalReference;
+        this.attributes.externalReference = externalReference;
 
       }
 
@@ -94,7 +94,7 @@ define(["./Feature"], function(Feature) {
    */
   CellSpace.prototype.pushCoordinatesFromDots = function(dots) {
 
-    var len = dots.lenght;
+    var len = dots.length;
 
     for (var i = 0; i < len; i++) {
 

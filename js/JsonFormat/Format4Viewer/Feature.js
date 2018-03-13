@@ -4,16 +4,14 @@ define([], function() {
   /**
   * @class Feature
   */
-  function Feature(conditions) {
-
-  }
+  function Feature() { }
 
   /**
    * @memberof Feature
    */
   Feature.prototype.setName = function(name) {
 
-    this.attribute['name'] = name;
+    this.attributes['name'] = name;
 
   }
 
@@ -22,7 +20,7 @@ define([], function() {
    */
   Feature.prototype.setDescription = function(description) {
 
-    this.attribute['description'] = description;
+    this.attributes['description'] = description;
 
   }
 
@@ -31,7 +29,7 @@ define([], function() {
    */
   Feature.prototype.setDuality = function(duality) {
 
-    this.attribute['duality'] = duality;
+    this.attributes['duality'] = duality;
 
   }
 

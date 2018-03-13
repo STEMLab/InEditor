@@ -26,6 +26,9 @@ define([
 
   CellLayer.prototype = Object.create(Layer.prototype);
 
+  /**
+  * @memberof CellLayer
+  */
   CellLayer.prototype.init = function(){
 
     // this.addGroup(new CellGroup());
@@ -36,10 +39,16 @@ define([
 
   }
 
+  /**
+  * @memberof CellLayer
+  */
   CellLayer.prototype.getConnection = function(){
     return this.group.getConnection();
   }
 
+  /**
+  * @memberof CellLayer
+  */
   CellLayer.prototype.getBoundaries = function(){
     return this.group.getBoundaries();
   }

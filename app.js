@@ -185,7 +185,7 @@ app.post('/floorplan-undo', function(req, res) {
   });
 });
 
-app.post('/export-json', function(req, res) {
+app.post('/save-json', function(req, res) {
 
   mutex.lock(function() {
 

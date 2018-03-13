@@ -9,7 +9,7 @@ define(["./Feature"], function(Feature) {
   * @class State
   * @augments Feature
   */
-  function State(conditions) {
+  function State() {
 
     Feature.apply(this, arguments);
 
