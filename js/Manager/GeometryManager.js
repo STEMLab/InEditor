@@ -253,13 +253,6 @@ define([
    * @return {Object} { x : coordinate of x, y : coordinate of y } or null
    */
   GeometryManager.prototype.snapping = function(dots, connections, point) {
-    // log.info(dots, connections, point);
-
-
-    // dot snapping
-    /*************************************************************************************/
-    /*************************************************************************************/
-    /*************************************************************************************/
 
     var minimum_d = window.conditions.snappingThreshold;
     var minimum_connection = null;
@@ -401,7 +394,7 @@ define([
 
     if ( window.tmpObj.cells == null ){
 
-      var manager = window.broker.getManager('snapping', 'GeometryManager');
+      var manager = window.broker.getManager('addnewcellboundarybtw', 'GeometryManager');
       var cells = window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.getCells();
       var line = manager.isExistOnALine(point, cells);
 
@@ -432,7 +425,7 @@ define([
 
       } else {
 
-        isConnected = cell.isPartOf(window.tmpObj.dots[window.tmpObj.dots.length-1], isDotExist);
+        isConnected = cell.isPartOf(window.tmpObj.dots[window.tmpObj.dots.length-1].point, isDotExist.point);
 
         if(isConnected.result){
           dot = isDotExist;
@@ -493,6 +486,8 @@ define([
     //add cellBoundary data in geometry canvasContainer
     window.storage.geometryContainer.cellBoundaryGeometry.push(new CellBoundaryGeometry(reqObj.id, obj.dots));
 
+    log.trace(window.storage);
+
   }
 
   /**
@@ -508,21 +503,33 @@ define([
     point.y = point.y - window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.y;
     point.y = point.y / window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleY;
 
-    var manager = window.broker.getManager('snapping', 'GeometryManager');
-    var dots = Object.values(window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDots());
-    var connections = window.storage.canvasContainer.stages[reqObj.floor].getConnection();
+    var isDotExist = window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDotByPoint({
+      x: point.x,
+      y: point.y
+    });
 
-    var snapping = manager.snapping(dots, connections, point);
+    var newPoint;
+
+    if(isDotExist == null){
+
+      var manager = window.broker.getManager('snapping', 'GeometryManager');
+      var dots = Object.values(window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDots());
+      var connections = window.storage.canvasContainer.stages[reqObj.floor].getConnection();
+      newPoint = manager.snapping(dots, connections, point);
+
+    } else {
+
+      newPoint = isDotExist.point;
+
+    }
 
     var cursor = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.getCursor();
 
-    cursor.setCoor(snapping);
+    cursor.setCoor(newPoint);
     cursor.setVisible(true);
 
     window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
-    // window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
-    // log.info(window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.tmpGroup);
   }
 
   /**
@@ -550,7 +557,7 @@ define([
     // find other cell contain this line
     var candidateCells = result.line.dot1.memberOf;
     for(var key in candidateCells){
-      if( result.line.dot2.memberOf[key] != null ){
+      if( candidateCells[key] == 'cell' && result.line.dot2.memberOf[key] != null ){
         result.cells.push(key);
       }
     }

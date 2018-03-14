@@ -76,7 +76,7 @@ define(["./Feature"], function(Feature) {
    */
   CellSpaceBoundary.prototype.pushCoordinatesFromDots = function(dots) {
 
-    var len = dots.lenght;
+    var len = dots.length;
 
     for (var i = 0; i < len; i++) {
 

@@ -38,17 +38,17 @@ define([],function() {
     /**
     * @memberof FloorProperty
     */
-    this.groundHeight = 0;
+    this.groundHeight = "0";
 
     /**
     * @memberof FloorProperty
     */
-    this.celingHeight = 0;
+    this.celingHeight = "0";
 
     /**
     * @memberof FloorProperty
     */
-    this.doorHeight = 0;
+    this.doorHeight = "0";
 
     /**
     * @memberof FloorProperty

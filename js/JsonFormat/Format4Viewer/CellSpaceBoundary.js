@@ -52,7 +52,7 @@ define(["./Feature"], function(Feature) {
 
     } else {
 
-      this.properties.externalReference = externalReference;
+      this.attributes.externalReference = externalReference;
 
     }
 
@@ -63,7 +63,7 @@ define(["./Feature"], function(Feature) {
    */
   CellSpaceBoundary.prototype.pushCoordinatesFromDots = function(dots) {
 
-    var len = dots.lenght;
+    var len = dots.length;
 
     for (var i = 0; i < len; i++) {
 
@@ -100,6 +100,16 @@ define(["./Feature"], function(Feature) {
   CellSpaceBoundary.prototype.setHeight = function(height) {
 
     this.geometry.properties.height = height;
+
+  }
+
+  /**
+   * @memberof CellSpaceBoundary
+   * @return coordinates array
+   */
+  CellSpaceBoundary.prototype.getCoordinates = function() {
+
+    return this.geometry.coordinates;
 
   }
 

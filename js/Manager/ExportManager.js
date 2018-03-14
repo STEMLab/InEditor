@@ -43,9 +43,9 @@ define([
     var manager = window.broker.getManager('exporttoviewer', 'ExportManager');
 
     var cells = manager.cellObj4Viewer(manager);
-    var cellBoundaries = manager.cellBoundaryObj4Viewer();
-    var states = manager.stateObj4Viewer();
-    var transitions = manager.transitionObj4Viewer();
+    var cellBoundaries = manager.cellBoundaryObj4Viewer(manager);
+    var states = manager.stateObj4Viewer(manager);
+    var transitions = manager.transitionObj4Viewer(manager);
 
     var result = {};
     if (Object.keys(cells).length != 0) result['CellSpace'] = cells;
@@ -57,16 +57,24 @@ define([
 
     // send json data to viewer
     var xhr = new XMLHttpRequest();
-    var filename = null;
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status == 200) {
-        log.info(">>>> succeed to exporting json");
+        log.info(">>>> succeed to export to viewer");
       }
     }
 
-    xhr.open("POST", "http://127.0.0.1:8080/save-json", true);
+    xhr.open("POST", "http://127.0.0.1:8100/viewer", true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(result);
+  }
+
+  /**
+   * @memberof ExportManager
+   */
+  ExportManager.prototype.post = function(xhr, address, data) {
+
+
+
   }
 
   /**
@@ -135,12 +143,68 @@ define([
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.cellBoundaryObj4Viewer = function() {
+  ExportManager.prototype.cellBoundaryObj4Viewer = function(manager) {
 
-    var cells = {};
+    var cellBoundaries = {};
+
+    var geometries = window.storage.geometryContainer.cellBoundaryGeometry;
+    var properties = window.storage.propertyContainer.cellBoundaryProperties;
+    var floorProperties = window.storage.propertyContainer.floorProperties;
+
+    // copy geometry coordinates
+    for (var key in geometries) {
+
+      var tmp = new FeatureFactory4Viewer('CellSpaceBoundary');
+      tmp.setGeometryId("CBG-" + geometries[key].id);
+      tmp.pushCoordinatesFromDots(geometries[key].points);
+      cellBoundaries[geometries[key].id] = tmp;
+
+    }
+
+    log.info('cellBoundaryObj4Viewer > ', cellBoundaries);
+
+    // copy attributes
+    for (var key in properties) {
+
+      var id = properties[key].id;
+      cellBoundaries[id].setName(properties[key].name);
+      cellBoundaries[id].setDescription(properties[key].description);
+      cellBoundaries[id].setExternalReference(properties[key].externalReference);
+      cellBoundaries[id].setDuality(properties[key].duality);
+
+    }
+
+    log.info('cellBoundaryObj4Viewer > ', cellBoundaries);
+
+    // pixel to real world coordinates
+    for (var floorKey in floorProperties) {
+
+      var cellBoundarykeyInFloor = floorProperties[floorKey].cellBoundaryKey;
+      var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
+
+      var pixelLLC = [0, 0, 0];
+      var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
+      var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
+      var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
 
 
-    return cells;
+      for (var cellBoundaryKey in cellBoundarykeyInFloor) {
+
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(floorProperties[floorKey].celingHeight);
+        var points = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
+
+        for (var i = 0; i < points.length; i++) {
+          var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, points[i]);
+          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'x', trans._data[0]);
+          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'y', trans._data[1]);
+          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
+        }
+      }
+    }
+
+    log.info('cellBoundaryObj4Viewer > ', cellBoundaries);
+
+    return cellBoundaries;
 
   }
 
@@ -198,36 +262,79 @@ define([
     var states = manager.stateObj4VFactory(document.id, primalspacefeatures.id);
     var transitions = manager.transitionObj4VFactory(document.id, primalspacefeatures.id);
 
-    var result = {};
-    result['Document'] = document;
-    result['indoorfeatures'] = indoorfeatures;
-    result['primalspacefeatures'] = primalspacefeatures;
+    var order = {
+      'index': 1,
+      'list': [
+        ['Document', "http://127.0.0.1:8100/Document"],
+        ['indoorfeatures', "http://127.0.0.1:8100/indoorfeatures"],
+        ['primalspacefeatures', "http://127.0.0.1:8100/primalspacefeatures"],
+        ['cellspace', "http://127.0.0.1:8100/cellspace", 0],
+        ['document', "http://127.0.0.1:8100/document/" + document.id]
+      ]
+    }
 
-    if (cells.length != 0) result['CellSpace'] = cells;
-    if (cellBoundaries.length != 0) result['CellSpaceBoundary'] = cellBoundaries;
-
-    result = JSON.stringify(result);
-
-    // send json data to viewer
     var xhr = new XMLHttpRequest();
-    var filename = null;
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status == 200) {
-        log.info(">>>> succeed to exporting json");
+    xhr.timeout = 100;
+
+    xhr.ontimeout = function() {
+
+      if (order.index < order.list.length) {
+
+        switch (order.list[order.index][0]) {
+          case 'indoorfeatures':
+            xhr.open("POST", order.list[order.index][1], true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.send(JSON.stringify(indoorfeatures));
+            order.index++;
+            break;
+          case 'primalspacefeatures':
+            xhr.open("POST", order.list[order.index][1], true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.send(JSON.stringify(primalspacefeatures));
+            order.index++;
+            break;
+          case 'cellspace':
+
+            xhr.open("POST", order.list[order.index][1], true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.send(JSON.stringify(cells[order.list[order.index][2]]));
+            order.list[order.index][2]++;
+
+            if (order.list[order.index][2] == cells.length) {
+              order.index++;
+            }
+            break;
+          case 'document':
+            xhr.timeout = null;
+            xhr.open("POST", order.list[order.index][1], false);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.send();
+            order.index++;
+            break;
+          default:
+        }
+
       }
     }
 
-    xhr.open("POST", "http://127.0.0.1:8080/save-json", true);
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(result);
+    // send json data to viewer
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status == 200) {
+        console.log(xhr.responseText);
+        log.info(">>>> export to factory end");
+      }
+    }
 
+    xhr.open("POST", "http://127.0.0.1:8100/Document", true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(JSON.stringify(document));
   }
 
   /**
-  * @memberof ExportManager
-  * @return Array of Format4Factory.CellSpace
-  */
-  ExportManager.prototype.cellObj4VFactory = function(docId, parentId){
+   * @memberof ExportManager
+   * @return Array of Format4Factory.CellSpace
+   */
+  ExportManager.prototype.cellObj4VFactory = function(docId, parentId) {
 
     var cells = {};
     var result = [];
@@ -254,11 +361,11 @@ define([
     for (var key in properties) {
 
       var id = properties[key].id;
-      if(conditions.properties.name) cells[id].setName(properties[key].name);
-      if(conditions.properties.description) cells[id].setDescription(properties[key].description);
-      if(conditions.properties.partialboundedBy) cells[id].setPartialboundedBy(properties[key].partialboundedBy);
-      if(conditions.properties.externalReference) cells[id].setExternalReference(properties[key].externalReference);
-      if(conditions.properties.duality) cells[id].setDuality(properties[key].duality);
+      if (conditions.properties.name) cells[id].setName(properties[key].name);
+      if (conditions.properties.description) cells[id].setDescription(properties[key].description);
+      if (conditions.properties.partialboundedBy) cells[id].setPartialboundedBy(properties[key].partialboundedBy);
+      if (conditions.properties.externalReference) cells[id].setExternalReference(properties[key].externalReference);
+      if (conditions.properties.duality) cells[id].setDuality(properties[key].duality);
 
     }
 
@@ -288,7 +395,7 @@ define([
       }
     }
 
-    for(var key in cells){
+    for (var key in cells) {
       result.push(cells[key]);
     }
 
@@ -297,30 +404,30 @@ define([
   }
 
   /**
-  * @memberof ExportManager
-  * @return Array of Format4Factory.CellSpaceBoundary
-  */
-  ExportManager.prototype.cellBoundaryObj4VFactory = function(docId, parentId){
+   * @memberof ExportManager
+   * @return Array of Format4Factory.CellSpaceBoundary
+   */
+  ExportManager.prototype.cellBoundaryObj4VFactory = function(docId, parentId) {
     var cellBoundaries = [];
 
     return cellBoundaries;
   }
 
   /**
-  * @memberof ExportManager
-  * @return Array of Format4Factory.State
-  */
-  ExportManager.prototype.stateObj4VFactory = function(docId, parentId){
+   * @memberof ExportManager
+   * @return Array of Format4Factory.State
+   */
+  ExportManager.prototype.stateObj4VFactory = function(docId, parentId) {
     var states = [];
 
     return states;
   }
 
   /**
-  * @memberof ExportManager
-  * @return Array of Format4Factory.Transition
-  */
-  ExportManager.prototype.transitionObj4VFactory = function(docId, parentId){
+   * @memberof ExportManager
+   * @return Array of Format4Factory.Transition
+   */
+  ExportManager.prototype.transitionObj4VFactory = function(docId, parentId) {
     var transitions = [];
 
     return transitions;

@@ -228,20 +228,22 @@ define([
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
       var isFirstClick = (window.tmpObj.affiliatedCell == null);
-      var isTwoCellExist = (window.storage.propertyContainer.getElementById('floor', data.currentTarget.attrs.id).cellKey.length >= 2);
+      // var isTwoCellExist = (window.storage.propertyContainer.getElementById('floor', data.currentTarget.attrs.id).cellKey.length >= 2);
 
-      if (!isTwoCellExist) {
+      // if (!isTwoCellExist) {
+      //
+      //   broker.publish(new Message('canceladdnewcellboundary', {
+      //     'floor': data.currentTarget.attrs.id
+      //   }));
+      //
+      //   log.warn("This floor have less then two cell ... You can't draw cellspacebounday here !");
+      //
+      //   result.result = true;
+      //   result.msg = 'canceladdnewcellboundary';
+      //
+      // } else
 
-        broker.publish(new Message('canceladdnewcellboundary', {
-          'floor': data.currentTarget.attrs.id
-        }));
-
-        log.warn("This floor have less then two cell ... You can't draw cellspacebounday here !");
-
-        result.result = true;
-        result.msg = 'canceladdnewcellboundary';
-
-      } else if (isFirstClick || (!isFirstClick && isSameFloor)) {
+      if (isFirstClick || (!isFirstClick && isSameFloor)) {
 
         broker.publish(new Message('addnewcellboundarybtw', {
           'floor': data.currentTarget.attrs.id

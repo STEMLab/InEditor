@@ -28,17 +28,13 @@ define([],function() {
     /**
     * @memberof CellBoundaryProperty
     */
-    this.duality = null;
+    this.duality = "";
 
     /**
     * @memberof CellBoundaryProperty
     */
     this.externalReference = [];
 
-    /**
-    * @memberof CellBoundaryProperty
-    */
-    this.partialboundedBy = [];
   }
 
   return CellBoundaryProperty;

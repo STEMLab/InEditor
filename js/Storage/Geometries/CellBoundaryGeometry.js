@@ -8,7 +8,7 @@ define([], function() {
   /**
   * @class CellBoundaryGeometry
   */
-  function CellBoundaryGeometry(id, dots) {
+  function CellBoundaryGeometry(id, points) {
 
     /**
     * @memberof CellBoundaryGeometry
@@ -18,7 +18,7 @@ define([], function() {
     /**
     * @memberof CellBoundaryGeometry
     */
-    this.dost = dots;
+    this.points = points;
 
   }
 
