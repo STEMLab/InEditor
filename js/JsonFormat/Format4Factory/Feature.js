@@ -139,12 +139,12 @@ define([], function() {
 
     var condition = window.conditions.exportSimplifyCondition[this.type].properties;
 
-    var keys = Object.keys(condition.properties);
+    var keys = Object.keys(condition);
 
-    for(var key in keys){
-      var obj = this.properties[key];
-      if( !condition[key] && ( obj == "" || (isArray(obj) && obj.lenght == 0))){
-        delete this.properties[key];
+    for(var i = 0; i < keys.length; i++){
+      var obj = this.properties[keys[i]];
+      if( !condition[keys[i]] && ( obj == "" || (isArray(obj) && obj.lenght == 0))){
+        delete this.properties[keys[i]];
       }
     }
 

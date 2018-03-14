@@ -6,9 +6,9 @@ define(["./Feature"], function(Feature) {
   'user strict';
 
   /**
-  * @class CellSpaceBoundary
-  * @augments Feature
-  */
+   * @class CellSpaceBoundary
+   * @augments Feature
+   */
   function CellSpaceBoundary(conditions) {
 
     Feature.apply(this, arguments);
@@ -89,7 +89,7 @@ define(["./Feature"], function(Feature) {
   /**
    * @memberof CellSpaceBoundary
    */
-  CellSpaceBoundary.prototype.updateCoordinates = function(index, position, value){
+  CellSpaceBoundary.prototype.updateCoordinates = function(index, position, value) {
 
     if (position == 'x') {
 
@@ -116,6 +116,58 @@ define(["./Feature"], function(Feature) {
 
   }
 
+  /**
+   * @memberof CellSpaceBoundary
+   * @return coordinates array
+   */
+  CellSpaceBoundary.prototype.getCoordinates = function() {
+
+    return this.geometry.coordinates;
+
+  }
+
+  /**
+   * @memberof CellSpaceBoundary
+   */
+  CellSpaceBoundary.prototype.reverseCoor = function() {
+
+    var len = this.geometry.coordinates.length;
+
+    for (var i = 0; i < len / 2; i++) {
+      var tmp = this.geometry.coordinates[len - 1 - i];
+      this.geometry.coordinates[len - 1 - i] = this.geometry.coordinates[i];
+      this.geometry.coordinates[i] = tmp;
+    }
+
+  }
+
+  /**
+   * @memberof CellSpaceBoundary
+   */
+  CellSpaceBoundary.prototype.copy = function(obj) {
+
+    if(this.properties.name != null) this.properties.name = obj.properties.name;
+    if(this.properties.description != null) this.properties.description = obj.properties.description;
+    if(this.properties.externalReference != null) this.properties.externalReference = obj.properties.externalReference;
+    if(this.properties.duality != null) this.properties.duality = obj.properties.duality;
+
+    this.docId = obj.docId;
+    this.parentId = obj.parentId;
+    this.id = obj.id;
+    this.copyCoordinates(obj.geometry.coordinates);
+    this.geometry.properties.id = obj.geometry.properties.id;
+    this.geometry.properties.height = obj.geometry.properties.height;
+  }
+
+  /**
+   * @memberof CellSpaceBoundary
+   */
+  CellSpaceBoundary.prototype.copyCoordinates = function(coordinates) {
+
+    for (var i = 0; i < coordinates.length; i++) {
+      this.geometry.coordinates.push([coordinates[i][0], coordinates[i][1], coordinates[i][2]]);
+    }
+  }
 
   return CellSpaceBoundary;
 

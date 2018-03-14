@@ -161,8 +161,6 @@ define([
 
     }
 
-    log.info('cellBoundaryObj4Viewer > ', cellBoundaries);
-
     // copy attributes
     for (var key in properties) {
 
@@ -173,8 +171,6 @@ define([
       cellBoundaries[id].setDuality(properties[key].duality);
 
     }
-
-    log.info('cellBoundaryObj4Viewer > ', cellBoundaries);
 
     // pixel to real world coordinates
     for (var floorKey in floorProperties) {
@@ -199,10 +195,17 @@ define([
           cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'y', trans._data[1]);
           cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
         }
+
+
+        // make reverse
+        var reverseObj = new FeatureFactory4Viewer('CellSpaceBoundary');
+        reverseObj.copy(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]]);
+        reverseObj.setGeometryId(reverseObj.geometry.properties.id+'-REVERSE');
+        reverseObj.setName(reverseObj.attributes.name+'-REVERSE');
+        reverseObj.reverseCoor();
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]+'-REVERSE'] = reverseObj;
       }
     }
-
-    log.info('cellBoundaryObj4Viewer > ', cellBoundaries);
 
     return cellBoundaries;
 
@@ -269,6 +272,7 @@ define([
         ['indoorfeatures', "http://127.0.0.1:8100/indoorfeatures"],
         ['primalspacefeatures', "http://127.0.0.1:8100/primalspacefeatures"],
         ['cellspace', "http://127.0.0.1:8100/cellspace", 0],
+        ['cellspaceboundary', "http://127.0.0.1:8100/cellspaceboundary", 0],
         ['document', "http://127.0.0.1:8100/document/" + document.id]
       ]
     }
@@ -304,9 +308,20 @@ define([
               order.index++;
             }
             break;
+          case 'cellspaceboundary':
+
+            xhr.open("POST", order.list[order.index][1], true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.send(JSON.stringify(cellBoundaries[order.list[order.index][2]]));
+            order.list[order.index][2]++;
+
+            if (order.list[order.index][2] == cellBoundaries.length) {
+              order.index++;
+            }
+            break;
           case 'document':
             xhr.timeout = null;
-            xhr.open("POST", order.list[order.index][1], false);
+            xhr.open("GET", order.list[order.index][1], false);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhr.send();
             order.index++;
@@ -396,6 +411,7 @@ define([
     }
 
     for (var key in cells) {
+      cells[key].simplify();
       result.push(cells[key]);
     }
 
@@ -408,9 +424,79 @@ define([
    * @return Array of Format4Factory.CellSpaceBoundary
    */
   ExportManager.prototype.cellBoundaryObj4VFactory = function(docId, parentId) {
-    var cellBoundaries = [];
+    var cellBoundaries = {};
+    var result = [];
+    var conditions = window.conditions.exportConditions.CellSpaceBoundary;
+    var geometries = window.storage.geometryContainer.cellBoundaryGeometry;
+    var properties = window.storage.propertyContainer.cellBoundaryProperties;
+    var floorProperties = window.storage.propertyContainer.floorProperties;
+    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
-    return cellBoundaries;
+    // copy geometry coordinates
+    for (var key in geometries) {
+
+      var tmp = new FeatureFactory4Factory('CellSpaceBoundary', conditions);
+      tmp.setId(geometries[key].id);
+      tmp.setDocId(docId);
+      tmp.setParentId(parentId);
+      tmp.setGeometryId("CBG-" + geometries[key].id);
+      tmp.pushCoordinatesFromDots(geometries[key].points);
+      cellBoundaries[geometries[key].id] = tmp;
+
+    }
+
+    // copy attributes
+    for (var key in properties) {
+
+      var id = properties[key].id;
+      if (conditions.properties.name) cellBoundaries[id].setName(properties[key].name);
+      if (conditions.properties.description) cellBoundaries[id].setDescription(properties[key].description);
+      if (conditions.properties.externalReference) cellBoundaries[id].setExternalReference(properties[key].externalReference);
+      if (conditions.properties.duality) cellBoundaries[id].setDuality(properties[key].duality);
+
+    }
+
+    // pixel to real world coordinates
+    for (var floorKey in floorProperties) {
+
+      var cellBoundarykeyInFloor = floorProperties[floorKey].cellBoundaryKey;
+      var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
+
+      var pixelLLC = [0, 0, 0];
+      var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
+      var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
+      var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
+
+
+      for (var cellBoundaryKey in cellBoundarykeyInFloor) {
+
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(floorProperties[floorKey].celingHeight);
+        var points = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
+
+        for (var i = 0; i < points.length; i++) {
+          var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, points[i]);
+          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'x', trans._data[0]);
+          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'y', trans._data[1]);
+          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
+        }
+
+        // make reverse
+        var reverseObj = new FeatureFactory4Factory('CellSpaceBoundary', conditions);
+        reverseObj.copy(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]]);
+        reverseObj.setId(reverseObj.id+'-REVERSE');
+        reverseObj.setGeometryId(reverseObj.geometry.properties.id+'-REVERSE');
+        reverseObj.setName(reverseObj.properties.name+'-REVERSE')
+        reverseObj.reverseCoor();
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]+'-REVERSE'] = reverseObj;
+      }
+    }
+
+    for (var key in cellBoundaries) {
+      cellBoundaries[key].simplify();
+      result.push(cellBoundaries[key]);
+    }
+
+    return result;
   }
 
   /**

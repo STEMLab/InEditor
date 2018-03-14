@@ -89,12 +89,12 @@ define([], function() {
     /**
     * @memberof Conditions
     */
-    this.coordinateThreshold = 5;
+    this.coordinateThreshold = 10;
 
     /**
     * @memberof Conditions
     */
-    this.snappingThreshold = 20;
+    this.snappingThreshold = 10;
 
     /**
     * @memberof Conditions
