@@ -49,8 +49,8 @@ define([
     this.addCallbackFun('canceladdnewcell', this.cancelAddNewCell);
     this.addCallbackFun('canceladdnewcellboundary', this.cancelAddNewCellBoundary);
 
-    this.addCallbackFun('start-addnewcellboundarybtw', this.startAddNewCellBoundaryBtw);
-    this.addCallbackFun('end-addnewcellboundarybtw', this.endAddNewCellBoundaryBtw);
+    this.addCallbackFun('start-addnewcellboundary', this.startAddNewCellBoundary);
+    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary);
   }
 
 
@@ -410,10 +410,10 @@ define([
    * @memberof UIManager
    * @param {Object} reqObj empty
    */
-  UIManager.prototype.startAddNewCellBoundaryBtw = function(reqObj){
+  UIManager.prototype.startAddNewCellBoundary = function(reqObj){
 
     // change floor btn color
-    document.getElementById('cellboundary_btw_btn').src = "../../assets/icon/cellboundary_btw_a.png";
+    document.getElementById('cellboundary-btn').src = "../../assets/icon/cellboundary_a.png";
 
   }
 
@@ -422,10 +422,10 @@ define([
    * @memberof UIManager
    * @param {Object} reqObj { id, floor, isEmpty }
    */
-  UIManager.prototype.endAddNewCellBoundaryBtw = function(reqObj) {
+  UIManager.prototype.endAddNewCellBoundary = function(reqObj) {
 
     // change cellboundary_btw color
-    document.getElementById('cellboundary_btw_btn').src = "../../assets/icon/cellboundary_btw_d.png";
+    document.getElementById('cellboundary-btn').src = "../../assets/icon/cellboundary_d.png";
 
     if(reqObj.isEmpty != null) return;
 
@@ -442,7 +442,7 @@ define([
   */
   UIManager.prototype.cancelAddNewCellBoundary = function(reqObj){
 
-    document.getElementById('cellboundary_btw_btn').src = "../../assets/icon/cellboundary_btw_d.png";
+    document.getElementById('cellboundarys-btn').src = "../../assets/icon/cellboundary_d.png";
 
   }
 

@@ -171,8 +171,6 @@ define([
     return result;
   }
 
-
-
   /**
    * @desc When tree view clicked `addfloorplan` can publish.
    * @memberof UIChangeEventHandler
@@ -206,6 +204,7 @@ define([
     return result;
 
   }
+
 
   return UIChangeEventHandler;
 });

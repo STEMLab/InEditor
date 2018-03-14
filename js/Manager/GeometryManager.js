@@ -48,9 +48,9 @@ define([
     this.addCallbackFun('addnewcell', this.addNewCell, this.makeSimpleHistoryObj, this.addNewCell_undo);
     this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.makeSimpleHistoryObj, this.endAddNewCell_undo);
 
-    this.addCallbackFun('start-addnewcellboundarybtw', this.startAddNewCellBoundaryBtw, function() {}, function() {});
-    this.addCallbackFun('addnewcellboundarybtw', this.addNewCellBoundaryBtw, this.addNewCellBoundaryBtw_makeHistoryObj, this.addNewCellBoundaryBtw_obj);
-    this.addCallbackFun('end-addnewcellboundarybtw', this.endAddNewCellBoundaryBtw, function() {}, function() {});
+    this.addCallbackFun('start-addnewcellboundary', this.startAddNewCellBoundary, function() {}, function() {});
+    this.addCallbackFun('addnewcellboundary', this.addNewCellBoundary, function() {}, function() {});
+    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, function() {}, function() {});
 
     this.addCallbackFun('snapping', this.snappingMousePointer);
 
@@ -326,14 +326,11 @@ define([
 
   /**
    * @memberof GeometryManager
-   * @param {Object} reqObj empty
    */
   GeometryManager.prototype.startAddNewCellBoundary = function(reqObj) {
-
     var tmpObj = new CellBoundary('tmpObj');
     tmpObj.type = 'cellBoundary';
     window.tmpObj = tmpObj;
-
   }
 
   /**
@@ -341,42 +338,6 @@ define([
    * @param {Object} reqObj floor
    */
   GeometryManager.prototype.addNewCellBoundary = function(reqObj) {
-
-    if ( window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.obj == null ){
-      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.addNewObj('cellBoundary');
-      window.tmpObj.floor = reqObj.floor;
-    }
-
-    // add corner
-    var point = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor.coor;
-
-    var manager = window.broker.getManager('snapping', 'GeometryManager');
-    var connections = window.storage.canvasContainer.stages[reqObj.floor].getConnection();
-    var isExistOnALine = manager.isExistOnALine(point, connections);
-
-  }
-
-  /**
-   * @memberof GeometryManager
-   */
-  GeometryManager.prototype.endAddNewCellBoundary = function(reqObj) {
-    log.info('GeometryManager.endAddNewCellBoundary called');
-  }
-
-  /**
-   * @memberof GeometryManager
-   */
-  GeometryManager.prototype.startAddNewCellBoundaryBtw = function(reqObj) {
-    var tmpObj = new CellBoundary('tmpObj');
-    tmpObj.type = 'cellBoundary';
-    window.tmpObj = tmpObj;
-  }
-
-  /**
-   * @memberof GeometryManager
-   * @param {Object} reqObj floor
-   */
-  GeometryManager.prototype.addNewCellBoundaryBtw = function(reqObj) {
 
     if ( window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.obj == null ){
       window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.addNewObj('cellBoundary');
@@ -394,7 +355,7 @@ define([
 
     if ( window.tmpObj.cells == null ){
 
-      var manager = window.broker.getManager('addnewcellboundarybtw', 'GeometryManager');
+      var manager = window.broker.getManager('addnewcellboundary', 'GeometryManager');
       var cells = window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.getCells();
       var line = manager.isExistOnALine(point, cells);
 
@@ -450,7 +411,7 @@ define([
    * @memberof GeometryManager
    * @param {Object} reqObj { id, floor, isEmpty }
    */
-  GeometryManager.prototype.endAddNewCellBoundaryBtw = function(reqObj) {
+  GeometryManager.prototype.endAddNewCellBoundary = function(reqObj) {
 
     if(reqObj.isEmpty != null){
       window.tmpObj = null;

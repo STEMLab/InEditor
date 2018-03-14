@@ -43,7 +43,7 @@ define([
     this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.endAddNewCell_makeHistoryObj, this.endAddNewCell_undo);
     this.addCallbackFun('updaterefdata', this.updateRefProperty);
 
-    this.addCallbackFun('end-addnewcellboundarybtw', this.endAddNewCellBoundaryBtw);
+    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary);
 
   }
 
@@ -191,7 +191,7 @@ define([
   * @memberof GeometryManager
   * @param {Object} reqObj { id, floor, isEmpty }
   */
-  PropertyManager.prototype.endAddNewCellBoundaryBtw = function(reqObj){
+  PropertyManager.prototype.endAddNewCellBoundary = function(reqObj){
 
     if(reqObj.isEmpty != null ){ return; }
 
