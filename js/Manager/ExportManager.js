@@ -186,7 +186,7 @@ define([
 
       for (var cellBoundaryKey in cellBoundarykeyInFloor) {
 
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(floorProperties[floorKey].celingHeight);
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(floorProperties[floorKey].doorHeight);
         var points = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
 
         for (var i = 0; i < points.length; i++) {
@@ -200,10 +200,10 @@ define([
         // make reverse
         var reverseObj = new FeatureFactory4Viewer('CellSpaceBoundary');
         reverseObj.copy(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]]);
-        reverseObj.setGeometryId(reverseObj.geometry.properties.id+'-REVERSE');
-        reverseObj.setName(reverseObj.attributes.name+'-REVERSE');
+        reverseObj.setGeometryId(reverseObj.geometry.properties.id + '-REVERSE');
+        reverseObj.setName(reverseObj.attributes.name + '-REVERSE');
         reverseObj.reverseCoor();
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]+'-REVERSE'] = reverseObj;
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'] = reverseObj;
       }
     }
 
@@ -264,18 +264,28 @@ define([
     var cellBoundaries = manager.cellBoundaryObj4VFactory(document.id, primalspacefeatures.id);
     var states = manager.stateObj4VFactory(document.id, primalspacefeatures.id);
     var transitions = manager.transitionObj4VFactory(document.id, primalspacefeatures.id);
-
     var order = {
       'index': 1,
       'list': [
-        ['Document', "http://127.0.0.1:8100/Document"],
-        ['indoorfeatures', "http://127.0.0.1:8100/indoorfeatures"],
-        ['primalspacefeatures', "http://127.0.0.1:8100/primalspacefeatures"],
-        ['cellspace', "http://127.0.0.1:8100/cellspace", 0],
-        ['cellspaceboundary', "http://127.0.0.1:8100/cellspaceboundary", 0],
-        ['document', "http://127.0.0.1:8100/document/" + document.id]
-      ]
+        ['Document', "http://127.0.0.1:8100/Document/" + document.id]
+      ]};
+
+    if(cells.length != 0 || cellBoundaries.length != 0){
+      order.list.push(['indoorfeatures', "http://127.0.0.1:8100/indoorfeatures/" + document.id]);
+      order.list.push(['primalspacefeatures', "http://127.0.0.1:8100/primalspacefeatures/" + document.id]);
     }
+
+    if(cells.length != 0){
+      order.list.push(['cellspace', "http://127.0.0.1:8100/cellspace/" + document.id, 0]);
+    }
+
+    if(cellBoundaries.length != 0){
+      order.list.push(['cellspaceboundary', "http://127.0.0.1:8100/cellspaceboundary/" + document.id, 0]);
+    }
+
+    order.list.push(['document', "http://127.0.0.1:8100/document/" + document.id]);
+
+    log.info(order);
 
     var xhr = new XMLHttpRequest();
     xhr.timeout = 100;
@@ -298,7 +308,6 @@ define([
             order.index++;
             break;
           case 'cellspace':
-
             xhr.open("POST", order.list[order.index][1], true);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhr.send(JSON.stringify(cells[order.list[order.index][2]]));
@@ -307,9 +316,9 @@ define([
             if (order.list[order.index][2] == cells.length) {
               order.index++;
             }
+
             break;
           case 'cellspaceboundary':
-
             xhr.open("POST", order.list[order.index][1], true);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhr.send(JSON.stringify(cellBoundaries[order.list[order.index][2]]));
@@ -317,6 +326,7 @@ define([
 
             if (order.list[order.index][2] == cellBoundaries.length) {
               order.index++;
+              break;
             }
             break;
           case 'document':
@@ -340,7 +350,7 @@ define([
       }
     }
 
-    xhr.open("POST", "http://127.0.0.1:8100/Document", true);
+    xhr.open("POST", "http://127.0.0.1:8100/Document/" + document.id, true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(JSON.stringify(document));
   }
@@ -470,7 +480,7 @@ define([
 
       for (var cellBoundaryKey in cellBoundarykeyInFloor) {
 
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(floorProperties[floorKey].celingHeight);
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(floorProperties[floorKey].doorHeight);
         var points = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
 
         for (var i = 0; i < points.length; i++) {
@@ -483,11 +493,11 @@ define([
         // make reverse
         var reverseObj = new FeatureFactory4Factory('CellSpaceBoundary', conditions);
         reverseObj.copy(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]]);
-        reverseObj.setId(reverseObj.id+'-REVERSE');
-        reverseObj.setGeometryId(reverseObj.geometry.properties.id+'-REVERSE');
-        reverseObj.setName(reverseObj.properties.name+'-REVERSE')
+        reverseObj.setId(reverseObj.id + '-REVERSE');
+        reverseObj.setGeometryId(reverseObj.geometry.properties.id + '-REVERSE');
+        reverseObj.setName(reverseObj.properties.name + '-REVERSE')
         reverseObj.reverseCoor();
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]+'-REVERSE'] = reverseObj;
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'] = reverseObj;
       }
     }
 

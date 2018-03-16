@@ -150,6 +150,29 @@ define([], function() {
     this.corners.visible(visible);
   }
 
+  /**
+  * @memberof Cell
+  */
+  CellBoundary.prototype.insertDotIntoLine = function(line, point){
+
+    var indexOfDot1 = this.dots.getDotIndex(line.dot1.uuid);
+    var indexOfDot2 = this.dots.getDotIndex(line.dot2.uuid);
+
+    if(indexOfDot1 == -1 || indexOfDot2 == -1){
+
+      log.warn('Cell.insertDotIntoLine : inserted line is not part of '+this.id);
+      return;
+
+    }
+
+    if(indexOfDot1 > indexOfDot2) this.dots.splice(indexOfDot2, 0, point);
+    else this.dots.splice(indexOfDot1, 0, point);
+
+    this.addObjectFromDots();
+
+    point.participateObj(this.id, 'cellBoundary');
+
+  }
 
 
   return CellBoundary;

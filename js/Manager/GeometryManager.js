@@ -175,6 +175,8 @@ define([
     // add cell using tmpObj
     window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.add(tmpObj);
 
+    // fragmenteGeometry
+
     // set corner to invisible
     var obj = window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.cells[window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.cells.length - 1];
     obj.corners.visible(false);
@@ -236,10 +238,14 @@ define([
    */
   GeometryManager.prototype.cancelAddNewCell = function(reqObj) {
 
+    for (var key in window.tmpObj.dots) {
+      window.tmpObj.dots[key].leaveObj('tmpObj');
+    }
+
     // clear tmp obj
     window.tmpObj = null;
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.destroy();
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer = null;
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.removeObj();
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
     window.myhistory.history.pop_back();
 
@@ -247,7 +253,7 @@ define([
 
   /**
    * @memberof GeometryManager
-   * @param {Array} Dot[@see Dot] array in same floor.
+   * @param {Array} Dot array in same floor.
    * @param {Array} Connection data of this floor. This value is array of Object and it's form is { dot1, dot2 }.
    * @param {Object} { x : coordinate of x, y : coordinate of y }
    * @return {Object} { x : coordinate of x, y : coordinate of y } or null
@@ -542,6 +548,55 @@ define([
     window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
     window.myhistory.history.pop_back();
+  }
+
+  /**
+  * @memberof GeometryManager
+  * @param {Object} dots
+  * @desc
+  */
+
+  /**
+  * @memberof GeometryManager
+  * @desc In Indoor-GML, Geometry should not duplicated with each other. To mainta this conraction, if the newest point is on exist line, we need to add information about that point to dot.
+  * @param {Object} line { dot1 , dot2 }
+  * @param {Dot} newPoint
+  */
+  GeometryManager.prototype.insertDotIntoLine = function(line, newPoint){
+
+    // check newPoint is on the line
+    // line.dot1 -> line.dot2
+    var V1 = {
+      x: line.dot2.point.x - line.dot1.point.x,
+      y: line.dot2.point.y - line.dot1.point.y
+    };
+
+    // line.dot1 -> newPoint
+    var V2 = {
+      x: newPoint.point.x - line.dot1.point.x,
+      y: newPoint.point.y - line.dot1.point.y
+    };
+
+    var cos = (V1.x * V2.x + V1.y * V2.y) /
+              ( Math.sqrt(Math.pow(V1.x, 2) + Math.pow(V1.y, 2))
+                * Math.sqrt(Math.pow(V2.x, 2) + Math.pow(V2.y, 2)));
+    var threshold = 0.0000001;
+
+    if( !( 1 - threshold <= cos && cos <= 1 + threshold ) || !( (-1) - threshold <= cos && cos <= (-1) + threshold ) )
+      return;
+
+    // find the cells which line is included
+    var candidateObjs = line.dot1.memberOf;
+    var keyOfMemberofDot2 = Object.keys(line.dot2.memberOf);
+    for(var key in candidateObjs){
+      if(keyOfMemberofDot2.indexOf(key) == -1) delete candidateObjs[key];
+    }
+
+    // insert dot in geometry
+    candidateObjs.forEach(function(obj){
+      obj.insertDotIntoLine(line, newPoint);
+    });
+
   }
 
 

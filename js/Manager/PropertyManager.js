@@ -162,7 +162,7 @@ define([
   PropertyManager.prototype.endAddNewCell_undo = function(undoObj) {
 
     // remove new cellproperty object in storage.propertyContainer
-    var cells = window.storage.propertyContainer.cellProperites;
+    var cells = window.storage.propertyContainer.cellProperties;
 
     for (var key in cells) {
       if (cells.id == undoObj.id)
@@ -177,6 +177,8 @@ define([
         floors[key].cellKey.splice(floors[key].cellKey.indexOf(undoObj.id), 1);
       }
     }
+
+    window.conditions.LAST_CELL_ID_NUM--;
 
   }
 

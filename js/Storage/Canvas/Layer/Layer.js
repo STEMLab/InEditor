@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([], function() {
   'use strict';
@@ -8,7 +8,7 @@ define([], function() {
   /**
    * @class Layer
    */
-  function Layer() {
+  function Layer(_width, _height) {
     this.layer = new Konva.Layer();
     this.group = null;
 
@@ -24,8 +24,6 @@ define([], function() {
     this.group = _group;
     this.layer.add(_group.getGroup());
   }
-
-
 
 
   return Layer;

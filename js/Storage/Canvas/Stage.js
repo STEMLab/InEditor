@@ -66,24 +66,27 @@ define([
      */
     this.tmpLayer = new TmpLayer();
 
+    var calculatedHeight = this.calculateHeight(_width);
+
     /**
      * @memberof Stage
      */
     this.stage = new Konva.Stage({
       container: _container,
       width: _width,
-      height: this.calculateHeight(_width),
+      height: calculatedHeight,
       id: _id,
       draggable: true,
+      x: 0,
+      y: 0,
+      scaleX: 1,
+      scaleY: 1,
       dragBoundFunc: function(pos) {
         if (window.storage.canvasContainer.stages[_id].stage.attrs.scaleX > 1)
           return window.storage.canvasContainer.stages[_id].zoomFun(_id, pos);
         return pos;
       }
     });
-
-    this.stage.setAttr('x', 0);
-    this.stage.setAttr('y', 0);
 
     this.stage.add(this.backgroundLayer.getLayer());
     this.stage.add(this.cellLayer.getLayer());

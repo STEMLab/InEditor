@@ -78,7 +78,7 @@ define([
 
   /**
    * @memberof UIManager
-   * @param {Message.reqObj} reqObj id : state id<br>newScale<br>newPos
+   * @param {Message.reqObj} reqObj id :floor id<br>newScale<br>newPos
    */
   UIManager.prototype.zoomWorkspace = function(reqObj) {
 
@@ -86,6 +86,10 @@ define([
     window.storage.canvasContainer.stages[reqObj.id].stage.scale({
       x: reqObj.newScale,
       y: reqObj.newScale
+    });
+    window.storage.canvasContainer.stages[reqObj.id].tmpLayer.group.cursor.cursor.scale({
+      x: 1 / reqObj.newScale,
+      y: 1 / reqObj.newScale
     });
     window.storage.canvasContainer.stages[reqObj.id].stage.batchDraw();
 
