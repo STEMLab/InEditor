@@ -134,6 +134,8 @@ define([
     this.reqSpecList['exporttofactory'] = new MessageSpec('single', 'including', null, false);
 
     this.reqSpecList['snapping'] = new MessageSpec('single', 'including', ['draw'], false);
+
+    this.reqSpecList['saveproject'] = new MessageSpec('single', 'excluding', ['draw'], false);
   }
 
   /**

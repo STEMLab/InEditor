@@ -38,16 +38,20 @@ define([
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.exportToViewer = function() {
+  ExportManager.prototype.exportToViewer = function(reqObj) {
 
     var manager = window.broker.getManager('exporttoviewer', 'ExportManager');
 
-    var cells = manager.cellObj4Viewer(manager);
+    var cellsResult = manager.cellObj4Viewer(manager);
+    var bbox = cellsResult.bbox;
+    var cells = cellsResult.cells;
     var cellBoundaries = manager.cellBoundaryObj4Viewer(manager);
     var states = manager.stateObj4Viewer(manager);
     var transitions = manager.transitionObj4Viewer(manager);
 
-    var result = {};
+    var result = {
+      'bbox' : bbox
+    };
     if (Object.keys(cells).length != 0) result['CellSpace'] = cells;
     if (Object.keys(cellBoundaries).length != 0) result['CellSpaceBoundary'] = cellBoundaries;
     if (Object.keys(states).length != 0) result['State'] = states;
@@ -63,7 +67,8 @@ define([
       }
     }
 
-    xhr.open("POST", "http://127.0.0.1:8100/viewer", true);
+
+    xhr.open("POST", "http://127.0.0.1:"+reqObj.port+"/"+reqObj.uri, true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(result);
   }
@@ -83,6 +88,21 @@ define([
   ExportManager.prototype.cellObj4Viewer = function(manager) {
 
     var cells = {};
+    var VERY_SMALL_VALUE = -999999;
+    var VERY_BIG_VALUE = 999999;
+    var min = {
+      x: VERY_BIG_VALUE,
+      y: VERY_BIG_VALUE,
+      z: VERY_BIG_VALUE,
+      d: VERY_BIG_VALUE
+    };
+    var max = {
+      x: VERY_SMALL_VALUE,
+      y: VERY_SMALL_VALUE,
+      z: VERY_SMALL_VALUE,
+      d: VERY_SMALL_VALUE
+    };
+
 
     var geometries = window.storage.geometryContainer.cellGeometry;
     var properties = window.storage.propertyContainer.cellProperties;
@@ -126,17 +146,33 @@ define([
 
         cells[cellkeyInFloor[cellKey]].setHeight(floorProperties[floorKey].celingHeight);
         var points = cells[cellkeyInFloor[cellKey]].getCoordinates();
+        if (floorProperties[floorKey].groundHeight*1 + floorProperties[floorKey].celingHeight * 1 > max.z)
+          max.z = floorProperties[floorKey].groundHeight*1 + floorProperties[floorKey].celingHeight * 1;
+        if (floorProperties[floorKey].groundHeight * 1 < min.z)
+          min.z = floorProperties[floorKey].groundHeight * 1;
 
         for (var i = 0; i < points.length; i++) {
           var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, points[i]);
           cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'x', trans._data[0]);
           cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'y', trans._data[1]);
           cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
+
+          if (trans._data[0] > max.x)
+            max.x = trans._data[0];
+          if (trans._data[1] > max.y)
+            max.y = trans._data[1];
+          if (trans._data[0] < min.x)
+            min.x = trans._data[0];
+          if (trans._data[1] < min.y)
+            min.y = trans._data[1];
         }
       }
     }
 
-    return cells;
+    return {
+      cells: cells,
+      bbox: [min.x, min.y, min.z, max.x, max.y, max.z]
+    };
 
   }
 
@@ -268,18 +304,19 @@ define([
       'index': 1,
       'list': [
         ['Document', "http://127.0.0.1:8100/Document/" + document.id]
-      ]};
+      ]
+    };
 
-    if(cells.length != 0 || cellBoundaries.length != 0){
+    if (cells.length != 0 || cellBoundaries.length != 0) {
       order.list.push(['indoorfeatures', "http://127.0.0.1:8100/indoorfeatures/" + document.id]);
       order.list.push(['primalspacefeatures', "http://127.0.0.1:8100/primalspacefeatures/" + document.id]);
     }
 
-    if(cells.length != 0){
+    if (cells.length != 0) {
       order.list.push(['cellspace', "http://127.0.0.1:8100/cellspace/" + document.id, 0]);
     }
 
-    if(cellBoundaries.length != 0){
+    if (cellBoundaries.length != 0) {
       order.list.push(['cellspaceboundary', "http://127.0.0.1:8100/cellspaceboundary/" + document.id, 0]);
     }
 

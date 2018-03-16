@@ -20,7 +20,32 @@ define([
 
   ProjectEventHandler.prototype.setHandlerBinder = function(handlerBinder) {
 
+    handlerBinder['project-save'] = {
+      'click': this.saveProject
+    };
 
+  }
+
+  ProjectEventHandler.prototype.saveProject = function(broker, previousMsg){
+
+    var result = new Result();
+
+    if(broker.isPublishable('saveproject')){
+
+      // reqObj.floor will be active workspace
+      broker.publish(new Message('saveproject', null));
+
+      result = {
+        'result': true,
+        'msg': 'saveproject'
+      };
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to saveproject.";
+
+    }
+
+    return result;
 
   }
 

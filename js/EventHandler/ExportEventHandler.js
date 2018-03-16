@@ -20,7 +20,7 @@ define([
 
   ExportEventHandler.prototype.setHandlerBinder = function(handlerBinder) {
 
-    handlerBinder['viewer-btn'] = {
+    handlerBinder['viewer-modal-btn'] = {
       'click': this.exportToViewer
     };
 
@@ -35,7 +35,10 @@ define([
     var result = new Result();
 
     if (broker.isPublishable('exporttoviewer')) {
-      broker.publish(new Message('exporttoviewer', null));
+      broker.publish(new Message('exporttoviewer', {
+        'port': document.getElementById("viewer-portNum").value,
+        'uri': document.getElementById("viewer-uri").value
+      }));
       result.result = true;
       result.msg = null;
     } else {

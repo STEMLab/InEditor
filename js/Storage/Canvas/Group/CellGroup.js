@@ -77,7 +77,7 @@ define([
       var qr = [r.x - q.x, r.y - q.y, 0];
       var cross = [pq[1] * qr[2] - pq[2] * qr[1], pq[2] * qr[0] - pq[0] * qr[2], pq[0] * qr[1] - pq[1] * qr[0]];
 
-      if (cross < 0) direction = true;
+      if (cross < 0) direction = false;
     }
 
     var len = dots.length;

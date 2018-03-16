@@ -29,7 +29,7 @@
   <script type="text/javascript" src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
   <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css" />
   <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-dark-theme.css" />
-<!--      <link type="text/css" rel="style  sheet" href="https://golden-layout.com/files/latest/css/goldenlayout-light-theme.css" />-->
+  <!--      <link type="text/css" rel="style  sheet" href="https://golden-layout.com/files/latest/css/goldenlayout-light-theme.css" />-->
 
   <!-- konvajs -->
   <script src="https://cdn.rawgit.com/konvajs/konva/1.7.6/konva.js"></script>
@@ -101,7 +101,7 @@
         </ul>
         <ul class="navbar-nav my-2 my-lg-0">
           <li class="nav-item">
-            <img src="./assets/icon/go_viewer.png" title="go viewer" id="viewer-btn">
+            <img src="./assets/icon/go_viewer.png" title="go viewer" id="viewer-btn" data-toggle="modal" data-target="#myModal">
           </li>
         </ul>
       </div>
@@ -118,8 +118,29 @@
       </div>
 
       <main role="main" class="workspace">
-          <div id="workspace-layout-container"></div>
+        <div id="workspace-layout-container"></div>
       </main>
+    </div>
+  </div>
+
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="viewer-portNum">Port Number</label>
+            <input type="number" class="form-control" id="viewer-portNum" placeholder="8100">
+          </div>
+          <div class="form-group">
+            <label for="viewer-uri">URI</label>
+            <input type="text" class="form-control" id="viewer-uri" placeholder="viewer" aria-describedby="uriHelp" >
+            <small id="uriHelp" class="form-text text-muted">localhost:Port Number/URI</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="viewer-modal-btn">Call Viewer</button>
+        </div>
+      </div>
     </div>
   </div>
 
