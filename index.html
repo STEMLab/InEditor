@@ -7,6 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>IndoorGML-Editor</title>
 
+  <!-- favicon -->
+  <link rel="icon" href="./assets/favicon/favicon16.png" sizes="16x16">
+  <link rel="icon" href="./assets/favicon/favicon24.png" sizes="24x24">
+  <link rel="icon" href="./assets/favicon/favicon32.png" sizes="32x32">
+  <link rel="icon" href="./assets/favicon/favicon48.png" sizes="48x48">
+  <link rel="icon" href="./assets/favicon/favicon64.png" sizes="64x64">
+
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="./css/bootstrap.min.css">
@@ -43,6 +50,7 @@
   <!-- js-bson -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-bson/2.0.4/bson.min.js"></script>
 
+
 </head>
 
 <body>
@@ -59,7 +67,7 @@
               <a class="dropdown-item" id="project-saveas">Save As...</a>
               <hr>
               <a class="dropdown-item" id="project-import">Import</a>
-              <a class="dropdown-item" id="project-export">Export</a>
+              <a class="dropdown-item" id="project-export">Export(.gml)</a>
             </div>
           </li>
           <li class="nav-item dropdown">
@@ -101,7 +109,7 @@
         </ul>
         <ul class="navbar-nav my-2 my-lg-0">
           <li class="nav-item">
-            <img src="./assets/icon/go_viewer.png" title="go viewer" id="viewer-btn" data-toggle="modal" data-target="#myModal">
+            <img src="./assets/icon/go_viewer.png" title="go viewer" id="viewer-btn" data-toggle="modal" data-target="#go-viewer-modal">
           </li>
         </ul>
       </div>
@@ -123,27 +131,30 @@
     </div>
   </div>
 
-  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal fade" id="go-viewer-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-body">
           <div class="form-group">
-            <label for="viewer-portNum">Port Number</label>
-            <input type="number" class="form-control" id="viewer-portNum" placeholder="8100">
+            <label for="viewer-baseURL">Base URL</label>
+            <input type="text" class="form-control" id="viewer-baseURL" value = "http://127.0.0.1">
           </div>
           <div class="form-group">
-            <label for="viewer-uri">URI</label>
-            <input type="text" class="form-control" id="viewer-uri" placeholder="viewer" aria-describedby="uriHelp" >
-            <small id="uriHelp" class="form-text text-muted">localhost:Port Number/URI</small>
+            <label for="viewer-portNum">Port Number</label>
+            <input type="number" class="form-control" id="viewer-portNum" placeholder="8080">
+          </div>
+          <div class="form-group">
+            <label for="viewer-params">Parameter</label>
+            <input type="text" class="form-control" id="viewer-params" placeholder="viewer">
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="viewer-modal-btn">Call Viewer</button>
+          <middle id="uriHelp" class="form-text text-muted">Base URL:Port Number/Parameter    </middle>
+          <button type="button" class="btn btn-primary" id="viewer-modal-btn" aria-label="Close">Call Viewer</button>
         </div>
       </div>
     </div>
   </div>
-
   <script data-main="js/main" src="lib/require.js"></script>
 </body>
 

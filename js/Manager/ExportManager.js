@@ -40,6 +40,8 @@ define([
    */
   ExportManager.prototype.exportToViewer = function(reqObj) {
 
+    $('#go-viewer-modal').modal('hide');
+
     var manager = window.broker.getManager('exporttoviewer', 'ExportManager');
 
     var cellsResult = manager.cellObj4Viewer(manager);
@@ -50,12 +52,20 @@ define([
     var transitions = manager.transitionObj4Viewer(manager);
 
     var result = {
-      'bbox' : bbox
+      'bbox': bbox
     };
+
     if (Object.keys(cells).length != 0) result['CellSpace'] = cells;
     if (Object.keys(cellBoundaries).length != 0) result['CellSpaceBoundary'] = cellBoundaries;
     if (Object.keys(states).length != 0) result['State'] = states;
     if (Object.keys(transitions).length != 0) result['Transition'] = transitions;
+
+    if(Object.keys(result).length == 1){
+
+      log.warn('ExportManager.exportToViewer : There is nothing to export :-<');
+      return;
+
+    }
 
     result = JSON.stringify(result);
 
@@ -67,8 +77,7 @@ define([
       }
     }
 
-
-    xhr.open("POST", "http://127.0.0.1:"+reqObj.port+"/"+reqObj.uri, true);
+    xhr.open("POST", reqObj.address, true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(result);
   }
@@ -146,8 +155,8 @@ define([
 
         cells[cellkeyInFloor[cellKey]].setHeight(floorProperties[floorKey].celingHeight);
         var points = cells[cellkeyInFloor[cellKey]].getCoordinates();
-        if (floorProperties[floorKey].groundHeight*1 + floorProperties[floorKey].celingHeight * 1 > max.z)
-          max.z = floorProperties[floorKey].groundHeight*1 + floorProperties[floorKey].celingHeight * 1;
+        if (floorProperties[floorKey].groundHeight * 1 + floorProperties[floorKey].celingHeight * 1 > max.z)
+          max.z = floorProperties[floorKey].groundHeight * 1 + floorProperties[floorKey].celingHeight * 1;
         if (floorProperties[floorKey].groundHeight * 1 < min.z)
           min.z = floorProperties[floorKey].groundHeight * 1;
 
@@ -296,100 +305,126 @@ define([
       "id": window.conditions.guid()
     };
 
+    var baseURL = "http://127.0.0.1:8100";
+    var index = 0;
+
     var cells = manager.cellObj4VFactory(document.id, primalspacefeatures.id);
     var cellBoundaries = manager.cellBoundaryObj4VFactory(document.id, primalspacefeatures.id);
     var states = manager.stateObj4VFactory(document.id, primalspacefeatures.id);
     var transitions = manager.transitionObj4VFactory(document.id, primalspacefeatures.id);
-    var order = {
-      'index': 1,
-      'list': [
-        ['Document', "http://127.0.0.1:8100/Document/" + document.id]
-      ]
-    };
+
+    var order = [{
+      type: 'document',
+      request: 'POST',
+      address: baseURL + '/document/' + document.id
+    }];
 
     if (cells.length != 0 || cellBoundaries.length != 0) {
-      order.list.push(['indoorfeatures', "http://127.0.0.1:8100/indoorfeatures/" + document.id]);
-      order.list.push(['primalspacefeatures', "http://127.0.0.1:8100/primalspacefeatures/" + document.id]);
+      order.push({
+        type: 'indoorfeatures',
+        request: 'POST',
+        address: baseURL + '/indoorfeatures/' + indoorfeatures.id
+      });
+      order.push({
+        type: 'primalspacefeatures',
+        request: 'POST',
+        address: baseURL + '/primalspacefeatures/' + primalspacefeatures.id
+      });
     }
 
     if (cells.length != 0) {
-      order.list.push(['cellspace', "http://127.0.0.1:8100/cellspace/" + document.id, 0]);
+      order.push({
+        type: 'cellspace',
+        request: 'POST',
+        address: baseURL + '/cellspace',
+        index: 0
+      });
     }
 
     if (cellBoundaries.length != 0) {
-      order.list.push(['cellspaceboundary', "http://127.0.0.1:8100/cellspaceboundary/" + document.id, 0]);
+      order.push({
+        type: 'cellspaceboundary',
+        request: 'POST',
+        address: baseURL + '/cellspaceboundary',
+        index: 0
+      });
     }
 
-    order.list.push(['document', "http://127.0.0.1:8100/document/" + document.id]);
-
-    log.info(order);
+    order.push({
+      type: 'document',
+      request: 'GET',
+      address: baseURL + '/document/' + document.id
+    });
 
     var xhr = new XMLHttpRequest();
-    xhr.timeout = 100;
 
-    xhr.ontimeout = function() {
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4 && xhr.status == 200) {
 
-      if (order.index < order.list.length) {
+        log.info(xhr.responseText);
 
-        switch (order.list[order.index][0]) {
-          case 'indoorfeatures':
-            xhr.open("POST", order.list[order.index][1], true);
+        // response of POST
+        if (order.length != 0) {
+
+          if (order[index].type == 'indoorfeatures') {
+
+            xhr.open(order[index].request, order[index].address, false);
+            order.splice(0, 1);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhr.send(JSON.stringify(indoorfeatures));
-            order.index++;
-            break;
-          case 'primalspacefeatures':
-            xhr.open("POST", order.list[order.index][1], true);
+
+          } else if (order[index].type == 'primalspacefeatures') {
+
+            xhr.open(order[index].request, order[index].address, false);
+            order.splice(0, 1);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhr.send(JSON.stringify(primalspacefeatures));
-            order.index++;
-            break;
-          case 'cellspace':
-            xhr.open("POST", order.list[order.index][1], true);
+
+          } else if (order[index].type == 'cellspace') {
+
+            xhr.open(order[index].request, order[index].address + '/' + cells[order[index].index], false);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhr.send(JSON.stringify(cells[order.list[order.index][2]]));
-            order.list[order.index][2]++;
+            var tmpdata = JSON.stringify(cells[order[index].index]);
+            order[index].index++;
+            if(order[index].index == cells.length) order.splice(0, 1);
+            xhr.send(tmpdata);
 
-            if (order.list[order.index][2] == cells.length) {
-              order.index++;
-            }
+          } else if (order[index].type == 'cellspaceboundary') {
 
-            break;
-          case 'cellspaceboundary':
-            xhr.open("POST", order.list[order.index][1], true);
+            xhr.open(order[index].request, order[index].address + '/' + cellBoundaries[order[index].index], false);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhr.send(JSON.stringify(cellBoundaries[order.list[order.index][2]]));
-            order.list[order.index][2]++;
+            var tmpdata = JSON.stringify(cellBoundaries[order[index].index]);
+            order[index].index++;
+            if(order[index].index == cellBoundaries.length) order.splice(0, 1);
+            xhr.send(tmpdata);
 
-            if (order.list[order.index][2] == cellBoundaries.length) {
-              order.index++;
-              break;
-            }
-            break;
-          case 'document':
-            xhr.timeout = null;
-            xhr.open("GET", order.list[order.index][1], false);
+          } else if( order[index].type == 'document' && order[index].request == 'GET'){
+
+            xhr.open(order[index].request, order[index].address, false);
+            order.splice(0, 1);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhr.send();
-            order.index++;
-            break;
-          default:
-        }
 
+          } else {
+
+            log.error('ExportManager.exportToFactory : order list error ', order);
+
+          }
+
+        }
+      } else if (xhr.readyState == 4 && xhr.status == 302) {
+
+        // response of GET
+        log.info(xhr.responseText);
       }
     }
 
     // send json data to viewer
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status == 200) {
-        console.log(xhr.responseText);
-        log.info(">>>> export to factory end");
-      }
-    }
-
-    xhr.open("POST", "http://127.0.0.1:8100/Document/" + document.id, true);
+    xhr.open(order[index].request, order[index].address, false);
+    order.splice(0, 1);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(JSON.stringify(document));
+
   }
 
   /**

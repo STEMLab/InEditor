@@ -22,5 +22,13 @@ define([], function() {
 
   }
 
+  /**
+  * @memberof CellBoundaryGeometry
+  */
+  CellBoundaryGeometry.prototype.load = function(values){
+    this.id = values.id;
+    this.points = values.points;
+  }
+
   return CellBoundaryGeometry;
 });

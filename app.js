@@ -5,6 +5,7 @@ var locks = require('locks');
 var path = require("path");
 var jsonFormat = require("json-format");
 var fs = require("fs");
+var BSON = require("bson");
 var app = express();
 
 
@@ -199,6 +200,58 @@ app.post('/save-json', function(req, res) {
       res.json('success');
 
       console.log('----- unlock : save-json -------------------');
+
+      mutex.unlock();
+
+    });
+
+  });
+
+});
+
+app.post('/save-project', function(req, res) {
+
+  mutex.lock(function() {
+
+    console.log('----- lock : save-bson -------------------');
+
+    var bson = new BSON();
+
+    fs.writeFile('./output/save-project.bson', bson.serialize(req.body), function(err) {
+
+      // fs.writeFile('./output/save-project.json', jsonFormat(req.body), function(err) {
+
+      if (err) return res.status(500).send(err);
+
+      res.json('success');
+
+      console.log('----- unlock : save-bson -------------------');
+
+      mutex.unlock();
+
+    });
+
+  });
+
+});
+
+app.get('/load-project', function(req, res){
+
+  mutex.lock(function() {
+
+    console.log('----- lock : load-bson -------------------');
+
+    var bson = new BSON();
+
+    fs.readFile('./output/save-project.bson', function(err, data) {
+
+      if (err) return res.status(500).send(err);
+
+      var bson = new BSON();
+      var json = bson.deserialize(data);
+      res.json(json);
+
+      console.log('----- unlock : load-bson -------------------');
 
       mutex.unlock();
 

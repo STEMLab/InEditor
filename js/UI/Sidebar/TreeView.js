@@ -124,5 +124,15 @@ define([], function() {
 
   }
 
+  TreeView.prototype.refresh = function(propertyContainer){
+
+    if(propertyContainer.floorProperties.length != 0){
+      for(var i = 0 ; i < propertyContainer.floorProperties.length; i ++){
+        this.addFloor(propertyContainer.floorProperties[i]);
+      }
+    }
+
+  }
+
   return TreeView;
 });

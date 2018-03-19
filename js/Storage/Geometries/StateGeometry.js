@@ -21,5 +21,14 @@ define([], function() {
     this.points = new Array(2);
   }
 
+  /**
+  * @memberof StateGeometry
+  */
+  StateGeometry.prototype.load = function(values){
+    this.id = values.id;
+    this.points = values.points;
+  }
+
+
   return StateGeometry;
 });

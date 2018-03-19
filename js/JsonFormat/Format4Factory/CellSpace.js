@@ -20,7 +20,8 @@ define(["./Feature"], function(Feature) {
       'properties': {
         'id': "",
         'height': "",
-        'extrude' : ""
+        'extrude' : "",
+        'type' : 'geojson'
       }
     };
 

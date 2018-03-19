@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
   "./CellGeometry.js",
@@ -69,6 +69,89 @@ define([
 
     return result;
   }
+
+  /**
+   * @memberof GeometryContainer
+   */
+  GeometryContainer.prototype.load = function(values) {
+
+    this.loadCells(values.cellGeometry);
+    this.loadCellBoundary(values.cellBoundaryGeometry);
+    this.loadState(values.stateGeometry);
+    this.loadTransition(values.transitionGeometry);
+
+  }
+
+
+  /**
+   * @memberof PropertyContainer
+   */
+  GeometryContainer.prototype.loadCells = function(values) {
+
+    this.cellGeometry = [];
+
+    for (var index in values) {
+
+      var tmp = new CellGeometry();
+      tmp.load(values[index]);
+      this.cellGeometry.push(tmp);
+
+    }
+
+  }
+
+  /**
+   * @memberof PropertyContainer
+   */
+  GeometryContainer.prototype.loadCellBoundary = function(values) {
+
+    this.cellBoundaryGeometry = [];
+
+    for (var index in values) {
+
+      var tmp = new CellBoundaryGeometry();
+      tmp.load(values[index]);
+      this.cellBoundaryGeometry.push(tmp);
+
+    }
+
+  }
+
+  /**
+   * @memberof PropertyContainer
+   */
+  GeometryContainer.prototype.loadState = function(values) {
+
+    this.stateGeometry = [];
+
+    for (var index in values) {
+
+      var tmp = new StateGeometry();
+      tmp.load(values[index]);
+      this.stateGeometry.push(tmp);
+
+    }
+
+  }
+
+  /**
+   * @memberof PropertyContainer
+   */
+  GeometryContainer.prototype.loadTransition = function(values) {
+
+    this.transitionGeometry = [];
+
+    for (var index in values) {
+
+      var tmp = new TransitionGeometry();
+      tmp.load(values[index]);
+      this.transitionGeometry.push(tmp);
+
+    }
+
+  }
+
+
 
   return GeometryContainer;
 });

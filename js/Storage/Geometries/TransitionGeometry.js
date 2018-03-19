@@ -18,7 +18,15 @@ define([], function() {
     /**
     * @memberof TransitionGeometry
     */
-    this.connects = new Array(2); // id of stateGeometry
+    this.points = [];
+  }
+
+  /**
+  * @memberof TransitionGeometry
+  */
+  TransitionGeometry.prototype.load = function(values){
+    this.id = values.id;
+    this.connects = values.points;
   }
 
   return TransitionGeometry;

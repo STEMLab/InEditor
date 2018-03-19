@@ -33,17 +33,25 @@ define([
   ExportEventHandler.prototype.exportToViewer = function(broker, previousMsg) {
 
     var result = new Result();
+    var address = document.getElementById("viewer-baseURL").value+ ":" + document.getElementById("viewer-portNum").value + "/" +document.getElementById("viewer-params").value;
+    var reg = /https?:\/\/(\w*:\w*@)?[-\w.]+(:\d+)?(\/([\w/_.]*(\?\S+)?)?)?/.exec(address);
 
-    if (broker.isPublishable('exporttoviewer')) {
-      broker.publish(new Message('exporttoviewer', {
-        'port': document.getElementById("viewer-portNum").value,
-        'uri': document.getElementById("viewer-uri").value
-      }));
-      result.result = true;
-      result.msg = null;
-    } else {
-      result.msg = "wrong state transition : " + previousMsg + " to exporttojson.";
+
+    if(reg[0] == address){
+
+      if (broker.isPublishable('exporttoviewer')) {
+        broker.publish(new Message('exporttoviewer', {
+          'address': address
+        }));
+        result.result = true;
+        result.msg = null;
+      } else {
+        result.msg = "wrong state transition : " + previousMsg + " to exporttojson.";
+      }
+
     }
+
+
 
     return result;
 

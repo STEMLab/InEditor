@@ -31,6 +31,8 @@ define([
    */
   function Stage(_id, _name, _container, _width, _height) {
 
+    var calculatedHeight = this.calculateHeight(_width);
+
     /**
      * @memberof Stage
      */
@@ -44,7 +46,7 @@ define([
     /**
      * @memberof Stage
      */
-    this.backgroundLayer = new BackgroundLayer();
+    this.backgroundLayer = new BackgroundLayer(_width, calculatedHeight);
     /**
      * @memberof Stage
      */
@@ -66,8 +68,6 @@ define([
      */
     this.tmpLayer = new TmpLayer();
 
-    var calculatedHeight = this.calculateHeight(_width);
-
     /**
      * @memberof Stage
      */
@@ -82,9 +82,7 @@ define([
       scaleX: 1,
       scaleY: 1,
       dragBoundFunc: function(pos) {
-        if (window.storage.canvasContainer.stages[_id].stage.attrs.scaleX > 1)
-          return window.storage.canvasContainer.stages[_id].zoomFun(_id, pos);
-        return pos;
+        return window.storage.canvasContainer.stages[_id].zoomFun(_id, pos);
       }
     });
 
@@ -118,7 +116,9 @@ define([
    */
   Stage.prototype.zoomFun = function(_id, pos) {
 
-    // console.log(document.getElementById(_id));
+    if(window.storage.canvasContainer.stages[_id].stage.attrs.scaleX <= 1){
+      return {x: 0, y: 0};
+    }
 
     var divWidth = document.getElementById(_id).children[0].clientWidth;
     var divHeight = document.getElementById(_id).children[0].clientHeight;
@@ -140,8 +140,6 @@ define([
     if (up <= pos.y && pos.y <= down) newY = pos.y;
     else if (up > pos.y) newY = up;
     else if (down < pos.y) newY = down;
-
-    // console.log(pos, newX, newY);
 
     return {
       x: newX,

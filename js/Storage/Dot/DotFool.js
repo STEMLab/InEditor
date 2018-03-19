@@ -98,8 +98,8 @@ define([
     if (this.dots[uuid] == null) return false;
 
     /**
-    * dot.memberof가 null이 아닐 경우, 해당 객체에서 dot을 제거하는 부분 추가 필요
-    */
+     * dot.memberof가 null이 아닐 경우, 해당 객체에서 dot을 제거하는 부분 추가 필요
+     */
     delete this.dots[uuid];
 
     log.trace(window.storage.dotFoolContainer);
@@ -117,7 +117,7 @@ define([
     // Leave Obj
     this.dots[dotUuid].leaveObj(objId);
 
-    if( Object.keys(this.dots[dotUuid].memberOf).length == 0 ){
+    if (Object.keys(this.dots[dotUuid].memberOf).length == 0) {
       this.deleteDot(dotUuid);
     }
 
@@ -205,11 +205,27 @@ define([
   }
 
   /**
-  * @memberof DotFool
-  * @return {Object}
-  */
-  DotFool.prototype.getDots = function(){
+   * @memberof DotFool
+   * @return {Object}
+   */
+  DotFool.prototype.getDots = function() {
     return this.dots;
+  }
+
+  /**
+   * @memberof DotFool
+   */
+  DotFool.prototype.load = function(values) {
+
+    this.floor = values.floor;
+    this.dots = {};
+
+    for (var key in values.dots) {
+      var tmp = new Dot();
+      tmp.load(values.dots[key]);
+      this.push(tmp);
+    }
+
   }
 
   return DotFool;

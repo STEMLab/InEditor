@@ -15,8 +15,6 @@ define([
   function CanvasContainer() {
     this.stages = [];
 
-    // one loor for test
-    // this.addStage('test-floor','container', document.getElementById('viewport').clientWidth, document.getElementById('viewport').clientHeight);
   }
 
   CanvasContainer.prototype.addStage = function(_id, _container, _width, _height){
@@ -131,6 +129,20 @@ define([
     }
 
     return result;
+  }
+
+  /**
+  * @memberof CanvasContainer
+  */
+  CanvasContainer.prototype.clearCanvas = function(){
+
+    for(var key in this.stages){
+      this.stages[key].stage.destroyChildren();
+      this.stages[key].stage.destroy();
+    }
+
+    this.stages = [];
+
   }
 
   return CanvasContainer;

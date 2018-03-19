@@ -3,9 +3,11 @@
  */
 
 define([
-  "../PubSub/Subscriber.js"
+  "../PubSub/Subscriber.js",
+  "../Conditions.js"
 ], function(
-  Subscriber
+  Subscriber,
+  Conditions
 ) {
   'use strict';
 
@@ -27,50 +29,107 @@ define([
     this.name = 'ProjectManager';
 
     this.addCallbackFun('saveproject', this.saveProject);
+    this.addCallbackFun('loadproject', this.loadProject);
 
   }
 
+  /**
+  * @memberof ProjectManager
+  */
   ProjectManager.prototype.saveProject = function() {
 
-    // Create a bson parser instance
-    var bson = new BSON();
 
     // Serialize document
     var id = window.storage.propertyContainer.projectProperty.id;
     var doc = {};
-    doc[window.storage.propertyContainer.projectProperty.id] = window.storage;
+    doc[id] = {
+      'geometryContainer': window.storage.geometryContainer,
+      'propertyContainer': window.storage.propertyContainer,
+      'dotFoolContainer' : window.storage.dotFoolContainer,
+      'canvasContainer' : {}
+    };
+
+    for(var key in window.storage.canvasContainer.stages){
+
+      doc[id].canvasContainer[key] = {
+        width : window.storage.canvasContainer.stages[key].stage.getAttr('width'),
+        height : window.storage.canvasContainer.stages[key].stage.getAttr('height')
+      };
+
+    }
+
     doc['conditions'] = window.conditions;
 
-    // Serialize a document;
-    var data = bson.serialize(doc);
-
-
-    log.info(data);
 
     // send json data to viewer
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status == 200) {
-        log.info(">>>> succeed to export to viewer");
+        log.info(">>>> succeed to save project");
       }
     }
 
-    // var formData = new FormData();
-    // formData.append("mydata", data);
-    //
-    // log.info(formData.getAll('mydata'));
-    //
-    //
-    // xhr.open("POST", "http://127.0.0.1:8080/save-project-to-bson/", true);
-    // xhr.send(formData);
-
-    xhr.open("POST", "http://127.0.0.1:8080/save-project-to-bson/", true);
+    xhr.open("POST", "http://127.0.0.1:8080/save-project", true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    var s = JSON.stringify(doc)
-    xhr.send(s);
+    xhr.send(JSON.stringify(doc));
 
   }
 
+  /**
+  * @memberof ProjectManager
+  */
+  ProjectManager.prototype.loadProject = function(){
+
+    // send json data to viewer
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status == 200) {
+        var obj = JSON.parse(xhr.responseText);
+        log.info(obj);
+
+        window.conditions.load(obj.conditions);
+        delete obj.conditions;
+
+        var keys = Object.keys(obj);
+        window.storage.propertyContainer.load(obj[keys[0]].propertyContainer);
+        window.storage.geometryContainer.load(obj[keys[0]].geometryContainer);
+        window.storage.dotFoolContainer.load(obj[keys[0]].dotFoolContainer);
+
+        window.storage.canvasContainer.clearCanvas();
+
+        // clear workspace
+        if (obj[keys[0]].canvasContainer != null){
+          window.uiContainer.workspace.clear('maketmp');
+        } else {
+          window.uiContainer.workspace.clear();
+        }
+
+        // add workspace
+        for(var key in obj[keys[0]].canvasContainer){
+
+          window.uiContainer.workspace.addNewWorkspace(key, key);
+
+        }
+
+        // delete tmp workspace
+        if (obj[keys[0]].canvasContainer != null){
+          window.uiContainer.workspace.deleteFirstWorkspace();
+        }
+
+        // refresh tree view
+        // log.info(window.storage.propertyContainer.toJson());
+        // window.uiContainer.sidebar.treeview.init();
+        window.uiContainer.sidebar.treeview.refresh(window.storage.propertyContainer);
+
+
+        log.info(">>>> succeed to load project");
+      }
+    }
+
+    xhr.open("GET", "http://127.0.0.1:8080/load-project", true);
+    xhr.send();
+
+  }
 
   return ProjectManager;
 });

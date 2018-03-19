@@ -70,8 +70,7 @@ define([], function() {
         if (this.connects[uuid].length == 1) {
           delete this.connects[uuid];
           delete window.dotFoolContainer.getDotById(uuid).connects[this.uuid];
-        }
-        else {
+        } else {
           for (var key in this.connects[uuid]) {
             if (this.connects[uuid][key].obj == object) {
               this.connects[uuid].splice(key, 1);
@@ -80,8 +79,8 @@ define([], function() {
           }
 
           var target = window.dotFoolContainer.getDotById(uuid);
-          for (var key in target.connects[this.uuid]){
-            if(target.connects[this.uuid][key].obj == object){
+          for (var key in target.connects[this.uuid]) {
+            if (target.connects[this.uuid][key].obj == object) {
               window.dotFoolContainer.getDotById(uuid).connects[this.uuid].splice(key, 1);
             }
           }
@@ -101,9 +100,9 @@ define([], function() {
     if (obj == null && this.connects[uuid] != null)
       return this.connect[uuid];
 
-    if (obj != null && this.connects[uuid] != null){
-      for(var key in this.connects[uuid]){
-        if(this.connects[uuid][key].obj == obj) return true;
+    if (obj != null && this.connects[uuid] != null) {
+      for (var key in this.connects[uuid]) {
+        if (this.connects[uuid][key].obj == obj) return true;
       }
     }
     return false;
@@ -151,6 +150,26 @@ define([], function() {
       log.info(this.uuid + " is already not part of " + objId + " !");
     } else {
       delete this.memberOf[objId];
+    }
+
+  }
+
+
+  /**
+   * @memberof Dot
+   */
+  Dot.prototype.load = function(values) {
+
+    this.uuid = values.uuid;
+
+    this.point = {
+      x: values.point.x,
+      y: values.point.y
+    };
+
+    this.memberOf = {};
+    for(var key in values.memberOf){
+      this.memberOf[key] = values.memberOf[key];
     }
 
   }

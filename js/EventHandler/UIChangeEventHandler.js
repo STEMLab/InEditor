@@ -101,7 +101,7 @@ define([
       var target = data.path[2].id;
       var oldScale = window.storage.canvasContainer.stages[target].stage.scaleX();
 
-      if (data.deltaY > 0 && oldScale < window.conditions.scaleMin) {
+      if (data.deltaY > 0 && oldScale <= window.conditions.scaleMin) {
 
         result = {
           'result': false,
@@ -109,7 +109,7 @@ define([
         };
 
 
-      } else if (data.deltaY < 0 && oldScale > window.conditions.scaleMax) {
+      } else if (data.deltaY < 0 && oldScale >= window.conditions.scaleMax) {
 
         result = {
           'result': false,

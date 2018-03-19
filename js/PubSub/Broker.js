@@ -136,6 +136,7 @@ define([
     this.reqSpecList['snapping'] = new MessageSpec('single', 'including', ['draw'], false);
 
     this.reqSpecList['saveproject'] = new MessageSpec('single', 'excluding', ['draw'], false);
+    this.reqSpecList['loadproject'] = new MessageSpec('single', 'excluding', ['draw'], false);
   }
 
   /**

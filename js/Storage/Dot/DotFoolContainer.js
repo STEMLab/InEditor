@@ -68,5 +68,22 @@ define([
     log.error("There is no dot which uuid is " + uuid);
   }
 
+  /**
+  * @memberof DotFoolContainer
+  */
+  DotFoolContainer.prototype.load = function(values){
+
+    this.dotFool = {};
+
+    for(var key in values.dotFool){
+
+      var tmp = new DotFool();
+      tmp.load(values.dotFool[key]);
+      this.dotFool[key] = tmp;
+
+    }
+
+  }
+
   return DotFoolContainer;
 });

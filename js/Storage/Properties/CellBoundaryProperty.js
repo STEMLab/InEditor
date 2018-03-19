@@ -1,39 +1,52 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
-define([],function() {
+define([], function() {
   'use strict';
 
   /**
-  * @class CellBoundaryProperty
-  */
+   * @class CellBoundaryProperty
+   */
   function CellBoundaryProperty(id) {
 
     /**
-    * @memberof CellBoundaryProperty
-    */
+     * @memberof CellBoundaryProperty
+     */
     this.id = id;
 
     /**
-    * @memberof CellBoundaryProperty
-    */
+     * @memberof CellBoundaryProperty
+     */
     this.name = id;
 
     /**
-    * @memberof CellBoundaryProperty
-    */
+     * @memberof CellBoundaryProperty
+     */
     this.description = "";
 
     /**
-    * @memberof CellBoundaryProperty
-    */
+     * @memberof CellBoundaryProperty
+     */
     this.duality = "";
 
     /**
-    * @memberof CellBoundaryProperty
-    */
+     * @memberof CellBoundaryProperty
+     */
     this.externalReference = [];
+
+  }
+
+  /**
+   * @memberof CellBoundaryProperty
+   */
+  CellBoundaryProperty.prototype.load = function(values) {
+
+    this.id = values.id;
+    this.name = values.name;
+    this.description = values.description;
+    this.duality = values.duality;
+    this.externalReference = values.externalReference;
 
   }
 

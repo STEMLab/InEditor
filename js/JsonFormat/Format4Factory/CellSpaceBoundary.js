@@ -19,7 +19,8 @@ define(["./Feature"], function(Feature) {
       'coordinates': [],
       'properties': {
         'id': "",
-        'height': ""
+        'height': "",
+        'type' : 'geojson'
       }
     };
 

@@ -41,5 +41,19 @@ define([],function() {
     this.duality; // CellSpaceBoundary
   }
 
+  /**
+  * @memberof TransitionProperty
+  */
+  TransitionProperty.prototype.load = function(values){
+
+    this.id = values.id;
+    this.name = values.name;
+    this.description = values.description;
+    this.weight = values.weight;
+    this.duality = values.duality;
+    this.connects = values.connects;
+
+  }
+
   return TransitionProperty;
 });
