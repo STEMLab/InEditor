@@ -145,6 +145,43 @@ define([
 
   }
 
+
+  /**
+  * @memberof CanvasContainer
+  */
+  CanvasContainer.prototype.addObjFromGeometries = function(geometryContainer){
+
+    log.info(window.storage.dotFoolContainer);
+
+    // add cell
+    var cells = geometryContainer.cellGeometry;
+    for ( var index in cells ){
+      var floor = window.storage.propertyContainer.getFloorById('cell', cells[index].id);
+      this.stages[floor].cellLayer.group.simpleAdd({
+        id : cells[index].id,
+        dots : cells[index].points
+      });
+    }
+
+    // add cellBoundary
+    var cellBoundary = geometryContainer.cellBoundaryGeometry;
+    for ( var index in cellBoundary ){
+      var floor = window.storage.propertyContainer.getFloorById('cellBoundary', cellBoundary[index].id);
+      this.stages[floor].cellBoundaryLayer.group.simpleAdd({
+        id : cellBoundary[index].id,
+        dots : cellBoundary[index].points
+      });
+    }
+
+    // add state
+
+    // add transition
+
+    for(var index in this.stages){
+      this.stages[index].stage.draw();
+    }
+  }
+
   return CanvasContainer;
 
 });

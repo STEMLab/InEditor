@@ -81,33 +81,33 @@ define([], function() {
 
   }
 
-  // FloorProperty.prototype.load = function(values) {
-  //
-  //   this.name = values.name;
-  //
-  //   this.level = values.level;
-  //
-  //   this.lowerCorner = values.lowerCorner;
-  //
-  //   this.upperCorner = values.upperCorner;
-  //
-  //   this.groundHeight = values.groundHeight;
-  //
-  //   this.celingHeight = values.celingHeight;
-  //
-  //   this.doorHeight = values.doorHeight;
-  //
-  //   this.description = values.description;
-  //
-  //   this.cellKey = values.cellKey;
-  //
-  //   this.cellBoundaryKey = values.cellBoundaryKey;
-  //
-  //   this.stateKey = values.stateKey;
-  //
-  //   this.transitionKey = values.transitionKey;
-  //
-  // }
+  FloorProperty.prototype.load = function(values) {
+
+    this.name = values.name;
+
+    this.level = values.level;
+
+    this.lowerCorner = values.lowerCorner;
+
+    this.upperCorner = values.upperCorner;
+
+    this.groundHeight = values.groundHeight;
+
+    this.celingHeight = values.celingHeight;
+
+    this.doorHeight = values.doorHeight;
+
+    this.description = values.description;
+
+    this.cellKey = values.cellKey;
+
+    this.cellBoundaryKey = values.cellBoundaryKey;
+
+    this.stateKey = values.stateKey;
+
+    this.transitionKey = values.transitionKey;
+
+  }
 
   return FloorProperty;
 });

@@ -15,24 +15,18 @@ define([
   function CellGroup() {
 
     /**
-    * @memberof CellGroup
-    */
+     * @memberof CellGroup
+     */
     this.cellGroup = new Konva.Group({
       x: 0,
       y: 0
     });
 
-    /**
-    * @memberof CellGroup
-    */
-    this.tmpGroup = new Konva.Group({
-      x: 0,
-      y: 0
-    });
+
 
     /**
-    * @memberof CellGroup
-    */
+     * @memberof CellGroup
+     */
     this.cells = []; // Cell array
 
   }
@@ -44,11 +38,30 @@ define([
   CellGroup.prototype.add = function(obj) {
 
     var newCell = new Cell(obj.id);
+    newCell.corners.visible(false);
 
     this.copyDots(newCell, obj.dots);
 
     // add corner and poly in new cell
     newCell.addObjectFromDots();
+
+    this.cells.push(newCell);
+
+    this.cellGroup.add(this.cells[this.cells.length - 1].getPolyObject());
+    this.cellGroup.add(this.cells[this.cells.length - 1].getCornersObject());
+
+  }
+
+  /**
+   * @memberof CellGroup
+   * @param {Cell} obj
+   */
+  CellGroup.prototype.simpleAdd = function(obj) {
+
+    var newCell = new Cell(obj.id);
+    newCell.dots = obj.dots;
+    newCell.addObjectFromDots();
+    newCell.corners.visible(false);
 
     this.cells.push(newCell);
 
@@ -82,15 +95,15 @@ define([
 
     var len = dots.length;
 
-    if(direction){
+    if (direction) {
 
-      for(var i = 0 ; i < len ; i++) newCell.addNewDot(dots[i]);
+      for (var i = 0; i < len; i++) newCell.addNewDot(dots[i]);
 
     } else {
 
       newCell.addNewDot(dots[0]);
 
-      for(var i = 1 ; i < len ; i++) newCell.addNewDot(dots[len-i]);
+      for (var i = 1; i < len; i++) newCell.addNewDot(dots[len - i]);
 
     }
 
@@ -151,35 +164,38 @@ define([
   }
 
   /**
-  * @memberof CellGroup
-  */
+   * @memberof CellGroup
+   */
   CellGroup.prototype.getCellGroup = function() {
     return this.cellGroup;
   }
 
-  /**
-  * @memberof CellGroup
-  */
-  CellGroup.prototype.getTmpGroup = function() {
-    return this.tmpGroup;
-  }
 
   /**
-  * @memberof CellGroup
-  */
-  CellGroup.prototype.getConnection = function(){
+   * @memberof CellGroup
+   */
+  CellGroup.prototype.getConnection = function() {
     var result = [];
 
-    for(var key in this.cells){
-      for(var dotkey = 0; dotkey < this.cells[key].dots.length; dotkey++){
+    for (var key in this.cells) {
+      for (var dotkey = 0; dotkey < this.cells[key].dots.length; dotkey++) {
         var newConnection;
-        if (dotkey == this.cells[key].dots.length-1){
-          newConnection = {'dot1' : this.cells[key].dots[dotkey], 'dot2' : this.cells[key].dots[0]};
+        if (dotkey == this.cells[key].dots.length - 1) {
+          newConnection = {
+            'dot1': this.cells[key].dots[dotkey],
+            'dot2': this.cells[key].dots[0]
+          };
         } else {
-          newConnection = {'dot1' : this.cells[key].dots[dotkey], 'dot2' : this.cells[key].dots[dotkey+1]};
+          newConnection = {
+            'dot1': this.cells[key].dots[dotkey],
+            'dot2': this.cells[key].dots[dotkey + 1]
+          };
         }
 
-        if(result.indexOf({'dot1':newConnection.dot2, 'dot2':newConnection.dot1}) == -1 ){
+        if (result.indexOf({
+            'dot1': newConnection.dot2,
+            'dot2': newConnection.dot1
+          }) == -1) {
           result.push(newConnection);
         }
       }
@@ -188,21 +204,30 @@ define([
     return result;
   }
 
-  CellGroup.prototype.getBoundaries = function(){
+  CellGroup.prototype.getBoundaries = function() {
 
     var result = [];
 
-    for(var key in this.cells){
-      var oneCell = {'cell': this.cells[key].id, 'connection': []};
+    for (var key in this.cells) {
+      var oneCell = {
+        'cell': this.cells[key].id,
+        'connection': []
+      };
 
-      for(var dotkey in this.cells){
+      for (var dotkey in this.cells) {
 
         var newConnection;
 
-        if ( dotkey == this.cells[key].dots.length-1){
-          newConnection = {'dot1' : this.cells[key].dots[dotkey], 'dot2' : this.cells[key].dots[0] };
+        if (dotkey == this.cells[key].dots.length - 1) {
+          newConnection = {
+            'dot1': this.cells[key].dots[dotkey],
+            'dot2': this.cells[key].dots[0]
+          };
         } else {
-          newConnection = {'dot1' : this.cells[key].dots[dotkey], 'dot2' : this.cells[key].dots[dotkey+1]};
+          newConnection = {
+            'dot1': this.cells[key].dots[dotkey],
+            'dot2': this.cells[key].dots[dotkey + 1]
+          };
         }
 
         oneCell[connection].push(newConnection);
@@ -215,7 +240,7 @@ define([
 
   }
 
-  CellGroup.prototype.getCells = function(){
+  CellGroup.prototype.getCells = function() {
     return this.cells;
   }
 

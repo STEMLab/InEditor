@@ -3,7 +3,7 @@
  */
 
 define([
-  "./ProjectProperty.js", ,
+  "./ProjectProperty.js",
   "./FloorProperty.js",
   "./CellProperty.js",
   "./CellBoundaryProperty.js",
@@ -117,16 +117,16 @@ define([
 
       switch (_type) {
         case 'cell':
-          if (this.floorProperties[key].cellKey.getIndexOf(_id) != -1) return this.floorProperties[key].id;
+          if (this.floorProperties[key].cellKey.indexOf(_id) != -1) return this.floorProperties[key].id;
           break;
         case 'cellBoundary':
-          if (this.floorProperties[key].cellBoundaryKey.getIndexOf(_id) != -1) return this.floorProperties[key].id;
+          if (this.floorProperties[key].cellBoundaryKey.indexOf(_id) != -1) return this.floorProperties[key].id;
           break;
         case 'state':
-          if (this.floorProperties[key].stateKey.getIndexOf(_id) != -1) return this.floorProperties[key].id;
+          if (this.floorProperties[key].stateKey.indexOf(_id) != -1) return this.floorProperties[key].id;
           break;
         case 'transition':
-          if (this.floorProperties[key].transitionKey.getIndexOf(_id) != -1) return this.floorProperties[key].id;
+          if (this.floorProperties[key].transitionKey.indexOf(_id) != -1) return this.floorProperties[key].id;
           break;
         default:
 
@@ -298,7 +298,7 @@ define([
 
       var tmp = new FloorProperty(values[index].id);
       tmp.load(values[index]);
-      this.cellProperties.push(tmp);
+      this.floorProperties.push(tmp);
 
     }
 

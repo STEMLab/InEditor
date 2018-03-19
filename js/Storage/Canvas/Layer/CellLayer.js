@@ -35,7 +35,6 @@ define([
     this.group = new CellGroup();
 
     this.layer.add(this.group.getCellGroup());
-    this.layer.add(this.group.getTmpGroup());
 
   }
 

@@ -73,10 +73,10 @@ define([
   /**
    * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.load = function(values) {
+  GeometryContainer.prototype.load = function(values, dotFoolContainer) {
 
-    this.loadCells(values.cellGeometry);
-    this.loadCellBoundary(values.cellBoundaryGeometry);
+    this.loadCells(values.cellGeometry, dotFoolContainer);
+    this.loadCellBoundary(values.cellBoundaryGeometry, dotFoolContainer);
     this.loadState(values.stateGeometry);
     this.loadTransition(values.transitionGeometry);
 
@@ -84,9 +84,9 @@ define([
 
 
   /**
-   * @memberof PropertyContainer
+   * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.loadCells = function(values) {
+  GeometryContainer.prototype.loadCells = function(values, dotFoolContainer) {
 
     this.cellGeometry = [];
 
@@ -94,6 +94,11 @@ define([
 
       var tmp = new CellGeometry();
       tmp.load(values[index]);
+
+      for(var key in tmp.points){
+        tmp.points[key] = dotFoolContainer.getDotById(tmp.points[key].uuid);
+      }
+
       this.cellGeometry.push(tmp);
 
     }
@@ -101,9 +106,9 @@ define([
   }
 
   /**
-   * @memberof PropertyContainer
+   * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.loadCellBoundary = function(values) {
+  GeometryContainer.prototype.loadCellBoundary = function(values, dotFoolContainer) {
 
     this.cellBoundaryGeometry = [];
 
@@ -111,6 +116,11 @@ define([
 
       var tmp = new CellBoundaryGeometry();
       tmp.load(values[index]);
+
+      for(var key in tmp.points){
+        tmp.points[key] = dotFoolContainer.getDotById(tmp.points[key].uuid);
+      }
+
       this.cellBoundaryGeometry.push(tmp);
 
     }
@@ -118,7 +128,7 @@ define([
   }
 
   /**
-   * @memberof PropertyContainer
+   * @memberof GeometryContainer
    */
   GeometryContainer.prototype.loadState = function(values) {
 
@@ -135,7 +145,7 @@ define([
   }
 
   /**
-   * @memberof PropertyContainer
+   * @memberof GeometryContainer
    */
   GeometryContainer.prototype.loadTransition = function(values) {
 
@@ -150,6 +160,8 @@ define([
     }
 
   }
+
+
 
 
 

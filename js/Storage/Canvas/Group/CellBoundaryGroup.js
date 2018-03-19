@@ -45,6 +45,20 @@ define([
 
   }
 
+  CellBoundaryGroup.prototype.simpleAdd = function(obj){
+
+    var newCB = new CellBoundary(obj.id);
+    newCB.dots = obj.dots;
+    newCB.addObjectFromDots();
+    newCB.corners.visible(false);
+
+    this.cellBoundaries.push(newCB);
+
+    this.cellBoundaryGroup.add(newCB.getCornersObject());
+    this.cellBoundaryGroup.add(newCB.getLineObject());
+
+  }
+
   /**
   * @memberof CellBoundaryGroup
   */

@@ -4,10 +4,12 @@
 
 define([
   "../PubSub/Subscriber.js",
-  "../Conditions.js"
+  "../Conditions.js",
+  "../Storage/Canvas/Stage.js"
 ], function(
   Subscriber,
-  Conditions
+  Conditions,
+  Stage
 ) {
   'use strict';
 
@@ -92,8 +94,8 @@ define([
 
         var keys = Object.keys(obj);
         window.storage.propertyContainer.load(obj[keys[0]].propertyContainer);
-        window.storage.geometryContainer.load(obj[keys[0]].geometryContainer);
         window.storage.dotFoolContainer.load(obj[keys[0]].dotFoolContainer);
+        window.storage.geometryContainer.load(obj[keys[0]].geometryContainer, window.storage.dotFoolContainer);
 
         window.storage.canvasContainer.clearCanvas();
 
@@ -104,10 +106,23 @@ define([
           window.uiContainer.workspace.clear();
         }
 
-        // add workspace
+        // add workspace and stage
         for(var key in obj[keys[0]].canvasContainer){
 
-          window.uiContainer.workspace.addNewWorkspace(key, key);
+          var newFloorProperty = window.storage.propertyContainer.getElementById('floor', key);
+
+          window.uiContainer.workspace.addNewWorkspace(key, newFloorProperty.name);
+
+          window.storage.canvasContainer.stages[key] = new Stage(
+            newFloorProperty.id,
+            newFloorProperty.name,
+            newFloorProperty.id,
+            obj[keys[0]].canvasContainer[key].width,
+            obj[keys[0]].canvasContainer[key].height
+          );
+
+          // bind stage click event
+          window.eventHandler.stageEventBind('stage', newFloorProperty.id);
 
         }
 
@@ -116,11 +131,11 @@ define([
           window.uiContainer.workspace.deleteFirstWorkspace();
         }
 
-        // refresh tree view
-        // log.info(window.storage.propertyContainer.toJson());
-        // window.uiContainer.sidebar.treeview.init();
-        window.uiContainer.sidebar.treeview.refresh(window.storage.propertyContainer);
+        // add object from geometry
+        window.storage.canvasContainer.addObjFromGeometries(window.storage.geometryContainer);
 
+        // refresh tree view
+        window.uiContainer.sidebar.treeview.refresh(window.storage.propertyContainer);
 
         log.info(">>>> succeed to load project");
       }
