@@ -56,6 +56,10 @@ app.post('/floorplan-upload', function(req, res) {
 
     filename += req.files.files.name + ".bmp";
 
+  } else if (req.files.files.mimetype == 'image/png') {
+
+    filename += req.files.files.name + ".png";
+
   }
 
   let file = req.files.files;
@@ -90,33 +94,45 @@ app.post('/floorplan-create-historyobj', function(req, res) {
 
     fs.readdir("./assets/floorplan/", function(err, files) {
 
+
       var result;
+      var flag = false;
 
-      for (var i = 0; i < files.length; i++) {
-        var split = files[i].split(".");
+      console.log(files.length);
 
-        if (split[0] == req.body.id) {
-          fs.rename("./assets/floorplan/" + files[i], "./assets/floorplan/" + req.body.id + "-save." + split[1], function() {
-            result = "./assets/floorplan/" + req.body.id + "-save." + split[1];
-            res.json({
-              result: result
+      if (files.length == 0) {
+
+        res.json({
+          result: null
+        });
+
+        console.log('----- unlock : floorplan-create-historyobj -----');
+        mutex.unlock();
+
+      } else {
+        for (var i = 0; i < files.length; i++) {
+          var split = files[i].split(".");
+          if (split[0] == req.body.id) {
+            flag = true;
+            fs.rename("./assets/floorplan/" + files[i], "./assets/floorplan/" + req.body.id + "-save." + split[1], function() {
+              result = "./assets/floorplan/" + req.body.id + "-save." + split[1];
+              res.json({
+                result: result
+              });
+              console.log('----- unlock : floorplan-create-historyobj -----');
+              mutex.unlock();
             });
-
+          } else if (i == files.length - 1 && !flag) {
+            res.json({
+              result: null
+            });
             console.log('----- unlock : floorplan-create-historyobj -----');
             mutex.unlock();
-          });
-
-
-
-          break;
+          }
         }
-
       }
-
     });
-
   });
-
 });
 
 app.post('/floorplan-undo', function(req, res) {
@@ -131,7 +147,7 @@ app.post('/floorplan-undo', function(req, res) {
 
     if (mode == "delete only") {
       fs.readdir("./assets/floorplan/", function(err, files) {
-        // console.log("> delete only : fs.readdir");
+        console.log("> delete only : fs.readdir");
 
         for (var i = 0; i < files.length; i++) {
           var split = files[i].split(".");
@@ -219,8 +235,6 @@ app.post('/save-project', function(req, res) {
 
     fs.writeFile('./output/save-project.bson', bson.serialize(req.body), function(err) {
 
-      // fs.writeFile('./output/save-project.json', jsonFormat(req.body), function(err) {
-
       if (err) return res.status(500).send(err);
 
       res.json('success');
@@ -235,7 +249,7 @@ app.post('/save-project', function(req, res) {
 
 });
 
-app.get('/load-project', function(req, res){
+app.get('/load-project', function(req, res) {
 
   mutex.lock(function() {
 

@@ -147,7 +147,7 @@ define([], function() {
 
     propertiesDiv += "</select></td></tr>";
 
-    propertiesDiv += "<tr><td class=\"title\">partialbounded by</td><td class=\"value\"><select id=\"partialboundedBy-text\" style=\"width: 100%;\">";
+    propertiesDiv += "<tr><td class=\"title\">partial-<br>bounded<br>by</td><td class=\"value\"><select id=\"partialboundedBy-text\" style=\"width: 100%;\">";
 
     for (var key in property.partialboundedBy) {
       var value = property.partialboundedBy[key];

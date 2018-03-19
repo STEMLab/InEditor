@@ -382,7 +382,7 @@ define([
 
           } else if (order[index].type == 'cellspace') {
 
-            xhr.open(order[index].request, order[index].address + '/' + cells[order[index].index], false);
+            xhr.open(order[index].request, order[index].address + '/' + cells[order[index].index].id, false);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             var tmpdata = JSON.stringify(cells[order[index].index]);
             order[index].index++;
