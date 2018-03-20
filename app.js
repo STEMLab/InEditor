@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var jsonFormat = require("json-format");
 var fs = require("fs");
 var BSON = require("bson");
+var cors = require('cors');	 	
 var app = express();
 
 
@@ -12,6 +13,7 @@ app.use(bodyParser.urlencoded({
   extended: false,
   limit: '1gb'
 }));
+app.use(cors());
 app.use(bodyParser.json());
 
 var server = app.listen(8080, function() {
