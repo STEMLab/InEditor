@@ -4,10 +4,12 @@
 
 define([
   "../PubSub/Subscriber.js",
-  "../JsonFormat/CellFormat.js"
+  "../Conditions.js",
+  "../Storage/Canvas/Stage.js"
 ], function(
   Subscriber,
-  CellFormat
+  Conditions,
+  Stage
 ) {
   'use strict';
 
@@ -28,113 +30,115 @@ define([
 
     this.name = 'ProjectManager';
 
-    this.addCallbackFun('exporttojson', this.exportToJson);
+    this.addCallbackFun('saveproject', this.saveProject);
+    this.addCallbackFun('loadproject', this.loadProject);
 
   }
 
   /**
-   * @param {Message.reqObj} reqObj null
    * @memberof ProjectManager
    */
-  ProjectManager.prototype.exportToJson = function(reqObj) {
+  ProjectManager.prototype.saveProject = function() {
 
-    var manager = window.broker.getManager('exporttojson', 'ProjectManager');
 
-    var cell = { "CellSpace" : manager.celldataToJson() };
+    // Serialize document
+    var id = window.storage.propertyContainer.projectProperty.id;
+    var doc = {};
+    doc[id] = {
+      'geometryContainer': window.storage.geometryContainer,
+      'propertyContainer': window.storage.propertyContainer,
+      'dotFoolContainer': window.storage.dotFoolContainer,
+      'canvasContainer': {}
+    };
 
+    for (var key in window.storage.canvasContainer.stages) {
+
+      doc[id].canvasContainer[key] = {
+        width: window.storage.canvasContainer.stages[key].stage.getAttr('width'),
+        height: window.storage.canvasContainer.stages[key].stage.getAttr('height'),
+        floorplanDataURL: window.storage.canvasContainer.stages[key].backgroundLayer.floorplanDataURL[0]
+      };
+
+    }
+
+    doc['conditions'] = window.conditions;
+
+
+    // send json data to viewer
     var xhr = new XMLHttpRequest();
-    var filename = null;
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status == 200) {
-        log.info(">>>> succeed to exporting json");
+        log.info(">>>> succeed to save project");
       }
     }
 
-    xhr.open("POST", "http://127.0.0.1:8080/export-json", true);
+    xhr.open("POST", "http://127.0.0.1:8080/save-project", true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify(cell));
+    xhr.send(JSON.stringify(doc));
 
   }
 
   /**
    * @memberof ProjectManager
    */
-  ProjectManager.prototype.celldataToJson = function() {
+  ProjectManager.prototype.loadProject = function() {
 
-    var result = {};
-    var geometries = window.storage.geometryContainer.cellGeometry;
+    // send json data to viewer
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status == 200) {
+        var obj = JSON.parse(xhr.responseText);
+        log.info(obj);
 
-    // copy geometry coordinates
-    for (var key in geometries) {
+        window.conditions.load(obj.conditions);
+        delete obj.conditions;
 
-      var tmp = new CellFormat();
-      tmp.pushCoordinates(geometries[key].points);
-      result[geometries[key].id] = tmp;
+        var loadData = obj[Object.keys(obj)[0]];
+        window.storage.propertyContainer.load(loadData.propertyContainer);
+        window.storage.dotFoolContainer.load(loadData.dotFoolContainer);
+        window.storage.geometryContainer.load(loadData.geometryContainer, window.storage.dotFoolContainer);
 
-    }
+        window.storage.canvasContainer.clearCanvas();
 
-    // copy attributes
-    var properties = window.storage.propertyContainer.cellProperties;
+        window.uiContainer.workspace.destroy();
 
-    for (var key in properties) {
+        // add workspace and stage
+        for (var key in loadData.canvasContainer) {
 
-      result[properties[key].id].setName(properties[key].name);
-      result[properties[key].id].setDesc(properties[key].description);
+          var newFloorProperty = window.storage.propertyContainer.getElementById('floor', key);
 
-    }
+          window.uiContainer.workspace.addNewWorkspace(key, newFloorProperty.name);
 
-    // pixel to real world coordinates
-    var floorProperties = window.storage.propertyContainer.floorProperties;
+          window.storage.canvasContainer.stages[key] = new Stage(
+            newFloorProperty.id,
+            newFloorProperty.name,
+            newFloorProperty.id,
+            loadData.canvasContainer[key].width,
+            loadData.canvasContainer[key].height
+          );
 
-    for(var key in floorProperties){
+          window.storage.canvasContainer.stages[key].backgroundLayer.saveFloorplanDataURL(loadData.canvasContainer[key].floorplanDataURL);
+          window.storage.canvasContainer.stages[key].backgroundLayer.refresh();
 
-      var cells = floorProperties[key].cellKey;
-      var stage = window.storage.canvasContainer.stages[floorProperties[key].id].stage;
+          // bind stage click event
+          window.eventHandler.stageEventBind('stage', newFloorProperty.id);
 
-      var widthScale = floorProperties[key].upperCorner[0] / stage.getAttr('width');
-      var heightScale = floorProperties[key].upperCorner[1] / stage.getAttr('height');
-      var widthTrans = floorProperties[key].upperCorner[0] - stage.getAttr('width');
-      var heightTrans = floorProperties[key].upperCorner[1] - stage.getAttr('height');
-      var matrix = math.matrix([[widthScale, 0, 0], [0, heightScale, 0], [widthTrans, heightTrans, 1]]);
+        }
 
-      for( var index in cells ){
+        // add object from geometry
+        window.storage.canvasContainer.addObjFromGeometries(window.storage.geometryContainer);
 
-        result[cells[key]].setCoordinates(
-          window.broker.getManager('exporttojson', 'ProjectManager').pixel2realSurface(matrix, result[cells[key]].getCoordinates())
-        );
+        // refresh tree view
+        window.uiContainer.sidebar.treeview.refresh(window.storage.propertyContainer);
 
+        log.info(">>>> succeed to load project");
       }
-
     }
 
-    return result;
+    xhr.open("GET", "http://127.0.0.1:8080/load-project", true);
+    xhr.send();
 
   }
-
- /**
- * matrix transform
- * @memberof ProjectManager
- */
-  ProjectManager.prototype.pixel2realSurface = function(matrix, pixel){
-
-    log.info("matrix : ", matrix, "pixel : ", pixel);
-
-    var matrixTrans = [];
-
-    var len = pixel.length;
-
-    for(var i = 0; i < len; i++){
-
-      var pixelMatrix = math.matrix([pixel[i][0], pixel[i][1], 0]);
-      var result = math.multiply(matrix, pixelMatrix);
-      matrixTrans.push(result._data[0], result._data[1]);
-
-    }
-
-    return matrixTrans;
-
-  }
-
 
   return ProjectManager;
 });

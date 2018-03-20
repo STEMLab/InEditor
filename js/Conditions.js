@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([], function() {
   'use strict';
@@ -11,37 +11,37 @@ define([], function() {
   function Conditions() {
 
     /**
-    * @desc Prefix of cell object
-    * @default C
-    */
+     * @desc Prefix of cell object
+     * @default C
+     */
     this.pre_cell = 'C';
 
     /**
-    * @desc Prefix of cellBoundary object
-    * @memberof Conditions
-    * @default B
-    */
+     * @desc Prefix of cellBoundary object
+     * @memberof Conditions
+     * @default B
+     */
     this.pre_cellBoundary = 'B';
 
     /**
-    * @desc Prefix of floor object
-    * @memberof Conditions
-    * @default F
-    */
+     * @desc Prefix of floor object
+     * @memberof Conditions
+     * @default F
+     */
     this.pre_floor = 'F';
 
     /**
-    * @desc Prefix of state object
-    * @memberof Conditions
-    * @default S
-    */
+     * @desc Prefix of state object
+     * @memberof Conditions
+     * @default S
+     */
     this.pre_state = 'S';
 
     /**
-    * @desc Prefix of transtiion object
-    * @memberof Conditions
-    * @default T
-    */
+     * @desc Prefix of transtiion object
+     * @memberof Conditions
+     * @default T
+     */
     this.pre_transition = 'T';
 
     this.LAST_CELL_ID_NUM = 0;
@@ -51,46 +51,155 @@ define([], function() {
     this.LAST_TRANSITION_ID_NUM = 0;
 
     /**
-    * @desc The aspect ratio used to create the stage
-    * @memberof Conditions
-    * @default { x : 4, y : 3 }
-    */
-    this.aspectRatio = { x : 4, y : 3 };
+     * @desc The aspect ratio used to create the stage
+     * @memberof Conditions
+     * @default { x : 4, y : 3 }
+     */
+    this.aspectRatio = {
+      x: 4,
+      y: 3
+    };
 
     /**
-    * @desc scale factor
-    * @memberof Conditions
-    * @default 1.5
-    */
+     * @desc scale factor
+     * @memberof Conditions
+     * @default 1.1
+     */
     this.scaleFactor = 1.1;
 
     /**
-    * @desc min scale
-    * @memberof Conditions
-    * @default 1
-    */
+     * @desc min scale
+     * @memberof Conditions
+     * @default 1
+     */
     this.scaleMin = 1;
 
     /**
-    * @desc max scale
-    * @memberof Conditions
-    * @default 50
-    */
+     * @desc max scale
+     * @memberof Conditions
+     * @default 50
+     */
     this.scaleMax = 50;
 
     /**
-    * @memberof Conditions
-    * @default 10
-    */
+     * @memberof Conditions
+     * @default 10
+     */
     this.maxHistoryLen = 10;
 
     this.ctrlDown = false;
 
+    /**
+     * @memberof Conditions
+     */
+    this.coordinateThreshold = 10;
+
+    /**
+     * @memberof Conditions
+     */
+    this.snappingThreshold = 10;
+
+    /**
+     * @memberof Conditions
+     */
+    this.cursorrSize = 5;
+
+    /**
+     * @memberof Conditions
+     */
+    this.cursorColor = 'red';
+
+    /**
+     * @memberof Conditions
+     * @desc If the value is 'true', the attribute will included json which exported.
+     */
+    this.exportConditions = {
+      'CellSpace': {
+        'properties': {
+          'name': true,
+          'description': true,
+          'partialboundedBy': true,
+          'externalReference': true,
+          'duality': true
+        },
+        'geometry': {
+          'extrude': true
+        }
+      },
+      'CellSpaceBoundary': {
+        'properties': {
+          'name': true,
+          'description': true,
+          'externalReference': true,
+          'duality': true
+        },
+        'geometry': {
+          'extrude': true
+        }
+      },
+      'State': {
+        'properties': {
+          'name': true,
+          'description': true,
+          'duality': true,
+          'connected': true
+        }
+      },
+      'Transition': {
+        'properties': {
+          'name': true,
+          'description': true,
+          'duality': true,
+          'weight': true
+        }
+      }
+    };
+
+    /**
+     * @memberof Conditions
+     * @desc This this value is true, the attribute will remain even it's value is null("").
+     */
+    this.exportSimplifyCondition = {
+      'CellSpace': {
+        'properties': {
+          'name': true,
+          'description': true,
+          'partialboundedBy': false,
+          'externalReference': false,
+          'duality': true
+        }
+      },
+      'CellSpaceBoundary': {
+        'properties': {
+          'name': true,
+          'description': true,
+          'externalReference': false,
+          'duality': true
+        }
+      },
+      'State': {
+        'properties': {
+          'name': true,
+          'description': true,
+          'duality': true,
+          'connected': true
+        }
+      },
+      'Transition': {
+        'properties': {
+          'name': true,
+          'description': true,
+          'duality': true,
+          'weight': false
+        }
+      }
+    };
+
   }
 
   /**
-  * @memberof Conditions
-  */
+   * @memberof Conditions
+   */
   Conditions.prototype.guid = function() {
     function s4() {
       return ((1 + Math.random()) * 0x10000 | 0).toString(16).substring(1);
@@ -99,8 +208,8 @@ define([], function() {
   }
 
   /**
-  * @memberof Conditions
-  */
+   * @memberof Conditions
+   */
   Conditions.prototype.getDate = function() {
     var d = new Date();
 
@@ -113,8 +222,8 @@ define([], function() {
   }
 
   /**
-  * @memberof Conditions
-  */
+   * @memberof Conditions
+   */
   Conditions.prototype.leadingZeros = function(n, digits) {
     var zero = '';
     n = n.toString();
@@ -124,6 +233,39 @@ define([], function() {
         zero += '0';
     }
     return zero + n;
+  }
+
+  /**
+   * @memberof Conditions
+   */
+  Conditions.prototype.load = function(values) {
+    this.pre_cell = values.pre_cell;
+    this.pre_cellBoundary = values.pre_cellBoundary;
+    this.pre_floor = values.pre_floor;
+    this.pre_state = values.pre_state;
+    this.pre_transition = values.pre_transition;
+
+    this.LAST_CELL_ID_NUM = values.LAST_CELL_ID_NUM;
+    this.LAST_CELLBOUNDARY_ID_NUM = values.LAST_CELLBOUNDARY_ID_NUM;
+    this.LAST_FLOOR_ID_NUM = values.LAST_FLOOR_ID_NUM;
+    this.LAST_STATE_ID_NUM = values.LAST_STATE_ID_NUM;
+    this.LAST_TRANSITION_ID_NUM = values.LAST_TRANSITION_ID_NUM;
+    this.aspectRatio = {
+      x: values.aspectRatio.x,
+      y: values.aspectRatio.y
+    };
+    this.scaleFactor = values.scaleFactor;
+    this.scaleMin = values.scaleMin;
+    this.scaleMax = values.scaleMax;
+    this.maxHistoryLen = values.maxHistoryLen;
+    this.ctrlDown = values.ctrlDown;
+    this.coordinateThreshold = values.coordinateThreshold;
+    this.snappingThreshold = values.snappingThreshold;
+    this.cursorrSize = values.cursorrSize;
+    this.cursorColor = values.cursorColor;
+
+    this.exportConditions = values.exportConditions;
+    this.exportSimplifyCondition = values.exportSimplifyCondition;
   }
 
   return Conditions;

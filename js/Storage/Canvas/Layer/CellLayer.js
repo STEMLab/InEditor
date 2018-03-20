@@ -26,14 +26,30 @@ define([
 
   CellLayer.prototype = Object.create(Layer.prototype);
 
+  /**
+  * @memberof CellLayer
+  */
   CellLayer.prototype.init = function(){
 
     // this.addGroup(new CellGroup());
     this.group = new CellGroup();
 
     this.layer.add(this.group.getCellGroup());
-    this.layer.add(this.group.getTmpGroup());
 
+  }
+
+  /**
+  * @memberof CellLayer
+  */
+  CellLayer.prototype.getConnection = function(){
+    return this.group.getConnection();
+  }
+
+  /**
+  * @memberof CellLayer
+  */
+  CellLayer.prototype.getBoundaries = function(){
+    return this.group.getBoundaries();
   }
 
   return CellLayer;

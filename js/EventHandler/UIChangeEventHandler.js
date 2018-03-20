@@ -3,9 +3,11 @@
 */
 
 define([
-  "../PubSub/Message.js"
+  "../PubSub/Message.js",
+  "./Result.js"
 ], function(
-  Message
+  Message,
+  Result
 ) {
   'use strict';
 
@@ -33,6 +35,26 @@ define([
     handlerBinder['floorplan-file'] = {
       'change': this.floorplanUpload
     };
+
+    handlerBinder['project-export'] = {
+      'click': this.showFactoryExportModal
+    };
+
+  }
+
+  UIChangeEventHandler.prototype.showFactoryExportModal = function(broker, previousMsg){
+
+    var result = new Result();
+    if (broker.isPublishable('showfactoryexportmodal')) {
+
+      broker.publish(new Message('showfactoryexportmodal', {}));
+
+      result.result = true;
+      result.msg = 'showfactoryexportmodal';
+
+    }
+
+    return result;
 
   }
 
@@ -101,7 +123,7 @@ define([
       var target = data.path[2].id;
       var oldScale = window.storage.canvasContainer.stages[target].stage.scaleX();
 
-      if (data.deltaY > 0 && oldScale < window.conditions.scaleMin) {
+      if (data.deltaY > 0 && oldScale <= window.conditions.scaleMin) {
 
         result = {
           'result': false,
@@ -109,7 +131,7 @@ define([
         };
 
 
-      } else if (data.deltaY < 0 && oldScale > window.conditions.scaleMax) {
+      } else if (data.deltaY < 0 && oldScale >= window.conditions.scaleMax) {
 
         result = {
           'result': false,
@@ -171,8 +193,6 @@ define([
     return result;
   }
 
-
-
   /**
    * @desc When tree view clicked `addfloorplan` can publish.
    * @memberof UIChangeEventHandler
@@ -184,7 +204,7 @@ define([
       'msg': null
     };
 
-    if (broker.isPublishable('addfloorplan')) {
+    if (broker.isPublishable('addfloorplan') && document.getElementById(data.target.id).files[0] != null) {
 
       broker.publish(new Message('addfloorplan', {
         'id': document.getElementById('id-text').value,
@@ -206,6 +226,7 @@ define([
     return result;
 
   }
+
 
   return UIChangeEventHandler;
 });

@@ -127,16 +127,16 @@ define([], function() {
   /**
   * @memberof Property
   */
-  Property.prototype.setViewWithRef = function(config, property) {
+  Property.prototype.setViewWithRef = function(config, property, type) {
 
     $('#property-container').empty();
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=\"cell\" class=\"property-table\">";
+    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
     propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\"></textarea></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + property.description + "</textarea></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">external ref</td><td class=\"value\"><select id=\"externalRef-text\" style=\"width: 100%;\">";
 
@@ -147,11 +147,68 @@ define([], function() {
 
     propertiesDiv += "</select></td></tr>";
 
-    propertiesDiv += "<tr><td class=\"title\">partialbounded by</td><td class=\"value\"><select id=\"partialboundedBy-text\" style=\"width: 100%;\">";
+    propertiesDiv += "<tr><td class=\"title\">partial-<br>bounded<br>by</td><td class=\"value\"><select id=\"partialboundedBy-text\" style=\"width: 100%;\">";
 
     for (var key in property.partialboundedBy) {
       var value = property.partialboundedBy[key];
       propertiesDiv += "<option value=\"" + value + "\"></option>";
+    }
+
+    propertiesDiv += "</select></td></tr>";
+
+    propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
+    propertiesDiv += "</table>";
+
+
+    // ref tab
+    var refDiv = "<table id=\"property-ref-table\" type=\"ref\" class=\"property-table\">";
+    refDiv += "<tr><td class=\"title\">ref</td><td class=\"value\"><input id=\"ref-text\" type=\"text\"></td></tr>";
+    refDiv += "<tr><td colspan=\"2\"><button class=\"submit-btn\"  id=\"property-ref-submit-btn\">submit</button></td></tr>";
+    refDiv += "</table>";
+
+    var divs = {
+      "properties": propertiesDiv,
+      "ref": refDiv
+    };
+
+
+    propertyLayout.registerComponent('property-component', function(container, state) {
+
+      container.getElement().html("<div id=\"property-" + state.id + "\">" + divs[state.id] + "</div>");
+
+    });
+
+    propertyLayout.init();
+
+    // event binding
+    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
+      window.eventHandler.callHandler('html', event);
+    });
+
+    document.getElementById('property-ref-submit-btn').addEventListener('click', function(event) {
+      window.eventHandler.callHandler('html', event);
+    });
+  }
+
+  /**
+  * @memberof Property
+  */
+  Property.prototype.setCellBoundaryView = function(config, property, type) {
+
+    $('#property-container').empty();
+
+    var propertyLayout = new GoldenLayout(config, $('#property-container'));
+
+    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
+    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + property.description + "</textarea></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">external ref</td><td class=\"value\"><select id=\"externalRef-text\" style=\"width: 100%;\">";
+
+    for (var key in property.externalReference) {
+      var value = property.externalReference[key];
+      propertiesDiv += "<option value=\"" + value + "\">" + value + "</option>";
     }
 
     propertiesDiv += "</select></td></tr>";
@@ -272,7 +329,7 @@ define([], function() {
       }]
     };
 
-    this.setViewWithRef(config, storage.propertyContainer.getElementById('cell', id));
+    this.setViewWithRef(config, storage.propertyContainer.getElementById('cell', id), 'cell');
 
   }
 
@@ -291,19 +348,30 @@ define([], function() {
         showCloseIcon: false
       },
       content: [{
-        type: 'component',
-        componentName: 'property-component',
-        title: 'properties',
-        isClosable: false,
-        componentState: {
-          id: 'propertiesProper'
-        }
+        type: 'stack',
+        content: [{
+            type: 'component',
+            componentName: 'property-component',
+            title: 'properties',
+            isClosable: false,
+            componentState: {
+              id: 'properties'
+            }
+          },
+          {
+            type: 'component',
+            componentName: 'property-component',
+            title: 'ref',
+            isClosable: false,
+            componentState: {
+              id: 'ref'
+            }
+          }
+        ]
       }]
     };
 
-    var divContent = "<div>cellboundary properties</div>";
-
-    this.setView(config, divContent);
+    this.setCellBoundaryView(config, storage.propertyContainer.getElementById('cellBoundary', id), 'cellBoundary');
 
   }
 

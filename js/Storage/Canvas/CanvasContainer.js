@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
   "./Stage.js"
@@ -10,18 +10,16 @@ define([
   'use strict';
 
   /**
-  * @class CanvasContainer
-  */
+   * @class CanvasContainer
+   */
   function CanvasContainer() {
     this.stages = [];
 
-    // one loor for test
-    // this.addStage('test-floor','container', document.getElementById('viewport').clientWidth, document.getElementById('viewport').clientHeight);
   }
 
-  CanvasContainer.prototype.addStage = function(_id, _container, _width, _height){
+  CanvasContainer.prototype.addStage = function(_id, _container, _width, _height) {
 
-    this.stages[_id] = new Stage(_id,_id,_container, _width, _height);
+    this.stages[_id] = new Stage(_id, _id, _container, _width, _height);
   }
 
 
@@ -37,7 +35,7 @@ define([
     var len = window.storage.propertyContainer.floorProperties.length;
     var result = null;
 
-    if (_type == 'stage'){
+    if (_type == 'stage') {
       stageID = _id;
     }
 
@@ -89,7 +87,7 @@ define([
 
     switch (_type) {
       case 'cell':
-        var cells = window.storage.canvasContainer.stage[stageID].cellLayer.group.cells;
+        var cells = window.storage.canvasContainer.stages[stageID].cellLayer.group.cells;
         for (var key in cells) {
           if (cells[key].id == _id) {
             result = cells[key];
@@ -98,7 +96,7 @@ define([
         }
         break;
       case 'cellboundary':
-        var cellboundaries = window.storage.canvasContainer.stage[stageID].cellBoundaryLayer.group.cellBoundaries;
+        var cellboundaries = window.storage.canvasContainer.stages[stageID].cellBoundaryLayer.group.cellBoundaries;
         for (var key in cellboundaries) {
           if (cellboundaries[key].id == _id) {
             result = cellboundaries[key];
@@ -107,7 +105,7 @@ define([
         }
         break;
       case 'state':
-        var states = window.storage.canvasContainer.stage[stageID].stateLayer.group.states;
+        var states = window.storage.canvasContainer.stages[stageID].stateLayer.group.states;
         for (var key in states) {
           if (states[key].id == _id) {
             result = states[key];
@@ -116,7 +114,7 @@ define([
         }
         break;
       case 'transition':
-        var transitions = window.storage.canvasContainer.stage[stageID].transitionLayer.group.transitions;
+        var transitions = window.storage.canvasContainer.stages[stageID].transitionLayer.group.transitions;
         for (var key in transitions) {
           if (transitions[key].id == _id) {
             result = transitions[key];
@@ -131,6 +129,57 @@ define([
     }
 
     return result;
+  }
+
+  /**
+   * @memberof CanvasContainer
+   */
+  CanvasContainer.prototype.clearCanvas = function() {
+
+    for (var key in this.stages) {
+      this.stages[key].stage.destroyChildren();
+      this.stages[key].stage.destroy();
+    }
+
+    this.stages = [];
+
+  }
+
+
+  /**
+   * @memberof CanvasContainer
+   */
+  CanvasContainer.prototype.addObjFromGeometries = function(geometryContainer) {
+
+    log.info(window.storage.dotFoolContainer);
+
+    // add cell
+    var cells = geometryContainer.cellGeometry;
+    for (var index in cells) {
+      var floor = window.storage.propertyContainer.getFloorById('cell', cells[index].id);
+      this.stages[floor].cellLayer.group.simpleAdd({
+        id: cells[index].id,
+        dots: cells[index].points
+      });
+    }
+
+    // add cellBoundary
+    var cellBoundary = geometryContainer.cellBoundaryGeometry;
+    for (var index in cellBoundary) {
+      var floor = window.storage.propertyContainer.getFloorById('cellBoundary', cellBoundary[index].id);
+      this.stages[floor].cellBoundaryLayer.group.simpleAdd({
+        id: cellBoundary[index].id,
+        dots: cellBoundary[index].points
+      });
+    }
+
+    // add state
+
+    // add transition
+
+    for (var index in this.stages) {
+      this.stages[index].stage.draw();
+    }
   }
 
   return CanvasContainer;

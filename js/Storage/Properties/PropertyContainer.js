@@ -1,11 +1,21 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
-  "./ProjectProperty.js"
+  "./ProjectProperty.js",
+  "./FloorProperty.js",
+  "./CellProperty.js",
+  "./CellBoundaryProperty.js",
+  "./StateProperty.js",
+  "./TransitionProperty.js"
 ], function(
-  ProjectProperty
+  ProjectProperty,
+  FloorProperty,
+  CellProperty,
+  CellBoundaryProperty,
+  StateProperty,
+  TransitionProperty
 ) {
   'use strict';
 
@@ -15,33 +25,34 @@ define([
   function PropertyContainer() {
 
     /**
-    * @memberof PropertyContainer
-    */
+     * @memberof PropertyContainer
+     */
     this.floorProperties = [];
 
     /**
-    * @memberof PropertyContainer
-    */
+     * @memberof PropertyContainer
+     */
     this.cellProperties = [];
 
     /**
-    * @memberof PropertyContainer
-    */
+     * @memberof PropertyContainer
+     */
     this.cellBoundaryProperties = [];
 
     /**
-    * @memberof PropertyContainer
-    */
+     * @memberof PropertyContainer
+     */
     this.stateProperties = [];
 
     /**
-    * @memberof PropertyContainer
-    */
+     * @memberof PropertyContainer
+     */
     this.transitionProperties = [];
 
     /**
-    * @memberof PropertyContainer
-    */
+     * @memberof PropertyContainer
+     */
+    // this.projectProperty = null;
     this.projectProperty = new ProjectProperty();
   }
 
@@ -96,6 +107,38 @@ define([
 
 
   /**
+   * @param {String} _type
+   * @param {String} _id
+   * @returns {String} floor id or null
+   */
+  PropertyContainer.prototype.getFloorById = function(_type, _id) {
+
+    for (var key in this.floorProperties) {
+
+      switch (_type) {
+        case 'cell':
+          if (this.floorProperties[key].cellKey.indexOf(_id) != -1) return this.floorProperties[key].id;
+          break;
+        case 'cellBoundary':
+          if (this.floorProperties[key].cellBoundaryKey.indexOf(_id) != -1) return this.floorProperties[key].id;
+          break;
+        case 'state':
+          if (this.floorProperties[key].stateKey.indexOf(_id) != -1) return this.floorProperties[key].id;
+          break;
+        case 'transition':
+          if (this.floorProperties[key].transitionKey.indexOf(_id) != -1) return this.floorProperties[key].id;
+          break;
+        default:
+
+      }
+    }
+
+    log.warn("There is no object which id is " + _id + " !");
+
+    return null;
+  }
+
+  /**
    * @desc Converts information of stored object to json for tree view and returns it.
    * @returns {json} json object for tree view.
    */
@@ -126,7 +169,34 @@ define([
       floorObj.title = path[i].name;
       floorObj.key = path[i].id;
       floorObj.children = new Array();
+      floorObj.type = "floor";
+      floorObj.icon = '../../assets/tree-icon/floor.png'
       floorObj.folder = true;
+
+      floorObj.children.push({
+        "title": "Cell",
+        "key": floorObj.key + "-cell",
+        "folder": true,
+        "type": "cellFolder"
+      });
+      floorObj.children.push({
+        "title": "CellBoundary",
+        "key": floorObj.key + "-cellBoundary",
+        "folder": true,
+        "type": "cellBoundaryFolder"
+      });
+      floorObj.children.push({
+        "title": "State",
+        "key": floorObj.key + "-state",
+        "folder": true,
+        "type": "stateFolder"
+      });
+      floorObj.children.push({
+        "title": "Transition",
+        "key": floorObj.key + "-transition",
+        "folder": true,
+        "type": "transtitionFolder"
+      });
 
       if (path[i].cellKey.length != 0) {
         var cellObj = new Object;
@@ -142,7 +212,7 @@ define([
 
           cellObj.children.push(obj);
         }
-        floorObj.children.push(cellObj);
+        floorObj.children[0].push(cellObj);
       }
 
       if (path[i].cellBoundaryKey.length != 0) {
@@ -159,7 +229,7 @@ define([
 
           cellBoundaryObj.children.push(obj);
         }
-        floorObj.children.push(cellBoundaryObj);
+        floorObj.children[1].push(cellBoundaryObj);
       }
 
 
@@ -177,7 +247,7 @@ define([
 
           stateObj.children.push(obj);
         }
-        floorObj.children.push(stateObj);
+        floorObj.children[2].push(stateObj);
       }
 
       if (path[i].transitionKey.length != 0) {
@@ -192,7 +262,7 @@ define([
           obj.title = path[i].transitionKey[j];
           obj.key = path[i].transitionKey[j];
 
-          transitionObj.children.push(obj);
+          transitionObj[3].children.push(obj);
         }
         floorObj.children.push(transitionObj);
       }
@@ -202,6 +272,106 @@ define([
 
     return result;
   }
+
+  /**
+   * @memberof PropertyContainer
+   */
+  PropertyContainer.prototype.load = function(values) {
+
+    this.projectProperty.load(values.projectProperty);
+    this.loadFloors(values.floorProperties);
+    this.loadCells(values.cellProperties);
+    this.loadCellBoundary(values.cellBoundaryProperties);
+    this.loadState(values.stateProperties);
+    this.loadTransition(values.transitionProperties);
+
+  }
+
+  /**
+   * @memberof PropertyContainer
+   */
+  PropertyContainer.prototype.loadFloors = function(values) {
+
+    this.floorProperties = [];
+
+    for (var index in values) {
+
+      var tmp = new FloorProperty(values[index].id);
+      tmp.load(values[index]);
+      this.floorProperties.push(tmp);
+
+    }
+
+  }
+
+  /**
+   * @memberof PropertyContainer
+   */
+  PropertyContainer.prototype.loadCells = function(values) {
+
+    this.cellProperties = [];
+
+    for (var index in values) {
+
+      var tmp = new CellProperty();
+      tmp.load(values[index]);
+      this.cellProperties.push(tmp);
+
+    }
+
+  }
+
+  /**
+   * @memberof PropertyContainer
+   */
+  PropertyContainer.prototype.loadCellBoundary = function(values) {
+
+    this.cellBoundaryProperties = [];
+
+    for (var index in values) {
+
+      var tmp = new CellBoundaryProperty();
+      tmp.load(values[index]);
+      this.cellBoundaryProperties.push(tmp);
+
+    }
+
+  }
+
+  /**
+   * @memberof PropertyContainer
+   */
+  PropertyContainer.prototype.loadState = function(values) {
+
+    this.stateProperties = [];
+
+    for (var index in values) {
+
+      var tmp = new StateProperty();
+      tmp.load(values[index]);
+      this.stateProperties.push(tmp);
+
+    }
+
+  }
+
+  /**
+   * @memberof PropertyContainer
+   */
+  PropertyContainer.prototype.loadTransition = function(values) {
+
+    this.transitionProperties = [];
+
+    for (var index in values) {
+
+      var tmp = new TransitionProperty();
+      tmp.load(values[index]);
+      this.transitionProperties.push(tmp);
+
+    }
+
+  }
+
 
   return PropertyContainer;
 });

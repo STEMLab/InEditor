@@ -6,12 +6,14 @@ define([
   "./ProjectEventHandler.js",
   "./DrawEventHandler.js",
   "./PropertyEventHandler.js",
-  "./UIChangeEventHandler.js"
+  "./UIChangeEventHandler.js",
+  "./ExportEventHandler.js"
 ], function(
   ProjectEventHandler,
   DrawEventHandler,
   PropertyEventHandler,
-  UIChangeEventHandler
+  UIChangeEventHandler,
+  ExportEventHandler
 ) {
   'use strict';
 
@@ -47,6 +49,7 @@ define([
     this.handlers['propertyEventHandler'] = new PropertyEventHandler();
     this.handlers['projectEventHandler'] = new ProjectEventHandler();
     this.handlers['uiChangeEventHandler'] = new UIChangeEventHandler();
+    this.handlers['exportEventHandler'] = new ExportEventHandler();
 
   }
 
@@ -106,6 +109,16 @@ define([
           function(event) {
             window.eventHandler.callHandler('stage', event)
           });
+      } else if( subkey == 'contentMousemove' ){
+
+        var stage = window.storage.canvasContainer.getElementById('stage', _id);
+
+        stage.stage.on(
+          'contentMousemove',
+          function(event) {
+            window.eventHandler.callHandler('stage', event)
+          });
+
       }
 
     }

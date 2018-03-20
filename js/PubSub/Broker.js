@@ -100,10 +100,12 @@ define([
     var uuid = window.conditions.guid();
 
     for (var i = 0; i < subscriber.length; i++) {
-      _path[_topic][i].run(_message, uuid);
-
+      if(_path[_topic][i].run(_message, uuid) == false){
+        if( window.myhistory.history.back().msg == _message ){
+          window.myhistory.undo();
+        }
+      }
     }
-
   }
 
   /**
@@ -125,8 +127,17 @@ define([
     this.reqSpecList['canceladdnewcellboundary'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['canceladdnewstate'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['canceladdnewtransition'] = new MessageSpec('single', 'including', ['draw'], false);
-    this.reqSpecList['exporttojson'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['start-addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['end-addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['exporttoviewer'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['exporttofactory'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['showfactoryexportmodal'] = new MessageSpec('single', 'including', null, false);
 
+    this.reqSpecList['snapping'] = new MessageSpec('single', 'including', ['draw'], false);
+
+    this.reqSpecList['saveproject'] = new MessageSpec('single', 'excluding', ['draw'], false);
+    this.reqSpecList['loadproject'] = new MessageSpec('single', 'excluding', ['draw'], false);
   }
 
   /**

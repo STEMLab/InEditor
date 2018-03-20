@@ -1,17 +1,19 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
   "../Storage/Properties/FloorProperty.js",
   "../Storage/Canvas/Stage.js",
   "../Storage/Properties/CellProperty.js",
-  "../PubSub/Subscriber.js"
+  "../PubSub/Subscriber.js",
+  "../Storage/Properties/CellBoundaryProperty.js"
 ], function(
   FloorProperty,
   Stage,
   CellProperty,
-  Subscriber
+  Subscriber,
+  CellBoundaryProperty
 ) {
   'use strict';
 
@@ -41,15 +43,17 @@ define([
     this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.endAddNewCell_makeHistoryObj, this.endAddNewCell_undo);
     this.addCallbackFun('updaterefdata', this.updateRefProperty);
 
+    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary);
+
   }
 
   /**
-   * @param {Message.reqObj} reqObj null
+   * @param {Message.reqObj} reqObj floor
    * @memberof PropertyManager
    */
   PropertyManager.prototype.addNewFloor = function(reqObj) {
 
-    var newFloorProperty = new FloorProperty();
+    var newFloorProperty = new FloorProperty(reqObj.floor);
 
     // add new property
     window.storage.propertyContainer.floorProperties.push(newFloorProperty);
@@ -123,6 +127,10 @@ define([
    */
   PropertyManager.prototype.endAddNewCell = function(reqObj) {
 
+    if(reqObj.isEmpty != null ){
+      return;
+    }
+
     // add new cellproperty object in storage.propertyContainer
     window.storage.propertyContainer.cellProperties.push(
       new CellProperty(reqObj.id)
@@ -140,40 +148,67 @@ define([
    * @memberof PropertyManager
    * @return cell id
    */
-   PropertyManager.prototype.endAddNewCell_makeHistoryObj = function(reqObj){
+  PropertyManager.prototype.endAddNewCell_makeHistoryObj = function(reqObj) {
 
-     return reqObj;
+    return reqObj;
 
-   }
+  }
 
-   /**
-    * @param {Object} undoObj id<br>floor: floor id
-    * @memberof PropertyManager
-    * @return cell id
-    */
-    PropertyManager.prototype.endAddNewCell_undo = function(undoObj){
+  /**
+   * @param {Object} undoObj id<br>floor: floor id
+   * @memberof PropertyManager
+   * @return cell id
+   */
+  PropertyManager.prototype.endAddNewCell_undo = function(undoObj) {
 
-      // remove new cellproperty object in storage.propertyContainer
-      var cells = window.storage.propertyContainer.cellProperites;
+    // remove new cellproperty object in storage.propertyContainer
+    var cells = window.storage.propertyContainer.cellProperties;
 
-      for(var key in cells){
-        if(cells.id == undoObj.id)
-          cells.splice(key,1);
-      }
-
-      // add cell key in floor property
-      var floors = window.storage.propertyContainer.floorProperties;
-
-      for(var key in floors){
-        if(floors[key].id == undoObj.floor){
-          floors[key].cellKey.splice(floors[key].cellKey.indexOf(undoObj.id), 1);
-        }
-      }
-
+    for (var key in cells) {
+      if (cells.id == undoObj.id)
+        cells.splice(key, 1);
     }
 
+    // add cell key in floor property
+    var floors = window.storage.propertyContainer.floorProperties;
 
+    for (var key in floors) {
+      if (floors[key].id == undoObj.floor) {
+        floors[key].cellKey.splice(floors[key].cellKey.indexOf(undoObj.id), 1);
+      }
+    }
 
+    window.conditions.LAST_CELL_ID_NUM--;
+
+  }
+
+  /**
+   * @memberof GeometryManager
+   */
+  PropertyManager.prototype.endAddNewCellBoundary = function(reqObj) {
+    log.info('PropertyManager.endAddNewCellBoundary called');
+  }
+
+  /**
+  * @memberof GeometryManager
+  * @param {Object} reqObj { id, floor, isEmpty }
+  */
+  PropertyManager.prototype.endAddNewCellBoundary = function(reqObj){
+
+    if(reqObj.isEmpty != null ){ return; }
+
+    // add new cellspace boundary property(=CellBoundaryProperty) in stage.propertyContainer
+    window.storage.propertyContainer.cellBoundaryProperties.push(
+      new CellBoundaryProperty(reqObj.id)
+    );
+
+    // add key in floor property
+    window.storage.propertyContainer.getElementById('floor', reqObj.floor).cellBoundaryKey.push(
+      reqObj.id
+    );
+
+    // log.trace(window.storage.propertyContainer);
+  }
 
   return PropertyManager;
 });

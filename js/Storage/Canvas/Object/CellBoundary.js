@@ -2,36 +2,77 @@
 * @author suheeeee<lalune1120@hotmail.com>
 */
 
-define([
-  "../../../Observer/Subject.js"
-], function(
-  Subject
-) {
+define([], function() {
   'use strict';
 
   /**
   * @class CellBoundary
   */
-  function CellBoundary(){
-    Subject.apply(this, arguments);
+  function CellBoundary(id){
 
-    this.id = null;
-    this.name = null;
+    /**
+    * @memberof CellBoundary
+    */
+    this.id = id;
 
-    this.corners = Konva.Group({x:0, y:0});
+    /**
+    * @memberof CellBoundary
+    */
+    this.name = id;
+
+    /**
+    * @memberof CellBoundary
+    */
+    this.corners = new Konva.Group({
+      x: 0,
+      y: 0
+    });
+
+    /**
+    * @memberof CellBoundary
+    */
     this.line = new Konva.Line({
           points:[],
           stroke: 'black',
-          strokeWidth: 5
+          strokeWidth: 4
     });
+
+    /**
+    * @memberof CellBoundary
+    */
+    this.dots = [];
+
+    /**
+    * @memberof CellBoundary
+    */
+    this.associationCell = null;
   }
 
-  CellBoundary.prototype = Object.create(Subject.prototype);
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.addCorner = function( dot ){
 
-  CellBoundary.prototype.addCorner = function(_x, _y){
+    this.addNewDot(dot);
+
+    this.addCornerObj(dot.uuid, dot.getCoor());
+
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.addNewDot = function(dot){
+    dot.participateObj(this.id, 'cellBoundary');
+
+    this.dots.push(dot);
+  }
+
+  CellBoundary.prototype.addCornerObj = function(uuid, coor){
+
     var rect = new Konva.Rect({
-      x: _x,
-      y: _y,
+      x: coor.x,
+      y: coor.y,
       width: 5,
       height: 5,
       fill: 'white',
@@ -39,9 +80,98 @@ define([
       strokeWidth: 1
     });
 
+    rect.uuid = uuid;
+
     this.corners.add(rect);
 
-    this.line.points().push(_x, _y);
+    this.line.points().push(coor.x, coor.y);
+
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.getCornersObject = function(){
+    return this.corners;
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.getLineObject = function(){
+    return this.line;
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.getDots = function(){
+    return this.dots;
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.getDotIndex = function(uuid){
+    for(var key in this.dots){
+      if(this.dots[key].uuid == uuid) return key;
+    }
+
+    return -1;
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.isEmpty = function(){
+    if(this.dots.length == 0) return true;
+
+    return false;
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.addObjectFromDots = function(){
+
+    this.corners.destroyChildren();
+    this.line.attrs.points = [];
+
+    for(var key in this.dots){
+      this.addCornerObj(this.dots[key].uuid, this.dots[key].getCoor());
+    }
+
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.setCornersVisible = function(visible){
+    this.corners.visible(visible);
+  }
+
+  /**
+  * @memberof Cell
+  */
+  CellBoundary.prototype.insertDotIntoLine = function(line, point){
+
+    var indexOfDot1 = this.dots.getDotIndex(line.dot1.uuid);
+    var indexOfDot2 = this.dots.getDotIndex(line.dot2.uuid);
+
+    if(indexOfDot1 == -1 || indexOfDot2 == -1){
+
+      log.warn('Cell.insertDotIntoLine : inserted line is not part of '+this.id);
+      return;
+
+    }
+
+    if(indexOfDot1 > indexOfDot2) this.dots.splice(indexOfDot2, 0, point);
+    else this.dots.splice(indexOfDot1, 0, point);
+
+    this.addObjectFromDots();
+
+    point.participateObj(this.id, 'cellBoundary');
+
   }
 
 

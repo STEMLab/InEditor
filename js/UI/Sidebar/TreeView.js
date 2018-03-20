@@ -43,6 +43,18 @@ define([], function() {
 
   }
 
+  TreeView.prototype.addProject = function(newProejctProeprty){
+
+    var projectObj = new Object;
+    projectObj.title = newProejctProeprty.name;
+    projectObj.key = newProejctProeprty.id;
+    projectObj.type = 'project';
+    projectObj.folder = true;
+
+    $("#tree-view").fancytree("getTree").clear();
+    $("#tree-view").fancytree("getTree").getRootNode().addChildren(projectObj);
+  }
+
   /**
   * Read All value from storage and appear in tree view.
   * @param {FloorProperty} newFloorProperty
@@ -86,7 +98,6 @@ define([], function() {
   */
   TreeView.prototype.addCell = function(id, floor){
 
-
     $("#tree-view").fancytree("getTree").getNodeByKey(floor+"-cell").addChildren({
       title : id,
       key : id,
@@ -106,6 +117,63 @@ define([], function() {
   TreeView.prototype.reomveNode = function(id){
     $("#tree-view").fancytree("getTree").getNodeByKey(id).remove();
   }
+
+
+  /**
+  * @memberof TreeView
+  */
+  TreeView.prototype.addCellBoundary = function(id, floor){
+
+    $("#tree-view").fancytree("getTree").getNodeByKey(floor+"-cellBoundary").addChildren({
+      title : id,
+      key : id,
+      folder : false,
+      type : 'cellBoundary',
+      icon : '../../assets/tree-icon/cellBoundary.png'
+    });
+
+    $("#tree-view").fancytree("getTree").activateKey(id);
+
+  }
+
+  TreeView.prototype.refresh = function(propertyContainer){
+
+
+    this.addProject(propertyContainer.projectProperty);
+
+    if(propertyContainer.floorProperties.length != 0){
+
+
+      // add floors
+      for(var i = 0 ; i < propertyContainer.floorProperties.length; i ++){
+        this.addFloor(propertyContainer.floorProperties[i]);
+      }
+
+      // add cells
+      for(var i = 0 ; i < propertyContainer.cellProperties.length; i ++){
+        this.addCell(propertyContainer.cellProperties[i].id, propertyContainer.getFloorById('cell', propertyContainer.cellProperties[i].id));
+        if(propertyContainer.cellProperties[i].id != propertyContainer.cellProperties[i].name){
+          this.updateTitle(propertyContainer.cellProperties[i].id, propertyContainer.cellProperties[i].name);
+        }
+      }
+
+      // add cellboundary
+      for(var i = 0 ; i < propertyContainer.cellBoundaryProperties.length; i ++){
+        this.addCellBoundary(propertyContainer.cellBoundaryProperties[i].id, propertyContainer.getFloorById('cellBoundary', propertyContainer.cellBoundaryProperties[i].id));
+        if(propertyContainer.cellBoundaryProperties[i].id != propertyContainer.cellBoundaryProperties[i].name){
+          this.updateTitle(propertyContainer.cellBoundaryProperties[i].id, propertyContainer.cellBoundaryProperties[i].name);
+        }
+      }
+
+      // add state
+
+
+      // add transition
+
+    }
+
+  }
+
 
   return TreeView;
 });

@@ -1,209 +1,80 @@
 var express = require("express");
-var fileUpload = require("express-fileupload");
 var bodyParser = require('body-parser');
-var locks = require('locks');
-var path = require("path");
 var jsonFormat = require("json-format");
 var fs = require("fs");
+var BSON = require("bson");
+var cors = require('cors');
+var xmlBeautify = require('xml-beautifier');
 var app = express();
 
 
 app.use('/', express.static(__dirname));
-app.use(fileUpload());
+app.use(express.json({limit: '1gb'}));
 app.use(bodyParser.urlencoded({
-  extended: false
+  extended: true,
+  limit: '1gb'
 }));
+app.use(cors());
+var jsonParsor = bodyParser.json();
 app.use(bodyParser.json());
+app.use(bodyParser.raw());
+app.use(bodyParser.text());
 
 var server = app.listen(8080, function() {
 
   console.log('IndoorGML-Editor App listening on port 8080...');
 
-  // delete images in "./assets/floorplan/".
-  fs.readdir("./assets/floorplan/", function(err, files) {
-    for (var i = 0; i < files.length; i++) {
-      fs.unlink("./assets/floorplan/" + files[i], function(err) {
-        if (err) throw err;
-      });
-    }
-  });
-
 });
 
-var mutex = locks.createMutex();
 
-app.post('/floorplan-upload', function(req, res) {
+app.post('/save-json', function(req, res) {
 
-  if (!req.files)
-    return res.status(400).send('No files were uploaded.');
+  fs.writeFile('./output/output.json', jsonFormat(req.body), 'utf8', function(err) {
 
-  var filename = "./assets/floorplan/";
-
-  if (req.files.files.mimetype == 'image/jpeg') {
-
-    filename += req.files.files.name + ".jpeg";
-
-  } else if (req.files.files.mimetype == 'image/jpg') {
-
-    filename += req.files.files.name + ".jpg";
-
-  } else if (req.files.files.mimetype == 'image/gif') {
-
-    filename += req.files.files.name + ".gif";
-
-  } else if (req.files.files.mimetype == 'image/bmp') {
-
-    filename += req.files.files.name + ".bmp";
-
-  }
-
-  let file = req.files.files;
-
-  mutex.lock(function() {
-    console.log('----- lock : floorplan-upload ------------------');
-
-    fs.writeFile(filename, req.files.files.data, 'binary', function(err) {
-
-      if (err) return res.status(500).send(err);
-
-      res.json(filename);
-
-      console.log('----- unlock : floorplan-upload ----------------');
-
-      mutex.unlock();
-
-    });
-
-
+    if (err) return res.status(500).send(err);
+    res.json('success');
 
   });
-
-
 });
 
-app.post('/floorplan-create-historyobj', function(req, res) {
 
-  mutex.lock(function() {
+app.post('/save-project', function(req, res) {
 
-    console.log('----- lock : floorplan-create-historyobj -------');
+  var bson = new BSON();
 
-    fs.readdir("./assets/floorplan/", function(err, files) {
+  fs.writeFile('./output/save-project.bson', bson.serialize(req.body), function(err) {
 
-      var result;
+    if (err)  return res.status(500).send(err);
 
-      for (var i = 0; i < files.length; i++) {
-        var split = files[i].split(".");
-
-        if (split[0] == req.body.id) {
-          fs.rename("./assets/floorplan/" + files[i], "./assets/floorplan/" + req.body.id + "-save." + split[1], function() {
-            result = "./assets/floorplan/" + req.body.id + "-save." + split[1];
-            res.json({
-              result: result
-            });
-
-            console.log('----- unlock : floorplan-create-historyobj -----');
-            mutex.unlock();
-          });
-
-
-
-          break;
-        }
-
-      }
-
-    });
+    res.json('success');
 
   });
 
 });
 
-app.post('/floorplan-undo', function(req, res) {
+app.get('/load-project', function(req, res) {
 
-  mutex.lock(function() {
+  var bson = new BSON();
 
-    console.log('----- lock : floorplan-undo --------------------');
-    // console.log(req.body);
+  fs.readFile('./output/save-project.bson', function(err, data) {
 
-    var mode = req.body.mode;
-    var floor = req.body.floor;
+    if (err) return res.status(500).send(err);
 
-    if (mode == "delete only") {
-      fs.readdir("./assets/floorplan/", function(err, files) {
-        // console.log("> delete only : fs.readdir");
-
-        for (var i = 0; i < files.length; i++) {
-          var split = files[i].split(".");
-
-          if (split[0] == req.body.floor) {
-            fs.unlink("./assets/floorplan/" + files[i], function(err) {
-              // console.log("> delete only : " + files[i] + " fs.unlink");
-              if (err) throw err;
-              res.json({
-                result: "delete success"
-              });
-
-              console.log('----- unlock : floorplan-undo ------------------');
-              mutex.unlock();
-            });
-            break;
-          }
-        }
-      });
-    } else if (mode == "delete and rename") {
-      fs.readdir("./assets/floorplan/", function(err, files) {
-        // console.log("> delete and rename : fs.readdir");
-        for (var i = 0; i < files.length; i++) {
-          var split = files[i].split(".");
-
-          if (split[0] == req.body.floor) {
-            fs.unlink("./assets/floorplan/" + files[i], function(err) {
-              // console.log("> delete and rename : " + files[i] + " fs.unlink");
-              if (err) throw err;
-
-              var extention = req.body.filename.split(".")[2];
-              // console.log("> extention : " + extention);
-              fs.rename(req.body.filename, "./assets/floorplan/" + req.body.floor + "." + extention, function() {
-                // console.log("> delete and rename : " + files[i] + " fs.rename");
-                res.json({
-                  result: "delete and rename success",
-                  filename: "./assets/floorplan/" + req.body.floor + "." + extention
-                });
-
-                // console.log('> rename : ' + req.body.filename + ' to ' + req.body.floor + "." + extention );
-                console.log('----- unlock : floorplan-undo ------------------');
-                mutex.unlock();
-              });
-            });
-
-            break;
-          }
-        }
-      });
-    }
+    var bson = new BSON();
+    var json = bson.deserialize(data);
+    res.json(json);
 
   });
+
 });
 
-app.post('/export-json', function(req, res) {
+app.post('/save-gml/*', function(req, res) {
 
-  mutex.lock(function() {
+  fs.writeFile('./output/'+ req.params[0] +'.gml', xmlBeautify(req.body) , function(err) {
 
-    console.log('----- lock : export-json -------------------');
-    console.log(req.body);
+    if (err)  return res.status(500).send(err);
 
-    fs.writeFile('./output/output.json', jsonFormat(req.body), 'utf8', function(err) {
-
-      if (err) return res.status(500).send(err);
-
-      res.json('success');
-
-      console.log('----- unlock : export-json -------------------');
-
-      mutex.unlock();
-
-    });
+    res.send('/output/'+ req.params[0] +'.gml');
 
   });
-
 });

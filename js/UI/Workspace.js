@@ -20,11 +20,11 @@ define([], function() {
   Workspace.prototype.init = function(){
 
     // init
-    var config = {
-      content: [{
-        type: 'stack'
-      }]
-    };
+      var config = {
+        content: [{
+          type: 'stack'
+        }]
+      };
 
     this.workspaceLayout = new GoldenLayout(config, $('#workspace-layout-container'));
 
@@ -52,6 +52,13 @@ define([], function() {
       type: 'component',
       componentName: 'workspace'
     };
+
+    if(window.uiContainer.workspace.workspaceLayout.root.contentItems.length == 0){
+
+      this.init();
+
+
+    }
 
     var contentItems = window.uiContainer.workspace.workspaceLayout.root.contentItems[0];
     contentItems.addChild(newItemConfig);
@@ -85,6 +92,22 @@ define([], function() {
     }
     window.uiContainer.workspace.workspaceLayout.root.contentItems[0].setActiveContentItem(window.uiContainer.workspace.workspaceLayout.root.contentItems[0].contentItems[index]);
     window.uiContainer.workspace.workspaceLayout.root.contentItems[0].header.setActiveContentItem(tabs[index].contentItem);
+
+  }
+
+  /**
+  * @memberof Workspace
+  */
+  Workspace.prototype.destroy = function(condition){
+
+    window.uiContainer.workspace.workspaceLayout.destroy();
+
+  }
+
+  Workspace.prototype.deleteFirstWorkspace = function(){
+
+    var childerens = window.uiContainer.workspace.workspaceLayout.root.contentItems[0].contentItems;
+    window.uiContainer.workspace.workspaceLayout.root.contentItems[0].removeChild(childerens[0], false);
 
   }
 
