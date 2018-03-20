@@ -305,7 +305,7 @@ define([
       "id": window.conditions.guid()
     };
 
-    var baseURL = "http://127.0.0.1:9797";
+    var baseURL = "http://127.0.0.1:8100";
     var index = 0;
 
     var cells = manager.cellObj4VFactory(document.id, primalspacefeatures.id);
@@ -359,7 +359,7 @@ define([
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4 && xhr.status == 201) {
+      if (xhr.readyState == 4 && xhr.status == 200) {
 
         log.info(xhr.responseText);
 
@@ -441,6 +441,8 @@ define([
     var floorProperties = window.storage.propertyContainer.floorProperties;
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
+    var solid = [];
+
     // copy geometry coordinates
     for (var key in geometries) {
 
@@ -480,6 +482,8 @@ define([
 
       for (var cellKey in cellkeyInFloor) {
 
+        solid = [];
+
         cells[cellkeyInFloor[cellKey]].setHeight(floorProperties[floorKey].celingHeight);
         var points = cells[cellkeyInFloor[cellKey]].getCoordinates();
 
@@ -488,7 +492,10 @@ define([
           cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'x', trans._data[0]);
           cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'y', trans._data[1]);
           cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
+
         }
+
+        cells[cellkeyInFloor[cellKey]].setWKT(manager.extrudCell(cells[cellkeyInFloor[cellKey]].getCoordinates(), floorProperties[floorKey].celingHeight*1));
       }
     }
 
@@ -513,6 +520,9 @@ define([
     var properties = window.storage.propertyContainer.cellBoundaryProperties;
     var floorProperties = window.storage.propertyContainer.floorProperties;
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+
+
+
 
     // copy geometry coordinates
     for (var key in geometries) {
@@ -552,6 +562,8 @@ define([
 
       for (var cellBoundaryKey in cellBoundarykeyInFloor) {
 
+        var surface = [];
+
         cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(floorProperties[floorKey].doorHeight);
         var points = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
 
@@ -560,6 +572,7 @@ define([
           cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'x', trans._data[0]);
           cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'y', trans._data[1]);
           cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
+
         }
 
         // make reverse
@@ -570,6 +583,10 @@ define([
         reverseObj.setName(reverseObj.properties.name + '-REVERSE')
         reverseObj.reverseCoor();
         cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'] = reverseObj;
+
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setWKT(manager.extrudeCellBoundary(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates(), floorProperties[floorKey].doorHeight*1));
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setWKT(manager.extrudeCellBoundary(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].getCoordinates(), floorProperties[floorKey].doorHeight*1));
+
       }
     }
 
@@ -618,6 +635,80 @@ define([
     var pointMatrix = math.matrix([point[0], point[1], point[2]]);
 
     return math.multiply(matrix, pointMatrix);
+
+  }
+
+  /**
+  * @memberof ExportManager
+  */
+  ExportManager.prototype.extrudCell = function(surface, ch){
+
+    var down = surface;
+    var up = [];
+    var result = [];
+
+    var len = down.length;
+
+    for(var i = 0; i < len; i++){
+      var tmp = JSON.parse(JSON.stringify(down[i]));
+      tmp[2] += ch;
+      up.push(tmp);
+    }
+
+    // result.push(down);
+
+    for(var i = 0; i < len - 1; i++){
+
+      var downLeft = JSON.parse(JSON.stringify( down[i] ));
+      var downRight = JSON.parse(JSON.stringify( down[i+1]));
+      var upRigth = JSON.parse(JSON.stringify( up[i+1]));
+      var upLeft =JSON.parse(JSON.stringify( up[i] ));
+
+      result.push([downLeft, downRight, upRigth, upLeft, downLeft]);
+
+    }
+
+    result.push(up);
+
+    var tmp = [];
+    for(var i = 0; i < down.length; i++){
+      tmp.push(down[down.length-i-1]);
+    }
+
+    result.push(tmp);
+
+    log.info(result);
+
+    return result;
+  }
+
+  /**
+  * @memberof ExportManager
+  */
+  ExportManager.prototype.extrudeCellBoundary = function(line, ch){
+
+    // var result = [];
+    //
+    // for(var i = 0; i < line.length-1; i++){
+    //
+    //   var first = line[i];
+    //   var second = line[i+1];
+    //
+    //   result.push([first, second, [second[0], second[1], ch], [first[0], first[1], ch], first]);
+    //
+    // }
+
+
+
+
+    var first = line[0];
+    var second = line[1];
+
+    var result = [first, second, [second[0], second[1], ch], [first[0], first[1], ch], first];
+
+    log.info(result);
+
+    return result;
 
   }
 

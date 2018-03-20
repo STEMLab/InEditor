@@ -42,6 +42,31 @@ define(["./Feature"], function(Feature) {
 
   CellSpaceBoundary.prototype = Object.create(Feature.prototype);
 
+  CellSpaceBoundary.prototype.setWKT = function(coor){
+
+    var wkt = "POLYGON ((";
+
+    for (var i = 0 ; i < coor.length; i++){
+
+      wkt += coor[i][0];
+      wkt += " ";
+      wkt += coor[i][1];
+      wkt += " ";
+      wkt += coor[i][2];
+
+      if( i != coor.length - 1 ) wkt += ", ";
+
+    }
+
+   wkt += "))";
+
+    this.geometry.type = 'Surface';
+    this.geometry.coordinates = wkt;
+    this.geometry.properties.type = "wkt";
+    this.geometry.properties.extrude = 'false';
+
+  }
+
   /**
    * @memberof CellSpaceBoundary
    *
@@ -166,7 +191,7 @@ define(["./Feature"], function(Feature) {
   CellSpaceBoundary.prototype.copyCoordinates = function(coordinates) {
 
     for (var i = 0; i < coordinates.length; i++) {
-      this.geometry.coordinates.push([coordinates[i][0], coordinates[i][1], coordinates[i][2]]);
+      this.geometry.coordinates.push(JSON.parse(JSON.stringify(coordinates[i])));
     }
   }
 

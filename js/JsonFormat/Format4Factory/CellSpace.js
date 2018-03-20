@@ -44,6 +44,43 @@ define(["./Feature"], function(Feature) {
 
   CellSpace.prototype = Object.create(Feature.prototype);
 
+  CellSpace.prototype.setWKT = function(coor){
+
+    var wkt = "SOLID((";
+
+    for (var i = 0 ; i < coor.length; i++){
+
+      wkt += "((";
+
+      for(var j = 0; j < coor[i].length; j++){
+
+        wkt += coor[i][j][0];
+        wkt += " ";
+        wkt += coor[i][j][1];
+        wkt += " ";
+        wkt += coor[i][j][2];
+
+        if(j != coor[i].length - 1) wkt += ",";
+
+      }
+
+
+
+      if( i != coor.length - 1 ) wkt += ")),";
+      else wkt += "))";
+
+
+    }
+
+   wkt += "))";
+
+   this.geometry.type = 'Solid';
+    this.geometry.coordinates = wkt;
+    this.geometry.properties.type = "wkt";
+    this.geometry.properties.extrude = 'false';
+
+  }
+
   /**
    * @memberof CellSpace
    *
