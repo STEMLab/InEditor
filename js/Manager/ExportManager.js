@@ -305,7 +305,7 @@ define([
       "id": window.conditions.guid()
     };
 
-    var baseURL = "http://127.0.0.1:8100";
+    var baseURL = "http://127.0.0.1:9797";
     var index = 0;
 
     var cells = manager.cellObj4VFactory(document.id, primalspacefeatures.id);
@@ -359,7 +359,7 @@ define([
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4 && xhr.status == 200) {
+      if (xhr.readyState == 4 && xhr.status == 201) {
 
         log.info(xhr.responseText);
 
