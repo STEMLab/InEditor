@@ -35,6 +35,8 @@ define([
 
   Subscriber.prototype.run = function(_message, uuid) {
 
+    this.callbackFunctions[_message.req].run(_message.reqObj, window.storage);
+
     if( this.callbackFunctions[_message.req].undo != undefined ){
 
       window.myhistory.push(
@@ -45,8 +47,6 @@ define([
       );
 
     }
-
-    this.callbackFunctions[_message.req].run(_message.reqObj, window.storage);
 
   }
 

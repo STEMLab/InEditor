@@ -53,6 +53,13 @@ define([], function() {
       componentName: 'workspace'
     };
 
+    if(window.uiContainer.workspace.workspaceLayout.root.contentItems.length == 0){
+
+      this.init();
+
+
+    }
+
     var contentItems = window.uiContainer.workspace.workspaceLayout.root.contentItems[0];
     contentItems.addChild(newItemConfig);
 
@@ -91,22 +98,9 @@ define([], function() {
   /**
   * @memberof Workspace
   */
-  Workspace.prototype.clear = function(condition){
+  Workspace.prototype.destroy = function(condition){
 
-    var childerens = window.uiContainer.workspace.workspaceLayout.root.contentItems[0].contentItems;
-    var len = childerens.length;
-
-    if(condition != null && condition == 'maketmp'){
-      window.uiContainer.workspace.workspaceLayout.root.contentItems[0].addChild({
-        title: 'tmp',
-        type: 'component',
-        componentName: 'workspace'
-      });
-    }
-
-    for(var i = 0 ; i < len; i++){
-      window.uiContainer.workspace.workspaceLayout.root.contentItems[0].removeChild(childerens[0], false);
-    }
+    window.uiContainer.workspace.workspaceLayout.destroy();
 
   }
 

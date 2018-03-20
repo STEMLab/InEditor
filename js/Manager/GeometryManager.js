@@ -45,7 +45,7 @@ define([
     this.addCallbackFun('addnewfloor', this.addNewFloor);
 
     this.addCallbackFun('start-addnewcell', this.startAddNewCell, function() {}, function() {});
-    this.addCallbackFun('addnewcell', this.addNewCell, this.makeSimpleHistoryObj, this.addNewCell_undo);
+    this.addCallbackFun('addnewcell', this.addNewCell, this.addNewCell_makeHistoryObj, this.addNewCell_undo);
     this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.makeSimpleHistoryObj, this.endAddNewCell_undo);
 
     this.addCallbackFun('start-addnewcellboundary', this.startAddNewCellBoundary, function() {}, function() {});
@@ -126,7 +126,17 @@ define([
   }
 
   /**
+  * @memberof GeometryManager
+  * @param reqObj floor
+  */
+  GeometryManager.prototype.addNewCell_makeHistoryObj = function(reqObj){
+    return { floor : reqObj.floor, uuid : window.tmpObj.getLastDot().uuid };
+  }
+
+
+  /**
    * @memberof GeometryManager
+   * @param undoObj last dot of tmpObj
    */
   GeometryManager.prototype.addNewCell_undo = function(undoObj) {
 
@@ -135,7 +145,7 @@ define([
     tmpObj.deleteLastCorner();
     tmpObj.deleteLastPolyLine();
 
-    window.storage.dotFoolContainer.getDotFool(undoObj.floor).deleteDotFromObj(tmpObj.dots[window.tmpObj.dots.length - 1].uuid, tmpObj.id);
+    window.storage.dotFoolContainer.getDotFool(undoObj.floor).deleteDotFromObj(undoObj.uuid, tmpObj.id);
     window.storage.canvasContainer.stages[undoObj.floor].tmpLayer.layer.draw();
 
   }

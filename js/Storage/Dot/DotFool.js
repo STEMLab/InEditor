@@ -60,22 +60,13 @@ define([
    */
   DotFool.prototype.getDotByPoint = function(point) {
     var value = Object.values(this.dots);
+    var coordinateThreshold = window.conditions.coordinateThreshold;
 
     // If value exist in boundry, return true.
     // If you want to adjust the recognition sensitivity, modify conditions.coordinateThreshold.
     function isDotExist(value) {
-      var boundary = {
-        x: {
-          start: point.x - window.conditions.coordinateThreshold,
-          end: point.x + window.conditions.coordinateThreshold
-        },
-        y: {
-          start: point.y - window.conditions.coordinateThreshold,
-          end: point.y + window.conditions.coordinateThreshold
-        }
-      }
-
-      return (boundary.x.start <= value.point.x && value.point.x <= boundary.x.end) && (boundary.y.start <= value.point.y && value.point.y <= boundary.y.end);
+      var d = Math.sqrt(Math.pow(Math.abs(value.point.x - point.x), 2) + Math.pow(Math.abs(value.point.y - point.y), 2));
+      return d < coordinateThreshold;
     }
 
     var filtered = value.filter(isDotExist);

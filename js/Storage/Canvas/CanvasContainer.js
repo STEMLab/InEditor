@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
   "./Stage.js"
@@ -10,16 +10,16 @@ define([
   'use strict';
 
   /**
-  * @class CanvasContainer
-  */
+   * @class CanvasContainer
+   */
   function CanvasContainer() {
     this.stages = [];
 
   }
 
-  CanvasContainer.prototype.addStage = function(_id, _container, _width, _height){
+  CanvasContainer.prototype.addStage = function(_id, _container, _width, _height) {
 
-    this.stages[_id] = new Stage(_id,_id,_container, _width, _height);
+    this.stages[_id] = new Stage(_id, _id, _container, _width, _height);
   }
 
 
@@ -35,7 +35,7 @@ define([
     var len = window.storage.propertyContainer.floorProperties.length;
     var result = null;
 
-    if (_type == 'stage'){
+    if (_type == 'stage') {
       stageID = _id;
     }
 
@@ -132,11 +132,11 @@ define([
   }
 
   /**
-  * @memberof CanvasContainer
-  */
-  CanvasContainer.prototype.clearCanvas = function(){
+   * @memberof CanvasContainer
+   */
+  CanvasContainer.prototype.clearCanvas = function() {
 
-    for(var key in this.stages){
+    for (var key in this.stages) {
       this.stages[key].stage.destroyChildren();
       this.stages[key].stage.destroy();
     }
@@ -147,29 +147,29 @@ define([
 
 
   /**
-  * @memberof CanvasContainer
-  */
-  CanvasContainer.prototype.addObjFromGeometries = function(geometryContainer){
+   * @memberof CanvasContainer
+   */
+  CanvasContainer.prototype.addObjFromGeometries = function(geometryContainer) {
 
     log.info(window.storage.dotFoolContainer);
 
     // add cell
     var cells = geometryContainer.cellGeometry;
-    for ( var index in cells ){
+    for (var index in cells) {
       var floor = window.storage.propertyContainer.getFloorById('cell', cells[index].id);
       this.stages[floor].cellLayer.group.simpleAdd({
-        id : cells[index].id,
-        dots : cells[index].points
+        id: cells[index].id,
+        dots: cells[index].points
       });
     }
 
     // add cellBoundary
     var cellBoundary = geometryContainer.cellBoundaryGeometry;
-    for ( var index in cellBoundary ){
+    for (var index in cellBoundary) {
       var floor = window.storage.propertyContainer.getFloorById('cellBoundary', cellBoundary[index].id);
       this.stages[floor].cellBoundaryLayer.group.simpleAdd({
-        id : cellBoundary[index].id,
-        dots : cellBoundary[index].points
+        id: cellBoundary[index].id,
+        dots: cellBoundary[index].points
       });
     }
 
@@ -177,7 +177,7 @@ define([
 
     // add transition
 
-    for(var index in this.stages){
+    for (var index in this.stages) {
       this.stages[index].stage.draw();
     }
   }

@@ -102,53 +102,41 @@ define([
    */
   UIManager.prototype.addFloorPlan = function(reqObj) {
 
-    if (reqObj.img == null) window.myhistory.undo();
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var src = e.target.result;
 
-    // save image to assets > floorplan
-    var xhr = new XMLHttpRequest();
-    var formData = new FormData();
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status == 200) {
+      /// set background
+      var backgroundLayer = window.storage.canvasContainer.stages[reqObj.id].backgroundLayer;
+      var layer = backgroundLayer.layer;
 
-        // success to save image
-        log.info(">>> succeed in saving image");
-        // console.log(JSON.parse(xhr.response));
+      // clear layer before add new floorplan
+      layer.destroyChildren();
 
-        /// set background
-        var backgroundLayer = window.storage.canvasContainer.stages[reqObj.id].backgroundLayer.layer;
+      var imageObj = new Image();
 
-        // clear layer before add new floorplan
-        backgroundLayer.destroyChildren();
+      imageObj.onload = function() {
+        var floorplan = new Konva.Image({
+          x: 0,
+          y: 0,
+          image: imageObj,
+          width: window.storage.canvasContainer.stages[reqObj.id].stage.attrs.width,
+          height: window.storage.canvasContainer.stages[reqObj.id].stage.attrs.height
+        });
 
-        var imageObj = new Image();
+        // add the shape to the layer
+        layer.add(floorplan);
+        layer.draw();
+      };
 
-        imageObj.onload = function() {
-          // log.info("on load called...");
-          var floorplan = new Konva.Image({
-            x: 0,
-            y: 0,
-            image: imageObj,
-            width: window.storage.canvasContainer.stages[reqObj.id].stage.attrs.width,
-            height: window.storage.canvasContainer.stages[reqObj.id].stage.attrs.height
-          });
-
-          // add the shape to the layer
-          backgroundLayer.add(floorplan);
-          backgroundLayer.draw();
-
-        };
-
-        // window.open(JSON.parse(xhr.response));
-        var timestamp = new Date().getTime();
-        imageObj.src = JSON.parse(xhr.response) + "?" + timestamp;
-      }
-
+      // window.open(JSON.parse(xhr.response));
+      imageObj.src = src;
+      backgroundLayer.saveFloorplanDataURL(src);
+      // log.info(backgroundLayer.floorplanDataURL);
     }
 
-    xhr.open("POST", "http://127.0.0.1:8080/floorplan-upload", true);
-    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-    formData.append("files", reqObj.img, reqObj.id);
-    xhr.send(formData);
+    reader.readAsDataURL(reqObj.img);
+
   }
 
   /**
@@ -159,42 +147,11 @@ define([
    */
   UIManager.prototype.addFloorPlan_makeHistoryObj = function(reqObj, uuid, manager) {
 
-    // log.info(window.storage.canvasContainer.stages[reqObj.id].backgroundLayer.layer);
-
-    // If there is no existing floorplan, null is returned.
-    if (window.storage.canvasContainer.stages[reqObj.id].backgroundLayer.layer.children.length == 0) {
-
-      return {
-        'floor': reqObj.id,
-      };
-
-    }
-
-    var obj = new Object();
-    // save image to assets > floorplan
-    var xhr = new XMLHttpRequest();
-    var filename = null;
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status == 200) {
-
-        window.myhistory.pushHistoryObj(uuid, manager, {
-          'floor': reqObj.id,
-          'filename': JSON.parse(xhr.response).result
-        });
-        // log.info(">>> succeed save copy image : " + JSON.parse(xhr.response).result);
-
-      }
-    }
-
-    xhr.open("POST", "http://127.0.0.1:8080/floorplan-create-historyobj", true);
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify({
-      id: reqObj.id
-    }));
+    var backgroundLayer = window.storage.canvasContainer.stages[reqObj.id].backgroundLayer;
 
     return {
       'floor': reqObj.id,
-      'filename': filename
+      'dataURL': backgroundLayer.removeOldFloorplanDataURL()
     };
 
   }
@@ -202,72 +159,33 @@ define([
 
   /**
    * @memberof UIManager
+   * @param {Object} undoObj { floor, dataURL }
    */
-  UIManager.prototype.addFloorPlan_undo = function(obj) {
+  UIManager.prototype.addFloorPlan_undo = function(undoObj) {
 
-    var condition = {};
-    // log.info(obj);
+    var backgroundLayer = window.storage.canvasContainer.stages[undoObj.floor].backgroundLayer;
 
-    if (obj.filename == null) {
+    if ( undoObj.dataURL == null ){
 
-      window.storage.canvasContainer.stages[obj.floor].backgroundLayer.layer.destroyChildren();
-      window.storage.canvasContainer.stages[obj.floor].backgroundLayer.layer.draw();
-      condition['mode'] = "delete only";
-      condition['floor'] = obj.floor;
-
-      log.info(">>>>> addFloorPlan_undo");
+      backgroundLayer.layer.destroyChildren();
+      backgroundLayer.setGrid(backgroundLayer.layer.width(), backgroundLayer.layer.height());
 
     } else {
 
-      condition['mode'] = "delete and rename";
-      condition['floor'] = obj.floor;
-      condition['filename'] = obj.filename;
-
-    }
-
-    var xhr = new XMLHttpRequest();
-    var filename = null;
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status == 200) {
-
-        if (condition.mode == "delete and rename") {
-
-          /// set background
-          var backgroundLayer = window.storage.canvasContainer.stages[obj.floor].backgroundLayer.layer;
-
-          // clear layer before add new floorplan
-          backgroundLayer.destroyChildren();
-
-          var imageObj = new Image();
-
-          imageObj.onload = function() {
-            // log.info("on load called...");
-            var floorplan = new Konva.Image({
-              x: 0,
-              y: 0,
-              image: imageObj,
-              width: window.storage.canvasContainer.stages[obj.floor].stage.attrs.width,
-              height: window.storage.canvasContainer.stages[obj.floor].stage.attrs.height
-            });
-
-            // add the shape to the layer
-            backgroundLayer.add(floorplan);
-            backgroundLayer.draw();
-
-          }
-          var timestamp = new Date().getTime();
-          imageObj.src = JSON.parse(xhr.response).filename + "?" + timestamp;
-
-          log.info(">>>>> addFloorPlan_undo : " + JSON.parse(xhr.response).result);
-        }
-
+      if(backgroundLayer.layer.children.length == 0 || backgroundLayer.layer.children[0].className != 'Image'){
+        log.error('wrong access to backgorund layer');
+        return;
       }
+
+      backgroundLayer.layer.children[0].attrs.image.src = undoObj.dataURL;
+      backgroundLayer.saveFloorplanDataURL(undoObj.dataURL);
+
     }
 
-    // log.info(">>>>> send : ", condition);
-    xhr.open("POST", "http://127.0.0.1:8080/floorplan-undo", true);
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify(condition));
+
+    backgroundLayer.removeOldFloorplanDataURL();
+    backgroundLayer.layer.draw();
+
 
   }
 
@@ -414,7 +332,7 @@ define([
    * @memberof UIManager
    * @param {Object} reqObj empty
    */
-  UIManager.prototype.startAddNewCellBoundary = function(reqObj){
+  UIManager.prototype.startAddNewCellBoundary = function(reqObj) {
 
     // change floor btn color
     document.getElementById('cellboundary-btn').src = "../../assets/icon/cellboundary_a.png";
@@ -431,7 +349,7 @@ define([
     // change cellboundary_btw color
     document.getElementById('cellboundary-btn').src = "../../assets/icon/cellboundary_d.png";
 
-    if(reqObj.isEmpty != null) return;
+    if (reqObj.isEmpty != null) return;
 
     // set sidebar > propertyContainer
     window.uiContainer.sidebar.property.setPropertyTab('cellBoundary', reqObj.id, window.storage);
@@ -441,10 +359,10 @@ define([
   }
 
   /**
-  * @memberof UIManager
-  * @param {Object} reqObj null
-  */
-  UIManager.prototype.cancelAddNewCellBoundary = function(reqObj){
+   * @memberof UIManager
+   * @param {Object} reqObj null
+   */
+  UIManager.prototype.cancelAddNewCellBoundary = function(reqObj) {
 
     document.getElementById('cellboundarys-btn').src = "../../assets/icon/cellboundary_d.png";
 

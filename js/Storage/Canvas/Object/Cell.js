@@ -104,6 +104,15 @@ define([], function() {
   /**
   * @memberof Cell
   */
+  Cell.prototype.getLastDot = function(){
+
+    return this.dots[this.dots.length-1];
+
+  }
+
+  /**
+  * @memberof Cell
+  */
   Cell.prototype.getCornersObject = function() {
 
     return this.corners;

@@ -182,7 +182,7 @@ define([
       'msg': null
     };
 
-    if (broker.isPublishable('addfloorplan')) {
+    if (broker.isPublishable('addfloorplan') && document.getElementById(data.target.id).files[0] != null) {
 
       broker.publish(new Message('addfloorplan', {
         'id': document.getElementById('id-text').value,

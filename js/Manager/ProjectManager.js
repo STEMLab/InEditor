@@ -36,8 +36,8 @@ define([
   }
 
   /**
-  * @memberof ProjectManager
-  */
+   * @memberof ProjectManager
+   */
   ProjectManager.prototype.saveProject = function() {
 
 
@@ -47,15 +47,16 @@ define([
     doc[id] = {
       'geometryContainer': window.storage.geometryContainer,
       'propertyContainer': window.storage.propertyContainer,
-      'dotFoolContainer' : window.storage.dotFoolContainer,
-      'canvasContainer' : {}
+      'dotFoolContainer': window.storage.dotFoolContainer,
+      'canvasContainer': {}
     };
 
-    for(var key in window.storage.canvasContainer.stages){
+    for (var key in window.storage.canvasContainer.stages) {
 
       doc[id].canvasContainer[key] = {
-        width : window.storage.canvasContainer.stages[key].stage.getAttr('width'),
-        height : window.storage.canvasContainer.stages[key].stage.getAttr('height')
+        width: window.storage.canvasContainer.stages[key].stage.getAttr('width'),
+        height: window.storage.canvasContainer.stages[key].stage.getAttr('height'),
+        floorplanDataURL: window.storage.canvasContainer.stages[key].backgroundLayer.floorplanDataURL[0]
       };
 
     }
@@ -78,9 +79,9 @@ define([
   }
 
   /**
-  * @memberof ProjectManager
-  */
-  ProjectManager.prototype.loadProject = function(){
+   * @memberof ProjectManager
+   */
+  ProjectManager.prototype.loadProject = function() {
 
     // send json data to viewer
     var xhr = new XMLHttpRequest();
@@ -92,22 +93,17 @@ define([
         window.conditions.load(obj.conditions);
         delete obj.conditions;
 
-        var keys = Object.keys(obj);
-        window.storage.propertyContainer.load(obj[keys[0]].propertyContainer);
-        window.storage.dotFoolContainer.load(obj[keys[0]].dotFoolContainer);
-        window.storage.geometryContainer.load(obj[keys[0]].geometryContainer, window.storage.dotFoolContainer);
+        var loadData = obj[Object.keys(obj)[0]];
+        window.storage.propertyContainer.load(loadData.propertyContainer);
+        window.storage.dotFoolContainer.load(loadData.dotFoolContainer);
+        window.storage.geometryContainer.load(loadData.geometryContainer, window.storage.dotFoolContainer);
 
         window.storage.canvasContainer.clearCanvas();
 
-        // clear workspace
-        if (obj[keys[0]].canvasContainer != null){
-          window.uiContainer.workspace.clear('maketmp');
-        } else {
-          window.uiContainer.workspace.clear();
-        }
+        window.uiContainer.workspace.destroy();
 
         // add workspace and stage
-        for(var key in obj[keys[0]].canvasContainer){
+        for (var key in loadData.canvasContainer) {
 
           var newFloorProperty = window.storage.propertyContainer.getElementById('floor', key);
 
@@ -117,18 +113,16 @@ define([
             newFloorProperty.id,
             newFloorProperty.name,
             newFloorProperty.id,
-            obj[keys[0]].canvasContainer[key].width,
-            obj[keys[0]].canvasContainer[key].height
+            loadData.canvasContainer[key].width,
+            loadData.canvasContainer[key].height
           );
+
+          window.storage.canvasContainer.stages[key].backgroundLayer.saveFloorplanDataURL(loadData.canvasContainer[key].floorplanDataURL);
+          window.storage.canvasContainer.stages[key].backgroundLayer.refresh();
 
           // bind stage click event
           window.eventHandler.stageEventBind('stage', newFloorProperty.id);
 
-        }
-
-        // delete tmp workspace
-        if (obj[keys[0]].canvasContainer != null){
-          window.uiContainer.workspace.deleteFirstWorkspace();
         }
 
         // add object from geometry
