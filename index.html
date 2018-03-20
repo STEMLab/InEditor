@@ -67,7 +67,8 @@
               <a class="dropdown-item" id="project-saveas">Save As...</a>
               <hr>
               <a class="dropdown-item" id="project-import">Import</a>
-              <a class="dropdown-item" id="project-export">Export(.gml)</a>
+              <!-- <a class="dropdown-item" id="project-export" data-toggle="modal" data-target="#go-factory-modal">Export(.gml)</a> -->
+              <a class="dropdown-item" id="project-export" data-toggle="modal" data-target="#go-factory-modal">Export(.gml)</a>
             </div>
           </li>
           <li class="nav-item dropdown">
@@ -137,7 +138,7 @@
         <div class="modal-body">
           <div class="form-group">
             <label for="viewer-baseURL">Base URL</label>
-            <input type="text" class="form-control" id="viewer-baseURL" value = "http://127.0.0.1">
+            <input type="text" class="form-control" id="viewer-baseURL" value="http://127.0.0.1">
           </div>
           <div class="form-group">
             <label for="viewer-portNum">Port Number</label>
@@ -149,12 +150,55 @@
           </div>
         </div>
         <div class="modal-footer">
-          <middle id="uriHelp" class="form-text text-muted">Base URL:Port Number/Parameter    </middle>
+          <middle id="uriHelp" class="form-text text-muted">Base URL:Port Number/Parameter </middle>
           <button type="button" class="btn btn-primary" id="viewer-modal-btn" aria-label="Close">Call Viewer</button>
         </div>
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="go-factory-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Export to IndoorGML</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+
+        <div id="go-factory-modal-body-to-footer-before" class="">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="factory-baseURL">Base URL</label>
+              <input type="text" class="form-control" id="factory-baseURL" value="http://127.0.0.1">
+            </div>
+            <div class="form-group">
+              <label for="factory-portNum">Port Number</label>
+              <input type="number" class="form-control" id="factory-portNum" value="7979">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <middle id="uriHelp" class="form-text text-muted">Base URL:Port Number/ </middle>
+            <button type="button" class="btn btn-primary" id="viewer-factory-btn" aria-label="Close">Export</button>
+          </div>
+        </div>
+
+        <div id="go-factory-modal-body-to-footer-loading" class="d-none">
+          <img src="./assets/icon/ajax-loader.gif" class="mx-auto d-block p-5" />
+        </div>
+
+        <div id="go-factory-modal-body-to-footer-down" class="d-none">
+          <a id="gml-down-link" href="./assets/icon/cell_a.png" class="mx-auto d-block p-3 text-center" download>
+            <h6>Download</h6>
+          </a>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+
   <script data-main="js/main" src="lib/require.js"></script>
 </body>
 

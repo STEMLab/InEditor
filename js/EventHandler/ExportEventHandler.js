@@ -24,7 +24,7 @@ define([
       'click': this.exportToViewer
     };
 
-    handlerBinder['project-export'] = {
+    handlerBinder['viewer-factory-btn'] = {
       'click': this.exportToFactory
     };
 
@@ -62,7 +62,9 @@ define([
     var result = new Result();
 
     if (broker.isPublishable('exporttofactory')) {
-      broker.publish(new Message('exporttofactory', null));
+      broker.publish(new Message('exporttofactory', {
+        baseURL: window.document.getElementById('factory-baseURL').value + ":" + window.document.getElementById('factory-portNum').value
+      }));
       result.result = true;
       result.msg = null;
     } else {

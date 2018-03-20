@@ -132,6 +132,7 @@ define([
     this.reqSpecList['end-addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['exporttoviewer'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['exporttofactory'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['showfactoryexportmodal'] = new MessageSpec('single', 'including', null, false);
 
     this.reqSpecList['snapping'] = new MessageSpec('single', 'including', ['draw'], false);
 

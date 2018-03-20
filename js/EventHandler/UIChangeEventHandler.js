@@ -3,9 +3,11 @@
 */
 
 define([
-  "../PubSub/Message.js"
+  "../PubSub/Message.js",
+  "./Result.js"
 ], function(
-  Message
+  Message,
+  Result
 ) {
   'use strict';
 
@@ -33,6 +35,26 @@ define([
     handlerBinder['floorplan-file'] = {
       'change': this.floorplanUpload
     };
+
+    handlerBinder['project-export'] = {
+      'click': this.showFactoryExportModal
+    };
+
+  }
+
+  UIChangeEventHandler.prototype.showFactoryExportModal = function(broker, previousMsg){
+
+    var result = new Result();
+    if (broker.isPublishable('showfactoryexportmodal')) {
+
+      broker.publish(new Message('showfactoryexportmodal', {}));
+
+      result.result = true;
+      result.msg = 'showfactoryexportmodal';
+
+    }
+
+    return result;
 
   }
 

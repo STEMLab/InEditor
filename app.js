@@ -3,18 +3,22 @@ var bodyParser = require('body-parser');
 var jsonFormat = require("json-format");
 var fs = require("fs");
 var BSON = require("bson");
-var cors = require('cors');	 	
+var cors = require('cors');
+var xmlBeautify = require('xml-beautifier');
 var app = express();
 
 
 app.use('/', express.static(__dirname));
 app.use(express.json({limit: '1gb'}));
 app.use(bodyParser.urlencoded({
-  extended: false,
+  extended: true,
   limit: '1gb'
 }));
 app.use(cors());
+var jsonParsor = bodyParser.json();
 app.use(bodyParser.json());
+app.use(bodyParser.raw());
+app.use(bodyParser.text());
 
 var server = app.listen(8080, function() {
 
@@ -62,4 +66,15 @@ app.get('/load-project', function(req, res) {
 
   });
 
+});
+
+app.post('/save-gml/*', function(req, res) {
+
+  fs.writeFile('./output/'+ req.params[0] +'.gml', xmlBeautify(req.body) , function(err) {
+
+    if (err)  return res.status(500).send(err);
+
+    res.send('/output/'+ req.params[0] +'.gml');
+
+  });
 });

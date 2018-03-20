@@ -60,7 +60,7 @@ define([
     if (Object.keys(states).length != 0) result['State'] = states;
     if (Object.keys(transitions).length != 0) result['Transition'] = transitions;
 
-    if(Object.keys(result).length == 1){
+    if (Object.keys(result).length == 1) {
 
       log.warn('ExportManager.exportToViewer : There is nothing to export :-<');
       return;
@@ -82,14 +82,6 @@ define([
     xhr.send(result);
   }
 
-  /**
-   * @memberof ExportManager
-   */
-  ExportManager.prototype.post = function(xhr, address, data) {
-
-
-
-  }
 
   /**
    * @memberof ExportManager
@@ -284,7 +276,11 @@ define([
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.exportToFactory = function() {
+  ExportManager.prototype.exportToFactory = function(reqObj) {
+
+    $('#go-factory-modal-body-to-footer-before').addClass('d-none');
+    $('#go-factory-modal-body-to-footer-loading').removeClass('d-none');
+    $('#go-factory-modal-body-to-footer-down').addClass('d-none');
 
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
@@ -305,127 +301,88 @@ define([
       "id": window.conditions.guid()
     };
 
-    var baseURL = "http://127.0.0.1:9797";
-    var index = 0;
+    var baseURL = reqObj.baseURL;
 
     var cells = manager.cellObj4VFactory(document.id, primalspacefeatures.id);
     var cellBoundaries = manager.cellBoundaryObj4VFactory(document.id, primalspacefeatures.id);
     var states = manager.stateObj4VFactory(document.id, primalspacefeatures.id);
     var transitions = manager.transitionObj4VFactory(document.id, primalspacefeatures.id);
 
-    var order = [{
-      type: 'document',
-      request: 'POST',
-      address: baseURL + '/document/' + document.id
-    }];
+    var address = {
+      'post-document': baseURL + '/document/' + document.id,
+      'post-indoorfeatures': baseURL + '/indoorfeatures/' + indoorfeatures.id,
+      'post-primalspacefeatures': baseURL + '/primalspacefeatures/' + primalspacefeatures.id,
+      'post-cell': baseURL + '/cellspace/',
+      'post-cellspaceboundary': baseURL + '/cellspaceboundary/',
+      'get-document': baseURL + '/document/' + document.id
+    };
+
+    manager.postJson(address['post-document'], JSON.stringify(document));
 
     if (cells.length != 0 || cellBoundaries.length != 0) {
-      order.push({
-        type: 'indoorfeatures',
-        request: 'POST',
-        address: baseURL + '/indoorfeatures/' + indoorfeatures.id
-      });
-      order.push({
-        type: 'primalspacefeatures',
-        request: 'POST',
-        address: baseURL + '/primalspacefeatures/' + primalspacefeatures.id
-      });
+
+      manager.postJson(address['post-indoorfeatures'], JSON.stringify(indoorfeatures));
+      manager.postJson(address['post-primalspacefeatures'], JSON.stringify(primalspacefeatures));
+
     }
 
-    if (cells.length != 0) {
-      order.push({
-        type: 'cellspace',
-        request: 'POST',
-        address: baseURL + '/cellspace',
-        index: 0
-      });
-    }
+    for (var i = 0; i < cells.length; i++)
+      manager.postJson(address['post-cell'] + cells[i].id, JSON.stringify(cells[i]));
 
-    if (cellBoundaries.length != 0) {
-      order.push({
-        type: 'cellspaceboundary',
-        request: 'POST',
-        address: baseURL + '/cellspaceboundary',
-        index: 0
-      });
-    }
+    for (var i = 0; i < cellBoundaries.length; i++)
+      manager.postJson(address['post-cellspaceboundary'] + cellBoundaries[i].id, JSON.stringify(cellBoundaries[i]));
 
-    order.push({
-      type: 'document',
-      request: 'GET',
-      address: baseURL + '/document/' + document.id
-    });
+    manager.getDocument(address['get-document'], document.id);
 
+  }
+
+  /**
+   * @memberof ExportManager
+   */
+  ExportManager.prototype.postJson = function(address, data) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", address, false);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(data);
+  }
+
+  /**
+   * @memberof ExportManager
+   */
+  ExportManager.prototype.getDocument = function(address, documentId) {
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4 && xhr.status == 201) {
+      if(xhr.readyState == 4 && xhr.status == 302){
 
-        log.info(xhr.responseText);
+        var getXhr = new XMLHttpRequest();
+        getXhr.onreadystatechange = function(){
 
-        // response of POST
-        if (order.length != 0) {
+          if(getXhr.readyState == 4 && getXhr.status == 200){
+            $('#go-factory-modal-body-to-footer-before').addClass('d-none');
+            $('#go-factory-modal-body-to-footer-loading').addClass('d-none');
+            $('#go-factory-modal-body-to-footer-down').removeClass('d-none');
 
-          if (order[index].type == 'indoorfeatures') {
-
-            xhr.open(order[index].request, order[index].address, false);
-            order.splice(0, 1);
-            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhr.send(JSON.stringify(indoorfeatures));
-
-          } else if (order[index].type == 'primalspacefeatures') {
-
-            xhr.open(order[index].request, order[index].address, false);
-            order.splice(0, 1);
-            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhr.send(JSON.stringify(primalspacefeatures));
-
-          } else if (order[index].type == 'cellspace') {
-
-            xhr.open(order[index].request, order[index].address + '/' + cells[order[index].index].id, false);
-            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            var tmpdata = JSON.stringify(cells[order[index].index]);
-            order[index].index++;
-            if(order[index].index == cells.length) order.splice(0, 1);
-            xhr.send(tmpdata);
-
-          } else if (order[index].type == 'cellspaceboundary') {
-
-            xhr.open(order[index].request, order[index].address + '/' + cellBoundaries[order[index].index].id, false);
-            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            var tmpdata = JSON.stringify(cellBoundaries[order[index].index]);
-            order[index].index++;
-            if(order[index].index == cellBoundaries.length) order.splice(0, 1);
-            xhr.send(tmpdata);
-
-          } else if( order[index].type == 'document' && order[index].request == 'GET'){
-
-            xhr.open(order[index].request, order[index].address, false);
-            order.splice(0, 1);
-            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhr.send();
-
-          } else {
-
-            log.error('ExportManager.exportToFactory : order list error ', order);
+            // download gml
+            window.document.getElementById('gml-down-link').href = 'http://127.0.0.1:8080/'+getXhr.responseText;
 
           }
 
         }
-      } else if (xhr.readyState == 4 && xhr.status == 302) {
 
-        // response of GET
-        log.info(xhr.responseText);
+        getXhr.open("POST", "http://localhost:8080/save-gml/"+documentId, false);
+        getXhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+        // save gml
+        getXhr.send(xhr.responseXML);
+
       }
-    }
+    };
 
-    // send json data to viewer
-    xhr.open(order[index].request, order[index].address, false);
-    order.splice(0, 1);
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify(document));
-
+    xhr.open("GET", address, false);
+    xhr.send();
   }
+
+
 
   /**
    * @memberof ExportManager
@@ -495,7 +452,7 @@ define([
 
         }
 
-        cells[cellkeyInFloor[cellKey]].setWKT(manager.extrudCell(cells[cellkeyInFloor[cellKey]].getCoordinates(), floorProperties[floorKey].celingHeight*1));
+        cells[cellkeyInFloor[cellKey]].setWKT(manager.extrudCell(cells[cellkeyInFloor[cellKey]].getCoordinates(), floorProperties[floorKey].celingHeight * 1));
       }
     }
 
@@ -584,8 +541,8 @@ define([
         reverseObj.reverseCoor();
         cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'] = reverseObj;
 
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setWKT(manager.extrudeCellBoundary(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates(), floorProperties[floorKey].doorHeight*1));
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setWKT(manager.extrudeCellBoundary(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].getCoordinates(), floorProperties[floorKey].doorHeight*1));
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setWKT(manager.extrudeCellBoundary(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates(), floorProperties[floorKey].doorHeight * 1));
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setWKT(manager.extrudeCellBoundary(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].getCoordinates(), floorProperties[floorKey].doorHeight * 1));
 
       }
     }
@@ -639,9 +596,9 @@ define([
   }
 
   /**
-  * @memberof ExportManager
-  */
-  ExportManager.prototype.extrudCell = function(surface, ch){
+   * @memberof ExportManager
+   */
+  ExportManager.prototype.extrudCell = function(surface, ch) {
 
     var down = surface;
     var up = [];
@@ -649,7 +606,7 @@ define([
 
     var len = down.length;
 
-    for(var i = 0; i < len; i++){
+    for (var i = 0; i < len; i++) {
       var tmp = JSON.parse(JSON.stringify(down[i]));
       tmp[2] += ch;
       up.push(tmp);
@@ -657,12 +614,12 @@ define([
 
     // result.push(down);
 
-    for(var i = 0; i < len - 1; i++){
+    for (var i = 0; i < len - 1; i++) {
 
-      var downLeft = JSON.parse(JSON.stringify( down[i] ));
-      var downRight = JSON.parse(JSON.stringify( down[i+1]));
-      var upRigth = JSON.parse(JSON.stringify( up[i+1]));
-      var upLeft =JSON.parse(JSON.stringify( up[i] ));
+      var downLeft = JSON.parse(JSON.stringify(down[i]));
+      var downRight = JSON.parse(JSON.stringify(down[i + 1]));
+      var upRigth = JSON.parse(JSON.stringify(up[i + 1]));
+      var upLeft = JSON.parse(JSON.stringify(up[i]));
 
       result.push([downLeft, downRight, upRigth, upLeft, downLeft]);
 
@@ -671,21 +628,19 @@ define([
     result.push(up);
 
     var tmp = [];
-    for(var i = 0; i < down.length; i++){
-      tmp.push(down[down.length-i-1]);
+    for (var i = 0; i < down.length; i++) {
+      tmp.push(down[down.length - i - 1]);
     }
 
     result.push(tmp);
-
-    log.info(result);
 
     return result;
   }
 
   /**
-  * @memberof ExportManager
-  */
-  ExportManager.prototype.extrudeCellBoundary = function(line, ch){
+   * @memberof ExportManager
+   */
+  ExportManager.prototype.extrudeCellBoundary = function(line, ch) {
 
     // var result = [];
     //
@@ -698,15 +653,13 @@ define([
     //
     // }
 
-
-
-
     var first = line[0];
     var second = line[1];
 
-    var result = [first, second, [second[0], second[1], ch], [first[0], first[1], ch], first];
+    var result = [first, second, [second[0], second[1], ch],
+      [first[0], first[1], ch], first
+    ];
 
-    log.info(result);
 
     return result;
 

@@ -51,8 +51,21 @@ define([
 
     this.addCallbackFun('start-addnewcellboundary', this.startAddNewCellBoundary);
     this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary);
+
+    this.addCallbackFun('showfactoryexportmodal', this.showFactoryExportModal);
   }
 
+  /**
+  * @memberof
+  */
+  UIManager.prototype.showFactoryExportModal = function(){
+
+    $('#go-factory-modal').modal('show');
+    $('#go-factory-modal-body-to-footer-before').removeClass('d-none');
+    $('#go-factory-modal-body-to-footer-loading').addClass('d-none');
+    $('#go-factory-modal-body-to-footer-down').addClass('d-none');
+
+  }
 
   /**
    * @desc Change title of node in tree view which representing reqObj.id
