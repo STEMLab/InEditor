@@ -353,7 +353,7 @@ define([
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
-      if(xhr.readyState == 4 && xhr.status == 302){
+      if(xhr.readyState == 4 && ( xhr.status == 302 || xhr.status == 200 )){
 
         var getXhr = new XMLHttpRequest();
         getXhr.onreadystatechange = function(){
