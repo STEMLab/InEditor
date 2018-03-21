@@ -31,7 +31,8 @@ define([
    */
   function Stage(_id, _name, _container, _width, _height) {
 
-    var calculatedHeight = this.calculateHeight(_width);
+    var calculatedWH = this.calculateWH(_width, _height);
+    // var calculatedHeight = this.calculateHeight(_width);
 
     /**
      * @memberof Stage
@@ -46,7 +47,7 @@ define([
     /**
      * @memberof Stage
      */
-    this.backgroundLayer = new BackgroundLayer(_width, calculatedHeight);
+    this.backgroundLayer = new BackgroundLayer(calculatedWH.width, calculatedWH.height);
     /**
      * @memberof Stage
      */
@@ -73,8 +74,8 @@ define([
      */
     this.stage = new Konva.Stage({
       container: _container,
-      width: _width,
-      height: calculatedHeight,
+      width: calculatedWH.width,
+      height: calculatedWH.height,
       id: _id,
       draggable: true,
       x: 0,
@@ -104,6 +105,14 @@ define([
   Stage.prototype.calculateHeight = function(_width) {
 
     return _width * (window.conditions.aspectRatio.y / window.conditions.aspectRatio.x);
+
+  }
+
+  Stage.prototype.calculateWH = function(_width, _height) {
+
+    var calH = _width * (window.conditions.aspectRatio.y / window.conditions.aspectRatio.x);
+    if( calH < _height ) return { width : _width, height : calH };
+    else return { width :  _height * (window.conditions.aspectRatio.x / window.conditions.aspectRatio.y), height : _height };
 
   }
 
