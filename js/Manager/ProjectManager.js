@@ -5,7 +5,7 @@
 define([
   "../PubSub/Subscriber.js",
   "../Conditions.js",
-  "../Storage/Canvas/Stage.js"
+  "../Storage/Canvas/Stage.js",
 ], function(
   Subscriber,
   Conditions,
@@ -81,7 +81,14 @@ define([
   /**
    * @memberof ProjectManager
    */
-  ProjectManager.prototype.loadProject = function() {
+  ProjectManager.prototype.loadProject = function(reqObj) {
+
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(reqObj.file);
+    reader.onload = function(e){
+
+
+    }
 
     // send json data to viewer
     var xhr = new XMLHttpRequest();
