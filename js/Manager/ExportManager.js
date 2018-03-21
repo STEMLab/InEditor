@@ -278,11 +278,12 @@ define([
    */
   ExportManager.prototype.exportToFactory = function(reqObj) {
 
+    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+    manager.getExportConditionFromModal();
+
     $('#go-factory-modal-body-to-footer-before').addClass('d-none');
     $('#go-factory-modal-body-to-footer-loading').removeClass('d-none');
     $('#go-factory-modal-body-to-footer-down').addClass('d-none');
-
-    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
     var result = {};
 
@@ -382,6 +383,78 @@ define([
     xhr.send();
   }
 
+  /**
+  * @memberof ExportManager
+  */
+  ExportManager.prototype.getExportConditionFromModal = function(){
+
+    var exportConditions = window.conditions.exportConditions;
+
+    // cell
+    if($('#factory-geometry-type-2D').prop("checked")) exportConditions.CellSpace.geometry.extrude = false;
+    if($('#factory-geometry-type-3D').prop("checked")) exportConditions.CellSpace.geometry.extrude = true;
+
+    if($('#factory-property-cell-name').prop("checked")) exportConditions.CellSpace.properties.name = true;
+    else exportConditions.CellSpace.properties.name = false;
+
+    if($('#factory-property-cell-description').prop("checked")) exportConditions.CellSpace.properties.description = true;
+    else exportConditions.CellSpace.properties.description = false;
+
+    if($('#factory-property-cell-partialboundedByexternalReference').prop("checked")) exportConditions.CellSpace.properties.partialboundedByexternalReference = true;
+    else exportConditions.CellSpace.properties.partialboundedByexternalReference = false;
+
+    if($('#factory-property-cell-externalReference').prop("checked")) exportConditions.CellSpace.properties.externalReference = true;
+    else exportConditions.CellSpace.properties.externalReference = false;
+
+    if($('#factory-property-cell-duality').prop("checked")) exportConditions.CellSpace.properties.duality = true;
+    else exportConditions.CellSpace.properties.duality = false;
+
+
+    // cellboundary
+    if($('#factory-geometry-type-2D').prop("checked")) exportConditions.CellSpaceBoundary.geometry.extrude = false;
+    if($('#factory-geometry-type-3D').prop("checked")) exportConditions.CellSpaceBoundary.geometry.extrude = true;
+
+    if($('#factory-property-cellbondary-name').prop("checked")) exportConditions.CellSpaceBoundary.properties.name = true;
+    else exportConditions.CellSpaceBoundary.properties.name = false;
+
+    if($('#factory-property-cellbondary-description').prop("checked")) exportConditions.CellSpaceBoundary.properties.description = true;
+    else exportConditions.CellSpaceBoundary.properties.description = false;
+
+    if($('#factory-property-cellbondary-externalReference').prop("checked")) exportConditions.CellSpaceBoundary.properties.externalReference = true;
+    else exportConditions.CellSpaceBoundary.properties.externalReference = false;
+
+    if($('#factory-property-cellbondary-duality').prop("checked")) exportConditions.CellSpaceBoundary.properties.duality = true;
+    else exportConditions.CellSpaceBoundary.properties.duality = false;
+
+
+    // state
+    if($('#factory-property-state-name').prop("checked")) exportConditions.State.properties.name = true;
+    else exportConditions.State.properties.name = false;
+
+    if($('#factory-property-state-description').prop("checked")) exportConditions.State.properties.description = true;
+    else exportConditions.State.properties.description = false;
+
+    if($('#factory-property-state-connected').prop("checked")) exportConditions.State.properties.connected = true;
+    else exportConditions.State.properties.connected = false;
+
+    if($('#factory-property-state-duality').prop("checked")) exportConditions.State.properties.duality = true;
+    else exportConditions.State.properties.duality = false;
+
+
+    // transition
+    if($('#factory-property-transition-name').prop("checked")) exportConditions.Transition.properties.name = true;
+    else exportConditions.Transition.properties.name = false;
+
+    if($('#factory-property-transition-description').prop("checked")) exportConditions.Transition.properties.description = true;
+    else exportConditions.Transition.properties.description = false;
+
+    if($('#factory-property-transition-weight').prop("checked")) exportConditions.Transition.properties.weight = true;
+    else exportConditions.Transition.properties.weight = false;
+
+    if($('#factory-property-transition-duality').prop("checked")) exportConditions.Transition.properties.duality = true;
+    else exportConditions.Transition.properties.duality = false;
+
+  }
 
 
   /**
