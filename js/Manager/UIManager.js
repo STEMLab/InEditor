@@ -377,7 +377,7 @@ define([
    */
   UIManager.prototype.cancelAddNewCellBoundary = function(reqObj) {
 
-    document.getElementById('cellboundarys-btn').src = "../../assets/icon/cellboundary_d.png";
+    document.getElementById('cellboundary-btn').src = "../../assets/icon/cellboundary_d.png";
 
   }
 
