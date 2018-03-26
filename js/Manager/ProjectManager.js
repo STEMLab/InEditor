@@ -5,7 +5,7 @@
 define([
   "../PubSub/Subscriber.js",
   "../Conditions.js",
-  "../Storage/Canvas/Stage.js",
+  "../Storage/Canvas/Stage.js"
 ], function(
   Subscriber,
   Conditions,
@@ -84,66 +84,65 @@ define([
   ProjectManager.prototype.loadProject = function(reqObj) {
 
     var reader = new FileReader();
-    reader.readAsArrayBuffer(reqObj.file);
-    reader.onload = function(e){
+    reader.readAsBinaryString(reqObj.file);
+    reader.onload = function(e) {
 
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
 
-    }
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          var obj = JSON.parse(xhr.responseText);
+          log.info(obj);
 
-    // send json data to viewer
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status == 200) {
-        var obj = JSON.parse(xhr.responseText);
-        log.info(obj);
+          window.conditions.load(obj.conditions);
+          delete obj.conditions;
 
-        window.conditions.load(obj.conditions);
-        delete obj.conditions;
+          var loadData = obj[Object.keys(obj)[0]];
+          window.storage.propertyContainer.load(loadData.propertyContainer);
+          window.storage.dotFoolContainer.load(loadData.dotFoolContainer);
+          window.storage.geometryContainer.load(loadData.geometryContainer, window.storage.dotFoolContainer);
 
-        var loadData = obj[Object.keys(obj)[0]];
-        window.storage.propertyContainer.load(loadData.propertyContainer);
-        window.storage.dotFoolContainer.load(loadData.dotFoolContainer);
-        window.storage.geometryContainer.load(loadData.geometryContainer, window.storage.dotFoolContainer);
+          window.storage.canvasContainer.clearCanvas();
 
-        window.storage.canvasContainer.clearCanvas();
+          window.uiContainer.workspace.destroy();
 
-        window.uiContainer.workspace.destroy();
+          // add workspace and stage
+          for (var key in loadData.canvasContainer) {
 
-        // add workspace and stage
-        for (var key in loadData.canvasContainer) {
+            var newFloorProperty = window.storage.propertyContainer.getElementById('floor', key);
 
-          var newFloorProperty = window.storage.propertyContainer.getElementById('floor', key);
+            window.uiContainer.workspace.addNewWorkspace(key, newFloorProperty.name);
 
-          window.uiContainer.workspace.addNewWorkspace(key, newFloorProperty.name);
+            window.storage.canvasContainer.stages[key] = new Stage(
+              newFloorProperty.id,
+              newFloorProperty.name,
+              newFloorProperty.id,
+              loadData.canvasContainer[key].width,
+              loadData.canvasContainer[key].height
+            );
 
-          window.storage.canvasContainer.stages[key] = new Stage(
-            newFloorProperty.id,
-            newFloorProperty.name,
-            newFloorProperty.id,
-            loadData.canvasContainer[key].width,
-            loadData.canvasContainer[key].height
-          );
+            window.storage.canvasContainer.stages[key].backgroundLayer.saveFloorplanDataURL(loadData.canvasContainer[key].floorplanDataURL);
+            window.storage.canvasContainer.stages[key].backgroundLayer.refresh();
 
-          window.storage.canvasContainer.stages[key].backgroundLayer.saveFloorplanDataURL(loadData.canvasContainer[key].floorplanDataURL);
-          window.storage.canvasContainer.stages[key].backgroundLayer.refresh();
+            // bind stage click event
+            window.eventHandler.stageEventBind('stage', newFloorProperty.id);
 
-          // bind stage click event
-          window.eventHandler.stageEventBind('stage', newFloorProperty.id);
+          }
+
+          // add object from geometry
+          window.storage.canvasContainer.addObjFromGeometries(window.storage.geometryContainer);
+
+          // refresh tree view
+          window.uiContainer.sidebar.treeview.refresh(window.storage.propertyContainer);
 
         }
 
-        // add object from geometry
-        window.storage.canvasContainer.addObjFromGeometries(window.storage.geometryContainer);
-
-        // refresh tree view
-        window.uiContainer.sidebar.treeview.refresh(window.storage.propertyContainer);
-
-        log.info(">>>> succeed to load project");
       }
-    }
 
-    xhr.open("GET", "http://127.0.0.1:8080/load-project", true);
-    xhr.send();
+      xhr.open("POST", "http://127.0.0.1:8080/convert-bson-to-json", true);
+      xhr.send(reader.result);
+
+    }
 
   }
 

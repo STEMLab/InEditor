@@ -12,7 +12,8 @@ app.use('/', express.static(__dirname));
 app.use(cors());
 var jsonParsor = bodyParser.json();
 app.use(bodyParser.json({limit: '1gb'}));
-app.use(bodyParser.raw({limit: '1gb'}));
+app.use(bodyParser.raw({
+  limit: '1gb' }));
 app.use(bodyParser.text({limit: '1gb'}));
 
 var server = app.listen(8080, function() {
@@ -36,8 +37,10 @@ app.post('/save-json', function(req, res) {
 app.post('/save-project', function(req, res) {
 
   var bson = new BSON();
+  var data = bson.serialize(req.body);
+  console.log(data);
 
-  fs.writeFile('./output/save-project.bson', bson.serialize(req.body), function(err) {
+  fs.writeFile('./output/save-project.bson', data, function(err) {
 
     if (err)  return res.status(500).send(err);
 
@@ -72,4 +75,13 @@ app.post('/save-gml/*', function(req, res) {
     res.send('/output/'+ req.params[0] +'.gml');
 
   });
+});
+
+app.post('/convert-bson-to-json', function(req, res){
+
+  var buffer = new Buffer(req.body, "binary");
+  var bson = new BSON();
+  var json = bson.deserialize(buffer);
+  res.send(json);
+
 });

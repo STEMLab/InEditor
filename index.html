@@ -51,6 +51,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-bson/2.0.4/bson.min.js"></script>
 
 
+
+
 </head>
 
 <body>
@@ -62,12 +64,11 @@
             <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">PROJECT</a>
             <div class="dropdown-menu">
               <a class="dropdown-item" id="project-new">New</a>
-              <a class="dropdown-item" id="project-load">Load</a><input type="file" id="project-load-file" accept=".bson"/>
+              <a class="dropdown-item" id="project-load">Load</a><input type="file" id="project-load-file" accept=".bson" class="d-none"/>
               <a class="dropdown-item" id="project-save">Save</a>
-              <a class="dropdown-item" id="project-saveas">Save As...</a><input type="file" id="project-saveas-file"  webkitdirectory />
+              <a class="dropdown-item" id="project-saveas">Save As...</a><input type="file" id="project-saveas-file" class="d-none" nwsaveas="filename.txt"  />
               <hr>
               <a class="dropdown-item" id="project-import">Import</a>
-              <!-- <a class="dropdown-item" id="project-export" data-toggle="modal" data-target="#go-factory-modal">Export(.gml)</a> -->
               <a class="dropdown-item" id="project-export" data-toggle="modal" data-target="#go-factory-modal">Export(.gml)</a>
             </div>
           </li>

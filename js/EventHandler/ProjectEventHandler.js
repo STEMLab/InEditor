@@ -27,10 +27,6 @@ define([
       'click': this.saveProject
     };
 
-    // handlerBinder['project-load'] = {
-    //   'click': this.clickloadProjectBtn
-    // };
-
     handlerBinder['project-load'] = {
       'click': this.clickLoadProjectBtn
     }
@@ -39,6 +35,44 @@ define([
       'change': this.loadProject
     };
 
+    handlerBinder['project-saveas-file'] = {
+      'change': this.saveProjectToNewPath
+    }
+
+    handlerBinder['project-saveas'] = {
+      'click': this.clickSaveAsProjectBtn
+    }
+
+  }
+
+  /**
+  * @memberof ProjectEventHandler
+  */
+  ProjectEventHandler.prototype.clickSaveAsProjectBtn = function(broker, previousMsg){
+
+    window.document.getElementById("project-saveas-file").addEventListener("change", function(e) {
+      window.eventHandler.callHandler('html', e);
+    });
+
+    $('#project-saveas-file').click();
+
+    return {
+      'result': true,
+      'msg': null
+    }
+
+  }
+
+  /**
+  * @memberof ProjectEventHandler
+  */
+  ProjectEventHandler.prototype.saveProjectToNewPath = function(broker, previousMsg, data){
+
+    var result = new Result();
+
+    log.info(data.target);
+
+    return result;
   }
 
   /**
@@ -92,17 +126,23 @@ define([
 
     var result = new Result();
 
-    if (broker.isPublishable('loadproject')) {
+    if (broker.isPublishable('loadproject') && document.getElementById(data.target.id).value != "") {
 
       // reqObj.floor will be active workspace
       broker.publish(new Message('loadproject', {
         file : document.getElementById(data.target.id).files[0]
       }));
 
+       document.getElementById(data.target.id).value = '';
+
       result = {
         'result': true,
         'msg': 'loadproject'
       };
+    } else if (document.getElementById(data.target.id).value == "") {
+
+      result.msg = "clear file input ...";
+
     } else {
 
       result.msg = "wrong state transition : " + previousMsg + " to saveproject.";
