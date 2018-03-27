@@ -113,7 +113,7 @@ define([
 
     }
 
-    // log.trace(this.history);
+    log.trace(this.history);
 
   }
 

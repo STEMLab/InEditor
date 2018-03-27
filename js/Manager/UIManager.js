@@ -46,11 +46,11 @@ define([
 
     this.addCallbackFun('activateworkspace', this.activateWorkspace);
 
-    this.addCallbackFun('canceladdnewcell', this.cancelAddNewCell);
-    this.addCallbackFun('canceladdnewcellboundary', this.cancelAddNewCellBoundary);
+    this.addCallbackFun('cancel-addnewcell', this.cancelAddNewCell);
+    this.addCallbackFun('cancel-addnewcellboundary', this.cancelAddNewCellBoundary);
 
     this.addCallbackFun('start-addnewcellboundary', this.startAddNewCellBoundary);
-    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary);
+    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.endAddNewCellBoundary_makeHistoryObj, this.removeObj);
 
     this.addCallbackFun('showfactoryexportmodal', this.showFactoryExportModal);
   }
@@ -377,11 +377,17 @@ define([
    */
   UIManager.prototype.cancelAddNewCellBoundary = function(reqObj) {
 
-    document.getElementById('cellboundarys-btn').src = "../../assets/icon/cellboundary_d.png";
+    document.getElementById('cellboundary-btn').src = "../../assets/icon/cellboundary_d.png";
 
   }
 
+  UIManager.prototype.endAddNewCellBoundary_makeHistoryObj = function(reqObj){
 
+    var obj = reqObj;
+    obj['type'] = 'cellBoundary';
+
+    return obj;
+  }
 
   return UIManager;
 });

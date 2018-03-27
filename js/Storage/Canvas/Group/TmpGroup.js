@@ -88,7 +88,7 @@ define([
 
   TmpGroup.prototype.removeObj = function(){
 
-    log.info(this.tmpGroup.children);
+    // log.info(this.tmpGroup.children);
 
     this.obj = null;
 

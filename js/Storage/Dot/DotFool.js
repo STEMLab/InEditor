@@ -93,7 +93,7 @@ define([
      */
     delete this.dots[uuid];
 
-    log.trace(window.storage.dotFoolContainer);
+    // log.trace(window.storage.dotFoolContainer);
     return true;
 
   }

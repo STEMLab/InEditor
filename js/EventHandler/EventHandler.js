@@ -222,7 +222,7 @@ define([
 
     if (!result.result) {
 
-      log.error(result.msg);
+      log.warn(result.msg);
 
     }
 
