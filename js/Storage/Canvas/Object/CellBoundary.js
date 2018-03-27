@@ -151,7 +151,7 @@ define([], function() {
   }
 
   /**
-  * @memberof Cell
+  * @memberof CellBoundary
   */
   CellBoundary.prototype.insertDotIntoLine = function(line, point){
 
@@ -174,6 +174,37 @@ define([], function() {
 
   }
 
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.removeDot = function(uuid){
+    var i = 0;
+    for(i = this.dots.length - i - 1 ; i > -1 ; i++){
+      if( this.dots[i].uuid == uuid ){
+        this.dots.splice(i, 1);
+        this.addObjectFromDots();
+        break;
+      }
+    }
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.getLastDot = function(){
+    return this.dots[this.dots.length - 1];
+  }
+
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.destroy = function(floor){
+
+    this.corners.destroy();
+    this.line.destroy();
+
+  }
 
   return CellBoundary;
 

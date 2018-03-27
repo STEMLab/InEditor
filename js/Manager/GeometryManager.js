@@ -45,17 +45,17 @@ define([
     this.addCallbackFun('addnewfloor', this.addNewFloor);
 
     this.addCallbackFun('start-addnewcell', this.startAddNewCell, function() {}, function() {});
-    this.addCallbackFun('addnewcell', this.addNewCell, this.addNewCell_makeHistoryObj, this.addNewCell_undo);
+    this.addCallbackFun('addnewcell', this.addNewCell, this.drawGeometry_makeHistoryObj, this.addNewCell_undo);
     this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.makeSimpleHistoryObj, this.endAddNewCell_undo);
 
     this.addCallbackFun('start-addnewcellboundary', this.startAddNewCellBoundary, function() {}, function() {});
-    this.addCallbackFun('addnewcellboundary', this.addNewCellBoundary, this.addNewCellBoundary_makeHistoryObj, this.addNewCellBoundary_undo);
+    this.addCallbackFun('addnewcellboundary', this.addNewCellBoundary, this.drawGeometry_makeHistoryObj, this.addNewCellBoundary_undo);
     this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.makeSimpleHistoryObj, this.endAddNewCellBoundary_undo);
 
     this.addCallbackFun('snapping', this.snappingMousePointer);
 
-    this.addCallbackFun('canceladdnewcell', this.cancelAddNewCell);
-    this.addCallbackFun('canceladdnewcellboundary', this.cancelAddNewCellBoundary);
+    this.addCallbackFun('cancel-addnewcell', this.cancelAddNewCell);
+    this.addCallbackFun('cancel-addnewcellboundary', this.cancelAddNewCellBoundary);
 
   }
 
@@ -129,7 +129,7 @@ define([
    * @memberof GeometryManager
    * @param reqObj floor
    */
-  GeometryManager.prototype.addNewCell_makeHistoryObj = function(reqObj) {
+  GeometryManager.prototype.drawGeometry_makeHistoryObj = function(reqObj) {
     return {
       floor: reqObj.floor,
       uuid: window.tmpObj.getLastDot().uuid
@@ -216,8 +216,16 @@ define([
 
     for (var key in cells) {
       if (cells[key].id == undoObj.id) {
-        cells[key].destory(undoObj.floor);
 
+        // destroy canvas object
+        cells[key].destroy(undoObj.floor);
+
+        // free dot from object
+        for(var cellkey in cells[key].dots){
+          window.storage.dotFoolContainer.getDotFool(undoObj.floor).deleteDotFromObj(cells[key].dots[cellkey].uuid, cells[key].id);
+        }
+
+        // redraw canvas
         window.storage.canvasContainer.stages[undoObj.floor].cellLayer.layer.draw();
         cells.splice(key, 1);
       }
@@ -228,6 +236,7 @@ define([
     for (var key in cells) {
       if (cells[key].id == undoObj.id) {
         cells.splice(key, 1);
+        break;
       }
     }
 
@@ -250,6 +259,11 @@ define([
    * @desc set tmpObj to null
    */
   GeometryManager.prototype.cancelAddNewCell = function(reqObj) {
+
+    if(reqObj.floor == undefined){
+      window.tmpObj = null;
+      return;
+    }
 
     for (var key in window.tmpObj.dots) {
       window.storage.dotFoolContainer.getDotFool(reqObj.floor).deleteDotFromObj(window.tmpObj.dots[key].uuid, 'tmpObj');
@@ -413,6 +427,7 @@ define([
           window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(dot);
         } else {
           log.info("The point you click is not on the line in " + window.tmpObj.cells);
+          return false;
         }
 
       } else {
@@ -434,29 +449,24 @@ define([
       window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
     }
 
-    log.trace(window.storage.canvasContainer);
-
-  }
-
-  /**
-  * @memberof GeometryManager
-  */
-  GeometryManager.prototype.addNewCellBoundary_makeHistoryObj = function(reqObj){
-
-    log.info(' addNewCellBoundary_undo called ... ');
+    // log.trace(window.storage.canvasContainer);
 
   }
 
 
   /**
   * @memberof GeometryManager
+  * @param undoObj floor, uuid of last dot
   */
   GeometryManager.prototype.addNewCellBoundary_undo = function(undoObj){
 
-    log.info(' addNewCellBoundary_undo called ... ');
+    var tmpObj = window.tmpObj;
+
+    tmpObj.removeDot(undoObj.uuid);
+    window.storage.dotFoolContainer.getDotFool(undoObj.floor).deleteDotFromObj(undoObj.uuid, tmpObj.id);
+    window.storage.canvasContainer.stages[undoObj.floor].tmpLayer.layer.draw();
 
   }
-
 
 
   /**
@@ -509,7 +519,34 @@ define([
   */
   GeometryManager.prototype.endAddNewCellBoundary_undo = function(undoObj){
 
-    log.info(' endAddNewCellBoundary_undo called ... ');
+    log.info(undoObj);
+
+    // remove cellboundary in canvasContainer
+    var cellboundaries = window.storage.canvasContainer.stages[undoObj.floor].cellBoundaryLayer.group.cellBoundaries;
+
+    for(var key in cellboundaries){
+      if(cellboundaries[key].id == undoObj.id){
+        cellboundaries[key].destroy(undoObj.floor);
+
+        // free dot from object
+        for(var dotkey in cellboundaries[key].dots){
+          window.storage.dotFoolContainer.getDotFool(undoObj.floor).deleteDotFromObj(cellboundaries[key].dots[dotkey].uuid, cellboundaries[key].id);
+        }
+
+        // redraw canvas
+        window.storage.canvasContainer.stages[undoObj.floor].cellBoundaryLayer.layer.draw();
+        cellboundaries.splice(key, 1);
+      }
+    }
+
+    // remove cell in geometryContainer
+    cellboundaries = window.storage.geometryContainer.cellBoundaryGeometry;
+    for (var key in cellboundaries) {
+      if (cellboundaries[key].id == undoObj.id) {
+        cellboundaries.splice(key, 1);
+        break;
+      }
+    }
 
   }
 
@@ -518,6 +555,11 @@ define([
    * @memberof GeometryManager
    */
   GeometryManager.prototype.cancelAddNewCellBoundary = function(reqObj) {
+
+    if(reqObj.floor == undefined){
+      window.tmpObj = null;
+      return;
+    }
 
     for (var key in window.tmpObj.dots) {
       window.storage.dotFoolContainer.getDotFool(reqObj.floor).deleteDotFromObj(window.tmpObj.dots[key].uuid, 'tmpObj');

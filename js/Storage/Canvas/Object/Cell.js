@@ -148,17 +148,10 @@ define([], function() {
   /**
   * @memberof Cell
   */
-  Cell.prototype.destory = function(floor){
+  Cell.prototype.destroy = function(floor){
 
     this.corners.destroy();
     this.poly.destroy();
-
-    if(floor != null){
-      for(var key in this.dots){
-        window.storage.dotFoolContainer.getDotFool(floor).deleteDotFromObj(this.dots[key].uuid, this.id);
-      }
-    }
-
 
   }
 

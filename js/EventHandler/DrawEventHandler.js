@@ -208,53 +208,59 @@ define([
 
     var result = new Result();
 
-    // The results of the broker.isPublishable function are the same in all cases,
-    // because addnewcell, addnewcellboundary, addnewstate, and addnewtransition all belong to the `draw` code.
-    // Therefore, proceed to the isPublishable test for any one msg(canceladdnewcell).
-
-    if (broker.isPublishable('canceladdnewcell')) {
-      switch (previousMsg) {
-        case 'addnewcell':
-          broker.publish(new Message('canceladdnewcell', {
+    switch (previousMsg) {
+      case 'addnewcell':
+        if (broker.isPublishable('cancel-addnewcell')) {
+          broker.publish(new Message('cancel-addnewcell', {
             'floor': window.tmpObj.floor
           }));
 
           result.result = true;
-          result.msg = 'canceladdnewcell';
-          break;
-        case 'addnewcellboundary':
-          broker.publish(new Message('canceladdnewcellboundary', {
+          result.msg = 'cancel-addnewcell';
+        }
+        break;
+      case 'addnewcellboundary':
+        if (broker.isPublishable('cancel-addnewcellboundary')) {
+
+          broker.publish(new Message('cancel-addnewcellboundary', {
             'floor': window.tmpObj.floor
           }));
 
           result.result = true;
-          result.msg = 'canceladdnewcellboundary';
-          break;
-        case 'addnewstate':
-          broker.publish(new Message('canceladdnewstate', {
+          result.msg = 'cancel-addnewcellboundary';
+
+        }
+        break;
+      case 'addnewstate':
+        if (broker.isPublishable('cancel-addnewstate')) {
+
+          broker.publish(new Message('cancel-addnewstate', {
             'floor': window.tmpObj.floor
           }));
 
           result.result = true;
-          result.msg = 'canceladdnewstate';
-          break;
-        case 'addnewtransition':
-          broker.publish(new Message('canceladdnewtransition', {
+          result.msg = 'cancel-addnewstate';
+
+        }
+
+        break;
+      case 'addnewtransition':
+        if(broker.isPublishable('cancel-addnewtransition')){
+
+          broker.publish(new Message('cancel-addnewtransition', {
             'floor': window.tmpObj.floor
           }));
 
           result.result = true;
-          result.msg = 'canceladdnewtransition';
-          break;
-        default:
-          result.msg = "no match function.";
-      }
-    } else {
-      result.msg = "wrong state transition : " + previousMsg + " to canceladdnewcell, canceladdnewcellboundary, canceladdnewtransition or canceladdnewtransition.";
+          result.msg = 'cancel-addnewtransition';
+
+        }
+        break;
+      default:
+        result.msg = "no match function.";
     }
 
     return result;
-
   }
 
   /**

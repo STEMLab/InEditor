@@ -40,10 +40,10 @@ define([
 
     this.addCallbackFun('addnewfloor', this.addNewFloor);
     this.addCallbackFun('updateproperty', this.updateProperty);
-    this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.endAddNewCell_makeHistoryObj, this.endAddNewCell_undo);
+    this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.makeSimpleHistoryObj, this.endAddNewCell_undo);
     this.addCallbackFun('updaterefdata', this.updateRefProperty);
 
-    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary);
+    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.makeSimpleHistoryObj, this.endAddNewCellBoundary_undo);
 
   }
 
@@ -144,14 +144,11 @@ define([
   }
 
   /**
-   * @param {Object} reqObj id<br>floor: floor id
    * @memberof PropertyManager
-   * @return cell id
+   * @desc just return input parameter(reqObj)
    */
-  PropertyManager.prototype.endAddNewCell_makeHistoryObj = function(reqObj) {
-
+  PropertyManager.prototype.makeSimpleHistoryObj = function(reqObj) {
     return reqObj;
-
   }
 
   /**
@@ -169,7 +166,7 @@ define([
         cells.splice(key, 1);
     }
 
-    // add cell key in floor property
+    // remove cell key in floor property
     var floors = window.storage.propertyContainer.floorProperties;
 
     for (var key in floors) {
@@ -183,7 +180,7 @@ define([
   }
 
   /**
-   * @memberof GeometryManager
+   * @memberof PropertyManager
    */
   PropertyManager.prototype.endAddNewCellBoundary = function(reqObj) {
     log.info('PropertyManager.endAddNewCellBoundary called');
@@ -208,6 +205,39 @@ define([
     );
 
     // log.trace(window.storage.propertyContainer);
+  }
+
+  /**
+  * @memberof PropertyManager
+  */
+  PropertyManager.prototype.endAddNewCellBoundary_undo = function(undoObj){
+
+    // remove new cellboundary object in storage.propertyContainer
+    var cellBoundaries = window.storage.propertyContainer.cellBoundaryProperties;
+
+    var i = 0;
+    for(i = cellBoundaries.length - i - 1 ; i > -1 ; i++ ){
+
+      if(cellBoundaries[i].id == undoObj.id){
+        cellBoundaries.splice(i, 1);
+        break;
+      }
+
+    }
+
+    // remove cell key in floor property
+    var floors = window.storage.propertyContainer.floorProperties;
+
+    for (var key in floors) {
+      if (floors[key].id == undoObj.floor) {
+        floors[key].cellBoundaryKey.splice(floors[key].cellBoundaryKey.indexOf(undoObj.id), 1);
+      }
+    }
+
+    window.conditions.LAST_CELLBOUNDARY_ID_NUM--;
+
+    log.trace(window.storage);
+
   }
 
   return PropertyManager;
