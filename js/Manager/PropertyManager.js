@@ -7,13 +7,15 @@ define([
   "../Storage/Canvas/Stage.js",
   "../Storage/Properties/CellProperty.js",
   "../PubSub/Subscriber.js",
-  "../Storage/Properties/CellBoundaryProperty.js"
+  "../Storage/Properties/CellBoundaryProperty.js",
+  "../Storage/Properties/StateProperty.js"
 ], function(
   FloorProperty,
   Stage,
   CellProperty,
   Subscriber,
-  CellBoundaryProperty
+  CellBoundaryProperty,
+  StateProperty
 ) {
   'use strict';
 
@@ -140,6 +142,19 @@ define([
     window.storage.propertyContainer.getElementById('floor', reqObj.floor).cellKey.push(
       reqObj.id
     );
+
+    // add state property if there if conditions.automGenerateState is true
+    if(window.conditions.automGenerateState){
+      var newState = new StateProperty(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM));
+      newState.setDuality(reqObj.id);
+
+      window.storage.propertyContainer.stateProperties.push( newState );
+      window.storage.propertyContainer.getElementById('floor', reqObj.floor).stateKey.push(
+        newState.id
+      );
+    }
+
+    log.trace(window.storage);
 
   }
 

@@ -110,6 +110,16 @@ define([], function() {
     this.cursorColor = 'red';
 
     /**
+    * @memberof  Conditions
+    */
+    this.automGenerateState = true;
+
+    /**
+    * @memberof  Conditions
+    */
+    this.useMultiSpaceLayer = true;
+
+    /**
      * @memberof Conditions
      * @desc If the value is 'true', the attribute will included json which exported.
      */

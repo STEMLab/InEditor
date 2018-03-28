@@ -4,6 +4,7 @@ var jsonFormat = require("json-format");
 var fs = require("fs");
 var BSON = require("bson");
 var cors = require('cors');
+var earcut = require('earcut');
 var xmlBeautify = require('xml-beautifier');
 var app = express();
 
@@ -38,7 +39,6 @@ app.post('/save-project', function(req, res) {
 
   var bson = new BSON();
   var data = bson.serialize(req.body);
-  console.log(data);
 
   fs.writeFile('./output/save-project.bson', data, function(err) {
 
@@ -83,5 +83,12 @@ app.post('/convert-bson-to-json', function(req, res){
   var bson = new BSON();
   var json = bson.deserialize(buffer);
   res.send(json);
+
+});
+
+app.post('/triangulate', function(req, res){
+
+  var triangles = earcut(req.body);
+  res.send(triangles);
 
 });

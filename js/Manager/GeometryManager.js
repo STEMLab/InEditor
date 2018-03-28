@@ -8,14 +8,16 @@ define([
   "../Storage/Canvas/Object/CellBoundary.js",
   "../PubSub/Subscriber.js",
   "../Storage/Dot/Dot.js",
-  "../Storage/Geometries/CellBoundaryGeometry.js"
+  "../Storage/Geometries/CellBoundaryGeometry.js",
+  "../Storage/Canvas/Object/State.js"
 ], function(
   Cell,
   CellGeometry,
   CellBoundary,
   Subscriber,
   Dot,
-  CellBoundaryGeometry
+  CellBoundaryGeometry,
+  State
 ) {
   'use strict';
 
@@ -194,13 +196,90 @@ define([
     var obj = window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.cells[window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.cells.length - 1];
     obj.corners.visible(false);
 
-    // redraw cellLayer
-    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.layer.draw();
-
     //add cell data in geometry canvasContainer
     window.storage.geometryContainer.cellGeometry.push(new CellGeometry(reqObj.id, obj.dots));
 
+    // add state if there if conditions.automGenerateState is true
+    if (window.conditions.automGenerateState) {
+
+      var manager = window.broker.getManager('end-addnewcell', 'GeometryManager');
+      manager.generateStateUsingCell(tmpObj, reqObj.floor);
+
+    }
+
+    // redraw stage
+    window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
+
+  }
+
+  /**
+   * @memberof GeometryManager
+   */
+  GeometryManager.prototype.generateStateUsingCell = function(tmpObj, floor) {
+
     // add state
+    var wkt = tmpObj.getWKT();
+    var reader = new jsts.io.WKTReader();
+    var cell = reader.read(wkt);
+    var centroid = cell.getCentroid();
+    var realCentroid = cell.getCentroid().getCoordinates()[0];
+    var intersection = centroid.intersection(cell).getCoordinates();
+    var d = 87465132;
+    var data = [];
+
+    function setState() {
+      var centroidDot = new Dot(intersection[0].x, intersection[0].y);
+
+      var stateId = window.conditions.pre_state+(++window.conditions.LAST_STATE_ID_NUM);
+      window.storage.canvasContainer.stages[floor].stateLayer.group.makeNewStateAndAdd(stateId, intersection[0].x, intersection[0].y);
+
+      centroidDot.participateObj(stateId, 'state');
+      window.storage.dotFoolContainer.getDotFool(floor).push(centroidDot);
+    }
+
+    if(intersection.length == 0){
+
+      for(var i = 0 ; i < tmpObj.dots.length; i++){
+        data.push(tmpObj.dots[i].point.x, tmpObj.dots[i].point.y);
+      }
+
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status == 200) {
+          var triangles = JSON.parse(xhr.responseText);
+
+          for(var i = 0 ; i < triangles.length; i += 3){
+
+            log.info(i, i+1, i+2);
+            var partOfCellWKT = 'POLYGON (( ' + tmpObj.dots[triangles[i]].point.x + ' ' + tmpObj.dots[triangles[i]].point.y + ', ';
+              partOfCellWKT += tmpObj.dots[triangles[i+1]].point.x + ' ' + tmpObj.dots[triangles[i+1]].point.y + ', ';
+              partOfCellWKT += tmpObj.dots[triangles[i+2]].point.x + ' ' + tmpObj.dots[triangles[i+2]].point.y + ', ';
+              partOfCellWKT += tmpObj.dots[triangles[i]].point.x + ' ' + tmpObj.dots[triangles[i]].point.y + '))';
+            var partOfCell = reader.read(partOfCellWKT);
+            intersection = partOfCell.intersection(cell).getCentroid().getCoordinates();
+
+            if(intersection.length == 1){
+              var tmpD = Math.sqrt(Math.abs(Math.pow(realCentroid.x-intersection[0].x, 2)) + Math.abs(Math.pow(realCentroid.y-intersection[0].y, 2)));
+              if(tmpD < d) d = tmpD;
+            }
+          }
+
+          log.info(intersection);
+
+          setState();
+
+        }
+      }
+
+      xhr.open("POST", "http://127.0.0.1:8080/triangulate", false);
+      xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      xhr.send(JSON.stringify(data));
+
+    } else {
+
+      setState();
+
+    }
 
   }
 
@@ -221,7 +300,7 @@ define([
         cells[key].destroy(undoObj.floor);
 
         // free dot from object
-        for(var cellkey in cells[key].dots){
+        for (var cellkey in cells[key].dots) {
           window.storage.dotFoolContainer.getDotFool(undoObj.floor).deleteDotFromObj(cells[key].dots[cellkey].uuid, cells[key].id);
         }
 
@@ -260,7 +339,7 @@ define([
    */
   GeometryManager.prototype.cancelAddNewCell = function(reqObj) {
 
-    if(reqObj.floor == undefined){
+    if (reqObj.floor == undefined) {
       window.tmpObj = null;
       return;
     }
@@ -455,10 +534,10 @@ define([
 
 
   /**
-  * @memberof GeometryManager
-  * @param undoObj floor, uuid of last dot
-  */
-  GeometryManager.prototype.addNewCellBoundary_undo = function(undoObj){
+   * @memberof GeometryManager
+   * @param undoObj floor, uuid of last dot
+   */
+  GeometryManager.prototype.addNewCellBoundary_undo = function(undoObj) {
 
     var tmpObj = window.tmpObj;
 
@@ -515,21 +594,21 @@ define([
 
 
   /**
-  * @memberof GeometryManager
-  */
-  GeometryManager.prototype.endAddNewCellBoundary_undo = function(undoObj){
+   * @memberof GeometryManager
+   */
+  GeometryManager.prototype.endAddNewCellBoundary_undo = function(undoObj) {
 
     log.info(undoObj);
 
     // remove cellboundary in canvasContainer
     var cellboundaries = window.storage.canvasContainer.stages[undoObj.floor].cellBoundaryLayer.group.cellBoundaries;
 
-    for(var key in cellboundaries){
-      if(cellboundaries[key].id == undoObj.id){
+    for (var key in cellboundaries) {
+      if (cellboundaries[key].id == undoObj.id) {
         cellboundaries[key].destroy(undoObj.floor);
 
         // free dot from object
-        for(var dotkey in cellboundaries[key].dots){
+        for (var dotkey in cellboundaries[key].dots) {
           window.storage.dotFoolContainer.getDotFool(undoObj.floor).deleteDotFromObj(cellboundaries[key].dots[dotkey].uuid, cellboundaries[key].id);
         }
 
@@ -556,7 +635,7 @@ define([
    */
   GeometryManager.prototype.cancelAddNewCellBoundary = function(reqObj) {
 
-    if(reqObj.floor == undefined){
+    if (reqObj.floor == undefined) {
       window.tmpObj = null;
       return;
     }

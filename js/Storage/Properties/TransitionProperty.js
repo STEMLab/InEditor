@@ -39,6 +39,11 @@ define([],function() {
     * @memberof TransitionProperty
     */
     this.duality; // CellSpaceBoundary
+
+    /**
+    * @memberof TransitionProperty
+    */
+    this.isInterLayerConnetion = { tf : false, connection : [] };
   }
 
   /**

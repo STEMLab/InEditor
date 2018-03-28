@@ -404,9 +404,38 @@ define([], function() {
       }]
     };
 
-    var divContent = "<div>state properties</div>";
+    this.setStateyView(config, storage.propertyContainer.getElementById('state', id), 'state');
 
-    this.setView(config, divContent);
+  }
+
+  /**
+  * @memberof Property
+  */
+  Property.prototype.setStateyView = function(config, property, type){
+
+    // id, name, desc, duality, connects[]
+
+    $('#property-container').empty();
+
+    var propertyLayout = new GoldenLayout(config, $('#protperty-container'));
+
+    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
+    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + property.description + "</textarea></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">connects</td><td class=\"value\"><select id=\"connects-text\" style=\"width: 100%;\">";
+
+    for (var key in property.connects) {
+      var value = property.connects[key];
+      propertiesDiv += "<option value=\"" + value + "\">" + value + "</option>";
+    }
+
+    propertiesDiv += "</select></td></tr>";
+    propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
+    propertiesDiv += "</table>";
+
+    this.setView(config, propertiesDiv);
 
   }
 

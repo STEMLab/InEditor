@@ -33,11 +33,15 @@ define([
 
     handlerBinder['cellboundary-btn'] = {
       'click': this.clickCellBoundaryBtn
-    }
+    };
+
+    handlerBinder['state-btn'] = {
+      'click': this.clickStateBtn
+    };
 
     handlerBinder['stage'] = {
       'contentClick': this.addNewDot,
-      'contentMousemove': this.snapping
+      'contentMousemove': this.moveMouse
     };
 
     handlerBinder['Escape'] = {
@@ -325,20 +329,24 @@ define([
   /**
    * @memberof DrawEventHandler
    */
-  DrawEventHandler.prototype.snapping = function(broker, previousMsg, data) {
+  DrawEventHandler.prototype.moveMouse = function(broker, previousMsg, data) {
 
     var result = new Result();
     var rect = window.storage.canvasContainer.stages[data.currentTarget.attrs.id].stage.content.getBoundingClientRect();
 
     if (broker.isPublishable('snapping')) {
 
-      broker.publish(new Message('snapping', {
+      var reqObj = {
         'floor': data.currentTarget.attrs.id,
         'point': {
           x: data.evt.clientX - rect.left,
           y: data.evt.clientY - rect.top
         }
-      }));
+      };
+
+      broker.publish(new Message('snapping', reqObj));
+
+      broker.publish(new Message('movetooltip', reqObj));
 
       result.result = true;
       result.msg = 'snapping';
@@ -399,6 +407,19 @@ define([
     } else {
       result.msg = "wrong c transition : " + previousMsg + " to start-addnewcellboundary, end-addnewcellboundary.";
     }
+
+    return result;
+
+  }
+
+  /**
+  * @memberof DrawEventHandler
+  */
+  DrawEventHandler.prototype.clickStateBtn = function(broker, previousMsg){
+
+    var result = new Result();
+
+    log.info('call click state-btn');
 
     return result;
 
