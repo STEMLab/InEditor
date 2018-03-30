@@ -40,6 +40,10 @@ define([], function() {
       closed: true
     });
 
+    this.poly.on('contentDblclick', function (e) {
+      log.info('mousedown : ', e);
+    });
+
     /**
     * @memberof Cell
     */

@@ -76,7 +76,7 @@ define([
    */
   Broker.prototype.publish = function(_message) {
 
-    log.info(_message.req + " published");
+    // log.info(_message.req + " published");
 
     if (this.topic == null) {
 
@@ -138,6 +138,10 @@ define([
     this.reqSpecList['start-addnewstate'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['addnewstate'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['end-addnewstate'] = new MessageSpec('cycle', 'including', ['draw'], true);
+
+    this.reqSpecList['start-addnewtransition'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['addnewtransition'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['end-addnewtransition'] = new MessageSpec('cycle', 'including', ['draw'], true);
 
     this.reqSpecList['exporttoviewer'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['exporttofactory'] = new MessageSpec('single', 'including', null, false);

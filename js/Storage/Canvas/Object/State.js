@@ -20,6 +20,15 @@ define([], function() {
       y: _y
     });
 
+    this.dot = undefined;
+
+  }
+
+  /**
+  * @memberof State
+  */
+  State.prototype.setDot = function(dot){
+    this.dot = dot;
   }
 
   /**
@@ -35,6 +44,7 @@ define([], function() {
   State.prototype.getObj = function(){
     return this.circle;
   }
+
 
   return State;
 

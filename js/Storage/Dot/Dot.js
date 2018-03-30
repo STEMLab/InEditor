@@ -174,5 +174,13 @@ define([], function() {
 
   }
 
+   Dot.prototype.isState = function(){
+
+     var values = Object.values(this.partOf);
+     if( values.indexOf('state') == -1) return false;
+     return true;
+
+   }
+
   return Dot;
 });

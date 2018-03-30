@@ -30,6 +30,27 @@ define([
     return this.transitionGroup;
   }
 
+  /**
+  * @memberof TransitionGroup
+  * @param {Transition} obj
+  */
+  TransitionGroup.prototype.add = function(obj){
+
+    var newTransition = new Transition(obj.id);
+
+    this.copyDots(newTransition, obj.dots);
+
+  }
+
+  /**
+  * @memberof TransitionGroup
+  */
+  TransitionGroup.prototype.copyDots = function(newTransition, dots){
+
+    newTransition.
+
+  }
+
   return TransitionGroup;
 
 });

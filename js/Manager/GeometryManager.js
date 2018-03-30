@@ -9,7 +9,9 @@ define([
   "../PubSub/Subscriber.js",
   "../Storage/Dot/Dot.js",
   "../Storage/Geometries/CellBoundaryGeometry.js",
-  "../Storage/Canvas/Object/State.js"
+  "../Storage/Canvas/Object/State.js",
+  "../Storage/Canvas/Object/Transition.js",
+  "../Storage/Dot/DotMath.js"
 ], function(
   Cell,
   CellGeometry,
@@ -17,7 +19,9 @@ define([
   Subscriber,
   Dot,
   CellBoundaryGeometry,
-  State
+  State,
+  Transition,
+  DotMath
 ) {
   'use strict';
 
@@ -58,6 +62,10 @@ define([
 
     this.addCallbackFun('cancel-addnewcell', this.cancelAddNewCell);
     this.addCallbackFun('cancel-addnewcellboundary', this.cancelAddNewCellBoundary);
+
+    this.addCallbackFun('start-addnewtransition', this.startAddNewTransition, function() {}, function() {});
+    this.addCallbackFun('addnewtransition', this.addNewTransition, function() {}, function() {});
+    this.addCallbackFun('end-addnewtransition', this.endAddNewTransition, function(){}, function(){});
 
   }
 
@@ -172,7 +180,7 @@ define([
     // clear tmp obj
     window.tmpObj = null;
     window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.removeObj();
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+    // window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
     for (var key in tmpObj.dots) {
       tmpObj.dots[key].leaveObj('tmpObj');
@@ -187,7 +195,7 @@ define([
     tmpObj.id = reqObj.id;
     tmpObj.name = reqObj.id;
 
-    // add cell using tmpObj
+    // add cell to canvasContainer using tmpObj
     window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.add(tmpObj);
 
     // fragmenteGeometry
@@ -231,7 +239,7 @@ define([
       var centroidDot = new Dot(intersection[0].x, intersection[0].y);
 
       var stateId = window.conditions.pre_state+(++window.conditions.LAST_STATE_ID_NUM);
-      window.storage.canvasContainer.stages[floor].stateLayer.group.makeNewStateAndAdd(stateId, intersection[0].x, intersection[0].y);
+      window.storage.canvasContainer.stages[floor].stateLayer.group.makeNewStateAndAdd(stateId, centroidDot);
 
       centroidDot.participateObj(stateId, 'state');
       window.storage.dotFoolContainer.getDotFool(floor).push(centroidDot);
@@ -779,6 +787,122 @@ define([
     });
 
   }
+
+  /**
+  * @memberof GeometryManager
+  */
+  GeometryManager.prototype.startAddNewTransition = function(reqObj){
+
+    var tmpObj = new Transition('tmpObj');
+    tmpObj.type = 'transition';
+    window.tmpObj = tmpObj;
+
+  }
+
+  /**
+  * @memberof GeometryManager
+  */
+  GeometryManager.prototype.addNewTransition = function(reqObj){
+
+    if (window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.obj == null) {
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.addNewObj('transition');
+      window.tmpObj.floor = reqObj.floor;
+    }
+
+    // get  coordinate
+    var point = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor.coor;
+
+    var isDotExist = window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDotByPoint({
+      x: point.x,
+      y: point.y
+    });
+
+    if( isDotExist != null && tmpObj.dots.length <= 1 && isDotExist.isState ) {
+
+      window.tmpObj.addState(isDotExist);
+      isDotExist.participateObj('tmpObj', 'transition');
+
+      if(tmpObj.dots.length == 2){
+        var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+        manager.setTooltipText({
+          floor: reqObj.floor,
+          text: 'If you want to set duality of this transition, click cellspacecoundry.\nIf not, please click transition button or push enter'
+        });
+      }
+
+    } else if( tmpObj.dots.length == 2 ){
+
+      // is part of cellBoundary
+      var cellBoundaries = window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer.group.getObjects();
+      for(var boundaryKey in cellBoundaries){
+
+        var dots = cellBoundaries[boundaryKey].getDots();
+
+        // this lines shoule activate when factory support real line string
+        // for(var i = 0 ; i < dots.length ; i ++){
+        //
+        //   var line = { dot1 : null, dot2 : null };
+        //   line.dot1 = dots[i];
+        //   if( i == dots.length - 1 ) line.dot2 = dots[0];
+        //   else line.dot2 = dots[1];
+        //
+        // }
+
+        var line = {
+          dot1: dots[0],
+          dot2: dots[1]
+        };
+
+        if(DotMath.isLineContainDot(line, {point: point})){
+          var newDot = new Dot(point.x, point.y);
+          window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(newDot);
+          window.tmpObj.insertDot(1, newDot);
+
+          // segmentation cellboundary
+        }
+
+      }
+
+    }
+
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+
+    log.trace(window.storage);
+
+  }
+
+
+  /**
+  * @memberof GeometryManager
+  */
+  GeometryManager.prototype.endAddNewTransition = function(reqObj){
+
+    log.info('call end add new transition');
+
+    if( reqObj.isEmpty != null){
+      window.tmpObj = null;
+      return;
+    }
+
+    var tmpObj = window.tmpObj;
+
+    // clear tmp object
+    window.tmpObj = null;
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.removeObj();
+    // window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+
+    for (var key in tmpObj.dots){
+      tmpObj.dots[key].leaveObj('tmpObj');
+    }
+
+
+    tmpObj.id = reqObj.id;
+    tmpObj.name = reqObj.id;
+
+    // add transition to canvasContainer using tmpObj
+
+  }
+
 
 
   return GeometryManager;

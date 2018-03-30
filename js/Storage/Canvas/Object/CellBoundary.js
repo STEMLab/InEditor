@@ -206,6 +206,13 @@ define([], function() {
 
   }
 
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.getDots = function(){
+    return this.dots;
+  }
+
   return CellBoundary;
 
 });

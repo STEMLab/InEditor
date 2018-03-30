@@ -56,6 +56,8 @@ define([
 
     this.addCallbackFun('movetooltip', this.moveTooltip);
 
+    this.addCallbackFun('start-addnewtransition', this.startAddNewTransition);
+
   }
 
   /**
@@ -391,6 +393,9 @@ define([
 
   }
 
+  /**
+   * @memberof UIManager
+   */
   UIManager.prototype.endAddNewCellBoundary_makeHistoryObj = function(reqObj) {
 
     var obj = reqObj;
@@ -445,6 +450,20 @@ define([
 
     }
   }
+
+  /**
+   * @memberof UIManager
+   */
+   UIManager.prototype.startAddNewTransition = function(){
+
+     // change cell btn color
+     document.getElementById('transition-btn').src = "../../assets/icon/transition_a.png";
+
+      var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+      manager.setTooltipText({text:'select state'});
+
+   }
+
 
 
   return UIManager;

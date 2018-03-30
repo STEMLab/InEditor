@@ -19,9 +19,12 @@ define([
 
   }
 
-  StateGroup.prototype.makeNewStateAndAdd = function(id, _x, _y ){
+  StateGroup.prototype.makeNewStateAndAdd = function(id, dot){
 
-    this.states.push(new State(id, _x, _y));
+    var newState = new State(id, dot.point.x, dot.point.y);
+    newState.setDot(dot);
+
+    this.states.push(newState);
     this.stateGroup.add(this.states[this.states.length-1].getObj());
     console.log("add state complete : ", this);
   }

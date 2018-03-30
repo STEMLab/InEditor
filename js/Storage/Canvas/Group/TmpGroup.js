@@ -40,12 +40,13 @@ define([
     this.tooltip = new Konva.Text({
         text: "",
         fontFamily: "Calibri",
-        fontSize: 12,
+        fontSize: 15,
         padding: 5,
         textFill: "white",
         fill: "black",
         alpha: 0.75,
-        visible: false
+        visible: false,
+        width: 150
     });
 
     this.cursor.name('cursor');
@@ -84,6 +85,7 @@ define([
     } else if (type == 'transition') {
 
       this.obj = new Transition('tmpObj');
+      window.tmpObj = this.obj;
       this.tmpGroup.add(this.obj.getLineObject());
 
     }
