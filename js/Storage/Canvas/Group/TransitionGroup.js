@@ -47,7 +47,15 @@ define([
   */
   TransitionGroup.prototype.copyDots = function(newTransition, dots){
 
-    newTransition.
+    if(dots.length == 2){
+
+
+
+    } else {
+
+
+
+    }
 
   }
 

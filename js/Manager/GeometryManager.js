@@ -900,6 +900,9 @@ define([
     tmpObj.name = reqObj.id;
 
     // add transition to canvasContainer using tmpObj
+    window.storage.canvasContainer.stages[reqObj.floor].transitionLayer.group.add(tmpObj);
+
+
 
   }
 
