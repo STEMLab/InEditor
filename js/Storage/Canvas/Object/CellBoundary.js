@@ -2,7 +2,11 @@
 * @author suheeeee<lalune1120@hotmail.com>
 */
 
-define([], function() {
+define([
+  "../../Dot/DotMath.js"
+], function(
+  DotMath
+) {
   'use strict';
 
   /**
@@ -56,6 +60,43 @@ define([], function() {
     this.addNewDot(dot);
 
     this.addCornerObj(dot.uuid, dot.getCoor());
+
+  }
+
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.insertCorner = function(dot, index){
+
+    // if index == undefined
+    if( index == undefined ){
+
+      for(var i = 0 ; i < this.dots.length - 1; i ++){
+
+        var line = { dot1 : this.dots[i], dot2 : this.dots[i+1] };
+
+        if( DotMath.isLineContainDot(line, dot) ){
+
+          this.dots.splice(i, 0, dot);
+          dot.participateObj(this.id, 'cellBoundary');
+          this.addObjectFromDots();
+
+        }
+
+      }
+
+    } else {
+
+      if(this.dots.length <= index ) return;
+      if( DotMath.isLineContainDot({ dot1 : this.dots[index-1], dot2 : this.dots[index] }, dot) ){
+
+        this.dots.splice(index, 0, dot);
+        dot.participateObj(this.id, 'cellBoundary');
+        this.addObjectFromDots();
+
+      }
+
+    }
 
   }
 

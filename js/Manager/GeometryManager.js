@@ -11,7 +11,9 @@ define([
   "../Storage/Geometries/CellBoundaryGeometry.js",
   "../Storage/Canvas/Object/State.js",
   "../Storage/Canvas/Object/Transition.js",
-  "../Storage/Dot/DotMath.js"
+  "../Storage/Dot/DotMath.js",
+  "../Storage/Geometries/TransitionGeometry.js",
+  "../Storage/Geometries/StateGeometry.js"
 ], function(
   Cell,
   CellGeometry,
@@ -21,7 +23,9 @@ define([
   CellBoundaryGeometry,
   State,
   Transition,
-  DotMath
+  DotMath,
+  TransitionGeometry,
+  StateGeometry
 ) {
   'use strict';
 
@@ -243,6 +247,8 @@ define([
 
       centroidDot.participateObj(stateId, 'state');
       window.storage.dotFoolContainer.getDotFool(floor).push(centroidDot);
+
+      window.storage.geometryContainer.stateGeometry.push(new StateGeometry(stateId, centroidDot.point));
     }
 
     if(intersection.length == 0){
@@ -859,6 +865,9 @@ define([
           window.tmpObj.insertDot(1, newDot);
 
           // segmentation cellboundary
+          cellBoundaries[boundaryKey].insertCorner(newDot, 1);
+
+
         }
 
       }
@@ -877,8 +886,6 @@ define([
   */
   GeometryManager.prototype.endAddNewTransition = function(reqObj){
 
-    log.info('call end add new transition');
-
     if( reqObj.isEmpty != null){
       window.tmpObj = null;
       return;
@@ -895,14 +902,17 @@ define([
       tmpObj.dots[key].leaveObj('tmpObj');
     }
 
-
     tmpObj.id = reqObj.id;
     tmpObj.name = reqObj.id;
 
     // add transition to canvasContainer using tmpObj
     window.storage.canvasContainer.stages[reqObj.floor].transitionLayer.group.add(tmpObj);
 
+    //add transition data in geometry canvasContainer
+    window.storage.geometryContainer.transitionGeometry.push(new TransitionGeometry(tmpObj.id, tmpObj.getConnection(), tmpObj.getDots()));
 
+    // redraw stage
+    window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
 
   }
 

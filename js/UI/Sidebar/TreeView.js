@@ -150,7 +150,24 @@ define([], function() {
     });
 
     $("#tree-view").fancytree("getTree").activateKey(id);
-    
+
+  }
+
+  /**
+  * @memberof TreeView
+  */
+  TreeView.prototype.addTransition = function(id, floor){
+
+    $("#tree-view").fancytree("getTree").getNodeByKey(floor+"-transition").addChildren({
+      title : id,
+      key : id,
+      folder : false,
+      type : 'state',
+      icon : '../../assets/tree-icon/transition.png'
+    });
+
+    $("#tree-view").fancytree("getTree").activateKey(id);
+
   }
 
   /**

@@ -468,9 +468,7 @@ define([], function() {
       }]
     };
 
-    var transitionProperty = storage.propertyContainer.getElementById('transition', id);
-
-    this.setView(config, divContent);
+    this.setTransitionView(config, storage.propertyContainer.getElementById('transition', id), 'transition');
 
   }
 
@@ -528,6 +526,31 @@ define([], function() {
   Property.prototype.clear = function(){
 
     document.getElementById('property-container').innerHTML = "";
+
+  }
+
+  Property.prototype.setTransitionView = function(config, property, type){
+
+    // id, name, description, weight, connects, duality, isInterLayerConnetion
+
+    $('#property-container').empty();
+
+    var propertyLayout = new GoldenLayout(config, $('#property-container'));
+
+    log.info(property.getConncetsString());
+
+    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
+    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + property.description + "</textarea></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">weight</td><td class=\"value\"><input id=\"weight-text\" type=\"text\" value=" + property.weight + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">connects</td><td class=\"value\"><input id=\"connects-text\" type=\"text\" disabled value=\""+ property.getConncetsString() + "\"></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">is InterLayerConnetion</td><td class=\"value\"><input id=\"interlayer-text\" type=\"checkbox\" disabled value=" + property.isInterLayerConnetion.tf + "></td></tr>";
+    propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
+    propertiesDiv += "</table>";
+
+    this.setView(config, propertiesDiv);
 
   }
 

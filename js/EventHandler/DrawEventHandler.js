@@ -353,7 +353,15 @@ define([
 
     } else if (broker.isPublishable('end-addnewstate')) {
 
-    } else if (broker.isPublishable('end-addnewtrasition')) {
+    } else if (broker.isPublishable('end-addnewtransition')) {
+
+      broker.publish(new Message('end-addnewtransition', {
+        'id': window.conditions.pre_transition + (++window.conditions.LAST_TRANSITION_ID_NUM),
+        'floor': window.tmpObj.floor
+      }));
+
+      result.result = true;
+      result.msg = null;
 
     } else {
       result.mgs = "no match function."
@@ -488,7 +496,8 @@ define([
 
     } else if(broker.isPublishable('end-addnewtransition')){
 
-      // 나중에
+      broker.publish(new Message('start-addnewtransition', null));
+
       result.result = true;
       result.msg = null;
 

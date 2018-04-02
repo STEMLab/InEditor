@@ -57,6 +57,7 @@ define([
     this.addCallbackFun('movetooltip', this.moveTooltip);
 
     this.addCallbackFun('start-addnewtransition', this.startAddNewTransition);
+    this.addCallbackFun('end-addnewtransition', this.endAddNewTransition);
 
   }
 
@@ -461,6 +462,28 @@ define([
 
       var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
       manager.setTooltipText({text:'select state'});
+
+   }
+
+   /**
+   * @memberof UIManager
+   * @param {Object} reqObj { id, floor, isEmpty }
+   */
+   UIManager.prototype.endAddNewTransition = function(reqObj){
+
+     // change transition btn color
+     document.getElementById('transition-btn').src = "../../assets/icon/transition_d.png";
+
+     if (reqObj.isEmpty != null) return;
+
+     // set sidebar > propertyContainer
+     window.uiContainer.sidebar.property.setPropertyTab('transition', reqObj.id, window.storage);
+
+     // refresh tree view
+     window.uiContainer.sidebar.treeview.addTransition(reqObj.id, reqObj.floor);
+
+     var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+     manager.setTooltipText({text:''});
 
    }
 

@@ -8,14 +8,16 @@ define([
   "../Storage/Properties/CellProperty.js",
   "../PubSub/Subscriber.js",
   "../Storage/Properties/CellBoundaryProperty.js",
-  "../Storage/Properties/StateProperty.js"
+  "../Storage/Properties/StateProperty.js",
+  "../Storage/Properties/TransitionProperty.js"
 ], function(
   FloorProperty,
   Stage,
   CellProperty,
   Subscriber,
   CellBoundaryProperty,
-  StateProperty
+  StateProperty,
+  TransitionProperty
 ) {
   'use strict';
 
@@ -46,7 +48,7 @@ define([
     this.addCallbackFun('updaterefdata', this.updateRefProperty);
 
     this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.makeSimpleHistoryObj, this.endAddNewCellBoundary_undo);
-
+    this.addCallbackFun('end-addnewtransition', this.endAddNewTransition)
   }
 
   /**
@@ -252,6 +254,34 @@ define([
     window.conditions.LAST_CELLBOUNDARY_ID_NUM--;
 
     log.trace(window.storage);
+
+  }
+
+  /**
+  * @memberof PropertyManager
+  * @param {Message.reqObj} reqObj id : if of new object<br>floor : id of the floor where the new object will be created
+  */
+  PropertyManager.prototype.endAddNewTransition = function(reqObj){
+
+    if(reqObj.isEmpty != null) return;
+
+    var canvasObj = window.storage.canvasContainer.stages[reqObj.floor].transitionLayer.group.getLastTransition();
+    var newProperty = new TransitionProperty(reqObj.id);
+    var connects = canvasObj.getConnection()
+    newProperty.setConnects(connects);
+    newProperty.setDuality(canvasObj.getDuality());
+
+    // add connects to state
+    window.storage.propertyContainer.getElementById('state', connects[0]).addConnects(connects[1]);
+    window.storage.propertyContainer.getElementById('state', connects[1]).addConnects(connects[0]);
+
+    // add new transition object in storage.propertyContainer
+    window.storage.propertyContainer.transitionProperties.push(newProperty);
+
+    // add transition key in floor property
+    window.storage.propertyContainer.getElementById('floor', reqObj.floor).transitionKey.push(
+      reqObj.id
+    );
 
   }
 

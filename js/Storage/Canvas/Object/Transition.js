@@ -77,10 +77,14 @@ define([], function() {
   Transition.prototype.insertDot = function(index, dot){
 
     this.dots.splice(index, 0, dot);
+    dot.participateObj(this.id, 'transition');
     this.addObjectFromDots();
 
   }
 
+  /**
+  * @memberof Transition
+  */
   Transition.prototype.addObjectFromDots = function(){
 
     var points = [];
@@ -91,6 +95,48 @@ define([], function() {
     }
 
     this.line.attrs.points = points;
+
+  }
+
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.getConnection = function(){
+    var result = [];
+    var connects = [this.dots[0], this.dots[this.dots.length - 1]];
+
+    for(var i = 0 ; i < 2; i++){
+      for(var key in connects[i].memberOf){
+        if(connects[i].memberOf[key] == 'state') {
+          result.push(key);
+          break;
+        }
+      }
+
+    }
+
+    return result;
+  }
+
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.getDots = function(){
+    return this.dots;
+  }
+
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.getDuality = function(){
+
+    for(var i = 0 ; i < this.dots.length; i++){
+      for(var key in this.dots[i].memberOf){
+        if(this.dots[i].memberOf[key] == 'cellBoundary') return key;
+      }
+    }
+
+    return null;
 
   }
 

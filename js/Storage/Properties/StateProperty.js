@@ -65,5 +65,13 @@ define([], function() {
     return this.id;
   }
 
+  /**
+  * @memberof StateProperty
+  * @param {String} id of connected dot
+  */
+  StateProperty.prototype.addConnects = function(connect){
+    this.connects.push(connect);
+  }
+
   return StateProperty;
 });

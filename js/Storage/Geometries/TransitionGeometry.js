@@ -8,17 +8,22 @@ define([], function() {
   /**
   * @class TransitionGeometry
   */
-  function TransitionGeometry() {
+  function TransitionGeometry(id, connects, dots) {
 
     /**
     * @memberof TransitionGeometry
     */
-    this.id;
+    this.id = id;
 
     /**
     * @memberof TransitionGeometry
     */
-    this.points = [];
+    this.connects = connects;
+
+    /**
+    * @memberof TransitionGeometry
+    */
+    this.points = dots;
   }
 
   /**
@@ -26,7 +31,8 @@ define([], function() {
   */
   TransitionGeometry.prototype.load = function(values){
     this.id = values.id;
-    this.connects = values.points;
+    this.connects = values.connects;
+    this.points = points
   }
 
   return TransitionGeometry;

@@ -89,8 +89,8 @@ define([
     this.stage.add(this.backgroundLayer.getLayer());
     this.stage.add(this.cellLayer.getLayer());
     this.stage.add(this.cellBoundaryLayer.getLayer());
-    this.stage.add(this.stateLayer.getLayer());
     this.stage.add(this.transitionLayer.getLayer());
+    this.stage.add(this.stateLayer.getLayer());
     this.stage.add(this.tmpLayer.getLayer());
 
   }
