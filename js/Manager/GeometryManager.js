@@ -248,7 +248,7 @@ define([
       centroidDot.participateObj(stateId, 'state');
       window.storage.dotFoolContainer.getDotFool(floor).push(centroidDot);
 
-      window.storage.geometryContainer.stateGeometry.push(new StateGeometry(stateId, centroidDot.point));
+      window.storage.geometryContainer.stateGeometry.push(new StateGeometry(stateId, centroidDot));
     }
 
     if(intersection.length == 0){
@@ -910,6 +910,12 @@ define([
 
     //add transition data in geometry canvasContainer
     window.storage.geometryContainer.transitionGeometry.push(new TransitionGeometry(tmpObj.id, tmpObj.getConnection(), tmpObj.getDots()));
+
+    // change color of cellboundary
+    var duality = tmpObj.getDuality();
+    if(duality != null) {
+        window.storage.canvasContainer.stages[reqObj.floor].getElementById('cellboundary', duality).changeLineColor('gray');
+    }
 
     // redraw stage
     window.storage.canvasContainer.stages[reqObj.floor].stage.draw();

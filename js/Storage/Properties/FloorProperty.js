@@ -109,5 +109,9 @@ define([], function() {
 
   }
 
+  FloorProperty.prototype.getId = function(){
+    return this.id;
+  }
+
   return FloorProperty;
 });

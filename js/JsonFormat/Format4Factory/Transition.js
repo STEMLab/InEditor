@@ -79,6 +79,30 @@ define(["./Feature"], function(Feature) {
     }
   }
 
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.setCoordinates = function(connects){
+
+    function isArray(o) {
+      return Object.prototype.toString.call(o) === '[object Array]';
+    }
+
+    if(!isArray(connects)){
+
+      log.warn("The given parameter is not an Array type.");
+
+    } else if(connects.lenght != 2) {
+
+      log.warn("The given the length of parameter is now two.")
+
+    } else{
+
+      this.properties['connects'] = connects;
+
+    }
+  }
+
   return Transition;
 
 });

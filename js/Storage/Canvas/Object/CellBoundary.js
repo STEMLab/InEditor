@@ -254,6 +254,13 @@ define([
     return this.dots;
   }
 
+  /**
+  * @memberof CellBoundary
+  */
+  CellBoundary.prototype.changeLineColor = function(color){
+    this.line.setAttr('stroke', color);
+  }
+
   return CellBoundary;
 
 });

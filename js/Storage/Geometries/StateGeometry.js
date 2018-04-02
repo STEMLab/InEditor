@@ -13,7 +13,7 @@ define([], function() {
     /**
     * @memberof StateGeometry
     */
-    this.id;
+    this.id = id;
 
     /**
     * @memberof StateGeometry

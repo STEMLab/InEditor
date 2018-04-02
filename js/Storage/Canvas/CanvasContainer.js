@@ -85,50 +85,8 @@ define([
       }
     }
 
-    switch (_type) {
-      case 'cell':
-        var cells = window.storage.canvasContainer.stages[stageID].cellLayer.group.cells;
-        for (var key in cells) {
-          if (cells[key].id == _id) {
-            result = cells[key];
-            break;
-          }
-        }
-        break;
-      case 'cellboundary':
-        var cellboundaries = window.storage.canvasContainer.stages[stageID].cellBoundaryLayer.group.cellBoundaries;
-        for (var key in cellboundaries) {
-          if (cellboundaries[key].id == _id) {
-            result = cellboundaries[key];
-            break;
-          }
-        }
-        break;
-      case 'state':
-        var states = window.storage.canvasContainer.stages[stageID].stateLayer.group.states;
-        for (var key in states) {
-          if (states[key].id == _id) {
-            result = states[key];
-            break;
-          }
-        }
-        break;
-      case 'transition':
-        var transitions = window.storage.canvasContainer.stages[stageID].transitionLayer.group.transitions;
-        for (var key in transitions) {
-          if (transitions[key].id == _id) {
-            result = transitions[key];
-            break;
-          }
-        }
-        break;
-      case 'stage':
-        result = window.storage.canvasContainer.stages[stageID];
-        break;
-      default:
-    }
+    return window.storage.canvasContainer.stages[stageID].getElementById(_type, _id);
 
-    return result;
   }
 
   /**

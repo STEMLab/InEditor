@@ -152,7 +152,7 @@ define([], function() {
           'name': true,
           'description': true,
           'duality': true,
-          'connected': true
+          'connects': true
         }
       },
       'Transition': {
@@ -162,7 +162,8 @@ define([], function() {
           'duality': true,
           'weight': true
         }
-      }
+      },
+      'MultiLayer': false
     };
 
     /**
@@ -192,7 +193,7 @@ define([], function() {
           'name': true,
           'description': true,
           'duality': true,
-          'connected': true
+          'connects': true
         }
       },
       'Transition': {

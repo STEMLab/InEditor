@@ -162,7 +162,7 @@ define([], function() {
       title : id,
       key : id,
       folder : false,
-      type : 'state',
+      type : 'transition',
       icon : '../../assets/tree-icon/transition.png'
     });
 
