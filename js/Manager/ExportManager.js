@@ -315,7 +315,7 @@ define([
     var cells = manager.cellObj4VFactory(document.id, primalspacefeatures.id);
     var cellBoundaries = manager.cellBoundaryObj4VFactory(document.id, primalspacefeatures.id);
     var states = manager.stateObj4VFactory(document.id, spaceLayers);
-    var transitions = manager.transitionObj4VFactory(document.id, primalspacefeatures.id);
+    var transitions = manager.transitionObj4VFactory(document.id, spaceLayers);
 
     var address = {
       'post-document': baseURL + '/document/' + document.id,
@@ -326,6 +326,7 @@ define([
       'post-multiLayeredGraph': baseURL + '/multilayeredgraph/' + multiLayeredGraph.id,
       'post-spaceLayers': baseURL + '/spacelayers/',
       'post-state': baseURL + '/state/',
+      'post-transition': baseURL + '/transition/',
       'get-document': baseURL + '/document/' + document.id
     };
 
@@ -348,8 +349,11 @@ define([
     for (var i = 0; i < spaceLayers.length; i++)
       manager.postJson(address['post-spaceLayers'] + spaceLayers[i].id, JSON.stringify(spaceLayers[i]));
 
-    for (var i = 0; i < states.length; i++)
-      manager.postJson(address['post-state'] + states[i].id, JSON.stringify(states[i]));
+    // for (var i = 0; i < states.length; i++)
+    //   manager.postJson(address['post-state'] + states[i].id, JSON.stringify(states[i]));
+
+    for (var i = 0; i < transitions.length; i++)
+      manager.postJson(address['post-transition'] + transitions[i].id, JSON.stringify(transitions[i]));
 
     manager.getDocument(address['get-document'], document.id);
 
@@ -710,7 +714,6 @@ define([
       if (conditions.properties.name) states[id].setName(properties[key].name);
       if (conditions.properties.description) states[id].setDescription(properties[key].description);
       if (conditions.properties.duality) states[id].setDuality(properties[key].duality);
-      if (conditions.properties.weight) states[id].setWeight(properties[key].weight);
       if (conditions.properties.connects) states[id].setConnects(properties[key].connects);
 
     }
@@ -754,10 +757,78 @@ define([
    * @memberof ExportManager
    * @return Array of Format4Factory.Transition
    */
-  ExportManager.prototype.transitionObj4VFactory = function(docId, parentId) {
-    var transitions = [];
+  ExportManager.prototype.transitionObj4VFactory = function(docId, spaceLayers) {
+    var transitions = {};
+    var result = [];
+    var conditions = window.conditions.exportConditions.Transition;
+    var geometries = window.storage.geometryContainer.transitionGeometry;
+    var properties = window.storage.propertyContainer.transitionProperties;
+    var floorProperties = window.storage.propertyContainer.floorProperties;
+    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
-    return transitions;
+    // copy geometry coordinates
+    for (var key in geometries) {
+
+      var tmp = new FeatureFactory4Factory('Transition', conditions);
+      tmp.setId(geometries[key].id);
+      tmp.setDocId(docId);
+      tmp.setGeometryId("TG-" + geometries[key].id);
+      tmp.setConnects(geometries[key].connects);
+      tmp.pushCoordinatesFromDots(geometries[key].points);
+      transitions[geometries[key].id] = tmp;
+
+    }
+
+    // copy attributes
+    for (var key in properties) {
+
+      var id = properties[key].id;
+      if (conditions.properties.name) transitions[id].setName(properties[key].name);
+      if (conditions.properties.description) transitions[id].setDescription(properties[key].description);
+      if (conditions.properties.duality) transitions[id].setDuality(properties[key].duality);
+      if (conditions.properties.weight) transitions[id].setWeight(properties[key].weight);
+      if (conditions.properties.connects) transitions[id].setConnects(properties[key].connects);
+
+    }
+
+    // pixel to real world coordinates
+    for (var floorKey in floorProperties) {
+
+      var transitionKeyInFloor = floorProperties[floorKey].transitionKey;
+      var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
+
+      var pixelLLC = [0, 0, 0];
+      var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
+      var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
+      var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
+
+      for (var transitionKey in transitionKeyInFloor) {
+
+        var points = transitions[transitionKeyInFloor[transitionKey]].getCoordinates();
+        for (var i = 0; i < points.length; i++) {
+
+          var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, points[i]);
+          transitions[transitionKeyInFloor[transitionKey]].updateCoordinates(i, 'x', trans._data[0]);
+          transitions[transitionKeyInFloor[transitionKey]].updateCoordinates(i, 'y', trans._data[1]);
+          transitions[transitionKeyInFloor[transitionKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
+
+        }
+
+        transitions[transitionKeyInFloor[transitionKey]].setWKT();
+
+        if (spaceLayers.length == 1) transitions[transitionKeyInFloor[transitionKey]].setParentId(spaceLayers[0].id);
+        else transitions[transitionKeyInFloor[transitionKey]].setParentId(floorProperties[floorKey].id);
+
+      }
+    }
+
+    for (var key in transitions) {
+      transitions[key].simplify();
+      result.push(transitions[key]);
+    }
+
+
+    return result;
   }
 
   /**
@@ -826,17 +897,6 @@ define([
    * @memberof ExportManager
    */
   ExportManager.prototype.extrudeCellBoundary = function(line, ch) {
-
-    // var result = [];
-    //
-    // for(var i = 0; i < line.length-1; i++){
-    //
-    //   var first = line[i];
-    //   var second = line[i+1];
-    //
-    //   result.push([first, second, [second[0], second[1], ch], [first[0], first[1], ch], first]);
-    //
-    // }
 
     var first = line[0];
     var second = line[1];

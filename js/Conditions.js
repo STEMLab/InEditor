@@ -160,7 +160,8 @@ define([], function() {
           'name': true,
           'description': true,
           'duality': true,
-          'weight': true
+          'weight': true,
+          'connects': true
         }
       },
       'MultiLayer': false
