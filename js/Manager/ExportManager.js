@@ -308,14 +308,21 @@ define([
       "id": window.conditions.guid()
     };
 
+    var spaceLayers = {
+      "docId": document.id,
+      "parentId": multiLayeredGraph.id,
+      "id": window.conditions.guid()
+    }
 
     var baseURL = reqObj.baseURL;
 
-    var spaceLayers = manager.spaceLayers4Factory(document.id, multiLayeredGraph.id);
+    var spaceLayer = manager.spaceLayer4Factory(document.id, spaceLayers.id);
     var cells = manager.cellObj4VFactory(document.id, primalspacefeatures.id);
     var cellBoundaries = manager.cellBoundaryObj4VFactory(document.id, primalspacefeatures.id);
-    var states = manager.stateObj4VFactory(document.id, spaceLayers);
-    var transitions = manager.transitionObj4VFactory(document.id, spaceLayers);
+    var nodes = manager.nodes4Factory(document.id, spaceLayer);
+    var edges = manager.edges4Factory(document.id, spaceLayer);
+    var states = manager.stateObj4VFactory(document.id, nodes);
+    var transitions = manager.transitionObj4VFactory(document.id, edges);
 
     var address = {
       'post-document': baseURL + '/document/' + document.id,
@@ -324,7 +331,10 @@ define([
       'post-cell': baseURL + '/cellspace/',
       'post-cellspaceboundary': baseURL + '/cellspaceboundary/',
       'post-multiLayeredGraph': baseURL + '/multilayeredgraph/' + multiLayeredGraph.id,
-      'post-spaceLayers': baseURL + '/spacelayers/',
+      'post-spacelayers': baseURL + '/spacelayers/' + spaceLayers.id,
+      'post-spacelayer': baseURL + '/spacelayer/',
+      'post-nodes': baseURL + '/nodes/',
+      'post-edges': baseURL + '/edges/',
       'post-state': baseURL + '/state/',
       'post-transition': baseURL + '/transition/',
       'get-document': baseURL + '/document/' + document.id
@@ -336,24 +346,37 @@ define([
 
       manager.postJson(address['post-indoorfeatures'], JSON.stringify(indoorfeatures));
       manager.postJson(address['post-primalspacefeatures'], JSON.stringify(primalspacefeatures));
-      manager.postJson(address['post-multiLayeredGraph'], JSON.stringify(multiLayeredGraph));
+
+      for (var i = 0; i < cells.length; i++)
+        manager.postJson(address['post-cell'] + cells[i].id, JSON.stringify(cells[i]));
+
+      for (var i = 0; i < cellBoundaries.length; i++)
+        manager.postJson(address['post-cellspaceboundary'] + cellBoundaries[i].id, JSON.stringify(cellBoundaries[i]));
 
     }
 
-    for (var i = 0; i < cells.length; i++)
-      manager.postJson(address['post-cell'] + cells[i].id, JSON.stringify(cells[i]));
+    if (states.length != 0 || transitions.length != 0) {
 
-    for (var i = 0; i < cellBoundaries.length; i++)
-      manager.postJson(address['post-cellspaceboundary'] + cellBoundaries[i].id, JSON.stringify(cellBoundaries[i]));
+      manager.postJson(address['post-multiLayeredGraph'], JSON.stringify(multiLayeredGraph));
+      manager.postJson(address['post-spacelayers'], JSON.stringify(spaceLayers));
 
-    for (var i = 0; i < spaceLayers.length; i++)
-      manager.postJson(address['post-spaceLayers'] + spaceLayers[i].id, JSON.stringify(spaceLayers[i]));
+      for (var i = 0; i < spaceLayer.length; i++)
+        manager.postJson(address['post-spacelayer'] + spaceLayer[i].id, JSON.stringify(spaceLayer[i]));
 
-    // for (var i = 0; i < states.length; i++)
-    //   manager.postJson(address['post-state'] + states[i].id, JSON.stringify(states[i]));
+      for (var i = 0; i < nodes.length; i++)
+        manager.postJson(address['post-nodes'] + nodes[i].id, JSON.stringify(nodes[i]));
 
-    for (var i = 0; i < transitions.length; i++)
-      manager.postJson(address['post-transition'] + transitions[i].id, JSON.stringify(transitions[i]));
+      for (var i = 0; i < nodes.length; i++)
+        manager.postJson(address['post-edges'] + edges[i].id, JSON.stringify(edges[i]));
+
+      for (var i = 0; i < states.length; i++)
+        manager.postJson(address['post-state'] + states[i].id, JSON.stringify(states[i]));
+
+      for (var i = 0; i < transitions.length; i++)
+        manager.postJson(address['post-transition'] + transitions[i].id, JSON.stringify(transitions[i]));
+
+
+    }
 
     manager.getDocument(address['get-document'], document.id);
 
@@ -365,6 +388,14 @@ define([
   ExportManager.prototype.postJson = function(address, data) {
     log.info('POST : ' + address, data);
     var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function() {
+      if (xhr.status == 200) {
+        log.error('error');
+
+      }
+    }
+
     xhr.open("POST", address, false);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(data);
@@ -488,7 +519,7 @@ define([
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.spaceLayers4Factory = function(docId, parentId) {
+  ExportManager.prototype.spaceLayer4Factory = function(docId, parentId) {
 
     var floors = window.storage.propertyContainer.floorProperties;
     var spaceLayers = [];
@@ -512,6 +543,49 @@ define([
     return spaceLayers;
 
   }
+
+
+  /**
+   * @memberof ExportManager
+   */
+  ExportManager.prototype.nodes4Factory = function(docId, spaceLayers) {
+
+    var nodes = [];
+    for (var i = 0; i < spaceLayers.length; i++) {
+
+      nodes.push({
+        "docId": docId,
+        "parentId": spaceLayers[i].id,
+        "id": window.conditions.guid()
+      });
+
+    }
+
+    return nodes;
+
+  }
+
+
+  /**
+   * @memberof ExportManager
+   */
+  ExportManager.prototype.edges4Factory = function(docId, spaceLayers) {
+
+    var edges = [];
+    for (var i = 0; i < spaceLayers.length; i++) {
+
+      edges.push({
+        "docId": docId,
+        "parentId": spaceLayers[i].id,
+        "id": window.conditions.guid()
+      });
+
+    }
+
+    return edges;
+
+  }
+
 
   /**
    * @memberof ExportManager
@@ -686,7 +760,7 @@ define([
    * @memberof ExportManager
    * @return Array of Format4Factory.State
    */
-  ExportManager.prototype.stateObj4VFactory = function(docId, spaceLayers) {
+  ExportManager.prototype.stateObj4VFactory = function(docId, nodes) {
     var states = {};
     var result = [];
     var conditions = window.conditions.exportConditions.State;
@@ -739,7 +813,7 @@ define([
 
         states[stateKeyInFloor[stateKey]].setWKT();
 
-        if (spaceLayers.length == 1) states[stateKeyInFloor[stateKey]].setParentId(spaceLayers[0].id);
+        if (nodes.length == 1) states[stateKeyInFloor[stateKey]].setParentId(nodes[0].id);
         else states[stateKeyInFloor[stateKey]].setParentId(floorProperties[floorKey].id);
 
       }
@@ -757,7 +831,7 @@ define([
    * @memberof ExportManager
    * @return Array of Format4Factory.Transition
    */
-  ExportManager.prototype.transitionObj4VFactory = function(docId, spaceLayers) {
+  ExportManager.prototype.transitionObj4VFactory = function(docId, edges) {
     var transitions = {};
     var result = [];
     var conditions = window.conditions.exportConditions.Transition;
@@ -816,7 +890,7 @@ define([
 
         transitions[transitionKeyInFloor[transitionKey]].setWKT();
 
-        if (spaceLayers.length == 1) transitions[transitionKeyInFloor[transitionKey]].setParentId(spaceLayers[0].id);
+        if (edges.length == 1) transitions[transitionKeyInFloor[transitionKey]].setParentId(edges[0].id);
         else transitions[transitionKeyInFloor[transitionKey]].setParentId(floorProperties[floorKey].id);
 
       }

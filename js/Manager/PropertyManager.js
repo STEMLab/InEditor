@@ -272,8 +272,8 @@ define([
     newProperty.setDuality(canvasObj.getDuality());
 
     // add connects to state
-    window.storage.propertyContainer.getElementById('state', connects[0]).addConnects(connects[1]);
-    window.storage.propertyContainer.getElementById('state', connects[1]).addConnects(connects[0]);
+    window.storage.propertyContainer.getElementById('state', connects[0]).addConnects(newProperty.id);
+    window.storage.propertyContainer.getElementById('state', connects[1]).addConnects(newProperty.id);
 
     // add new transition object in storage.propertyContainer
     window.storage.propertyContainer.transitionProperties.push(newProperty);
