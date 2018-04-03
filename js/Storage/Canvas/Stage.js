@@ -90,8 +90,8 @@ define([
     this.stage.add(this.backgroundLayer.getLayer());
     this.stage.add(this.cellLayer.getLayer());
     this.stage.add(this.cellBoundaryLayer.getLayer());
-    this.stage.add(this.stateLayer.getLayer());
     this.stage.add(this.transitionLayer.getLayer());
+    this.stage.add(this.stateLayer.getLayer());
     this.stage.add(this.tmpLayer.getLayer());
 
   }
@@ -228,6 +228,60 @@ define([
   Stage.prototype.getCellConnectionWithID = function(){
     var cellConnections = this.cellLayer.getBoundaries();
     return cellConnections;
+  }
+
+  /**
+  * @memberof Stage
+  */
+  Stage.prototype.getElementById = function(_type, _id){
+
+    var result = null;
+
+    switch (_type) {
+      case 'cell':
+        var cells = this.cellLayer.group.cells;
+        for (var key in cells) {
+          if (cells[key].id == _id) {
+            result = cells[key];
+            break;
+          }
+        }
+        break;
+      case 'cellboundary':
+        var cellboundaries = this.cellBoundaryLayer.group.cellBoundaries;
+        for (var key in cellboundaries) {
+          if (cellboundaries[key].id == _id) {
+            result = cellboundaries[key];
+            break;
+          }
+        }
+        break;
+      case 'state':
+        var states = this.stateLayer.group.states;
+        for (var key in states) {
+          if (states[key].id == _id) {
+            result = states[key];
+            break;
+          }
+        }
+        break;
+      case 'transition':
+        var transitions = this.transitionLayer.group.transitions;
+        for (var key in transitions) {
+          if (transitions[key].id == _id) {
+            result = transitions[key];
+            break;
+          }
+        }
+        break;
+      case 'stage':
+        result = this;
+        break;
+      default:
+    }
+
+    return result;
+
   }
 
   return Stage;

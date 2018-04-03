@@ -160,8 +160,8 @@ define([], function() {
 
       // line.dot1 -> point
       var V2 = {
-        x: dot.point.x - line.dot1.x,
-        y: dot.point.y - line.dot1.y
+        x: dot.point.x - line.dot1.point.x,
+        y: dot.point.y - line.dot1.point.y
       }
 
       var cos = (V1.x * V2.x + V1.y * V2.y) /

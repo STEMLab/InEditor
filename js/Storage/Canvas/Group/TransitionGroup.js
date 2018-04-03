@@ -15,7 +15,7 @@ define([
   function TransitionGroup(){
 
     this.transitionGroup = new Konva.Group({ x: 0, y: 0 });
-    this.transitions = []; // states array
+    this.transitions = []; // transition array
 
   }
 
@@ -28,6 +28,50 @@ define([
 
   TransitionGroup.prototype.getGroup = function(){
     return this.transitionGroup;
+  }
+
+  /**
+  * @memberof TransitionGroup
+  * @param {Transition} obj
+  */
+  TransitionGroup.prototype.add = function(obj){
+
+    var newTransition = new Transition(obj.id);
+
+    this.copyDots(newTransition, obj.dots);
+    newTransition.addObjectFromDots();
+
+    this.transitions.push(newTransition);
+    this.transitionGroup.add(newTransition.getLineObject());
+
+  }
+
+  /**
+  * @memberof TransitionGroup
+  */
+  TransitionGroup.prototype.copyDots = function(newTransition, dots){
+
+    newTransition.addState(dots[0]);
+    newTransition.addState(dots[dots.length - 1]);
+
+    if(dots.length > 2){
+
+      var len = dots.length - 2;
+      for(var i = 0 ; i < len; i++){
+
+        newTransition.insertDot( 1 + i, dots[1 + i] );
+
+      }
+
+    }
+
+  }
+
+  /**
+  * @memberof TransitionGroup
+  */
+  TransitionGroup.prototype.getLastTransition = function(){
+    return this.transitions[this.transitions.length-1];
   }
 
   return TransitionGroup;

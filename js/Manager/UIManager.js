@@ -53,12 +53,18 @@ define([
     this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.endAddNewCellBoundary_makeHistoryObj, this.removeObj);
 
     this.addCallbackFun('showfactoryexportmodal', this.showFactoryExportModal);
+
+    this.addCallbackFun('movetooltip', this.moveTooltip);
+
+    this.addCallbackFun('start-addnewtransition', this.startAddNewTransition);
+    this.addCallbackFun('end-addnewtransition', this.endAddNewTransition);
+
   }
 
   /**
-  * @memberof
-  */
-  UIManager.prototype.showFactoryExportModal = function(){
+   * @memberof
+   */
+  UIManager.prototype.showFactoryExportModal = function() {
 
     $('#go-factory-modal').modal('show');
     $('#go-factory-modal-body-to-footer-before').removeClass('d-none');
@@ -178,14 +184,14 @@ define([
 
     var backgroundLayer = window.storage.canvasContainer.stages[undoObj.floor].backgroundLayer;
 
-    if ( undoObj.dataURL == null ){
+    if (undoObj.dataURL == null) {
 
       backgroundLayer.layer.destroyChildren();
       backgroundLayer.setGrid(backgroundLayer.layer.width(), backgroundLayer.layer.height());
 
     } else {
 
-      if(backgroundLayer.layer.children.length == 0 || backgroundLayer.layer.children[0].className != 'Image'){
+      if (backgroundLayer.layer.children.length == 0 || backgroundLayer.layer.children[0].className != 'Image') {
         log.error('wrong access to backgorund layer');
         return;
       }
@@ -205,12 +211,13 @@ define([
 
   /**
    * @memberof UIManager
-   * @param {Message.reqObj} reqObj id : new obj id<br>floor : id of the floor where the new object will be created
    */
   UIManager.prototype.startAddNewCell = function(reqObj) {
 
     // change floor btn color
     document.getElementById('cell-btn').src = "../../assets/icon/cell_a.png";
+
+    window.broker.getManager('start-addnewcell', 'UIManager').setTooltipText({text: 'Add corner for cell by clicking canvas \(^0^)/'});
 
   }
 
@@ -243,6 +250,12 @@ define([
 
     // refresh tree view
     window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
+
+    if (window.conditions.automGenerateState)
+      window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM), reqObj.floor);
+
+    // set tooltip
+    window.broker.getManager('start-addnewcell', 'UIManager').setTooltipText({floor: reqObj.floor, text: ''});
 
   }
 
@@ -381,13 +394,100 @@ define([
 
   }
 
-  UIManager.prototype.endAddNewCellBoundary_makeHistoryObj = function(reqObj){
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.endAddNewCellBoundary_makeHistoryObj = function(reqObj) {
 
     var obj = reqObj;
     obj['type'] = 'cellBoundary';
 
     return obj;
   }
+
+
+  /**
+   * @memberof UIManager
+   * @param {Object} reqObj floor, point
+   */
+  UIManager.prototype.moveTooltip = function(reqObj) {
+
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.moveTooltip(reqObj.point.x + 8, reqObj.point.y);
+
+  }
+
+  /**
+  * @memberof UIManager
+  * @param {Object} reqObj : floor, text
+  */
+  UIManager.prototype.setTooltipText = function(reqObj){
+
+    if(reqObj.floor == undefined){
+      var stages = window.storage.canvasContainer.stages;
+      for(var key in stages){
+
+        if(reqObj.text == '') {
+          stages[key].tmpLayer.group.setTooltipText(reqObj.text);
+          stages[key].tmpLayer.group.hideTooltip();
+        } else {
+          stages[key].tmpLayer.group.setTooltipText(reqObj.text);
+          stages[key].tmpLayer.group.showTooltip();
+        }
+
+        stages[key].tmpLayer.layer.draw();
+
+      }
+    } else {
+
+      if(reqObj.text == '') {
+        window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.setTooltipText(reqObj.text);
+        window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.hideTooltip();
+      } else {
+        window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.setTooltipText(reqObj.text);
+        window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.showTooltip();
+      }
+
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+
+    }
+  }
+
+  /**
+   * @memberof UIManager
+   */
+   UIManager.prototype.startAddNewTransition = function(){
+
+     // change cell btn color
+     document.getElementById('transition-btn').src = "../../assets/icon/transition_a.png";
+
+      var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+      manager.setTooltipText({text:'select state'});
+
+   }
+
+   /**
+   * @memberof UIManager
+   * @param {Object} reqObj { id, floor, isEmpty }
+   */
+   UIManager.prototype.endAddNewTransition = function(reqObj){
+
+     // change transition btn color
+     document.getElementById('transition-btn').src = "../../assets/icon/transition_d.png";
+
+     if (reqObj.isEmpty != null) return;
+
+     // set sidebar > propertyContainer
+     window.uiContainer.sidebar.property.setPropertyTab('transition', reqObj.id, window.storage);
+
+     // refresh tree view
+     window.uiContainer.sidebar.treeview.addTransition(reqObj.id, reqObj.floor);
+
+     var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+     manager.setTooltipText({text:''});
+
+   }
+
+
 
   return UIManager;
 });

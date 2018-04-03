@@ -33,11 +33,21 @@ define([
 
     handlerBinder['cellboundary-btn'] = {
       'click': this.clickCellBoundaryBtn
+    };
+
+    handlerBinder['state-btn'] = {
+      'click': this.clickStateBtn
+    };
+
+    handlerBinder['transition-btn'] = {
+      'click': this.clickTransitionBtn
     }
 
     handlerBinder['stage'] = {
       'contentClick': this.addNewDot,
-      'contentMousemove': this.snapping
+      'contentMousemove': this.moveMouse,
+      'contentDblclick': this.dbclick,
+      'contentMousedown': this.mousedown
     };
 
     handlerBinder['Escape'] = {
@@ -48,6 +58,19 @@ define([
       'keyup': this.finishDraw
     }
 
+
+  }
+
+  DrawEventHandler.prototype.dbclick = function(broker, previous, data){
+    log.info('dbclick : ', data);
+
+    return new Result();
+  }
+
+  DrawEventHandler.prototype.mousedown = function(broker, previous, data){
+    log.info('mousedown : ', data);
+
+    return new Result();
   }
 
   /**
@@ -191,6 +214,24 @@ define([
 
       }
 
+    } else if (broker.isPublishable('addnewtransition')) {
+
+      broker.publish(new Message('addnewtransition', {
+        'floor': data.currentTarget.attrs.id
+      }));
+
+      result.result = true;
+      result.msg = 'addnewtransition';
+
+      if(window.tmpObj.dots.length == 3){
+        broker.publish(new Message('end-addnewtransition', {
+          floor: data.currentTarget.attrs.id,
+          id: window.conditions.pre_transition+(++window.conditions.LAST_TRANSITION_ID_NUM)
+        }));
+      }
+
+
+
     } else {
 
       result.msg = "no match function.";
@@ -312,7 +353,15 @@ define([
 
     } else if (broker.isPublishable('end-addnewstate')) {
 
-    } else if (broker.isPublishable('end-addnewtrasition')) {
+    } else if (broker.isPublishable('end-addnewtransition')) {
+
+      broker.publish(new Message('end-addnewtransition', {
+        'id': window.conditions.pre_transition + (++window.conditions.LAST_TRANSITION_ID_NUM),
+        'floor': window.tmpObj.floor
+      }));
+
+      result.result = true;
+      result.msg = null;
 
     } else {
       result.mgs = "no match function."
@@ -325,20 +374,24 @@ define([
   /**
    * @memberof DrawEventHandler
    */
-  DrawEventHandler.prototype.snapping = function(broker, previousMsg, data) {
+  DrawEventHandler.prototype.moveMouse = function(broker, previousMsg, data) {
 
     var result = new Result();
     var rect = window.storage.canvasContainer.stages[data.currentTarget.attrs.id].stage.content.getBoundingClientRect();
 
     if (broker.isPublishable('snapping')) {
 
-      broker.publish(new Message('snapping', {
+      var reqObj = {
         'floor': data.currentTarget.attrs.id,
         'point': {
           x: data.evt.clientX - rect.left,
           y: data.evt.clientY - rect.top
         }
-      }));
+      };
+
+      broker.publish(new Message('snapping', reqObj));
+
+      broker.publish(new Message('movetooltip', reqObj));
 
       result.result = true;
       result.msg = 'snapping';
@@ -397,7 +450,59 @@ define([
       result.msg = null;
 
     } else {
-      result.msg = "wrong c transition : " + previousMsg + " to start-addnewcellboundary, end-addnewcellboundary.";
+      result.msg = "wrong transition : " + previousMsg + " to start-addnewcellboundary, end-addnewcellboundary.";
+    }
+
+    return result;
+
+  }
+
+  /**
+  * @memberof DrawEventHandler
+  */
+  DrawEventHandler.prototype.clickStateBtn = function(broker, previousMsg){
+
+    var result = new Result();
+
+    log.info('call click state-btn');
+
+    return result;
+
+  }
+
+  /**
+  * @memberof DrawEventHandler
+  */
+  DrawEventHandler.prototype.clickTransitionBtn = function(broker, previousMsg){
+
+    var result = new Result();
+    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
+    var isStateExist = (window.storage.propertyContainer.stateProperties.length >= 2);
+
+    if (!isFloorExist) {
+
+      result.msg = "There is no floor ...";
+
+    } else if (!isStateExist){
+
+      result.msg = "There is too few state ...";
+
+    } else if(broker.isPublishable('start-addnewtransition')){
+
+      broker.publish(new Message('start-addnewtransition', null));
+
+      result.result = true;
+      result.msg = 'start-addnewtransition';
+
+    } else if(broker.isPublishable('end-addnewtransition')){
+
+      broker.publish(new Message('start-addnewtransition', null));
+
+      result.result = true;
+      result.msg = null;
+
+    } else {
+      result.msg = "wrong transition : " + previousMsg + " to start-addnewtransition, end-addnewtransition.";
     }
 
     return result;

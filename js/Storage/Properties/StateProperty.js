@@ -8,22 +8,22 @@ define([], function() {
   /**
    * @class StateProperty
    */
-  function StateProperty() {
+  function StateProperty(id) {
 
     /**
      * @memberof StateProperty
      */
-    this.id;
+    this.id = id;
 
     /**
      * @memberof StateProperty
      */
-    this.name;
+    this.name = id;
 
     /**
      * @memberof StateProperty
      */
-    this.description;
+    this.description = "";
 
     /**
      * @memberof StateProperty
@@ -47,6 +47,30 @@ define([], function() {
     this.duality = values.duality;
     this.connects = values.connects;
 
+  }
+
+  /**
+  * @memberof StateProperty
+  */
+  StateProperty.prototype.setDuality = function(duality){
+
+    this.duality = duality;
+
+  }
+
+  /**
+  * @memberof StateProperty
+  */
+  StateProperty.prototype.getId = function(){
+    return this.id;
+  }
+
+  /**
+  * @memberof StateProperty
+  * @param {String} id of connected dot
+  */
+  StateProperty.prototype.addConnects = function(connect){
+    this.connects.push(connect);
   }
 
   return StateProperty;

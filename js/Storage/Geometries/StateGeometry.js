@@ -8,17 +8,17 @@ define([], function() {
   /**
   * @class StateGeometry
   */
-  function StateGeometry() {
+  function StateGeometry(id, dot) {
 
     /**
     * @memberof StateGeometry
     */
-    this.id;
+    this.id = id;
 
     /**
     * @memberof StateGeometry
     */
-    this.points = new Array(2);
+    this.point = dot;
   }
 
   /**

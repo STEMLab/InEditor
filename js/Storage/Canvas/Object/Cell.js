@@ -40,6 +40,10 @@ define([], function() {
       closed: true
     });
 
+    this.poly.on('contentDblclick', function (e) {
+      log.info('mousedown : ', e);
+    });
+
     /**
     * @memberof Cell
     */
@@ -296,6 +300,26 @@ define([], function() {
     this.addObjectFromDots();
 
     point.participateObj(this.id, 'cell');
+
+  }
+
+
+  /**
+  * @memberof Cell
+  */
+  Cell.prototype.getWKT = function(){
+
+    var wkt = 'POLYGON ((';
+
+    for(var i = 0 ; i < this.dots.length ; i++ ){
+
+      wkt += this.dots[i].point.x + ' ' + this.dots[i].point.y + ', ';
+
+    }
+
+    wkt += this.dots[0].point.x + ' ' + this.dots[0].point.y +'))';
+
+    return wkt;
 
   }
 

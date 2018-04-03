@@ -37,7 +37,23 @@ define([
     * @memberof TmpGroup
     */
     this.cursor = new Cursor({x : 0, y : 0});
+    this.tooltip = new Konva.Text({
+        text: "",
+        fontFamily: "Calibri",
+        fontSize: 15,
+        padding: 5,
+        textFill: "white",
+        fill: "black",
+        alpha: 0.75,
+        visible: false,
+        width: 150
+    });
+
+    this.cursor.name('cursor');
+    this.tooltip.name('tooltip');
+
     this.tmpGroup.add(this.cursor.getObject());
+    this.tmpGroup.add(this.tooltip);
 
   }
 
@@ -69,6 +85,7 @@ define([
     } else if (type == 'transition') {
 
       this.obj = new Transition('tmpObj');
+      window.tmpObj = this.obj;
       this.tmpGroup.add(this.obj.getLineObject());
 
     }
@@ -95,12 +112,38 @@ define([
     var len = this.tmpGroup.children.length;
 
     for(var i = 0; i < len; i++){
-      if( this.tmpGroup.children[i].nodeType == "Group" || this.tmpGroup.children[i].className != "Circle"){
+      if( this.tmpGroup.children[i].name() == 'cursor' || this.tmpGroup.children[i].name() == 'tooltip' ){}
+      else{
         this.tmpGroup.children.splice(i, 1);
         i--;
         len--;
       }
     }
+  }
+
+  TmpGroup.prototype.moveTooltip = function(x, y){
+
+    this.tooltip.x(x);
+    this.tooltip.y(y);
+
+  }
+
+  TmpGroup.prototype.setTooltipText = function(text){
+
+    this.tooltip.setAttr('text', text);
+
+  }
+
+  TmpGroup.prototype.hideTooltip = function(){
+
+    this.tooltip.hide();
+
+  }
+
+  TmpGroup.prototype.showTooltip = function(){
+
+    this.tooltip.show();
+
   }
 
 

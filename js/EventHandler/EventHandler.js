@@ -119,6 +119,22 @@ define([
             window.eventHandler.callHandler('stage', event)
           });
 
+      } else if( subkey == 'contentDblclick'){
+
+        var stage = window.storage.canvasContainer.getElementById('stage', _id);
+        stage.stage.on(
+          'contentDblclick',
+          function(event) {
+            window.eventHandler.callHandler('stage', event)
+          });
+      } else if( subkey == 'contentMousedown'){
+
+        var stage = window.storage.canvasContainer.getElementById('stage', _id);
+        stage.stage.on(
+          'contentMousedown',
+          function(event) {
+            window.eventHandler.callHandler('stage', event)
+          });
       }
 
     }

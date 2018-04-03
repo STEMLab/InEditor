@@ -88,6 +88,13 @@ define([
 
   }
 
+  /**
+  * @memberof cellBoundaryGroup
+  */
+  CellBoundaryGroup.prototype.getObjects = function(){
+    return this.cellBoundaries;
+  }
+
   return CellBoundaryGroup;
 
 });

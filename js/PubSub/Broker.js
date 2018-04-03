@@ -76,7 +76,7 @@ define([
    */
   Broker.prototype.publish = function(_message) {
 
-    log.info(_message.req + " published");
+    // log.info(_message.req + " published");
 
     if (this.topic == null) {
 
@@ -118,26 +118,41 @@ define([
     this.reqSpecList['setpropertyview'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['zoomworkspace'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['addfloorplan'] = new MessageSpec('single', 'including', null, true);
+
     this.reqSpecList['start-addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['end-addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
+
     this.reqSpecList['updaterefdata'] = new MessageSpec('single', 'including', null,false);
     this.reqSpecList['activateworkspace'] = new MessageSpec('single', 'excluding', ['draw'], false);
+
     this.reqSpecList['cancel-addnewcell'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['cancel-addnewcellboundary'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['cancel-addnewstate'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['cancel-addnewtransition'] = new MessageSpec('single', 'including', ['draw'], false);
+
     this.reqSpecList['start-addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['end-addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);
+
+    this.reqSpecList['start-addnewstate'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['addnewstate'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['end-addnewstate'] = new MessageSpec('cycle', 'including', ['draw'], true);
+
+    this.reqSpecList['start-addnewtransition'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['addnewtransition'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['end-addnewtransition'] = new MessageSpec('cycle', 'including', ['draw'], true);
+
     this.reqSpecList['exporttoviewer'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['exporttofactory'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['showfactoryexportmodal'] = new MessageSpec('single', 'including', null, false);
 
     this.reqSpecList['snapping'] = new MessageSpec('single', 'including', ['draw'], false);
+    this.reqSpecList['movetooltip'] = new MessageSpec('single', 'including', ['draw'], false);
 
     this.reqSpecList['saveproject'] = new MessageSpec('single', 'excluding', ['draw'], false);
     this.reqSpecList['loadproject'] = new MessageSpec('single', 'excluding', ['draw'], false);
+
   }
 
   /**

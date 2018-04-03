@@ -302,12 +302,27 @@ define([
       "id": window.conditions.guid()
     };
 
+    var multiLayeredGraph = {
+      "docId": document.id,
+      "parentId": indoorfeatures.id,
+      "id": window.conditions.guid()
+    };
+
+    var spaceLayers = {
+      "docId": document.id,
+      "parentId": multiLayeredGraph.id,
+      "id": window.conditions.guid()
+    }
+
     var baseURL = reqObj.baseURL;
 
+    var spaceLayer = manager.spaceLayer4Factory(document.id, spaceLayers.id);
     var cells = manager.cellObj4VFactory(document.id, primalspacefeatures.id);
     var cellBoundaries = manager.cellBoundaryObj4VFactory(document.id, primalspacefeatures.id);
-    var states = manager.stateObj4VFactory(document.id, primalspacefeatures.id);
-    var transitions = manager.transitionObj4VFactory(document.id, primalspacefeatures.id);
+    var nodes = manager.nodes4Factory(document.id, spaceLayer);
+    var edges = manager.edges4Factory(document.id, spaceLayer);
+    var states = manager.stateObj4VFactory(document.id, nodes);
+    var transitions = manager.transitionObj4VFactory(document.id, edges);
 
     var address = {
       'post-document': baseURL + '/document/' + document.id,
@@ -315,6 +330,13 @@ define([
       'post-primalspacefeatures': baseURL + '/primalspacefeatures/' + primalspacefeatures.id,
       'post-cell': baseURL + '/cellspace/',
       'post-cellspaceboundary': baseURL + '/cellspaceboundary/',
+      'post-multiLayeredGraph': baseURL + '/multilayeredgraph/' + multiLayeredGraph.id,
+      'post-spacelayers': baseURL + '/spacelayers/' + spaceLayers.id,
+      'post-spacelayer': baseURL + '/spacelayer/',
+      'post-nodes': baseURL + '/nodes/',
+      'post-edges': baseURL + '/edges/',
+      'post-state': baseURL + '/state/',
+      'post-transition': baseURL + '/transition/',
       'get-document': baseURL + '/document/' + document.id
     };
 
@@ -325,13 +347,36 @@ define([
       manager.postJson(address['post-indoorfeatures'], JSON.stringify(indoorfeatures));
       manager.postJson(address['post-primalspacefeatures'], JSON.stringify(primalspacefeatures));
 
+      for (var i = 0; i < cells.length; i++)
+        manager.postJson(address['post-cell'] + cells[i].id, JSON.stringify(cells[i]));
+
+      for (var i = 0; i < cellBoundaries.length; i++)
+        manager.postJson(address['post-cellspaceboundary'] + cellBoundaries[i].id, JSON.stringify(cellBoundaries[i]));
+
     }
 
-    for (var i = 0; i < cells.length; i++)
-      manager.postJson(address['post-cell'] + cells[i].id, JSON.stringify(cells[i]));
+    if (states.length != 0 || transitions.length != 0) {
 
-    for (var i = 0; i < cellBoundaries.length; i++)
-      manager.postJson(address['post-cellspaceboundary'] + cellBoundaries[i].id, JSON.stringify(cellBoundaries[i]));
+      manager.postJson(address['post-multiLayeredGraph'], JSON.stringify(multiLayeredGraph));
+      manager.postJson(address['post-spacelayers'], JSON.stringify(spaceLayers));
+
+      for (var i = 0; i < spaceLayer.length; i++)
+        manager.postJson(address['post-spacelayer'] + spaceLayer[i].id, JSON.stringify(spaceLayer[i]));
+
+      for (var i = 0; i < nodes.length; i++)
+        manager.postJson(address['post-nodes'] + nodes[i].id, JSON.stringify(nodes[i]));
+
+      for (var i = 0; i < nodes.length; i++)
+        manager.postJson(address['post-edges'] + edges[i].id, JSON.stringify(edges[i]));
+
+      for (var i = 0; i < states.length; i++)
+        manager.postJson(address['post-state'] + states[i].id, JSON.stringify(states[i]));
+
+      for (var i = 0; i < transitions.length; i++)
+        manager.postJson(address['post-transition'] + transitions[i].id, JSON.stringify(transitions[i]));
+
+
+    }
 
     manager.getDocument(address['get-document'], document.id);
 
@@ -341,7 +386,16 @@ define([
    * @memberof ExportManager
    */
   ExportManager.prototype.postJson = function(address, data) {
+    log.info('POST : ' + address, data);
     var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function() {
+      if (xhr.status == 200) {
+        log.error('error');
+
+      }
+    }
+
     xhr.open("POST", address, false);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(data);
@@ -354,24 +408,24 @@ define([
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
-      if(xhr.readyState == 4 && ( xhr.status == 302 || xhr.status == 200 )){
+      if (xhr.readyState == 4 && (xhr.status == 302 || xhr.status == 200)) {
 
         var getXhr = new XMLHttpRequest();
-        getXhr.onreadystatechange = function(){
+        getXhr.onreadystatechange = function() {
 
-          if(getXhr.readyState == 4 && getXhr.status == 200){
+          if (getXhr.readyState == 4 && getXhr.status == 200) {
             $('#go-factory-modal-body-to-footer-before').addClass('d-none');
             $('#go-factory-modal-body-to-footer-loading').addClass('d-none');
             $('#go-factory-modal-body-to-footer-down').removeClass('d-none');
 
             // download gml
-            window.document.getElementById('gml-down-link').href = 'http://127.0.0.1:8080/'+getXhr.responseText;
+            window.document.getElementById('gml-down-link').href = 'http://127.0.0.1:8080/' + getXhr.responseText;
 
           }
 
         }
 
-        getXhr.open("POST", "http://localhost:8080/save-gml/"+documentId, false);
+        getXhr.open("POST", "http://localhost:8080/save-gml/" + documentId, false);
         getXhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
         // save gml
         getXhr.send(xhr.responseXML);
@@ -384,75 +438,151 @@ define([
   }
 
   /**
-  * @memberof ExportManager
-  */
-  ExportManager.prototype.getExportConditionFromModal = function(){
+   * @memberof ExportManager
+   */
+  ExportManager.prototype.getExportConditionFromModal = function() {
 
     var exportConditions = window.conditions.exportConditions;
 
     // cell
-    if($('#factory-geometry-type-2D').prop("checked")) exportConditions.CellSpace.geometry.extrude = false;
-    if($('#factory-geometry-type-3D').prop("checked")) exportConditions.CellSpace.geometry.extrude = true;
+    if ($('#factory-geometry-type-2D').prop("checked")) exportConditions.CellSpace.geometry.extrude = false;
+    if ($('#factory-geometry-type-3D').prop("checked")) exportConditions.CellSpace.geometry.extrude = true;
 
-    if($('#factory-property-cell-name').prop("checked")) exportConditions.CellSpace.properties.name = true;
+    if ($('#factory-property-cell-name').prop("checked")) exportConditions.CellSpace.properties.name = true;
     else exportConditions.CellSpace.properties.name = false;
 
-    if($('#factory-property-cell-description').prop("checked")) exportConditions.CellSpace.properties.description = true;
+    if ($('#factory-property-cell-description').prop("checked")) exportConditions.CellSpace.properties.description = true;
     else exportConditions.CellSpace.properties.description = false;
 
-    if($('#factory-property-cell-partialboundedByexternalReference').prop("checked")) exportConditions.CellSpace.properties.partialboundedByexternalReference = true;
+    if ($('#factory-property-cell-partialboundedByexternalReference').prop("checked")) exportConditions.CellSpace.properties.partialboundedByexternalReference = true;
     else exportConditions.CellSpace.properties.partialboundedByexternalReference = false;
 
-    if($('#factory-property-cell-externalReference').prop("checked")) exportConditions.CellSpace.properties.externalReference = true;
+    if ($('#factory-property-cell-externalReference').prop("checked")) exportConditions.CellSpace.properties.externalReference = true;
     else exportConditions.CellSpace.properties.externalReference = false;
 
-    if($('#factory-property-cell-duality').prop("checked")) exportConditions.CellSpace.properties.duality = true;
+    if ($('#factory-property-cell-duality').prop("checked")) exportConditions.CellSpace.properties.duality = true;
     else exportConditions.CellSpace.properties.duality = false;
 
 
     // cellboundary
-    if($('#factory-geometry-type-2D').prop("checked")) exportConditions.CellSpaceBoundary.geometry.extrude = false;
-    if($('#factory-geometry-type-3D').prop("checked")) exportConditions.CellSpaceBoundary.geometry.extrude = true;
+    if ($('#factory-geometry-type-2D').prop("checked")) exportConditions.CellSpaceBoundary.geometry.extrude = false;
+    if ($('#factory-geometry-type-3D').prop("checked")) exportConditions.CellSpaceBoundary.geometry.extrude = true;
 
-    if($('#factory-property-cellbondary-name').prop("checked")) exportConditions.CellSpaceBoundary.properties.name = true;
+    if ($('#factory-property-cellbondary-name').prop("checked")) exportConditions.CellSpaceBoundary.properties.name = true;
     else exportConditions.CellSpaceBoundary.properties.name = false;
 
-    if($('#factory-property-cellbondary-description').prop("checked")) exportConditions.CellSpaceBoundary.properties.description = true;
+    if ($('#factory-property-cellbondary-description').prop("checked")) exportConditions.CellSpaceBoundary.properties.description = true;
     else exportConditions.CellSpaceBoundary.properties.description = false;
 
-    if($('#factory-property-cellbondary-externalReference').prop("checked")) exportConditions.CellSpaceBoundary.properties.externalReference = true;
+    if ($('#factory-property-cellbondary-externalReference').prop("checked")) exportConditions.CellSpaceBoundary.properties.externalReference = true;
     else exportConditions.CellSpaceBoundary.properties.externalReference = false;
 
-    if($('#factory-property-cellbondary-duality').prop("checked")) exportConditions.CellSpaceBoundary.properties.duality = true;
+    if ($('#factory-property-cellbondary-duality').prop("checked")) exportConditions.CellSpaceBoundary.properties.duality = true;
     else exportConditions.CellSpaceBoundary.properties.duality = false;
 
 
     // state
-    if($('#factory-property-state-name').prop("checked")) exportConditions.State.properties.name = true;
+    if ($('#factory-property-state-name').prop("checked")) exportConditions.State.properties.name = true;
     else exportConditions.State.properties.name = false;
 
-    if($('#factory-property-state-description').prop("checked")) exportConditions.State.properties.description = true;
+    if ($('#factory-property-state-description').prop("checked")) exportConditions.State.properties.description = true;
     else exportConditions.State.properties.description = false;
 
-    if($('#factory-property-state-connected').prop("checked")) exportConditions.State.properties.connected = true;
-    else exportConditions.State.properties.connected = false;
+    if ($('#factory-property-state-connects').prop("checked")) exportConditions.State.properties.connects = true;
+    else exportConditions.State.properties.connects = false;
 
-    if($('#factory-property-state-duality').prop("checked")) exportConditions.State.properties.duality = true;
+    if ($('#factory-property-state-duality').prop("checked")) exportConditions.State.properties.duality = true;
     else exportConditions.State.properties.duality = false;
 
 
     // transition
-    if($('#factory-property-transition-name').prop("checked")) exportConditions.Transition.properties.name = true;
+    if ($('#factory-property-transition-name').prop("checked")) exportConditions.Transition.properties.name = true;
     else exportConditions.Transition.properties.name = false;
 
-    if($('#factory-property-transition-description').prop("checked")) exportConditions.Transition.properties.description = true;
+    if ($('#factory-property-transition-description').prop("checked")) exportConditions.Transition.properties.description = true;
     else exportConditions.Transition.properties.description = false;
 
-    if($('#factory-property-transition-weight').prop("checked")) exportConditions.Transition.properties.weight = true;
+    if ($('#factory-property-transition-weight').prop("checked")) exportConditions.Transition.properties.weight = true;
     else exportConditions.Transition.properties.weight = false;
 
-    if($('#factory-property-transition-duality').prop("checked")) exportConditions.Transition.properties.duality = true;
+    if ($('#factory-property-transition-duality').prop("checked")) exportConditions.Transition.properties.duality = true;
     else exportConditions.Transition.properties.duality = false;
+
+
+    // MultiLayer
+    if ($('#factory-multilayer-one').prop("checked")) exportConditions.MultiLayer = false;
+    if ($('#factory-multilayer-multi').prop("checked")) exportConditions.MultiLayer = true;
+
+  }
+
+
+  /**
+   * @memberof ExportManager
+   */
+  ExportManager.prototype.spaceLayer4Factory = function(docId, parentId) {
+
+    var floors = window.storage.propertyContainer.floorProperties;
+    var spaceLayers = [];
+
+    if (window.conditions.exportConditions.MultiLayer) {
+      for (var floorKey in floors) {
+        spaceLayers.push({
+          "docId": docId,
+          "parentId": parentId,
+          "id": floors[floorKey].getId()
+        });
+      }
+    } else {
+      spaceLayers.push({
+        "docId": docId,
+        "parentId": parentId,
+        "id": window.conditions.guid()
+      });
+    }
+
+    return spaceLayers;
+
+  }
+
+
+  /**
+   * @memberof ExportManager
+   */
+  ExportManager.prototype.nodes4Factory = function(docId, spaceLayers) {
+
+    var nodes = [];
+    for (var i = 0; i < spaceLayers.length; i++) {
+
+      nodes.push({
+        "docId": docId,
+        "parentId": spaceLayers[i].id,
+        "id": window.conditions.guid()
+      });
+
+    }
+
+    return nodes;
+
+  }
+
+
+  /**
+   * @memberof ExportManager
+   */
+  ExportManager.prototype.edges4Factory = function(docId, spaceLayers) {
+
+    var edges = [];
+    for (var i = 0; i < spaceLayers.length; i++) {
+
+      edges.push({
+        "docId": docId,
+        "parentId": spaceLayers[i].id,
+        "id": window.conditions.guid()
+      });
+
+    }
+
+    return edges;
 
   }
 
@@ -552,8 +682,6 @@ define([
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
 
-
-
     // copy geometry coordinates
     for (var key in geometries) {
 
@@ -632,20 +760,149 @@ define([
    * @memberof ExportManager
    * @return Array of Format4Factory.State
    */
-  ExportManager.prototype.stateObj4VFactory = function(docId, parentId) {
-    var states = [];
+  ExportManager.prototype.stateObj4VFactory = function(docId, nodes) {
+    var states = {};
+    var result = [];
+    var conditions = window.conditions.exportConditions.State;
+    var geometries = window.storage.geometryContainer.stateGeometry;
+    var properties = window.storage.propertyContainer.stateProperties;
+    var floorProperties = window.storage.propertyContainer.floorProperties;
+    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
-    return states;
+    // copy geometry coordinates
+    for (var key in geometries) {
+
+      var tmp = new FeatureFactory4Factory('State', conditions);
+      tmp.setId(geometries[key].id);
+      tmp.setDocId(docId);
+      tmp.setGeometryId("SG-" + geometries[key].id);
+      tmp.pushCoordinatesFromDots(geometries[key].point);
+      states[geometries[key].id] = tmp;
+
+    }
+
+    // copy attributes
+    for (var key in properties) {
+
+      var id = properties[key].id;
+      if (conditions.properties.name) states[id].setName(properties[key].name);
+      if (conditions.properties.description) states[id].setDescription(properties[key].description);
+      if (conditions.properties.duality) states[id].setDuality(properties[key].duality);
+      if (conditions.properties.connects) states[id].setConnects(properties[key].connects);
+
+    }
+
+    // pixel to real world coordinates
+    for (var floorKey in floorProperties) {
+
+      var stateKeyInFloor = floorProperties[floorKey].stateKey;
+      var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
+
+      var pixelLLC = [0, 0, 0];
+      var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
+      var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
+      var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
+
+      for (var stateKey in stateKeyInFloor) {
+
+        var point = states[stateKeyInFloor[stateKey]].getCoordinate();
+        var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, point);
+        states[stateKeyInFloor[stateKey]].updateCoordinates('x', trans._data[0]);
+        states[stateKeyInFloor[stateKey]].updateCoordinates('y', trans._data[1]);
+        states[stateKeyInFloor[stateKey]].updateCoordinates('z', floorProperties[floorKey].groundHeight * 1);
+
+        states[stateKeyInFloor[stateKey]].setWKT();
+
+        if (nodes.length == 1) states[stateKeyInFloor[stateKey]].setParentId(nodes[0].id);
+        else states[stateKeyInFloor[stateKey]].setParentId(floorProperties[floorKey].id);
+
+      }
+    }
+
+    for (var key in states) {
+      states[key].simplify();
+      result.push(states[key]);
+    }
+
+    return result;
   }
 
   /**
    * @memberof ExportManager
    * @return Array of Format4Factory.Transition
    */
-  ExportManager.prototype.transitionObj4VFactory = function(docId, parentId) {
-    var transitions = [];
+  ExportManager.prototype.transitionObj4VFactory = function(docId, edges) {
+    var transitions = {};
+    var result = [];
+    var conditions = window.conditions.exportConditions.Transition;
+    var geometries = window.storage.geometryContainer.transitionGeometry;
+    var properties = window.storage.propertyContainer.transitionProperties;
+    var floorProperties = window.storage.propertyContainer.floorProperties;
+    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
-    return transitions;
+    // copy geometry coordinates
+    for (var key in geometries) {
+
+      var tmp = new FeatureFactory4Factory('Transition', conditions);
+      tmp.setId(geometries[key].id);
+      tmp.setDocId(docId);
+      tmp.setGeometryId("TG-" + geometries[key].id);
+      tmp.setConnects(geometries[key].connects);
+      tmp.pushCoordinatesFromDots(geometries[key].points);
+      transitions[geometries[key].id] = tmp;
+
+    }
+
+    // copy attributes
+    for (var key in properties) {
+
+      var id = properties[key].id;
+      if (conditions.properties.name) transitions[id].setName(properties[key].name);
+      if (conditions.properties.description) transitions[id].setDescription(properties[key].description);
+      if (conditions.properties.duality) transitions[id].setDuality(properties[key].duality);
+      if (conditions.properties.weight) transitions[id].setWeight(properties[key].weight);
+      if (conditions.properties.connects) transitions[id].setConnects(properties[key].connects);
+
+    }
+
+    // pixel to real world coordinates
+    for (var floorKey in floorProperties) {
+
+      var transitionKeyInFloor = floorProperties[floorKey].transitionKey;
+      var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
+
+      var pixelLLC = [0, 0, 0];
+      var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
+      var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
+      var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
+
+      for (var transitionKey in transitionKeyInFloor) {
+
+        var points = transitions[transitionKeyInFloor[transitionKey]].getCoordinates();
+        for (var i = 0; i < points.length; i++) {
+
+          var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, points[i]);
+          transitions[transitionKeyInFloor[transitionKey]].updateCoordinates(i, 'x', trans._data[0]);
+          transitions[transitionKeyInFloor[transitionKey]].updateCoordinates(i, 'y', trans._data[1]);
+          transitions[transitionKeyInFloor[transitionKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
+
+        }
+
+        transitions[transitionKeyInFloor[transitionKey]].setWKT();
+
+        if (edges.length == 1) transitions[transitionKeyInFloor[transitionKey]].setParentId(edges[0].id);
+        else transitions[transitionKeyInFloor[transitionKey]].setParentId(floorProperties[floorKey].id);
+
+      }
+    }
+
+    for (var key in transitions) {
+      transitions[key].simplify();
+      result.push(transitions[key]);
+    }
+
+
+    return result;
   }
 
   /**
@@ -714,17 +971,6 @@ define([
    * @memberof ExportManager
    */
   ExportManager.prototype.extrudeCellBoundary = function(line, ch) {
-
-    // var result = [];
-    //
-    // for(var i = 0; i < line.length-1; i++){
-    //
-    //   var first = line[i];
-    //   var second = line[i+1];
-    //
-    //   result.push([first, second, [second[0], second[1], ch], [first[0], first[1], ch], first]);
-    //
-    // }
 
     var first = line[0];
     var second = line[1];

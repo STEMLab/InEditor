@@ -110,6 +110,16 @@ define([], function() {
     this.cursorColor = 'red';
 
     /**
+    * @memberof  Conditions
+    */
+    this.automGenerateState = true;
+
+    /**
+    * @memberof  Conditions
+    */
+    this.useMultiSpaceLayer = true;
+
+    /**
      * @memberof Conditions
      * @desc If the value is 'true', the attribute will included json which exported.
      */
@@ -142,7 +152,7 @@ define([], function() {
           'name': true,
           'description': true,
           'duality': true,
-          'connected': true
+          'connects': true
         }
       },
       'Transition': {
@@ -150,9 +160,11 @@ define([], function() {
           'name': true,
           'description': true,
           'duality': true,
-          'weight': true
+          'weight': true,
+          'connects': true
         }
-      }
+      },
+      'MultiLayer': false
     };
 
     /**
@@ -182,7 +194,7 @@ define([], function() {
           'name': true,
           'description': true,
           'duality': true,
-          'connected': true
+          'connects': true
         }
       },
       'Transition': {

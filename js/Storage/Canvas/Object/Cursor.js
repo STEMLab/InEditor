@@ -38,6 +38,15 @@ define([], function() {
     this.cursor.visible(visiblity);
   }
 
+  Cursor.prototype.name = function(name){
+
+    if(name == null || name == undefined)
+      return this.cursor.name();
+    else
+      this.cursor.name(name);
+
+  }
+
   return Cursor;
 
 });

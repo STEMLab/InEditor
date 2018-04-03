@@ -7,13 +7,17 @@ define([
   "../Storage/Canvas/Stage.js",
   "../Storage/Properties/CellProperty.js",
   "../PubSub/Subscriber.js",
-  "../Storage/Properties/CellBoundaryProperty.js"
+  "../Storage/Properties/CellBoundaryProperty.js",
+  "../Storage/Properties/StateProperty.js",
+  "../Storage/Properties/TransitionProperty.js"
 ], function(
   FloorProperty,
   Stage,
   CellProperty,
   Subscriber,
-  CellBoundaryProperty
+  CellBoundaryProperty,
+  StateProperty,
+  TransitionProperty
 ) {
   'use strict';
 
@@ -44,7 +48,7 @@ define([
     this.addCallbackFun('updaterefdata', this.updateRefProperty);
 
     this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.makeSimpleHistoryObj, this.endAddNewCellBoundary_undo);
-
+    this.addCallbackFun('end-addnewtransition', this.endAddNewTransition)
   }
 
   /**
@@ -140,6 +144,19 @@ define([
     window.storage.propertyContainer.getElementById('floor', reqObj.floor).cellKey.push(
       reqObj.id
     );
+
+    // add state property if there if conditions.automGenerateState is true
+    if(window.conditions.automGenerateState){
+      var newState = new StateProperty(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM));
+      newState.setDuality(reqObj.id);
+
+      window.storage.propertyContainer.stateProperties.push( newState );
+      window.storage.propertyContainer.getElementById('floor', reqObj.floor).stateKey.push(
+        newState.id
+      );
+    }
+
+    log.trace(window.storage);
 
   }
 
@@ -237,6 +254,34 @@ define([
     window.conditions.LAST_CELLBOUNDARY_ID_NUM--;
 
     log.trace(window.storage);
+
+  }
+
+  /**
+  * @memberof PropertyManager
+  * @param {Message.reqObj} reqObj id : if of new object<br>floor : id of the floor where the new object will be created
+  */
+  PropertyManager.prototype.endAddNewTransition = function(reqObj){
+
+    if(reqObj.isEmpty != null) return;
+
+    var canvasObj = window.storage.canvasContainer.stages[reqObj.floor].transitionLayer.group.getLastTransition();
+    var newProperty = new TransitionProperty(reqObj.id);
+    var connects = canvasObj.getConnection()
+    newProperty.setConnects(connects);
+    newProperty.setDuality(canvasObj.getDuality());
+
+    // add connects to state
+    window.storage.propertyContainer.getElementById('state', connects[0]).addConnects(newProperty.id);
+    window.storage.propertyContainer.getElementById('state', connects[1]).addConnects(newProperty.id);
+
+    // add new transition object in storage.propertyContainer
+    window.storage.propertyContainer.transitionProperties.push(newProperty);
+
+    // add transition key in floor property
+    window.storage.propertyContainer.getElementById('floor', reqObj.floor).transitionKey.push(
+      reqObj.id
+    );
 
   }
 

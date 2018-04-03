@@ -50,8 +50,8 @@
   <!-- js-bson -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-bson/2.0.4/bson.min.js"></script>
 
-
-
+  <!-- jsts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsts/1.6.0/jsts.min.js"></script>
 
 </head>
 
@@ -177,7 +177,7 @@
             </div>
             <div class="form-group">
               <label for="factory-portNum">Port Number</label>
-              <input type="number" class="form-control" id="factory-portNum" value="7979">
+              <input type="number" class="form-control" id="factory-portNum" value="9797">
             </div>
             <hr>
             <h6>Export Options</h6>
@@ -198,6 +198,28 @@
                     <input class="form-check-input" type="radio" id="factory-geometry-type-3D" checked>
                     <label class="form-check-label" for="factory-geometry-type-3D" title="CellSpace : Solid, CellSpaceBoundary : Surface">
                       geometry3D
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="factory-geometry-type-container"><b>Multi-Layer Option</b></label>
+              <div class="row" id="factory-geometry-type-container">
+                <div class="col-md-6">
+                  <div class="form-check" id="factory-geometry-type">
+                    <input class="form-check-input" type="radio" id="factory-multilayer-one" checked>
+                    <label class="form-check-label" for="factory-multilayer-one " >
+                      only one layer
+                    </label>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" id="factory-multilayer-multi" disabled>
+                    <label class="form-check-label" for="factory-multilayer-multi">
+                      make multi-layer
                     </label>
                   </div>
                 </div>
@@ -303,9 +325,9 @@
                           </label>
                   </div>
                   <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-state-connected" checked>
-                    <label class="form-check-label" for="factory-property-state-connected">
-                            connected
+                    <input class="form-check-input" type="checkbox" value="" id="factory-property-state-connects" checked>
+                    <label class="form-check-label" for="factory-property-state-connects">
+                            connects
                           </label>
                   </div>
                 </div>

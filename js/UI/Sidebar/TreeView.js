@@ -136,6 +136,43 @@ define([], function() {
 
   }
 
+  /**
+  * @memberof TreeView
+  */
+  TreeView.prototype.addState = function(id, floor){
+
+    $("#tree-view").fancytree("getTree").getNodeByKey(floor+"-state").addChildren({
+      title : id,
+      key : id,
+      folder : false,
+      type : 'state',
+      icon : '../../assets/tree-icon/state.png'
+    });
+
+    $("#tree-view").fancytree("getTree").activateKey(id);
+
+  }
+
+  /**
+  * @memberof TreeView
+  */
+  TreeView.prototype.addTransition = function(id, floor){
+
+    $("#tree-view").fancytree("getTree").getNodeByKey(floor+"-transition").addChildren({
+      title : id,
+      key : id,
+      folder : false,
+      type : 'transition',
+      icon : '../../assets/tree-icon/transition.png'
+    });
+
+    $("#tree-view").fancytree("getTree").activateKey(id);
+
+  }
+
+  /**
+  *  @memberof TreeView
+  */
   TreeView.prototype.refresh = function(propertyContainer){
 
 
