@@ -88,6 +88,29 @@ define([], function() {
 
   /**
   * @memberof Cell
+  * @param {Object} cor x, y
+  * @param String uuid of dot
+  */
+  Cell.prototype.addCornerObjFromDot = function(dot) {
+    var rect = new Konva.Rect({
+      x: dot.point.x,
+      y: dot.point.y,
+      width: 5,
+      height: 5,
+      fill: 'white',
+      stroke: 'black',
+      strokeWidth: 1
+    });
+
+    rect.uuid = dot.uuid;
+
+    this.corners.add(rect);
+
+    this.poly.points().push(dot.point.x, dot.point.y);
+  }
+
+  /**
+  * @memberof Cell
   */
   Cell.prototype.deleteLastCorner = function(){
 
@@ -179,7 +202,8 @@ define([], function() {
     this.poly.attrs.points = [];
 
     for(var key in this.dots){
-      this.addCornerObj(this.dots[key].uuid, this.dots[key].getCoor());
+      // this.addCornerObj(this.dots[key].uuid, this.dots[key].getCoor());
+      this.addCornerObjFromDot(this.dots[key]);
     }
 
   }

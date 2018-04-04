@@ -285,5 +285,9 @@ define([
 
   }
 
+  PropertyManager.prototype.endAddNewTransition_undo = function(undoObj){
+    
+  }
+
   return PropertyManager;
 });

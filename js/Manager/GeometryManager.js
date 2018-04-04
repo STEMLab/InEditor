@@ -68,8 +68,8 @@ define([
     this.addCallbackFun('cancel-addnewcellboundary', this.cancelAddNewCellBoundary);
 
     this.addCallbackFun('start-addnewtransition', this.startAddNewTransition, function() {}, function() {});
-    this.addCallbackFun('addnewtransition', this.addNewTransition, function() {}, function() {});
-    this.addCallbackFun('end-addnewtransition', this.endAddNewTransition, function(){}, function(){});
+    this.addCallbackFun('addnewtransition', this.addNewTransition, this.drawGeometry_makeHistoryObj, this.addNewTransition_undo);
+    this.addCallbackFun('end-addnewtransition', this.endAddNewTransition, this.makeSimpleHistoryObj, this.endAddNewTransition_undo);
 
   }
 
@@ -332,6 +332,8 @@ define([
         break;
       }
     }
+
+    // ask remove state or not
 
   }
 
@@ -612,14 +614,12 @@ define([
    */
   GeometryManager.prototype.endAddNewCellBoundary_undo = function(undoObj) {
 
-    log.info(undoObj);
-
     // remove cellboundary in canvasContainer
     var cellboundaries = window.storage.canvasContainer.stages[undoObj.floor].cellBoundaryLayer.group.cellBoundaries;
 
     for (var key in cellboundaries) {
       if (cellboundaries[key].id == undoObj.id) {
-        cellboundaries[key].destroy(undoObj.floor);
+        cellboundaries[key].destroy();
 
         // free dot from object
         for (var dotkey in cellboundaries[key].dots) {
@@ -629,6 +629,8 @@ define([
         // redraw canvas
         window.storage.canvasContainer.stages[undoObj.floor].cellBoundaryLayer.layer.draw();
         cellboundaries.splice(key, 1);
+
+        break;
       }
     }
 
@@ -883,6 +885,31 @@ define([
 
   /**
   * @memberof GeometryManager
+  * @param {Object} undoObj floor : id of floor<br>uuid : id of dot
+  */
+  GeometryManager.prototype.addNewTransition_undo = function(undoObj){
+
+    // change tooltip text
+    if(tmpObj.dots.length == 2){
+      var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+      manager.setTooltipText({
+        floor: undoObj.floor,
+        text: 'select state'
+      });
+    }
+
+    var dotFool = window.storage.dotFoolContainer.getDotFool(undoObj.floor);
+
+    // remove state data from obj and free dot
+    window.tmpObj.removeState(dotFool.getDotById(undoObj.uuid));
+    dotFool.deleteDotFromObj(undoObj.uuid, 'tmpObj');
+
+    window.storage.canvasContainer.stages[undoObj.floor].tmpLayer.layer.draw();
+
+  }
+
+  /**
+  * @memberof GeometryManager
   */
   GeometryManager.prototype.endAddNewTransition = function(reqObj){
 
@@ -920,6 +947,50 @@ define([
     // redraw stage
     window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
 
+  }
+
+  /**
+  * @memberof GeometryManager
+  * @param {Object} undoObj floor, id
+  */
+  GeometryManager.prototype.endAddNewTransition_undo = function(undoObj){
+
+    // remove transition object in canvasContainer
+    var canvasObj = window.storage.canvasContainer.stages[undoObj.floor].getElementById('transition', undoObj.id);
+    canvasObj.destroy();
+
+    // free dot from object
+    var dots = canvasObj.getDots();
+    var dotFool = window.storage.dotFoolContainer.getDotFool(undoObj.floor);
+    for(var dotKey in dots){
+
+      dotFool.deleteDotFromObj(dots[dotKey].uuid, undoObj.id);
+
+      // if dots[dotKey] is part of cell boundary
+      var memberOf = dots[dotKey].getMemberOf();
+      for(var memKey in memberOf){
+        if ( memberOf[memKey] == 'cellBoundary' ){
+          var boundryObj = window.storage.canvasContainer.stages[undoObj.floor].getElementById('cellboundary', memKey);
+          if(boundryObj.isRemovableDot(dots[dotKey])){
+            dotFool.deleteDotFromObj(dots[dotKey].uuid, boundryObj.id);
+          }
+        }
+      }
+    }
+
+    window.storage.canvasContainer.stages[undoObj.floor].transitionLayer.group.transitions.splice(
+      window.storage.canvasContainer.stages[undoObj.floor].transitionLayer.group.transitions.indexOf(canvasObj), 1
+    );
+
+    // remove transition geometry in geometryContainer
+    window.storage.geometryContainer.removeObj(
+      window.storage.geometryContainer.getElementById('transition', undoObj.id)
+    );
+
+    // redraw stage
+    window.storage.canvasContainer.stages[undoObj.floor].stage.draw();
+
+    log.trace(window.storage);
   }
 
 

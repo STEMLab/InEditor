@@ -240,7 +240,7 @@ define([
   /**
   * @memberof CellBoundary
   */
-  CellBoundary.prototype.destroy = function(floor){
+  CellBoundary.prototype.destroy = function(){
 
     this.corners.destroy();
     this.line.destroy();
@@ -259,6 +259,25 @@ define([
   */
   CellBoundary.prototype.changeLineColor = function(color){
     this.line.setAttr('stroke', color);
+  }
+
+  /**
+  * @memberof CellBoundary
+  * @desc If the dot, inserted as parameter, is located the middle of the line which consists of other dots of this object and the dot not belongs in another object except this, the dot could be removed from this object.
+  */
+  CellBoundary.prototype.isRemovableDot = function(dot){
+
+    for(var i = 0 ; i < this.dots.length - 2; i++){
+      if( dot == this.dots[i] || dot == this.dots[i+2] ) continue;
+
+      var line = {dot1 : this.dots[i], dot2: this.dots[i+2]};
+      if(DotMath.isLineContainDot(line, dot) && Object.keys(dot.getMemberOf()).length == 1 ){
+        return true;
+      }
+    }
+
+    return false;
+
   }
 
   return CellBoundary;

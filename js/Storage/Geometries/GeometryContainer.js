@@ -33,6 +33,18 @@ define([
   }
 
   /**
+  * @memberof GeometryContainer
+  */
+   GeometryContainer.prototype.removeObj = function(obj){
+
+     if(this.cellGeometry.indexOf(obj) != -1 ) this.cellGeometry.splice(this.cellGeometry.indexOf(obj), 1);
+     else if(this.cellBoundaryGeometry.indexOf(obj) != -1 ) this.cellBoundaryGeometry.splice(this.cellBoundaryGeometry.indexOf(obj), 1);
+     else if(this.stateGeometry.indexOf(obj) != -1 ) this.stateGeometry.splice(this.stateGeometry.indexOf(obj), 1);
+     else if(this.transitionGeometry.indexOf(obj) != -1 ) this.transitionGeometry.splice(this.transitionGeometry.indexOf(obj), 1);
+
+   }
+
+  /**
    * @param {String} _type
    * @param {String} _id
    * @memberof GeometryContainer
