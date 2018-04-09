@@ -48,6 +48,7 @@ define([
 
     this.addCallbackFun('cancel-addnewcell', this.cancelAddNewCell);
     this.addCallbackFun('cancel-addnewcellboundary', this.cancelAddNewCellBoundary);
+    this.addCallbackFun('cancel-addnewtransition', this.cancelAddNewTransition);
 
     this.addCallbackFun('start-addnewcellboundary', this.startAddNewCellBoundary);
     this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.endAddNewCellBoundary_makeHistoryObj, this.removeObj);
@@ -57,7 +58,7 @@ define([
     this.addCallbackFun('movetooltip', this.moveTooltip);
 
     this.addCallbackFun('start-addnewtransition', this.startAddNewTransition);
-    this.addCallbackFun('end-addnewtransition', this.endAddNewTransition);
+    this.addCallbackFun('end-addnewtransition', this.endAddNewTransition, this.endAddNewTransition_makeHistoryObj, this.removeObj);
 
   }
 
@@ -486,6 +487,31 @@ define([
      manager.setTooltipText({text:''});
 
    }
+
+   /**
+    * @memberof UIManager
+    */
+   UIManager.prototype.endAddNewTransition_makeHistoryObj = function(reqObj) {
+
+     var obj = reqObj;
+     obj['type'] = 'transition';
+
+     return obj;
+   }
+
+   /**
+   * @memberof UIManager
+   */
+   UIManager.prototype.cancelAddNewTransition = function(reqObj){
+
+    document.getElementById('transition-btn').src = "../../assets/icon/transition_d.png";
+
+    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    manager.setTooltipText({text:''});
+
+   }
+
+
 
 
 
