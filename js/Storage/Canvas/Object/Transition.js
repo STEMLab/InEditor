@@ -74,6 +74,18 @@ define([], function() {
   /**
   * @memberof Transition
   */
+  Transition.prototype.removeState = function(dot){
+
+    if( this.dots.indexOf(dot) == -1) return;
+
+    this.dots.splice(this.dots.indexOf(dot), 1);
+    this.addObjectFromDots();
+
+  }
+
+  /**
+  * @memberof Transition
+  */
   Transition.prototype.insertDot = function(index, dot){
 
     this.dots.splice(index, 0, dot);
@@ -137,6 +149,24 @@ define([], function() {
     }
 
     return null;
+
+  }
+
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.getLastDot = function(){
+
+    return this.dots[this.dots.length - 1];
+
+  }
+
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.destroy = function(floor){
+
+    this.line.destroy();
 
   }
 

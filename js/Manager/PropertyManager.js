@@ -48,7 +48,7 @@ define([
     this.addCallbackFun('updaterefdata', this.updateRefProperty);
 
     this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.makeSimpleHistoryObj, this.endAddNewCellBoundary_undo);
-    this.addCallbackFun('end-addnewtransition', this.endAddNewTransition)
+    this.addCallbackFun('end-addnewtransition', this.endAddNewTransition, this.makeSimpleHistoryObj, this.endAddNewTransition_undo);
   }
 
   /**
@@ -282,6 +282,27 @@ define([
     window.storage.propertyContainer.getElementById('floor', reqObj.floor).transitionKey.push(
       reqObj.id
     );
+
+  }
+
+  /**
+  * @memberof PropertyManager
+  * @param {Object} undoObj id : if of new object<br>floor : id of the floor where the new object will be created
+  */
+  PropertyManager.prototype.endAddNewTransition_undo = function(undoObj){
+
+    // remove new transition object in storage.propertyContainer
+    var propertyObj = window.storage.propertyContainer.getElementById('transition', undoObj.id);
+    window.storage.propertyContainer.transitionProperties.splice(
+      window.storage.propertyContainer.transitionProperties.indexOf(propertyObj), 1
+    );
+
+    // remove cell key in floor property
+    var floor = window.storage.propertyContainer.getElementById('floor', undoObj.floor);
+    var index = floor.transitionKey.indexOf(undoObj.id);
+    floor.transitionKey.splice(index, 1);
+
+    window.conditions.LAST_TRANSITION_ID_NUM--;
 
   }
 

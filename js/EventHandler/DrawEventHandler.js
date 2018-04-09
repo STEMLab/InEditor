@@ -46,8 +46,8 @@ define([
     handlerBinder['stage'] = {
       'contentClick': this.addNewDot,
       'contentMousemove': this.moveMouse,
-      'contentDblclick': this.dbclick,
-      'contentMousedown': this.mousedown
+      'contentDblclick': this.dbclick
+      // 'contentMousedown': this.mousedown
     };
 
     handlerBinder['Escape'] = {

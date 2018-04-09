@@ -174,13 +174,34 @@ define([], function() {
 
   }
 
+  /**
+   * @memberof Dot
+   */
    Dot.prototype.isState = function(){
 
-     var values = Object.values(this.partOf);
+     var values = Object.values(this.memberOf);
      if( values.indexOf('state') == -1) return false;
      return true;
 
    }
+
+   /**
+    * @memberof Dot
+    */
+    Dot.prototype.isPartOfCellBoundary = function(){
+
+      var values = Object.values(this.memberOf);
+      if( values.indexOf('cellBoundary') == -1) return false;
+      return true;
+
+    }
+
+    /**
+     * @memberof Dot
+     */
+    Dot.prototype.getMemberOf = function(type){
+      return this.memberOf;
+    }
 
   return Dot;
 });
