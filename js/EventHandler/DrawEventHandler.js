@@ -43,6 +43,10 @@ define([
       'click': this.clickTransitionBtn
     }
 
+    handlerBinder['stair-btn'] = {
+      'click': this.clickStairBtn
+    }
+
     handlerBinder['stage'] = {
       'contentClick': this.addNewDot,
       'contentMousemove': this.moveMouse,
@@ -190,7 +194,8 @@ define([
       }
 
 
-    } else if (broker.isPublishable('addnewcellboundary')) {
+    }
+    else if (broker.isPublishable('addnewcellboundary')) {
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
       var isFirstClick = (window.tmpObj.affiliatedCell == null);
@@ -214,25 +219,76 @@ define([
 
       }
 
-    } else if (broker.isPublishable('addnewtransition')) {
+    }
+    else if (broker.isPublishable('addnewtransition')) {
 
-      broker.publish(new Message('addnewtransition', {
-        'floor': data.currentTarget.attrs.id
-      }));
+      var isFirstClick = (window.tmpObj.floor == null);
+      var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
 
-      result.result = true;
-      result.msg = 'addnewtransition';
+      if(isSameFloor || isFirstClick){
+
+        broker.publish(new Message('addnewtransition', {
+          'floor': data.currentTarget.attrs.id
+        }));
+
+        result.result = true;
+        result.msg = 'addnewtransition';
+
+      } else {
+
+        result.msg = 'Transition need states which existed same floor but you select wrong state.';
+
+      }
 
       if(window.tmpObj.dots.length == 3){
+
         broker.publish(new Message('end-addnewtransition', {
           floor: data.currentTarget.attrs.id,
           id: window.conditions.pre_transition+(++window.conditions.LAST_TRANSITION_ID_NUM)
         }));
+
+        result.result = true;
+        result.msg = null;
       }
 
+    }
+    else if (broker.isPublishable('addnewstair')) {
 
+      var isFirstClick = (window.tmpObj.floor == null);
+      var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
 
-    } else {
+      if(isFirstClick || !isSameFloor){
+
+        broker.publish(new Message('addnewstair', {
+          'floor': data.currentTarget.attrs.id
+        }));
+
+        result.result = true;
+        result.msg = 'addnewstair';
+
+      } else if( isSameFloor ) {
+
+        result.msg = 'You should select state which on the different floor from the floor that the state you selected before.';
+
+      } else {
+
+        result.msg = "wrong state transition : " + previousMsg + " to addnewstair.";
+
+      }
+
+      if(window.tmpObj.dots.length == 2){
+
+        broker.publish(new Message('end-addnewstair', {
+          floor: window.tmpObj.floor,
+          id: window.conditions.pre_transition+(++window.conditions.LAST_TRANSITION_ID_NUM)
+        }));
+
+        result.result = true;
+        result.msg = null;
+      }
+
+    }
+    else {
 
       result.msg = "no match function.";
 
@@ -257,7 +313,7 @@ define([
           }));
 
           result.result = true;
-          result.msg = 'cancel-addnewcell';
+          result.msg = null;
         }
         break;
       case 'addnewcellboundary':
@@ -268,7 +324,7 @@ define([
           }));
 
           result.result = true;
-          result.msg = 'cancel-addnewcellboundary';
+          result.msg = null;
 
         }
         break;
@@ -280,7 +336,7 @@ define([
           }));
 
           result.result = true;
-          result.msg = 'cancel-addnewstate';
+          result.msg = null;
 
         }
 
@@ -293,7 +349,7 @@ define([
           }));
 
           result.result = true;
-          result.msg = 'cancel-addnewtransition';
+          result.msg = null;
 
         }
         break;
@@ -355,10 +411,20 @@ define([
 
     } else if (broker.isPublishable('end-addnewtransition')) {
 
-      broker.publish(new Message('end-addnewtransition', {
-        'id': window.conditions.pre_transition + (++window.conditions.LAST_TRANSITION_ID_NUM),
-        'floor': window.tmpObj.floor
-      }));
+      if (window.tmpObj.isEmpty()){
+
+        broker.publish(new Message('end-addnewcellboundary', {
+          'isEmpty': true
+        }));
+
+      } else {
+
+        broker.publish(new Message('end-addnewtransition', {
+          'id': window.conditions.pre_transition + (++window.conditions.LAST_TRANSITION_ID_NUM),
+          'floor': window.tmpObj.floor
+        }));
+
+      }
 
       result.result = true;
       result.msg = null;
@@ -503,6 +569,47 @@ define([
 
     } else {
       result.msg = "wrong transition : " + previousMsg + " to start-addnewtransition, end-addnewtransition.";
+    }
+
+    return result;
+
+  }
+
+  /**
+  * @memberof DrawEventHandler
+  */
+  DrawEventHandler.prototype.clickStairBtn = function(broker, previousMsg){
+
+    var result = new Result();
+    var isFloorExist = (window.storage.propertyContainer.floorProperties.length >= 2);
+    var isStateExist = (window.storage.propertyContainer.stateProperties.length >= 2);
+
+    if (!isFloorExist) {
+
+      result.msg = "There is too few floor ...";
+
+    } else if (!isStateExist){
+
+      result.msg = "There is too few state ...";
+
+    } else if(broker.isPublishable('start-addnewstair')){
+
+      broker.publish(new Message('start-addnewstair', null));
+
+      result.result = true;
+      result.msg = 'start-addnewstair';
+
+    } else if(broker.isPublishable('end-addnewstair')){
+
+      broker.publish(new Message('start-addnewstair', null));
+
+      result.result = true;
+      result.msg = null;
+
+    } else {
+
+      result.msg = "wrong transition : " + previousMsg + " to start-addnewstair, end-addnewstair.";
+
     }
 
     return result;

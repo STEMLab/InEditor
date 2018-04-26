@@ -88,6 +88,11 @@ define([
       window.tmpObj = this.obj;
       this.tmpGroup.add(this.obj.getLineObject());
 
+    } else if (type == 'stair') {
+
+      this.obj = new Transition('tmpObj');
+      window.tmpObj = this.obj;
+
     }
 
   }

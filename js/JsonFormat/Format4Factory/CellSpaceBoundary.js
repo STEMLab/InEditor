@@ -20,7 +20,7 @@ define(["./Feature"], function(Feature) {
       'properties': {
         'id': "",
         'height': "",
-        'type' : 'geojson'
+        'type': 'geojson'
       }
     };
 
@@ -42,11 +42,11 @@ define(["./Feature"], function(Feature) {
 
   CellSpaceBoundary.prototype = Object.create(Feature.prototype);
 
-  CellSpaceBoundary.prototype.setWKT = function(coor){
+  CellSpaceBoundary.prototype.setWKT = function(coor) {
 
     var wkt = "POLYGON ((";
 
-    for (var i = 0 ; i < coor.length; i++){
+    for (var i = 0; i < coor.length; i++) {
 
       wkt += coor[i][0];
       wkt += " ";
@@ -54,11 +54,11 @@ define(["./Feature"], function(Feature) {
       wkt += " ";
       wkt += coor[i][2];
 
-      if( i != coor.length - 1 ) wkt += ", ";
+      if (i != coor.length - 1) wkt += ", ";
 
     }
 
-   wkt += "))";
+    wkt += "))";
 
     this.geometry.type = 'Surface';
     this.geometry.coordinates = wkt;
@@ -100,13 +100,29 @@ define(["./Feature"], function(Feature) {
   /**
    * @memberof CellSpaceBoundary
    */
-  CellSpaceBoundary.prototype.pushCoordinatesFromDots = function(dots) {
+  CellSpaceBoundary.prototype.pushCoordinatesFromDots = function(dots, transDots) {
 
-    var len = dots.length;
+    if (transDots == undefined) {
 
-    for (var i = 0; i < len; i++) {
+      var len = dots.length;
 
-      this.geometry.coordinates.push([dots[i].point.x, dots[i].point.y, 0]);
+      for (var i = 0; i < len; i++) {
+
+        this.geometry.coordinates.push([dots[i].point.x, dots[i].point.y, 0]);
+
+      }
+
+    }
+    else {
+
+      var len = dots.length;
+
+      for (var i = 0; i < len; i++) {
+
+        var transDot = transDots[dots[i].uuid];
+        this.geometry.coordinates.push([transDot.point.x, transDot.point.y, transDot.point.z]);
+
+      }
 
     }
 
@@ -172,10 +188,10 @@ define(["./Feature"], function(Feature) {
    */
   CellSpaceBoundary.prototype.copy = function(obj) {
 
-    if(this.properties.name != null) this.properties.name = obj.properties.name;
-    if(this.properties.description != null) this.properties.description = obj.properties.description;
-    if(this.properties.externalReference != null) this.properties.externalReference = obj.properties.externalReference;
-    if(this.properties.duality != null) this.properties.duality = obj.properties.duality;
+    if (this.properties.name != null) this.properties.name = obj.properties.name;
+    if (this.properties.description != null) this.properties.description = obj.properties.description;
+    if (this.properties.externalReference != null) this.properties.externalReference = obj.properties.externalReference;
+    if (this.properties.duality != null) this.properties.duality = obj.properties.duality;
 
     this.docId = obj.docId;
     this.parentId = obj.parentId;

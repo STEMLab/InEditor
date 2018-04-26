@@ -372,6 +372,23 @@ define([
 
   }
 
+  /**
+   * @memberof PropertyContainer
+   */
+  PropertyContainer.prototype.getFloorObj = function() {
+
+    var result = {};
+
+    for( var i = 0 ; i < this.floorProperties.length; i++){
+
+      result[this.floorProperties[i].id] = this.floorProperties[i];
+
+    }
+
+    return result;
+
+  }
+
 
   return PropertyContainer;
 });

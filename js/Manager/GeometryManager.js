@@ -72,6 +72,9 @@ define([
     this.addCallbackFun('addnewtransition', this.addNewTransition, this.drawGeometry_makeHistoryObj, this.addNewTransition_undo);
     this.addCallbackFun('end-addnewtransition', this.endAddNewTransition, this.makeSimpleHistoryObj, this.endAddNewTransition_undo);
 
+    this.addCallbackFun('start-addnewstair', this.startAddNewStair, function() {}, function() {});
+    this.addCallbackFun('addnewstair', this.addNewStair, function() {}, function() {});
+    this.addCallbackFun('end-addnewstair', this.endAddNewStair, function() {}, function() {});
   }
 
   /**
@@ -356,21 +359,21 @@ define([
    */
   GeometryManager.prototype.cancelDrawObj = function(reqObj) {
 
-    if (reqObj.floor == undefined) {
-      window.tmpObj = null;
-      return;
-    }
+    if (reqObj.floor != undefined) {
 
-    for (var key in window.tmpObj.dots) {
-      window.storage.dotFoolContainer.getDotFool(reqObj.floor).deleteDotFromObj(window.tmpObj.dots[key].uuid, 'tmpObj');
+      for (var key in window.tmpObj.dots) {
+        window.storage.dotFoolContainer.getDotFool(reqObj.floor).deleteDotFromObj(window.tmpObj.dots[key].uuid, 'tmpObj');
+      }
+
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.removeObj();
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+
     }
 
     // clear tmp obj
     window.tmpObj = null;
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.removeObj();
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
-    window.myhistory.history.pop_back();
+    window.myhistory.cancelCycle();
 
   }
 
@@ -855,12 +858,12 @@ define([
       }
 
     } else {
+
       return false;
+
     }
 
     window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
-
-    log.trace(window.storage);
 
   }
 
@@ -973,6 +976,107 @@ define([
     window.storage.canvasContainer.stages[undoObj.floor].stage.draw();
 
     log.trace(window.storage);
+  }
+
+  /**
+   * @memberof GeometryManager
+   */
+  GeometryManager.prototype.startAddNewStair = function(reqObj) {
+
+    var tmpObj = new Transition('tmpObj');
+    tmpObj.type = 'transition';
+    window.tmpObj = tmpObj;
+
+
+  }
+
+  /**
+   * @memberof GeometryManager
+   * @desc In case of the transition which connects different floor, if will be saved to first state's container(floor)
+   */
+  GeometryManager.prototype.addNewStair = function(reqObj) {
+
+    if (window.tmpObj.floor == null) {
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.addNewObj('stair');
+      window.tmpObj.floor = reqObj.floor;
+    }
+
+    // get  coordinate
+    var point = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor.coor;
+
+    var isDotExist = window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDotByPoint({
+      x: point.x,
+      y: point.y
+    });
+
+    if (isDotExist != null && tmpObj.dots.length <= 1 && isDotExist.isState()) {
+
+      window.tmpObj.addState(isDotExist);
+      isDotExist.participateObj('tmpObj', 'transition');
+
+      if (tmpObj.dots.length == 1) {
+        var manager = window.broker.getManager('start-addnewstair', 'UIManager');
+        manager.setTooltipText({
+          floor: reqObj.floor,
+          text: 'select state on another floor'
+        });
+      } else {
+        var manager = window.broker.getManager('start-addnewstair', 'UIManager');
+        manager.setTooltipText({
+          text: ''
+        });
+        window.tmpObj.deleteLineObject();
+      }
+
+      var memeberof = window.tmpObj.getLastDot().getMemberOf();
+      var stateKey = null;
+      for (var key in memeberof) {
+        if (memeberof[key] == 'state') {
+          stateKey = key;
+          break;
+        }
+      }
+
+      window.storage.canvasContainer.stages[reqObj.floor].getElementById('state', stateKey).setColor('blue');
+      window.storage.canvasContainer.stages[reqObj.floor].getElementById('state', stateKey).getObj().draw();
+
+    } else {
+
+      return false;
+
+    }
+
+  }
+
+  /**
+   * @memberof GeometryManager
+   */
+  GeometryManager.prototype.endAddNewStair = function(reqObj) {
+
+    if (reqObj.isEmpty != null) {
+      window.tmpObj = null;
+      return;
+    }
+
+    var tmpObj = window.tmpObj;
+
+    // clear tmp object
+    window.tmpObj = null;
+    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.removeObj();
+    // window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+
+    for (var key in tmpObj.dots) {
+      tmpObj.dots[key].leaveObj('tmpObj');
+    }
+
+    tmpObj.id = reqObj.id;
+    tmpObj.name = reqObj.id;
+
+    //add transition data in geometry canvasContainer
+    window.storage.geometryContainer.transitionGeometry.push(new TransitionGeometry(tmpObj.id, tmpObj.getConnection(), tmpObj.getDots()));
+
+    // log.info(window.tmpObj);
+    // log.info(window.storage);
   }
 
 

@@ -49,6 +49,8 @@ define([
 
     this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.makeSimpleHistoryObj, this.endAddNewCellBoundary_undo);
     this.addCallbackFun('end-addnewtransition', this.endAddNewTransition, this.makeSimpleHistoryObj, this.endAddNewTransition_undo);
+    this.addCallbackFun('end-addnewstair', this.endAddNewStair, function() {}, function() {});
+
   }
 
   /**
@@ -303,6 +305,40 @@ define([
     floor.transitionKey.splice(index, 1);
 
     window.conditions.LAST_TRANSITION_ID_NUM--;
+
+  }
+
+  /**
+  * @memberof PropertyManager
+  * @param {Message.reqObj} reqObj id : if of new object<br>floor : id of the floor where the new object will be created
+  */
+  PropertyManager.prototype.endAddNewStair = function(reqObj){
+
+    if(reqObj.isEmpty != null) return;
+
+    var geometryObj = window.storage.geometryContainer.getElementById('transition', reqObj.id);
+    var newProperty = new TransitionProperty(reqObj.id);
+    var connects = geometryObj.getConnects();
+    newProperty.setConnects(connects);
+    newProperty.setDuality(geometryObj.getDuality());
+
+    var startFloor = window.storage.propertyContainer.getFloorById('state', connects[0]);
+    var endFloor = window.storage.propertyContainer.getFloorById('state', connects[1]);
+    newProperty.setStair([startFloor, endFloor]);
+
+    // add connects to state
+    window.storage.propertyContainer.getElementById('state', connects[0]).addConnects(newProperty.id);
+    window.storage.propertyContainer.getElementById('state', connects[1]).addConnects(newProperty.id);
+
+    // add new transition object in storage.propertyContainer
+    window.storage.propertyContainer.transitionProperties.push(newProperty);
+
+    // add transition key in floor property
+    window.storage.propertyContainer.getElementById('floor', reqObj.floor).transitionKey.push(
+      reqObj.id
+    );
+
+    // log.info(window.storage.propertyContainer);
 
   }
 

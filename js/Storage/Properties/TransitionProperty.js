@@ -42,8 +42,9 @@ define([],function() {
 
     /**
     * @memberof TransitionProperty
+    * @desc connection [ start floor, end floor ]
     */
-    this.isInterLayerConnetion = { tf : false, connection : [] };
+    this.isStair = { tf : false, connection : [] };
   }
 
   /**
@@ -95,8 +96,22 @@ define([],function() {
     this.duality = duality;
   }
 
+  /**
+  * @memberof TransitionProperty
+  */
   TransitionProperty.prototype.getConncetsString = function(){
     return this.connects[0] +  ' - ' + this.connects[1];
+  }
+
+  /**
+  * @memberof TransitionProperty
+  * @param {Array} If connection is undefined(there is no parameter), `isStair` attribute will be reset.
+  */
+  TransitionProperty.prototype.setStair = function(connection){
+
+    if(connection == undefined) this.isStair = { tf : false, connection : [] };
+    else                        this.isStair = { tf : true, connection : connection };
+    
   }
 
   return TransitionProperty;

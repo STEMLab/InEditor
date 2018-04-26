@@ -56,7 +56,11 @@ define([], function() {
   * @memberof Transition
   */
   Transition.prototype.isEmpty = function(){
-    log.error(' YOU NEED TO DEVELOP IS-EMPTY FUNCTION FOR TRANSITION OBJ ! ');
+
+    if( this.dots.length == 0 ) return true;
+
+    return false;
+
   }
 
   /**
@@ -167,6 +171,16 @@ define([], function() {
   Transition.prototype.destroy = function(floor){
 
     this.line.destroy();
+
+  }
+
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.deleteLineObject = function(){
+
+    this.line.destroy();
+    delete this.line;
 
   }
 

@@ -101,7 +101,9 @@ define(["./Feature"], function(Feature) {
    */
   State.prototype.pushCoordinatesFromDots = function(dot) {
 
-    this.geometry.coordinates.push([dot.point.x, dot.point.y, 0]);
+    if(dot.point.x != undefined) this.geometry.coordinates.push([dot.point.x, dot.point.y, dot.point.z]);
+    else this.geometry.coordinates.push([dot.point.x, dot.point.y, 0]);
+
 
   }
 

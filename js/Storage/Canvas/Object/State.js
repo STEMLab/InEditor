@@ -46,6 +46,14 @@ define([], function() {
   }
 
 
+  /**
+  * @memberof State
+  */
+  State.prototype.setColor = function(color){
+    this.circle.fill(color);
+  }
+
+
   return State;
 
 });

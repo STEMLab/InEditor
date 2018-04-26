@@ -127,6 +127,14 @@ body {
     overflow-y: auto;
 }
 
+.property-container input[type=checkbox]{
+    width: 20%;
+}
+
+.property-container label{
+    width: 50%;
+}
+
 .property-table {
     position: absolute;
     table-layout: fixed;

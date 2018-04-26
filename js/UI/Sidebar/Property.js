@@ -537,7 +537,7 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    log.info(property.getConncetsString());
+    log.inof
 
     var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
     propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
@@ -546,7 +546,14 @@ define([], function() {
     propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">weight</td><td class=\"value\"><input id=\"weight-text\" type=\"text\" value=" + property.weight + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">connects</td><td class=\"value\"><input id=\"connects-text\" type=\"text\" disabled value=\""+ property.getConncetsString() + "\"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">is InterLayerConnetion</td><td class=\"value\"><input id=\"interlayer-text\" type=\"checkbox\" disabled value=" + property.isInterLayerConnetion.tf + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">is stair</td><td class=\"value\"><input id=\"stair-text\" type=\"checkbox\" disabled ";
+
+    if( property.isStair.tf ){
+      // propertiesDiv += "checked value =" + property.isStair.connection[0] + " + \"-\" + "+ property.isStair.connection[1];
+      propertiesDiv += "checked> <label for=\"stair-text\">" + property.isStair.connection[0] + " - "+ property.isStair.connection[1]+"</label";
+    }
+
+    propertiesDiv += "></td></tr>";
     propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
     propertiesDiv += "</table>";
 

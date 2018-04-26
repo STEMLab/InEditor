@@ -143,6 +143,10 @@ define([
     this.reqSpecList['addnewtransition'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['end-addnewtransition'] = new MessageSpec('cycle', 'including', ['draw'], true);
 
+    this.reqSpecList['start-addnewstair'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['addnewstair'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['end-addnewstair'] = new MessageSpec('cycle', 'including', ['draw'], true);
+
     this.reqSpecList['exporttoviewer'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['exporttofactory'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['showfactoryexportmodal'] = new MessageSpec('single', 'including', null, false);

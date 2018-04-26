@@ -60,6 +60,9 @@ define([
     this.addCallbackFun('start-addnewtransition', this.startAddNewTransition);
     this.addCallbackFun('end-addnewtransition', this.endAddNewTransition, this.endAddNewTransition_makeHistoryObj, this.removeObj);
 
+    this.addCallbackFun('start-addnewstair', this.startAddNewStair, function() {}, function() {});
+    this.addCallbackFun('end-addnewstair', this.endAddNewStair, function() {}, function() {});
+
   }
 
   /**
@@ -218,7 +221,7 @@ define([
     // change floor btn color
     document.getElementById('cell-btn').src = "../../assets/icon/cell_a.png";
 
-    window.broker.getManager('start-addnewcell', 'UIManager').setTooltipText({text: 'Add corner for cell by clicking canvas \(^0^)/'});
+    // window.broker.getManager('start-addnewcell', 'UIManager').setTooltipText({text: 'Add corner for cell by clicking canvas \(^0^)/'});
 
   }
 
@@ -483,8 +486,9 @@ define([
      // refresh tree view
      window.uiContainer.sidebar.treeview.addTransition(reqObj.id, reqObj.floor);
 
+     // delete tooltip
      var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
-     manager.setTooltipText({text:''});
+     manager.setTooltipText({text:''});``
 
    }
 
@@ -511,7 +515,40 @@ define([
 
    }
 
+   /**
+    * @memberof UIManager
+    */
+    UIManager.prototype.startAddNewStair = function(){
 
+      // change cell btn color
+      document.getElementById('stair-btn').src = "../../assets/icon/stair_a.png";
+
+       var manager = window.broker.getManager('start-addnewstair', 'UIManager');
+       manager.setTooltipText({text:'select state'});
+
+    }
+
+    /**
+     * @memberof UIManager
+     */
+     UIManager.prototype.endAddNewStair = function(reqObj){
+
+       // change cell btn color
+       document.getElementById('stair-btn').src = "../../assets/icon/stair_d.png";
+
+       if (reqObj.isEmpty != null) return;
+
+       // set sidebar > propertyContainer
+       window.uiContainer.sidebar.property.setPropertyTab('transition', reqObj.id, window.storage);
+
+       // refresh tree view
+       window.uiContainer.sidebar.treeview.addTransition(reqObj.id, reqObj.floor);
+
+        // delete tooltip
+        var manager = window.broker.getManager('end-addnewstair', 'UIManager');
+        manager.setTooltipText({text:''});
+
+     }
 
 
 
