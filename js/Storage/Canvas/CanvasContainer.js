@@ -132,8 +132,24 @@ define([
     }
 
     // add state
+    var state = geometryContainer.stateGeometry;
+    for(var index in state){
+      var floor = window.storage.propertyContainer.getFloorById('state', state[index].id);
+      this.stages[floor].stateLayer.group.simpleAdd({
+        id: state[index].id,
+        dot: state[index].point
+      });
+    }
 
     // add transition
+    var transition = geometryContainer.transitionGeometry;
+    for(var index in transition){
+      var floor = window.storage.propertyContainer.getFloorById('transition', transition[index].id);
+      this.stages[floor].transitionLayer.group.simpleAdd({
+        id: transition[index].id,
+        points: transition[index].points
+      });
+    }
 
     for (var index in this.stages) {
       this.stages[index].stage.draw();

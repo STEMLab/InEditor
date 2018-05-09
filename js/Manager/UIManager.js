@@ -106,15 +106,21 @@ define([
   UIManager.prototype.zoomWorkspace = function(reqObj) {
 
     window.storage.canvasContainer.stages[reqObj.id].stage.position(reqObj.newPos);
+
     window.storage.canvasContainer.stages[reqObj.id].stage.scale({
       x: reqObj.newScale,
       y: reqObj.newScale
     });
+
     window.storage.canvasContainer.stages[reqObj.id].tmpLayer.group.cursor.cursor.scale({
       x: 1 / reqObj.newScale,
       y: 1 / reqObj.newScale
     });
+
     window.storage.canvasContainer.stages[reqObj.id].stage.batchDraw();
+
+    window.conditions.realSnappingThreshold = window.conditions.snappingThreshold / reqObj.newScale;
+    window.conditions.realCoordinateThreshold = window.conditions.coordinateThreshold / reqObj.newScale;
 
   }
 
@@ -316,7 +322,7 @@ define([
     window.uiContainer.workspace.addNewWorkspace(newFloorProperty.id, newFloorProperty.name);
 
     // add new stage
-    window.storage.canvasContainer.stages[newFloorProperty.id] = new Stage(
+    var newStage =  new Stage(
       newFloorProperty.id,
       newFloorProperty.name,
       newFloorProperty.id,
@@ -324,8 +330,10 @@ define([
       document.getElementById(newFloorProperty.id).clientHeight
     );
 
+    window.storage.canvasContainer.stages[newFloorProperty.id] = newStage;
+
     // bind stage click event
-    window.eventHandler.stageEventBind('stage', newFloorProperty.id);
+    window.eventHandler.canvasObjectEventBind('stage', newStage.stage);
 
     // refresh sidebar > tree-view
     window.uiContainer.sidebar.treeview.addFloor(newFloorProperty);

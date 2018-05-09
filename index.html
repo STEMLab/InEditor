@@ -75,7 +75,7 @@
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SETTING</a>
             <div class="dropdown-menu">
-              <a class="dropdown-item" id="setting-">DUMMY</a>
+              <a class="dropdown-item" id="setting-conditions" data-toggle="modal" data-target="#setting-conditions-modal">Conditions</a>
             </div>
           </li>
           <li class="nav-item dropdown">
@@ -381,6 +381,31 @@
       </div>
 
 
+    </div>
+  </div>
+
+  <div class="modal fade" id="setting-conditions-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Setting General Conditions</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+
+        <div class="modal-body">
+          <h6>Prefixes of object</h6>
+
+
+        </div>
+
+        <div class="modal-footer">
+          <middle id="uriHelp" class="form-text text-muted">Base URL:Port Number/Parameter </middle>
+          <button type="button" class="btn btn-primary" id="viewer-modal-btn" aria-label="Close">Call Viewer</button>
+        </div>
+      </div>
     </div>
   </div>
 

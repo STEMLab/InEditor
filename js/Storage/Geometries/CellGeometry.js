@@ -29,5 +29,13 @@ define([], function() {
     this.points = values.points;
   }
 
+  /**
+  * @memberof CellGeometry
+  */
+  CellGeometry.prototype.updatePoints = function(newPoints){
+    this.points = newPoints;
+  }
+
+
   return CellGeometry;
 });

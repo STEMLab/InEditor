@@ -26,7 +26,7 @@ define([], function() {
   */
   StateGeometry.prototype.load = function(values){
     this.id = values.id;
-    this.points = values.points;
+    this.point = values.point;
   }
 
 

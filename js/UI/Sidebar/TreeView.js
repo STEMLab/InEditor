@@ -203,9 +203,24 @@ define([], function() {
       }
 
       // add state
-
+      var stateLen = propertyContainer.stateProperties.length;
+      for(var i = 0 ; i < stateLen; i++){
+        var id = propertyContainer.stateProperties[i].id;
+        this.addState(id, propertyContainer.getFloorById('state', id));
+        if(id != propertyContainer.stateProperties[i].name){
+          this.updateTitle(id, propertyContainer.stateProperties[i].name);
+        }
+      }
 
       // add transition
+      var transitionLen = propertyContainer.transitionProperties.length;
+      for(var i = 0 ; i < transitionLen; i++){
+        var id = propertyContainer.transitionProperties[i].id;
+        this.addTransition(id, propertyContainer.getFloorById('transition', id));
+        if(id != propertyContainer.transitionProperties[i].name){
+          this.updateTitle(id, propertyContainer.transitionProperties[i].name);
+        }
+      }
 
     }
 

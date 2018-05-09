@@ -43,6 +43,15 @@ define([], function() {
       };
     },
 
+    getUnitVector: function(V){
+      var u = Math.sqrt(Math.pow(V.point.x, 2) + Math.pow(V.point.y, 2));
+
+      return {
+        x: V.x / u,
+        y: V.y / u
+      };
+    },
+
     getFootOfPerpendicularDistance: function(V1, V2, V2D) {
 
       var crossP = this.crossProduct({
@@ -149,6 +158,8 @@ define([], function() {
 
     /**
     * @desc Check the line contains the dot.
+    * @param {Object} line { dot1 : point{ x ,y }, dot2 : point{ x, y } }
+    * @param {Object} dot { point{ x, y } }
     */
     isLineContainDot: function(line, dot){
 
@@ -164,6 +175,13 @@ define([], function() {
         y: dot.point.y - line.dot1.point.y
       }
 
+      // V2 projection
+      var V2prj = this.dotProduct(V1, V2) / this.dotProduct(V1,V1);
+      // log.info('V2prj : ', V2prj);
+      if ( V2prj == 0 ) return true;
+      // else if( V2prj < 0 || 1 < V2prj ) return false;
+      if( V2prj < 0 || 1 < V2prj ) return false;
+
       var cos = (V1.x * V2.x + V1.y * V2.y) /
                 ( Math.sqrt(Math.pow(V1.x, 2) + Math.pow(V1.y, 2))
                   * Math.sqrt(Math.pow(V2.x, 2) + Math.pow(V2.y, 2)));
@@ -178,7 +196,7 @@ define([], function() {
     /**
     * @desc Check that the two given points are same within the threshold(=[coordinateThreshold]{@link Conditions}) range.
     */
-    ifSameDot: function(dot1, dot2){
+    isSameDot: function(dot1, dot2){
 
       this.threshold = window.conditins.coordinateThreshold;
 

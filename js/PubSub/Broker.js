@@ -116,7 +116,7 @@ define([
     this.reqSpecList['addnewfloor'] = new MessageSpec('single', 'including', null, true);
     this.reqSpecList['updateproperty'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['setpropertyview'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['zoomworkspace'] = new MessageSpec('single', 'including', ['draw'], false);
+    this.reqSpecList['zoomworkspace'] = new MessageSpec('single', 'including', ['draw', 'modify'], false);
     this.reqSpecList['addfloorplan'] = new MessageSpec('single', 'including', null, true);
 
     this.reqSpecList['start-addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
@@ -157,6 +157,11 @@ define([
     this.reqSpecList['saveproject'] = new MessageSpec('single', 'excluding', ['draw'], false);
     this.reqSpecList['loadproject'] = new MessageSpec('single', 'excluding', ['draw'], false);
 
+    this.reqSpecList['modifyline'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['start-modifypoint'] = new MessageSpec('cycle', 'including', ['modify'], false);
+    this.reqSpecList['modifypoint'] = new MessageSpec('cycle', 'including', ['modify'], false);
+    this.reqSpecList['end-modifypoint'] = new MessageSpec('cycle', 'including', ['modify'], false);
+
   }
 
   /**
@@ -195,7 +200,7 @@ define([
       } else if (previousSpec.cycle == 'cycle') {
 
         // If the cycle of previous published message is `cycle` and the cycle of req is 'single',
-        if (spec.including == 'including' && spec.codes.indexOf(previousSpec.codes[0]) != -1) {
+        if (spec.including == 'including' && spec.codes != null && spec.codes.indexOf(previousSpec.codes[0]) != -1) {
 
           // If the including value of req is `including` and codes of spec includes code of previousMsg, can publish req.
           result = true;

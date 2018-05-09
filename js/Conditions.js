@@ -95,9 +95,19 @@ define([], function() {
     this.coordinateThreshold = 10;
 
     /**
+    + @memberof Conditions
+    */
+    this.realCoordinateThreshold = this.coordinateThreshold;
+
+    /**
      * @memberof Conditions
      */
     this.snappingThreshold = 10;
+
+    /**
+    + @memberof Conditions
+    */
+    this.realSnappingThreshold = this.snappingThreshold;
 
     /**
      * @memberof Conditions

@@ -32,7 +32,7 @@ define([], function() {
   TransitionGeometry.prototype.load = function(values){
     this.id = values.id;
     this.connects = values.connects;
-    this.points = points
+    this.points = values.points
   }
 
   /**

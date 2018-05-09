@@ -43,6 +43,10 @@ define([
       'click': this.clickSaveAsProjectBtn
     }
 
+    handlerBinder['s'] = {
+      'keydown': this.saveProject
+    }
+
   }
 
   /**

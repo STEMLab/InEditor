@@ -225,7 +225,7 @@ define([
 
       for (var cellBoundaryKey in cellBoundarykeyInFloor) {
 
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(floorProperties[floorKey].doorHeight);
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(floorProperties[floorKey].doorHeight * 1);
         var points = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
 
         for (var i = 0; i < points.length; i++) {
@@ -390,7 +390,7 @@ define([
    * @memberof ExportManager
    */
   ExportManager.prototype.postJson = function(address, data) {
-    log.info('POST : ' + address, data);
+    // log.info('POST : ' + address, data);
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
@@ -974,13 +974,14 @@ define([
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.extrudeCellBoundary = function(line, ch) {
+  ExportManager.prototype.extrudeCellBoundary = function(line, dh) {
 
     var first = line[0];
     var second = line[1];
+    var doorCoor = first[2] + dh;
 
-    var result = [first, second, [second[0], second[1], ch],
-      [first[0], first[1], ch], first
+    var result = [first, second, [second[0], second[1], doorCoor],
+      [first[0], first[1], doorCoor], first
     ];
 
 

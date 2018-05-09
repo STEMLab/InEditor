@@ -97,6 +97,7 @@ define([
           window.conditions.load(obj.conditions);
           delete obj.conditions;
 
+          // manager가 load를 하도록  function move
           var loadData = obj[Object.keys(obj)[0]];
           window.storage.propertyContainer.load(loadData.propertyContainer);
           window.storage.dotFoolContainer.load(loadData.dotFoolContainer);
@@ -125,7 +126,8 @@ define([
             window.storage.canvasContainer.stages[key].backgroundLayer.refresh();
 
             // bind stage click event
-            window.eventHandler.stageEventBind('stage', newFloorProperty.id);
+            window.eventHandler.canvasObjectEventBind('stage',
+              window.storage.canvasContainer.stages[newFloorProperty.id].stage);
 
           }
 

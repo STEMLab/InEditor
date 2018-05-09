@@ -37,6 +37,21 @@ define([
     * @memberof TmpGroup
     */
     this.cursor = new Cursor({x : 0, y : 0});
+
+    /**
+    * @memberof TmpGroup
+    */
+    this.cursorData = {
+      isSnapped: false,
+      snapedObj: {
+        type: '',
+        obj: null
+      }
+    };
+
+    /**
+    * @memberof TmpGroup
+    */
     this.tooltip = new Konva.Text({
         text: "",
         fontFamily: "Calibri",
@@ -108,6 +123,10 @@ define([
     return this.cursor;
   }
 
+  TmpGroup.prototype.getCursorData = function(){
+    return this.cursorData;
+  }
+
   TmpGroup.prototype.removeObj = function(){
 
     // log.info(this.tmpGroup.children);
@@ -148,6 +167,34 @@ define([
   TmpGroup.prototype.showTooltip = function(){
 
     this.tooltip.show();
+
+  }
+
+  TmpGroup.prototype.setCursorData = function(data){
+
+    if( data.isSnapped == undefined ){
+
+      log.error('ERROR !! setCursorData : isSnapped is not defined on parameter', data);
+      return ;
+
+    } else if( data.snapedObj == undefined ){
+
+      log.error('ERROR !! setCursorData : snapedObj is not defined on parameter', data);
+      return ;
+
+    } else if( data.snapedObj.type == undefined ){
+
+      log.error('ERROR !! setCursorData : type is not defined on parameter', data);
+      return ;
+
+    }  else if( data.snapedObj.obj == undefined && data.snapedObj.obj != null){
+
+      log.error('ERROR !! setCursorData : obj is not defined on parameter', data);
+      return ;
+
+    }
+
+    this.cursorData = data;
 
   }
 

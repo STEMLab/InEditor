@@ -74,6 +74,47 @@ define([
     return this.transitions[this.transitions.length-1];
   }
 
+  /**
+  * @memberof TransitionGroup
+  */
+  TransitionGroup.prototype.getConnection = function(){
+    var result = [];
+
+    for (var key in this.transitions) {
+      for(var dotkey = 0; dotkey < this.transitions[key].dots.length- 1; dotkey++){
+        var newConnection = {
+          dot1: this.transitions[key].dots[dotkey],
+          dot2: this.transitions[key].dots[dotkey + 1]
+        };
+
+        if (result.indexOf({
+            'dot1': newConnection.dot2,
+            'dot2': newConnection.dot1
+          }) == -1) {
+          result.push(newConnection);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+  * @memberof TransitionGroup
+  */
+  TransitionGroup.prototype.simpleAdd = function(obj){
+
+    var newTransition = new Transition(obj.id);
+    newTransition.dots = obj.points;
+    newTransition.addObjectFromDots();
+
+    this.transitions.push(newTransition);
+    this.transitionGroup.add(newTransition.getLineObject());
+
+  }
+
+
+
   return TransitionGroup;
 
 });

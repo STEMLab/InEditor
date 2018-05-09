@@ -18,17 +18,12 @@ define([], function() {
     /**
     * @memberof Transition
     */
-    this.name = id;
-
-    /**
-    * @memberof Transition
-    */
     this.line = new Konva.Line({
       points: [],
       stroke: 'black',
-      strokeWidth: 3.5,
+      strokeWidth: 1.5,
       lineCap: 'round',
-      dash: [10, 10]
+      dash: [10, 5]
     });
 
     /**
@@ -71,6 +66,7 @@ define([], function() {
     if( this.dots.indexOf(dot) == -1 ){
       this.dots.push(dot);
       this.line.getAttr('points').push(dot.point.x, dot.point.y);
+      dot.participateObj(this.id, 'transition');
     }
 
   }
@@ -183,6 +179,43 @@ define([], function() {
     delete this.line;
 
   }
+
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.insertDotIntoLine = function(line, point){
+
+    var indexOfDot1 = this.getDotIndex(line.dot1.uuid);
+    var indexOfDot2 = this.getDotIndex(line.dot2.uuid);
+
+    if(indexOfDot1 == -1 || indexOfDot2 == -1){
+
+      log.warn('Transition.insertDotIntoLine : inserted line is not part of '+this.id);
+      return;
+
+    }
+
+    if(indexOfDot1 < indexOfDot2) this.dots.splice(indexOfDot2, 0, point);
+    else this.dots.splice(indexOfDot1, 0, point);
+
+    this.addObjectFromDots();
+
+    point.participateObj(this.id, 'transition');
+
+  }
+
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.getDotIndex = function(uuid){
+    for(var key in this.dots){
+      if(this.dots[key].uuid == uuid) return key;
+    }
+
+    return -1;
+  }
+
+
 
   return Transition;
 

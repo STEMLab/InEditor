@@ -34,6 +34,14 @@ define([], function() {
   /**
   * @memberof State
   */
+  State.prototype.addObjectFromDots = function(){
+    this.circle.x(this.dot.point.x);
+    this.circle.y(this.dot.point.y);
+  }
+
+  /**
+  * @memberof State
+  */
   State.prototype.isEmpty = function(){
     log.error(' YOU NEED TO DEVELOP IS-EMPTY FUNCTION FOR STATE OBJ ! ');
   }
@@ -51,6 +59,13 @@ define([], function() {
   */
   State.prototype.setColor = function(color){
     this.circle.fill(color);
+  }
+
+  /**
+  * @memberof State
+  */
+  State.prototype.getDot = function(dot){
+    return this.dot;
   }
 
 

@@ -22,11 +22,6 @@ define([
     /**
     * @memberof CellBoundary
     */
-    this.name = id;
-
-    /**
-    * @memberof CellBoundary
-    */
     this.corners = new Konva.Group({
       x: 0,
       y: 0

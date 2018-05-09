@@ -34,12 +34,6 @@ define([
     this.addGroup(new CellBoundaryGroup());
   }
 
-  /**
-  * @memberof CellBoundaryLayer
-  */
-  CellBoundaryLayer.prototype.getConnection = function(){
-    return this.group.getConnection();
-  }
 
   return CellBoundaryLayer;
 
