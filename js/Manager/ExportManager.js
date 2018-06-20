@@ -45,13 +45,14 @@ define([
     $('#go-viewer-modal').modal('hide');
 
     var manager = window.broker.getManager('exporttoviewer', 'ExportManager');
+    var transDots = manager.transAllDots(window.storage.dotFoolContainer.dotFool, window.storage.propertyContainer.getFloorObj());
 
-    var cellsResult = manager.cellObj4Viewer(manager);
+    var cellsResult = manager.cellObj4Viewer(manager, transDots);
     var bbox = cellsResult.bbox;
     var cells = cellsResult.cells;
-    var cellBoundaries = manager.cellBoundaryObj4Viewer(manager);
-    var states = manager.stateObj4Viewer(manager);
-    var transitions = manager.transitionObj4Viewer(manager);
+    var cellBoundaries = manager.cellBoundaryObj4Viewer(manager, transDots);
+    var states = manager.stateObj4Viewer(manager, transDots);
+    var transitions = manager.transitionObj4Viewer(manager, transDots);
 
     var result = {
       'bbox': bbox
@@ -88,7 +89,7 @@ define([
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.cellObj4Viewer = function(manager) {
+  ExportManager.prototype.cellObj4Viewer = function(manager, transDot) {
 
     var cells = {};
     var VERY_SMALL_VALUE = -999999;
@@ -182,7 +183,7 @@ define([
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.cellBoundaryObj4Viewer = function(manager) {
+  ExportManager.prototype.cellBoundaryObj4Viewer = function(manager, transDot) {
 
     var cellBoundaries = {};
 
@@ -195,7 +196,7 @@ define([
 
       var tmp = new FeatureFactory4Viewer('CellSpaceBoundary');
       tmp.setGeometryId("CBG-" + geometries[key].id);
-      tmp.pushCoordinatesFromDots(geometries[key].points);
+      tmp.pushCoordinatesFromDots(geometries[key].points, transDot);
       cellBoundaries[geometries[key].id] = tmp;
 
     }
@@ -215,34 +216,18 @@ define([
     for (var floorKey in floorProperties) {
 
       var cellBoundarykeyInFloor = floorProperties[floorKey].cellBoundaryKey;
-      var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
-
-      var pixelLLC = [0, 0, 0];
-      var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
-      var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
-      var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
-
 
       for (var cellBoundaryKey in cellBoundarykeyInFloor) {
 
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(floorProperties[floorKey].doorHeight * 1);
-        var points = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
-
-        for (var i = 0; i < points.length; i++) {
-          var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, points[i]);
-          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'x', trans._data[0]);
-          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'y', trans._data[1]);
-          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
-        }
-
-
         // make reverse
-        var reverseObj = new FeatureFactory4Viewer('CellSpaceBoundary');
+        var reverseObj = new FeatureFactory4Viewer('CellSpaceBoundary', conditions);
         reverseObj.copy(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]]);
+        reverseObj.setId(reverseObj.id + '-REVERSE');
         reverseObj.setGeometryId(reverseObj.geometry.properties.id + '-REVERSE');
-        reverseObj.setName(reverseObj.attributes.name + '-REVERSE');
+        reverseObj.setName(reverseObj.attributes.name + '-REVERSE')
         reverseObj.reverseCoor();
         cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'] = reverseObj;
+
       }
     }
 
@@ -253,24 +238,79 @@ define([
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.stateObj4Viewer = function() {
+  ExportManager.prototype.stateObj4Viewer = function(manager, transDot) {
 
-    var cells = {};
+    var states = {};
+    var result = [];
+    var conditions = window.conditions.exportConditions.State;
+    var geometries = window.storage.geometryContainer.stateGeometry;
+    var properties = window.storage.propertyContainer.stateProperties;
+    var floorProperties = window.storage.propertyContainer.floorProperties;
+    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
+    // copy geometry coordinates
+    for (var key in geometries) {
 
-    return cells;
+      var tmp = new FeatureFactory4Viewer('State', conditions);
+      tmp.setGeometryId("SG-" + geometries[key].id);
+      tmp.pushCoordinatesFromDots(transDot[geometries[key].point.uuid]);
+      states[geometries[key].id] = tmp;
+
+    }
+
+    // copy attributes
+    for (var key in properties) {
+
+      var id = properties[key].id;
+      if (conditions.properties.name) states[id].setName(properties[key].name);
+      if (conditions.properties.description) states[id].setDescription(properties[key].description);
+      if (conditions.properties.duality) states[id].setDuality(properties[key].duality);
+      if (conditions.properties.connects) states[id].setConnected(properties[key].connects);
+
+    }
+
+    return states;
 
   }
 
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.transitionObj4Viewer = function() {
+  ExportManager.prototype.transitionObj4Viewer = function(manager, transDot) {
 
-    var cells = {};
+    var transitions = {};
+    var result = [];
+    var conditions = window.conditions.exportConditions.Transition;
+    var geometries = window.storage.geometryContainer.transitionGeometry;
+    var properties = window.storage.propertyContainer.transitionProperties;
+    var floorProperties = window.storage.propertyContainer.floorProperties;
+    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
+    // copy geometry coordinates
+    for (var key in geometries) {
 
-    return cells;
+      var tmp = new FeatureFactory4Viewer('Transition', conditions);
+      tmp.setId(geometries[key].id);
+      tmp.setGeometryId("TG-" + geometries[key].id);
+      tmp.setConnects(geometries[key].connects);
+      tmp.pushCoordinatesFromDots(geometries[key].points, transDot);
+      transitions[geometries[key].id] = tmp;
+
+    }
+
+    // copy attributes
+    for (var key in properties) {
+
+      var id = properties[key].id;
+      if (conditions.properties.name) transitions[id].setName(properties[key].name);
+      if (conditions.properties.description) transitions[id].setDescription(properties[key].description);
+      if (conditions.properties.duality) transitions[id].setDuality(properties[key].duality);
+      if (conditions.properties.weight) transitions[id].setWeight(properties[key].weight);
+      if (conditions.properties.connects) transitions[id].setConnects(properties[key].connects);
+
+    }
+
+    return transitions;
 
   }
 
@@ -325,23 +365,26 @@ define([
     var cellBoundaries = manager.cellBoundaryObj4VFactory(document.id, primalspacefeatures.id, transDots);
     var nodes = manager.nodes4Factory(document.id, spaceLayer);
     var edges = manager.edges4Factory(document.id, spaceLayer);
-    var states = manager.stateObj4VFactory(document.id, nodes, transDots);
+    var states = manager.stateObj4Factory(document.id, nodes, transDots);
     var transitions = manager.transitionObj4VFactory(document.id, edges, transDots);
 
+    /********************************************************************************************************************
+    *************************************** 차 후 수 정 *****************************************************************
+    *********************************************************************************************************************/
     var address = {
-      'post-document': baseURL + '/document/' + document.id,
-      'post-indoorfeatures': baseURL + '/indoorfeatures/' + indoorfeatures.id,
-      'post-primalspacefeatures': baseURL + '/primalspacefeatures/' + primalspacefeatures.id,
-      'post-cell': baseURL + '/cellspace/',
-      'post-cellspaceboundary': baseURL + '/cellspaceboundary/',
-      'post-multiLayeredGraph': baseURL + '/multilayeredgraph/' + multiLayeredGraph.id,
-      'post-spacelayers': baseURL + '/spacelayers/' + spaceLayers.id,
-      'post-spacelayer': baseURL + '/spacelayer/',
-      'post-nodes': baseURL + '/nodes/',
-      'post-edges': baseURL + '/edges/',
-      'post-state': baseURL + '/state/',
-      'post-transition': baseURL + '/transition/',
-      'get-document': baseURL + '/document/' + document.id
+      'post-document': baseURL + '/documents/' + document.id,
+      'post-indoorfeatures': baseURL + '/documents/' + document.id + '/indoorfeatures/' + indoorfeatures.id,
+      'post-primalspacefeatures': baseURL + '/documents/' + document.id + '/primalspacefeatures/' + primalspacefeatures.id,
+      'post-cell': baseURL + '/documents/' + document.id + '/cellspace/',
+      'post-cellspaceboundary': baseURL + '/documents/' + document.id + '/cellspaceboundary/',
+      'post-multiLayeredGraph': baseURL + '/documents/' + document.id + '/multilayeredgraph/' + multiLayeredGraph.id,
+      'post-spacelayers': baseURL + '/documents/' + document.id + '/spacelayers/' + spaceLayers.id,
+      'post-spacelayer': baseURL + '/documents/' + document.id + '/spacelayer/',
+      'post-nodes': baseURL + '/documents/' + document.id + '/nodes/',
+      'post-edges': baseURL + '/documents/' + document.id + '/edges/',
+      'post-state': baseURL + '/documents/' + document.id + '/state/',
+      'post-transition': baseURL + '/documents/' + document.id + '/transition/',
+      'get-document': baseURL + '/documents/' + document.id
     };
 
     manager.postJson(address['post-document'], JSON.stringify(document));
@@ -764,7 +807,7 @@ define([
    * @memberof ExportManager
    * @return Array of Format4Factory.State
    */
-  ExportManager.prototype.stateObj4VFactory = function(docId, nodes, transDot) {
+  ExportManager.prototype.stateObj4Factory = function(docId, nodes, transDot) {
     var states = {};
     var result = [];
     var conditions = window.conditions.exportConditions.State;

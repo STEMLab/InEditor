@@ -13,14 +13,16 @@ require([
   "./js/EventHandler/EventHandler.js",
   "./js/PubSub/Broker.js",
   "./js/Conditions.js",
-  "./js/History/History.js"
+  "./js/History/History.js",
+  "./js/Storage/test.js"
 ], function(
   UIContainer,
   Storage,
   EventHandler,
   Broker,
   Conditions,
-  History
+  History,
+  Test
 ) {
   'use strict';
 
@@ -48,5 +50,8 @@ require([
   window.myhistory = myhistory;
 
   log.info(window.storage);
+
+  var singletonTest = Test.getInstance();
+  log.info(singletonTest);
 
 });

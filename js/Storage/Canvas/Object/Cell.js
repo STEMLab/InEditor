@@ -60,8 +60,8 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
     var rect = new Konva.Rect({
       x: coor.x,
       y: coor.y,
-      width: 5,
-      height: 5,
+      width: 1,
+      height: 1,
       fill: "white",
       stroke: "black",
       strokeWidth: 1
@@ -282,13 +282,30 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
   /**
    * @memberof Cell
    */
-  Cell.prototype.insertDot = function(dot) {
-    var lines = this.getLines();
+  Cell.prototype.insertDot = function(dot, index) {
+    if(index != undefined){
+      this.dots.splice(index, 0, dot);
+      dot.participateObj(this.id, 'cell');
+      this.addObjectFromDots();
+    } else {
+      var lines = this.getLines();
 
-    for (var i in lines) {
-      if (DotMath.isLineContainDot(lines[i], dot.point)) this.insertDotIntoLine(lines[i], dot);
+      for (var i in lines) {
+        if (DotMath.isLineContainDot(lines[i], dot.point)) this.insertDotIntoLine(lines[i], dot);
+      }
     }
 
+  };
+
+  /**
+   * @memberof Cell
+   */
+  Cell.prototype.replaceDot = function(dot, index) {
+    this.dots[index].leaveObj(this.id);
+    this.dots.splice(index, 1);
+    this.dots.splice(index, 0, dot);
+    dot.participateObj(this.id, 'cell');
+    this.addObjectFromDots();
   };
 
   /**

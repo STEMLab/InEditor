@@ -158,7 +158,7 @@ define([
       );
     }
 
-    log.trace(window.storage);
+    // log.trace(window.storage);
 
   }
 

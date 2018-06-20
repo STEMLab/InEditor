@@ -20,10 +20,9 @@ define([], function() {
     */
     this.line = new Konva.Line({
       points: [],
-      stroke: 'black',
-      strokeWidth: 1.5,
-      lineCap: 'round',
-      dash: [10, 5]
+      stroke: Konva.Util.getRandomColor(),
+      strokeWidth: 0.5,
+      lineCap: 'round'
     });
 
     /**
@@ -93,6 +92,17 @@ define([], function() {
     this.addObjectFromDots();
 
   }
+
+  /**
+   * @memberof Cell
+   */
+  Transition.prototype.replaceDot = function(dot, index) {
+    this.dots[index].leaveObj(this.id);
+    this.dots.splice(index, 1);
+    this.dots.splice(index, 0, dot);
+    dot.participateObj(this.id, 'transition');
+    this.addObjectFromDots();
+  };
 
   /**
   * @memberof Transition
@@ -195,7 +205,9 @@ define([], function() {
 
     }
 
-    if(indexOfDot1 < indexOfDot2) this.dots.splice(indexOfDot2, 0, point);
+    console.log(indexOfDot1*1 < indexOfDot2*1);
+
+    if(indexOfDot1*1 < indexOfDot2*1) this.dots.splice(indexOfDot2, 0, point);
     else this.dots.splice(indexOfDot1, 0, point);
 
     this.addObjectFromDots();
@@ -215,7 +227,18 @@ define([], function() {
     return -1;
   }
 
-
+  /**
+  * @memberof Transition
+  * @param line Object { dot1 ,dot2 }
+  */
+  Transition.prototype.isPartOf = function(point1, point2){
+    for(var i = 0; i < this.dots.length - 1; i++){
+      if((this.dots[i].uuid == point1.uuid && this.dots[i+1].uuid == point2.uuid) ||
+         (this.dots[i].uuid == point2.uuid && this.dots[i+1].uuid == point1.uuid))
+         return true;
+    }
+    return false;
+  }
 
   return Transition;
 

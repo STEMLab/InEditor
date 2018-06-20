@@ -58,7 +58,7 @@ define([
    * @memberof DotFool
    * @param {Object} point { x, y }
    */
-  DotFool.prototype.getDotByPoint = function(point) {
+  DotFool.prototype.getDotByPoint = function(point, type) {
     var value = Object.values(this.dots);
     var coordinateThreshold = window.conditions.realCoordinateThreshold;
 
@@ -97,7 +97,7 @@ define([
     var filtered = value.filter(isDotExist);
 
     if (filtered.length == 0) return null;
-    else filtered;
+    else return filtered;
   }
 
   DotFool.prototype.combineDuplicatedDots = function(dot1, dot2){
@@ -128,7 +128,7 @@ define([
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      
+
     }
 
   }

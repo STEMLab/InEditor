@@ -32,6 +32,7 @@ define([
 
     this.addCallbackFun('saveproject', this.saveProject);
     this.addCallbackFun('loadproject', this.loadProject);
+    this.addCallbackFun('importfile', this.importFile);
 
   }
 
@@ -119,7 +120,8 @@ define([
               newFloorProperty.name,
               newFloorProperty.id,
               loadData.canvasContainer[key].width,
-              loadData.canvasContainer[key].height
+              loadData.canvasContainer[key].height,
+              'force'
             );
 
             window.storage.canvasContainer.stages[key].backgroundLayer.saveFloorplanDataURL(loadData.canvasContainer[key].floorplanDataURL);
@@ -147,6 +149,29 @@ define([
     }
 
   }
+
+  /**
+   * @memberof ProjectManager
+   */
+   ProjectManager.prototype.importFile = function(reqObj) {
+     var reader = new FileReader();
+     reader.readAsText(reqObj.file);
+     reader.onload = function(e) {
+       var geojson = JSON.parse(e.target.result);
+
+
+       if(reqObj.option == 'new-project'){
+         /* need to develop */
+       } else if(reqObj.importOn.length == 0){
+         log.warn('there is no target floor')
+         return -1;
+       } else {
+         window.broker.getManager('addnewfloor', 'GeometryManager').addObjectFromGeojson({'geojson': geojson, 'floor': reqObj.importOn, coor: reqObj.coordinate});
+       }
+
+     }
+
+   }
 
   return ProjectManager;
 });

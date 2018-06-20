@@ -37,22 +37,26 @@ define([
 
     handlerBinder['project-saveas-file'] = {
       'change': this.saveProjectToNewPath
-    }
+    };
 
     handlerBinder['project-saveas'] = {
       'click': this.clickSaveAsProjectBtn
-    }
+    };
+
+    handlerBinder['project-import-modal-btn'] = {
+      'click': this.importFile
+    };
 
     handlerBinder['s'] = {
       'keydown': this.saveProject
-    }
+    };
 
   }
 
   /**
-  * @memberof ProjectEventHandler
-  */
-  ProjectEventHandler.prototype.clickSaveAsProjectBtn = function(broker, previousMsg){
+   * @memberof ProjectEventHandler
+   */
+  ProjectEventHandler.prototype.clickSaveAsProjectBtn = function(broker, previousMsg) {
 
     window.document.getElementById("project-saveas-file").addEventListener("change", function(e) {
       window.eventHandler.callHandler('html', e);
@@ -68,9 +72,9 @@ define([
   }
 
   /**
-  * @memberof ProjectEventHandler
-  */
-  ProjectEventHandler.prototype.saveProjectToNewPath = function(broker, previousMsg, data){
+   * @memberof ProjectEventHandler
+   */
+  ProjectEventHandler.prototype.saveProjectToNewPath = function(broker, previousMsg, data) {
 
     var result = new Result();
 
@@ -127,17 +131,17 @@ define([
    * @memberof ProjectEventHandler
    */
   ProjectEventHandler.prototype.loadProject = function(broker, previousMsg, data) {
-
+    console.log(document.getElementById(data.target.id).files)
     var result = new Result();
 
     if (broker.isPublishable('loadproject') && document.getElementById(data.target.id).value != "") {
 
       // reqObj.floor will be active workspace
       broker.publish(new Message('loadproject', {
-        file : document.getElementById(data.target.id).files[0]
+        file: document.getElementById(data.target.id).files[0]
       }));
 
-       document.getElementById(data.target.id).value = '';
+      document.getElementById(data.target.id).value = '';
 
       result = {
         'result': true,
@@ -150,6 +154,67 @@ define([
     } else {
 
       result.msg = "wrong state transition : " + previousMsg + " to saveproject.";
+
+    }
+
+    return result;
+
+  }
+
+  /**
+   * @memberof ProjectEventHandler
+   */
+  ProjectEventHandler.prototype.changeImportFileLabel = function(broker, previousMsg, data) {
+
+    log.info(data);
+
+    return {
+      'result': true,
+      'msg': null
+    }
+
+  }
+
+  /**
+   * @memberof ProjectEventHandler
+   */
+  ProjectEventHandler.prototype.importFile = function(broker, previousMsg, data) {
+
+    var result = new Result();
+
+    if (broker.isPublishable('importfile') && document.getElementById('project-import-file').value != "") {
+      var importOn = document.getElementById('project-import-option-new-project').checked;
+      var realCoor = document.getElementById('project-import-option-boundingbox').checked;
+
+      broker.publish(new Message('importfile', {
+        file: document.getElementById('project-import-file').files[0],
+        importOn: importOn ? 'new-project' : window.uiContainer.workspace.getActivatedWorkspace(),
+        coordinate: realCoor ? {
+          type: 'boundingBox',
+          data: null
+        } : {
+          type: 'center',
+          data: {
+            x: document.getElementById('project-imoprt-optino-center-x').value,
+            y: document.getElementById('project-imoprt-optino-center-y').value,
+            rotation: document.getElementById('project-imoprt-optino-center-rotation').value
+          }
+        }
+      }));
+
+      document.getElementById(data.target.id).value = '';
+
+      result = {
+        'result': true,
+        'msg': 'importfile'
+      };
+    } else if (document.getElementById(data.target.id).value == "") {
+
+      result.msg = "clear file input ...";
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to importfile.";
 
     }
 

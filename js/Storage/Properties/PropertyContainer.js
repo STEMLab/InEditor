@@ -150,14 +150,16 @@ define([
       result.key = window.storage.projectProperty.id;
       result.type = "project";
       result.folder = true;
+      result.children = new Array();
     } else {
       result.title = this.projectProperty.id;
       result.key = this.projectProperty.id;
       result.type = "project";
       result.folder = true;
+      result.children = new Array();
     }
 
-    result.childen = new Array();
+    result.children = new Array();
 
     var path;
 
@@ -173,102 +175,103 @@ define([
       floorObj.icon = '../../assets/tree-icon/floor.png'
       floorObj.folder = true;
 
-      floorObj.children.push({
+      var cells = {
         "title": "Cell",
         "key": floorObj.key + "-cell",
         "folder": true,
-        "type": "cellFolder"
-      });
-      floorObj.children.push({
+        "type": "cellFolder",
+        children: new Array()
+      };
+
+      var cellboundaries = {
         "title": "CellBoundary",
         "key": floorObj.key + "-cellBoundary",
         "folder": true,
-        "type": "cellBoundaryFolder"
-      });
-      floorObj.children.push({
+        "type": "cellBoundaryFolder",
+        children: new Array()
+      };
+
+      var states = {
         "title": "State",
         "key": floorObj.key + "-state",
         "folder": true,
-        "type": "stateFolder"
-      });
-      floorObj.children.push({
+        "type": "stateFolder",
+        children: new Array()
+      };
+
+      var transitions = {
         "title": "Transition",
         "key": floorObj.key + "-transition",
         "folder": true,
-        "type": "transtitionFolder"
-      });
+        "type": "transtitionFolder",
+        children: new Array()
+      };
+
 
       if (path[i].cellKey.length != 0) {
-        var cellObj = new Object;
-        cellObj.title = "Cell";
-        cellObj.key = "";
-        cellObj.children = new Array();
-        cellObj.folder = true;
-
-        for (var j = 0; j < path[i].cellKey.length; i++) {
-          var obj = new Object;
-          obj.title = path[i].cellKey[j];
-          obj.key = path[i].cellKey[j];
-
-          cellObj.children.push(obj);
+        for (var j = 0; j < path[i].cellKey.length; j++) {
+          var property = this.getElementById('cell', path[i].cellKey[j]);
+          var cellObj = {
+            title : (property.name == '' ? property.id : property.name),
+            key : property.id,
+            type : 'cell',
+            icon : '../../assets/tree-icon/cell.png'
+          }
+          cells.children.push(cellObj);
         }
-        floorObj.children[0].push(cellObj);
       }
+      floorObj.children.push(cells);
 
       if (path[i].cellBoundaryKey.length != 0) {
-        var cellBoundaryObj = new Object;
-        cellBoundaryObj.title = "Cell Boundary";
-        cellBoundaryObj.key = "";
-        cellBoundaryObj.children = new Array();
-        cellBoundaryObj.folder = true;
-
-        for (var j = 0; j < path[i].cellBoundaryKey.length; i++) {
-          var obj = new Object;
-          obj.title = path[i].cellBoundaryKey[j];
-          obj.key = path[i].cellBoundaryKey[j];
-
-          cellBoundaryObj.children.push(obj);
+        for (var j = 0; j < path[i].cellBoundaryKey.length; j++) {
+          var property = this.getElementById('cellBoundary', path[i].cellBoundaryKey[j]);
+          var cellBoundaryObj = {
+            title : (property.name == '' ? property.id : property.name),
+            key : property.id,
+            folder : false,
+            type : 'cellBoundary',
+            icon : '../../assets/tree-icon/cellBoundary.png'
+          };
+          cellboundaries.children.push(cellBoundaryObj);
         }
-        floorObj.children[1].push(cellBoundaryObj);
       }
+      floorObj.children.push(cellboundaries);
 
 
       if (path[i].stateKey.length != 0) {
-        var stateObj = new Object;
-        stateObj.title = "Cell Boundary";
-        stateObj.key = "";
-        stateObj.children = new Array();
-        stateObj.folder = true;
-
-        for (var j = 0; j < path[i].stateKey.length; i++) {
-          var obj = new Object;
-          obj.title = path[i].stateKey[j];
-          obj.key = path[i].stateKey[j];
-
-          stateObj.children.push(obj);
+        for (var j = 0; j < path[i].stateKey.length; j++) {
+          var property = this.getElementById('state', path[i].stateKey[j]);
+          var stateObj = {
+            title : (property.name == '' ? property.id : property.name),
+            key : property.id,
+            folder : false,
+            type : 'state',
+            icon : '../../assets/tree-icon/state.png'
+          };
+          states.children.push(stateObj);
         }
-        floorObj.children[2].push(stateObj);
       }
+      floorObj.children.push(states);
 
       if (path[i].transitionKey.length != 0) {
-        var transitionObj = new Object;
-        transitionObj.title = "Cell Boundary";
-        transitionObj.key = "";
-        transitionObj.children = new Array();
-        transitionObj.folder = true;
-
-        for (var j = 0; j < path[i].transitionKey.length; i++) {
-          var obj = new Object;
-          obj.title = path[i].transitionKey[j];
-          obj.key = path[i].transitionKey[j];
-
-          transitionObj[3].children.push(obj);
+        var property = this.getElementById('transition', path[i].transitionKey[j]);
+        for (var j = 0; j < path[i].transitionKey.length; j++) {
+          var transitionObj = {
+            title : (property.name == '' ? property.id : property.name),
+            key : property.id,
+            folder : false,
+            type : 'transition',
+            icon : '../../assets/tree-icon/transition.png'
+          };
+          transitions.children.push(transitionObj);
         }
-        floorObj.children.push(transitionObj);
       }
+      floorObj.children.push(transitions);
 
-      result.childen.push(floorObj);
+      result.children.push(floorObj);
     }
+
+    console.log(JSON.stringify(result));
 
     return result;
   }
@@ -379,7 +382,7 @@ define([
 
     var result = {};
 
-    for( var i = 0 ; i < this.floorProperties.length; i++){
+    for (var i = 0; i < this.floorProperties.length; i++) {
 
       result[this.floorProperties[i].id] = this.floorProperties[i];
 

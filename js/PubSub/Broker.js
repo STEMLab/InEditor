@@ -154,8 +154,9 @@ define([
     this.reqSpecList['snapping'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['movetooltip'] = new MessageSpec('single', 'including', ['draw'], false);
 
-    this.reqSpecList['saveproject'] = new MessageSpec('single', 'excluding', ['draw'], false);
-    this.reqSpecList['loadproject'] = new MessageSpec('single', 'excluding', ['draw'], false);
+    this.reqSpecList['saveproject'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['loadproject'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['importfile'] = new MessageSpec('single', 'including', null, false);
 
     this.reqSpecList['modifyline'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['start-modifypoint'] = new MessageSpec('cycle', 'including', ['modify'], false);

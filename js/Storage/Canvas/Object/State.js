@@ -12,7 +12,7 @@ define([], function() {
     this.id = id;
 
     this.circle = new Konva.Circle({
-      radius: 5,
+      radius: 0.5,
       fill: 'yellow',
       stroke: 'black',
       strokeWidth: 1,

@@ -76,6 +76,30 @@ define(["./Feature"], function(Feature) {
     }
   }
 
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.pushCoordinatesFromDots = function(dots, transDots){
+
+    if( transDots == undefined) {
+
+      for( var i = 0 ; i < dots.length; i++ ){
+        this.geometry.coordinates.push([dots[i].point.x, dots[i].point.y, 0]);
+      }
+
+    }
+    else {
+
+      for( var i = 0 ; i < dots.length; i++ ){
+        var transDot = transDots[dots[i].uuid];
+        this.geometry.coordinates.push([transDot.point.x, transDot.point.y, transDot.point.z]);
+      }
+
+    }
+
+
+  }
+
   return Transition;
 
 });

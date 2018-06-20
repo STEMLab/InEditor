@@ -40,7 +40,7 @@ app.post('/save-project', function(req, res) {
   var bson = new BSON();
   var data = bson.serialize(req.body);
 
-  fs.writeFile('./output/save-project.bson', data, function(err) {
+  fs.writeFile('./output/save-project-' + new Date().getTime() + '.bson', data, function(err) {
 
     if (err)  return res.status(500).send(err);
 

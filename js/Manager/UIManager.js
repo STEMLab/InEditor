@@ -145,12 +145,43 @@ define([
       var imageObj = new Image();
 
       imageObj.onload = function() {
+        var imageSize = {width: imageObj.width, height: imageObj.height };
+        var stageSize = {width: document.getElementById(reqObj.id).clientWidth,
+                         height: document.getElementById(reqObj.id).clientHeight};
+        var imageRatio = (imageSize.width > imageSize.height) ? {width: imageSize.width/imageSize.height, height: 1} : {width: 1, height: imageSize.height/imageSize.width};
+        var stageRatio = (stageSize.width > stageSize.height) ? {width: stageSize.width/stageSize.height, height: 1} : {width: 1, height: stageSize.height/stageSize.width};
+
+        if(imageSize.width <= stageSize.width && imageSize.height <= stageSize.width){
+
+        } else if (imageRatio.height == 1) {
+          imageSize = {
+            width: stageSize.width,
+            height: stageSize.width / imageRatio.width
+          }
+        } else {
+          if(stageSize.height / imageRatio.height > stageSize.width){
+            imageSize = {
+              width: stageSize.width,
+              height: stageSize.width * imageRatio.height
+            }
+          }
+          else {
+              imageSize = {
+              width: stageSize.height / imageRatio.height,
+              height: stageSize.height
+            }
+          }
+        }
+
+        window.storage.canvasContainer.stages[reqObj.id].stage.width(imageSize.width);
+        window.storage.canvasContainer.stages[reqObj.id].stage.height(imageSize.height);
+
         var floorplan = new Konva.Image({
           x: 0,
           y: 0,
           image: imageObj,
-          width: window.storage.canvasContainer.stages[reqObj.id].stage.attrs.width,
-          height: window.storage.canvasContainer.stages[reqObj.id].stage.attrs.height
+          width: imageSize.width,
+          height: imageSize.height
         });
 
         // add the shape to the layer

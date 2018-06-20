@@ -61,14 +61,28 @@ define(["./Feature"], function(Feature) {
   /**
    * @memberof CellSpaceBoundary
    */
-  CellSpaceBoundary.prototype.pushCoordinatesFromDots = function(dots) {
+  CellSpaceBoundary.prototype.pushCoordinatesFromDots = function(dots, transDots) {
 
-    var len = dots.length;
+    if (transDots == undefined) {
 
-    for (var i = 0; i < len; i++) {
+      var len = dots.length;
 
-      this.geometry.coordinates.push([dots[i].point.x, dots[i].point.y, 0]);
+      for (var i = 0; i < len; i++) {
 
+        this.geometry.coordinates.push([dots[i].point.x, dots[i].point.y, 0]);
+
+      }
+
+    } else {
+
+      var len = dots.length;
+
+      for (var i = 0; i < len; i++) {
+
+        var transDot = transDots[dots[i].uuid];
+        this.geometry.coordinates.push([transDot.point.x, transDot.point.y, transDot.point.z]);
+
+      }
     }
 
   }
@@ -114,24 +128,24 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-  * @memberof CellSpaceBoundary
-  */
-  CellSpaceBoundary.prototype.reverseCoor = function(){
+   * @memberof CellSpaceBoundary
+   */
+  CellSpaceBoundary.prototype.reverseCoor = function() {
 
     var len = this.geometry.coordinates.length;
 
-    for(var i = 0 ; i < len/2; i++){
-      var tmp = this.geometry.coordinates[len-1-i];
-      this.geometry.coordinates[len-1-i] = this.geometry.coordinates[i];
+    for (var i = 0; i < len / 2; i++) {
+      var tmp = this.geometry.coordinates[len - 1 - i];
+      this.geometry.coordinates[len - 1 - i] = this.geometry.coordinates[i];
       this.geometry.coordinates[i] = tmp;
     }
 
   }
 
   /**
-  * @memberof CellSpaceBoundary
-  */
-  CellSpaceBoundary.prototype.copy = function(obj){
+   * @memberof CellSpaceBoundary
+   */
+  CellSpaceBoundary.prototype.copy = function(obj) {
 
     this.attributes.name = obj.attributes.name;
     this.attributes.description = obj.attributes.description;
@@ -144,12 +158,12 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-  * @memberof CellSpaceBoundary
-  */
-  CellSpaceBoundary.prototype.copyCoordinates = function(coordinates){
+   * @memberof CellSpaceBoundary
+   */
+  CellSpaceBoundary.prototype.copyCoordinates = function(coordinates) {
 
-    for(var i = 0 ; i < coordinates.length; i++){
-      this.geometry.coordinates.push([coordinates[i][0],coordinates[i][1],coordinates[i][2]]);
+    for (var i = 0; i < coordinates.length; i++) {
+      this.geometry.coordinates.push([coordinates[i][0], coordinates[i][1], coordinates[i][2]]);
     }
   }
 
