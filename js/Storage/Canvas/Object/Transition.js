@@ -21,7 +21,7 @@ define([], function() {
     this.line = new Konva.Line({
       points: [],
       stroke: Konva.Util.getRandomColor(),
-      strokeWidth: 0.5,
+      strokeWidth: 1,
       lineCap: 'round'
     });
 

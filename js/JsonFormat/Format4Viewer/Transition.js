@@ -47,7 +47,7 @@ define(["./Feature"], function(Feature) {
 
     } else {
 
-      log.warn("The given conditions said you don 't need to need to set name of Feature.");
+      log.warn("The given conditions said you don't need to set name of Feature.");
     }
 
   }
@@ -65,7 +65,7 @@ define(["./Feature"], function(Feature) {
 
       log.warn("The given parameter is not an Array type.");
 
-    } else if(connects.lenght != 2) {
+    } else if(connects.length != 2) {
 
       log.warn("The given the length of parameter is now two.")
 

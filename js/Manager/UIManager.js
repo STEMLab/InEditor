@@ -145,13 +145,30 @@ define([
       var imageObj = new Image();
 
       imageObj.onload = function() {
-        var imageSize = {width: imageObj.width, height: imageObj.height };
-        var stageSize = {width: document.getElementById(reqObj.id).clientWidth,
-                         height: document.getElementById(reqObj.id).clientHeight};
-        var imageRatio = (imageSize.width > imageSize.height) ? {width: imageSize.width/imageSize.height, height: 1} : {width: 1, height: imageSize.height/imageSize.width};
-        var stageRatio = (stageSize.width > stageSize.height) ? {width: stageSize.width/stageSize.height, height: 1} : {width: 1, height: stageSize.height/stageSize.width};
+        var imageSize = {
+          width: imageObj.width,
+          height: imageObj.height
+        };
+        var stageSize = {
+          width: document.getElementById(reqObj.id).clientWidth,
+          height: document.getElementById(reqObj.id).clientHeight
+        };
+        var imageRatio = (imageSize.width > imageSize.height) ? {
+          width: imageSize.width / imageSize.height,
+          height: 1
+        } : {
+          width: 1,
+          height: imageSize.height / imageSize.width
+        };
+        var stageRatio = (stageSize.width > stageSize.height) ? {
+          width: stageSize.width / stageSize.height,
+          height: 1
+        } : {
+          width: 1,
+          height: stageSize.height / stageSize.width
+        };
 
-        if(imageSize.width <= stageSize.width && imageSize.height <= stageSize.width){
+        if (imageSize.width <= stageSize.width && imageSize.height <= stageSize.width) {
 
         } else if (imageRatio.height == 1) {
           imageSize = {
@@ -159,14 +176,13 @@ define([
             height: stageSize.width / imageRatio.width
           }
         } else {
-          if(stageSize.height / imageRatio.height > stageSize.width){
+          if (stageSize.height / imageRatio.height > stageSize.width) {
             imageSize = {
               width: stageSize.width,
               height: stageSize.width * imageRatio.height
             }
-          }
-          else {
-              imageSize = {
+          } else {
+            imageSize = {
               width: stageSize.height / imageRatio.height,
               height: stageSize.height
             }
@@ -296,7 +312,10 @@ define([
       window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM), reqObj.floor);
 
     // set tooltip
-    window.broker.getManager('start-addnewcell', 'UIManager').setTooltipText({floor: reqObj.floor, text: ''});
+    window.broker.getManager('start-addnewcell', 'UIManager').setTooltipText({
+      floor: reqObj.floor,
+      text: ''
+    });
 
   }
 
@@ -353,7 +372,7 @@ define([
     window.uiContainer.workspace.addNewWorkspace(newFloorProperty.id, newFloorProperty.name);
 
     // add new stage
-    var newStage =  new Stage(
+    var newStage = new Stage(
       newFloorProperty.id,
       newFloorProperty.name,
       newFloorProperty.id,
@@ -460,16 +479,16 @@ define([
   }
 
   /**
-  * @memberof UIManager
-  * @param {Object} reqObj : floor, text
-  */
-  UIManager.prototype.setTooltipText = function(reqObj){
+   * @memberof UIManager
+   * @param {Object} reqObj : floor, text
+   */
+  UIManager.prototype.setTooltipText = function(reqObj) {
 
-    if(reqObj.floor == undefined){
+    if (reqObj.floor == undefined) {
       var stages = window.storage.canvasContainer.stages;
-      for(var key in stages){
+      for (var key in stages) {
 
-        if(reqObj.text == '') {
+        if (reqObj.text == '') {
           stages[key].tmpLayer.group.setTooltipText(reqObj.text);
           stages[key].tmpLayer.group.hideTooltip();
         } else {
@@ -482,7 +501,7 @@ define([
       }
     } else {
 
-      if(reqObj.text == '') {
+      if (reqObj.text == '') {
         window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.setTooltipText(reqObj.text);
         window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.hideTooltip();
       } else {
@@ -498,96 +517,127 @@ define([
   /**
    * @memberof UIManager
    */
-   UIManager.prototype.startAddNewTransition = function(){
+  UIManager.prototype.startAddNewTransition = function() {
 
-     // change cell btn color
-     document.getElementById('transition-btn').src = "../../assets/icon/transition_a.png";
+    // change cell btn color
+    document.getElementById('transition-btn').src = "../../assets/icon/transition_a.png";
 
-      var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
-      manager.setTooltipText({text:'select state'});
+    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    manager.setTooltipText({
+      text: 'select state'
+    });
 
-   }
+  }
 
-   /**
+  /**
    * @memberof UIManager
    * @param {Object} reqObj { id, floor, isEmpty }
    */
-   UIManager.prototype.endAddNewTransition = function(reqObj){
+  UIManager.prototype.endAddNewTransition = function(reqObj) {
 
-     // change transition btn color
-     document.getElementById('transition-btn').src = "../../assets/icon/transition_d.png";
+    // change transition btn color
+    document.getElementById('transition-btn').src = "../../assets/icon/transition_d.png";
 
-     if (reqObj.isEmpty != null) return;
+    if (reqObj.isEmpty != null) return;
 
-     // set sidebar > propertyContainer
-     window.uiContainer.sidebar.property.setPropertyTab('transition', reqObj.id, window.storage);
+    // set sidebar > propertyContainer
+    window.uiContainer.sidebar.property.setPropertyTab('transition', reqObj.id, window.storage);
 
-     // refresh tree view
-     window.uiContainer.sidebar.treeview.addTransition(reqObj.id, reqObj.floor);
+    // refresh tree view
+    window.uiContainer.sidebar.treeview.addTransition(reqObj.id, reqObj.floor);
 
-     // delete tooltip
-     var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
-     manager.setTooltipText({text:''});``
+    // delete tooltip
+    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    manager.setTooltipText({
+      text: ''
+    });
+    ``
 
-   }
+  }
 
-   /**
-    * @memberof UIManager
-    */
-   UIManager.prototype.endAddNewTransition_makeHistoryObj = function(reqObj) {
-
-     var obj = reqObj;
-     obj['type'] = 'transition';
-
-     return obj;
-   }
-
-   /**
+  /**
    * @memberof UIManager
    */
-   UIManager.prototype.cancelAddNewTransition = function(reqObj){
+  UIManager.prototype.endAddNewTransition_makeHistoryObj = function(reqObj) {
+
+    var obj = reqObj;
+    obj['type'] = 'transition';
+
+    return obj;
+  }
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.cancelAddNewTransition = function(reqObj) {
 
     document.getElementById('transition-btn').src = "../../assets/icon/transition_d.png";
 
     var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
-    manager.setTooltipText({text:''});
+    manager.setTooltipText({
+      text: ''
+    });
 
-   }
+  }
 
-   /**
-    * @memberof UIManager
-    */
-    UIManager.prototype.startAddNewStair = function(){
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.startAddNewStair = function() {
 
-      // change cell btn color
-      document.getElementById('stair-btn').src = "../../assets/icon/stair_a.png";
+    // change cell btn color
+    document.getElementById('stair-btn').src = "../../assets/icon/stair_a.png";
 
-       var manager = window.broker.getManager('start-addnewstair', 'UIManager');
-       manager.setTooltipText({text:'select state'});
+    var manager = window.broker.getManager('start-addnewstair', 'UIManager');
+    manager.setTooltipText({
+      text: 'select state'
+    });
 
-    }
+  }
 
-    /**
-     * @memberof UIManager
-     */
-     UIManager.prototype.endAddNewStair = function(reqObj){
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.endAddNewStair = function(reqObj) {
 
-       // change cell btn color
-       document.getElementById('stair-btn').src = "../../assets/icon/stair_d.png";
+    // change cell btn color
+    document.getElementById('stair-btn').src = "../../assets/icon/stair_d.png";
 
-       if (reqObj.isEmpty != null) return;
+    if (reqObj.isEmpty != null) return;
 
-       // set sidebar > propertyContainer
-       window.uiContainer.sidebar.property.setPropertyTab('transition', reqObj.id, window.storage);
+    // set sidebar > propertyContainer
+    window.uiContainer.sidebar.property.setPropertyTab('transition', reqObj.id, window.storage);
 
-       // refresh tree view
-       window.uiContainer.sidebar.treeview.addTransition(reqObj.id, reqObj.floor);
+    // refresh tree view
+    window.uiContainer.sidebar.treeview.addTransition(reqObj.id, reqObj.floor);
 
-        // delete tooltip
-        var manager = window.broker.getManager('end-addnewstair', 'UIManager');
-        manager.setTooltipText({text:''});
+    // delete tooltip
+    var manager = window.broker.getManager('end-addnewstair', 'UIManager');
+    manager.setTooltipText({
+      text: ''
+    });
 
-     }
+  }
+
+  /**
+   * @memberof UIManager
+   * @param reqObj object { msg }
+   */
+  UIManager.prototype.showSnackBar = function(reqObj) {
+
+    // Get the snackbar DIV
+    var x = document.getElementById("snackbar");
+    x.innerHTML = reqObj.msg;
+
+    // Add the "show" class to DIV
+    x.className = "show";
+
+    // After 3 seconds, remove the show class from DIV
+    setTimeout(function() {
+      x.className = x.className.replace("show", "");
+    }, 3000);
+
+  }
 
 
 

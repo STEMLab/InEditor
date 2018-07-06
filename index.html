@@ -63,19 +63,19 @@
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">PROJECT</a>
             <div class="dropdown-menu">
-              <a class="dropdown-item" id="project-new">New</a>
+              <a class="dropdown-item" id="project-new" onClick="window.location.reload()">New</a>
               <a class="dropdown-item" id="project-load">Load</a><input type="file" id="project-load-file" accept=".bson" class="d-none" />
               <a class="dropdown-item" id="project-save">Save</a>
-              <a class="dropdown-item" id="project-saveas">Save As...</a><input type="file" id="project-saveas-file" class="d-none" nwsaveas="filename.txt" />
+              <a class="dropdown-item" id="project-saveas" data-toggle="modal" data-target="#project-save-as-modal">Save As...</a>
               <hr>
-              <a class="dropdown-item" id="project-import" data-toggle="modal" data-target="#project-import-modal">Import</a>
+              <a class="dropdown-item disabled" id="project-import" data-toggle="modal" data-target="#project-import-modal">Import</a>
               <a class="dropdown-item" id="project-export" data-toggle="modal" data-target="#go-factory-modal">Export(.gml)</a>
             </div>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">EDIT</a>
             <div class="dropdown-menu">
-              <a class="dropdown-item" id="edit-merge-cells" data-toggle="modal" data-target="#edit-merge-cells-modal">Merge Cells</a>
+              <a class="dropdown-item disabled" id="edit-merge-cells" data-toggle="modal" data-target="#edit-merge-cells-modal">Merge Cells</a>
             </div>
           </li>
           <li class="nav-item dropdown">
@@ -87,7 +87,7 @@
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">HELP</a>
             <div class="dropdown-menu">
-              <a class="dropdown-item" id="setting-">DUMMY</a>
+              <a class="dropdown-item" id="setting-" href="https://github.com/STEMLab/InEditor" target="_blank">GitHub</a>
             </div>
           </li>
         </ul>
@@ -135,8 +135,10 @@
 
       <main role="main" class="workspace">
         <div id="workspace-layout-container"></div>
+        <div id="snackbar"></div>
       </main>
     </div>
+
   </div>
 
   <div class="modal fade" id="go-viewer-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -402,14 +404,63 @@
         </div>
 
         <div class="modal-body">
-          <h6>Prefixes of object</h6>
+          <h6>Prefix of id of object</h6>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">Cell</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cell">
+            </div>
+          </div>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">CellSpaceBoundary</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cellBoundary">
+            </div>
+          </div>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">State</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-state">
+            </div>
+          </div>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">Transition</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-transition">
+            </div>
+          </div>
 
-
+          <br />
+          <h6>Canvas properties</h6>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">Aspect ratio</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-aspect-ratio">
+            </div>
+          </div>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">Scale Factor</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-factor">
+            </div>
+          </div>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">Scale Max</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-max">
+            </div>
+          </div>
         </div>
 
         <div class="modal-footer">
-          <middle id="uriHelp" class="form-text text-muted">Base URL:Port Number/Parameter </middle>
-          <button type="button" class="btn btn-primary" id="viewer-modal-btn" aria-label="Close">Call Viewer</button>
+          <button type="button" class="btn btn-primary" id="setting-conditions-modal-btn" aria-label="Close">Update</button>
         </div>
       </div>
     </div>
@@ -431,7 +482,7 @@
           <div id="project-import-modal-option">
             <h6>File</h6>
             <div class="custom-file">
-              <input type="file" class="custom-file-input" id="project-import-file" accept=".gml, .geojson" onChange={$( '#project-import-file-label').html(event.target.files[0].name)}>
+              <input type="file" class="custom-file-input" id="project-import-file" accept=".gml, .geojson" onChange={$( '#project-import-file-label').html(event.target.files[0].name);}>
               <label class="custom-file-label" for="customFile" id="project-import-file-label"></label>
             </div><br/><br/>
 
@@ -467,14 +518,25 @@
                 <label class="form-check-label col-3" for="project-import-option-center" style="float: left;">Center</label>
                 <div class="col-8 row">
                   <div class="col-4" style="padding:0;">
-                    <input type="number" style="padding:1; font-size: 9px" class="form-control" placeholder="x" id="project-imoprt-option-center-x">
+                    <input type="number" style="padding:1; font-size: 9px" class="form-control" placeholder="x" id="project-import-option-center-x">
                   </div>
                   <div class="col-4" style="padding:0">
-                    <input type="number" style="padding:1; font-size: 9px" class="form-control" placeholder="y" id="project-imoprt-option-center-y">
+                    <input type="number" style="padding:1; font-size: 9px" class="form-control" placeholder="y" id="project-import-option-center-y">
                   </div>
                   <div class="col-4" style="padding:0">
-                    <input type="number" style="padding:1; font-size: 9px" class="form-control" placeholder="rotation" id="project-imoprt-option-center-rotation">
+                    <input type="number" style="padding:1; font-size: 9px" class="form-control" placeholder="rotation" id="project-import-option-center-rotation">
                   </div>
+                </div>
+              </div>
+            </form>
+
+            <h6>Data Option </h6>
+
+            <form>
+              <div>
+                <label class="form-check-label col-3" for="significant-figures" style="float: left;">significant-figures</label>
+                <div class="col-8 row">
+                  <input type="number" style="padding:1; font-size: 9px" class="form-control" placeholder="x" id="project-import-option-significant-figures">
                 </div>
               </div>
             </form>
@@ -543,8 +605,6 @@
               <button type="button" class="btn btn-light col-10" id="edit-merge-btn">Merge</button>
               <div class="col-1" style="float: right;"></div>
             </div>
-
-
           </div>
 
 
@@ -552,6 +612,41 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="project-save-as-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="form-group">
+            <h6>Save as...</h6>
+            <br />
+            <div>
+              <div class="row" style="margin-bottom:2px">
+                <div class="col-1" style="float: left;"></div>
+                <div class="col-3" style="float: left;">File Name</div>
+                <div class="col-7">
+                  <input type="text" style="padding:1; font-size: 11px" class="form-control" id="project-save-as-file-name">
+                </div>
+              </div>
+            </div>
+            <div class="row" style="margin-bottom:2px">
+              <div class="col-1" style="float: left;"></div>
+              <div class="col-3" style="float: left;">File Path </div>
+              <div class="col-7">
+                <input type="text" style="padding:1; font-size: 11px" class="form-control" id="project-save-as-file-path">
+              </div>
+            </div>
+            <div>
+              <div class="col-1" style="float: left;"></div>
+              <button type="button" class="btn btn-light col-10" id="project-save-as-btn">Save</button>
+              <div class="col-1" style="float: right;"></div>
+            </div>
+          </div>s
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <script data-main="js/main" src="lib/require.js"></script>
 </body>
