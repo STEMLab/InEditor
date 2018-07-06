@@ -29,9 +29,11 @@ define([
    * @param {String} _width width of _container
    * @param {String} _height height of _container
    */
-  function Stage(_id, _name, _container, _width, _height) {
+  function Stage(_id, _name, _container, _width, _height, _size_type) {
 
-    var calculatedWH = this.calculateWH(_width, _height);
+    var calculatedWH = { width : _width, height : _height };
+    if(_size_type != 'force')
+    calculatedWH = this.calculateWH(_width, _height);
     // var calculatedHeight = this.calculateHeight(_width);
 
     /**
@@ -202,14 +204,15 @@ define([
     var cellConnection = this.cellLayer.getConnection();
     var cellBoundaryConnection = this.cellBoundaryLayer.getConnection();
     // state is only dot
-    // transition should not be snapping target
+    var transitionConnection = this.transitionLayer.getConnection();
 
     var connection = cellConnection.concat(cellBoundaryConnection);
+    connection = connection.concat(transitionConnection);
 
     var reduced = [];
 
     var reduced = connection.reduce(function(a, b) {
-      if (a.indexOf({'dot1':b.dot2, 'dot2':b.dot1}) > -1 ) {
+      if (a.indexOf({dot1:b.dot2, dot2:b.dot1}) > -1 ) {
         // do nothing
       }
       else if (a.indexOf(b) < 0){

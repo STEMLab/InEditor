@@ -113,7 +113,7 @@ define([
 
     }
 
-    log.trace(this.history);
+    // log.trace(this.history);
 
   }
 
@@ -292,6 +292,20 @@ define([
       undo.undoObj[i].undoFun(undo.undoObj[i].obj);
 
     }
+
+  }
+
+  /**
+   * @memberof History
+   */
+  History.prototype.cancelCycle = function(cycle) {
+
+    if( this.history.empty() ) {
+      log.info("History is empty...");
+      return;
+    }
+
+    if ( this.history.back().cycle_name != null ) this.history.pop_back();
 
   }
 

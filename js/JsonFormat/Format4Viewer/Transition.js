@@ -47,7 +47,7 @@ define(["./Feature"], function(Feature) {
 
     } else {
 
-      log.warn("The given conditions said you don 't need to need to set name of Feature.");
+      log.warn("The given conditions said you don't need to set name of Feature.");
     }
 
   }
@@ -65,7 +65,7 @@ define(["./Feature"], function(Feature) {
 
       log.warn("The given parameter is not an Array type.");
 
-    } else if(connects.lenght != 2) {
+    } else if(connects.length != 2) {
 
       log.warn("The given the length of parameter is now two.")
 
@@ -74,6 +74,30 @@ define(["./Feature"], function(Feature) {
       this.properties['connects'] = connects;
 
     }
+  }
+
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.pushCoordinatesFromDots = function(dots, transDots){
+
+    if( transDots == undefined) {
+
+      for( var i = 0 ; i < dots.length; i++ ){
+        this.geometry.coordinates.push([dots[i].point.x, dots[i].point.y, 0]);
+      }
+
+    }
+    else {
+
+      for( var i = 0 ; i < dots.length; i++ ){
+        var transDot = transDots[dots[i].uuid];
+        this.geometry.coordinates.push([transDot.point.x, transDot.point.y, transDot.point.z]);
+      }
+
+    }
+
+
   }
 
   return Transition;

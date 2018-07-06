@@ -18,17 +18,11 @@ define([], function() {
     /**
     * @memberof Transition
     */
-    this.name = id;
-
-    /**
-    * @memberof Transition
-    */
     this.line = new Konva.Line({
       points: [],
-      stroke: 'black',
-      strokeWidth: 3.5,
-      lineCap: 'round',
-      dash: [10, 10]
+      stroke: Konva.Util.getRandomColor(),
+      strokeWidth: 1,
+      lineCap: 'round'
     });
 
     /**
@@ -56,7 +50,11 @@ define([], function() {
   * @memberof Transition
   */
   Transition.prototype.isEmpty = function(){
-    log.error(' YOU NEED TO DEVELOP IS-EMPTY FUNCTION FOR TRANSITION OBJ ! ');
+
+    if( this.dots.length == 0 ) return true;
+
+    return false;
+
   }
 
   /**
@@ -67,6 +65,7 @@ define([], function() {
     if( this.dots.indexOf(dot) == -1 ){
       this.dots.push(dot);
       this.line.getAttr('points').push(dot.point.x, dot.point.y);
+      dot.participateObj(this.id, 'transition');
     }
 
   }
@@ -93,6 +92,17 @@ define([], function() {
     this.addObjectFromDots();
 
   }
+
+  /**
+   * @memberof Cell
+   */
+  Transition.prototype.replaceDot = function(dot, index) {
+    this.dots[index].leaveObj(this.id);
+    this.dots.splice(index, 1);
+    this.dots.splice(index, 0, dot);
+    dot.participateObj(this.id, 'transition');
+    this.addObjectFromDots();
+  };
 
   /**
   * @memberof Transition
@@ -168,6 +178,66 @@ define([], function() {
 
     this.line.destroy();
 
+  }
+
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.deleteLineObject = function(){
+
+    this.line.destroy();
+    delete this.line;
+
+  }
+
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.insertDotIntoLine = function(line, point){
+
+    var indexOfDot1 = this.getDotIndex(line.dot1.uuid);
+    var indexOfDot2 = this.getDotIndex(line.dot2.uuid);
+
+    if(indexOfDot1 == -1 || indexOfDot2 == -1){
+
+      log.warn('Transition.insertDotIntoLine : inserted line is not part of '+this.id);
+      return;
+
+    }
+
+    console.log(indexOfDot1*1 < indexOfDot2*1);
+
+    if(indexOfDot1*1 < indexOfDot2*1) this.dots.splice(indexOfDot2, 0, point);
+    else this.dots.splice(indexOfDot1, 0, point);
+
+    this.addObjectFromDots();
+
+    point.participateObj(this.id, 'transition');
+
+  }
+
+  /**
+  * @memberof Transition
+  */
+  Transition.prototype.getDotIndex = function(uuid){
+    for(var key in this.dots){
+      if(this.dots[key].uuid == uuid) return key;
+    }
+
+    return -1;
+  }
+
+  /**
+  * @memberof Transition
+  * @param line Object { dot1 ,dot2 }
+  */
+  Transition.prototype.isPartOf = function(point1, point2){
+    for(var i = 0; i < this.dots.length - 1; i++){
+      if((this.dots[i].uuid == point1.uuid && this.dots[i+1].uuid == point2.uuid) ||
+         (this.dots[i].uuid == point2.uuid && this.dots[i+1].uuid == point1.uuid))
+         return true;
+    }
+    return false;
   }
 
   return Transition;

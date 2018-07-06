@@ -58,9 +58,9 @@ define([
    * @memberof DotFool
    * @param {Object} point { x, y }
    */
-  DotFool.prototype.getDotByPoint = function(point) {
+  DotFool.prototype.getDotByPoint = function(point, type) {
     var value = Object.values(this.dots);
-    var coordinateThreshold = window.conditions.coordinateThreshold;
+    var coordinateThreshold = window.conditions.realCoordinateThreshold;
 
     // If value exist in boundry, return true.
     // If you want to adjust the recognition sensitivity, modify conditions.coordinateThreshold.
@@ -79,6 +79,59 @@ define([
     }
   }
 
+  /**
+   * @memberof DotFool
+   * @param {Object} point { x, y }
+   */
+  DotFool.prototype.getDotByPointaAllowDuplication = function(point) {
+    var value = Object.values(this.dots);
+    var coordinateThreshold = window.conditions.realCoordinateThreshold;
+
+    // If value exist in boundry, return true.
+    // If you want to adjust the recognition sensitivity, modify conditions.coordinateThreshold.
+    function isDotExist(value) {
+      var d = Math.sqrt(Math.pow(Math.abs(value.point.x - point.x), 2) + Math.pow(Math.abs(value.point.y - point.y), 2));
+      return d < coordinateThreshold;
+    }
+
+    var filtered = value.filter(isDotExist);
+
+    if (filtered.length == 0) return null;
+    else return filtered;
+  }
+
+  DotFool.prototype.combineDuplicatedDots = function(dot1, dot2){
+
+    var coordinateThreshold = window.conditions.realCoordinateThreshold;
+
+    function isSameDot(dot1, dot2) {
+      var d = Math.sqrt(Math.pow(Math.abs(dot1.point.x - dot2.point.x), 2) + Math.pow(Math.abs(dot1.point.y - dot2.point.y), 2));
+      return d < coordinateThreshold;
+    }
+
+    if(!isSameDot(dot1, dot2)){
+      log.error('Two dots are not duplicated !');
+    }
+    else {
+      // combind dot2 to dot1
+      var keys = Object.keys(dot2.memberOf);
+
+      // for( var i in keys ){
+      //   window.storage.canvasContainer.
+      // }
+
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    }
+
+  }
 
   /**
    * @memberof DotFool

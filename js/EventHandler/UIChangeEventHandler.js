@@ -205,7 +205,6 @@ define([
     };
 
     if (broker.isPublishable('addfloorplan') && document.getElementById(data.target.id).files[0] != null) {
-
       broker.publish(new Message('addfloorplan', {
         'id': document.getElementById('id-text').value,
         'img': document.getElementById(data.target.id).files[0]

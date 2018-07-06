@@ -32,6 +32,7 @@ define([
 
     this.addCallbackFun('saveproject', this.saveProject);
     this.addCallbackFun('loadproject', this.loadProject);
+    this.addCallbackFun('importfile', this.importFile);
 
   }
 
@@ -68,13 +69,19 @@ define([
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status == 200) {
-        log.info(">>>> succeed to save project");
+
+        window.broker.getManager('setpropertyview', 'UIManager').showSnackBar({msg: 'Project saved successfully ('+window.conditions.savePath+'/'+window.conditions.saveName+'.bson)'});
+
+      } else if( xhr.status == 500){
+
+        window.broker.getManager('setpropertyview', 'UIManager').showSnackBar({msg: xhr.statusText + '! '+ xhr.responseText});
+
       }
     }
 
     xhr.open("POST", "http://127.0.0.1:8080/save-project", true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify(doc));
+    xhr.send(JSON.stringify({doc : doc, path : window.conditions.savePath+'/'+window.conditions.saveName+'.bson'}));
 
   }
 
@@ -97,6 +104,7 @@ define([
           window.conditions.load(obj.conditions);
           delete obj.conditions;
 
+          // manager가 load를 하도록  function move
           var loadData = obj[Object.keys(obj)[0]];
           window.storage.propertyContainer.load(loadData.propertyContainer);
           window.storage.dotFoolContainer.load(loadData.dotFoolContainer);
@@ -118,14 +126,16 @@ define([
               newFloorProperty.name,
               newFloorProperty.id,
               loadData.canvasContainer[key].width,
-              loadData.canvasContainer[key].height
+              loadData.canvasContainer[key].height,
+              'force'
             );
 
             window.storage.canvasContainer.stages[key].backgroundLayer.saveFloorplanDataURL(loadData.canvasContainer[key].floorplanDataURL);
             window.storage.canvasContainer.stages[key].backgroundLayer.refresh();
 
             // bind stage click event
-            window.eventHandler.stageEventBind('stage', newFloorProperty.id);
+            window.eventHandler.canvasObjectEventBind('stage',
+              window.storage.canvasContainer.stages[newFloorProperty.id].stage);
 
           }
 
@@ -145,6 +155,29 @@ define([
     }
 
   }
+
+  /**
+   * @memberof ProjectManager
+   */
+   ProjectManager.prototype.importFile = function(reqObj) {
+     var reader = new FileReader();
+     reader.readAsText(reqObj.file);
+     reader.onload = function(e) {
+       var geojson = JSON.parse(e.target.result);
+
+
+       if(reqObj.option == 'new-project'){
+         /* need to develop */
+       } else if(reqObj.importOn.length == 0){
+         log.warn('there is no target floor')
+         return -1;
+       } else {
+         window.broker.getManager('addnewfloor', 'GeometryManager').addObjectFromGeojson({'geojson': geojson, 'floor': reqObj.importOn, coor: reqObj.coordinate, condition:{ significant: reqObj.significant}});
+       }
+
+     }
+
+   }
 
   return ProjectManager;
 });

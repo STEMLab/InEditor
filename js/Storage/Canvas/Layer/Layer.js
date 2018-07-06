@@ -25,6 +25,10 @@ define([], function() {
     this.layer.add(_group.getGroup());
   }
 
+  Layer.prototype.getConnection = function(){
+    return this.group.getConnection();
+  }
+
 
   return Layer;
 });

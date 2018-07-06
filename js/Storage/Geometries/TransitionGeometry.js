@@ -32,7 +32,29 @@ define([], function() {
   TransitionGeometry.prototype.load = function(values){
     this.id = values.id;
     this.connects = values.connects;
-    this.points = points
+    this.points = values.points
+  }
+
+  /**
+  * @memberof TransitionGeometry
+  */
+  TransitionGeometry.prototype.getConnects = function(){
+    return this.connects;
+  }
+
+  /**
+  * @memberof TransitionGeometry
+  */
+  TransitionGeometry.prototype.getDuality = function(){
+
+    for(var i = 0 ; i < this.points.length; i++){
+      for(var key in this.points[i].memberOf){
+        if(this.points[i].memberOf[key] == 'cellBoundary') return key;
+      }
+    }
+
+    return null;
+
   }
 
   return TransitionGeometry;

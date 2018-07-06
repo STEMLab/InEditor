@@ -26,11 +26,26 @@ define([
 
     this.states.push(newState);
     this.stateGroup.add(this.states[this.states.length-1].getObj());
-    console.log("add state complete : ", this);
+
   }
 
   StateGroup.prototype.getGroup = function(){
     return this.stateGroup;
+  }
+
+  /**
+   * @memberof StateGroup
+   * @param {State} obj
+   */
+  StateGroup.prototype.simpleAdd = function(obj) {
+
+    var newState = new State(obj.id);
+    newState.setDot(obj.dot);
+    newState.addObjectFromDots();
+
+    this.states.push(newState);
+    this.stateGroup.add(newState.getObj());
+
   }
 
   return StateGroup;

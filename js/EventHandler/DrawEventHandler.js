@@ -43,11 +43,19 @@ define([
       'click': this.clickTransitionBtn
     }
 
+    handlerBinder['stair-btn'] = {
+      'click': this.clickStairBtn
+    }
+
     handlerBinder['stage'] = {
       'contentClick': this.addNewDot,
-      'contentMousemove': this.moveMouse,
-      'contentDblclick': this.dbclick
+      'contentMousemove': this.stageMoveMouse,
+      'contentDblclick': this.stageDbclick
       // 'contentMousedown': this.mousedown
+    };
+
+    handlerBinder['line'] = {
+      'mouseover': this.lineDbclick
     };
 
     handlerBinder['Escape'] = {
@@ -58,13 +66,77 @@ define([
       'keyup': this.finishDraw
     }
 
+    handlerBinder['c'] = {
+      'keydown': this.clickCellBtn
+    }
+
+    handlerBinder['b'] = {
+      'keydown': this.clickCellBoundaryBtn
+    }
+
+    handlerBinder['r'] = {
+      'keydown': this.clickTransitionBtn
+    }
+
 
   }
 
-  DrawEventHandler.prototype.dbclick = function(broker, previous, data){
-    log.info('dbclick : ', data);
+  DrawEventHandler.prototype.stageDbclick = function(broker, previous, data){
 
-    return new Result();
+    log.info('stage dbclick called');
+
+    var result = new Result();
+
+    var floor = data.currentTarget.attrs.id;
+    var cursor = window.storage.canvasContainer.stages[floor].tmpLayer.group.getCursor();
+    var cursorData =  window.storage.canvasContainer.stages[floor].tmpLayer.group.getCursorData();
+
+    if(cursorData.isSnapped == false){
+
+      result.msg = "There is no match function !";
+
+    } else if( cursorData.snapedObj.type == 'line' && broker.isPublishable('modifyline') ){
+
+      broker.publish(new Message('modifyline', {
+        floor: floor,
+        line : cursorData.snapedObj.obj
+      }));
+
+      broker.publish(new Message('start-modifypoint',{
+        floor: floor,
+        point: window.storage.dotFoolContainer.getDotFool(floor).getDotByPoint(cursor.coor)
+      }));
+
+      result.result = true;
+      result.msg = 'modifypoint';
+
+    } else if( cursorData.snapedObj.type == 'point' && broker.isPublishable('start-modifypoint') ){
+
+      broker.publish(new Message('start-modifypoint', {
+        floor: floor,
+        point : cursorData.snapedObj.obj
+      }));
+
+      result.result = true;
+      result.msg = 'modifypoint';
+
+    } else if( broker.isPublishable('end-modifypoint') ){
+
+      broker.publish(new Message('end-modifypoint', {
+        floor: floor
+      }));
+
+      result.result = true;
+      result.msg = null;
+
+    } else {
+
+      result.msg = 'ERROR !! There is some erroe with cursor data ' + cursorData;
+
+    }
+
+    return result;
+
   }
 
   DrawEventHandler.prototype.mousedown = function(broker, previous, data){
@@ -190,7 +262,8 @@ define([
       }
 
 
-    } else if (broker.isPublishable('addnewcellboundary')) {
+    }
+    else if (broker.isPublishable('addnewcellboundary')) {
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
       var isFirstClick = (window.tmpObj.affiliatedCell == null);
@@ -214,25 +287,76 @@ define([
 
       }
 
-    } else if (broker.isPublishable('addnewtransition')) {
+    }
+    else if (broker.isPublishable('addnewtransition')) {
 
-      broker.publish(new Message('addnewtransition', {
-        'floor': data.currentTarget.attrs.id
-      }));
+      var isFirstClick = (window.tmpObj.floor == null);
+      var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
 
-      result.result = true;
-      result.msg = 'addnewtransition';
+      if(isSameFloor || isFirstClick){
+
+        broker.publish(new Message('addnewtransition', {
+          'floor': data.currentTarget.attrs.id
+        }));
+
+        result.result = true;
+        result.msg = 'addnewtransition';
+
+      } else {
+
+        result.msg = 'Transition need states which existed same floor but you select wrong state.';
+
+      }
 
       if(window.tmpObj.dots.length == 3){
+
         broker.publish(new Message('end-addnewtransition', {
           floor: data.currentTarget.attrs.id,
           id: window.conditions.pre_transition+(++window.conditions.LAST_TRANSITION_ID_NUM)
         }));
+
+        result.result = true;
+        result.msg = null;
       }
 
+    }
+    else if (broker.isPublishable('addnewstair')) {
 
+      var isFirstClick = (window.tmpObj.floor == null);
+      var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
 
-    } else {
+      if(isFirstClick || !isSameFloor){
+
+        broker.publish(new Message('addnewstair', {
+          'floor': data.currentTarget.attrs.id
+        }));
+
+        result.result = true;
+        result.msg = 'addnewstair';
+
+      } else if( isSameFloor ) {
+
+        result.msg = 'You should select state which on the different floor from the floor that the state you selected before.';
+
+      } else {
+
+        result.msg = "wrong state transition : " + previousMsg + " to addnewstair.";
+
+      }
+
+      if(window.tmpObj.dots.length == 2){
+
+        broker.publish(new Message('end-addnewstair', {
+          floor: window.tmpObj.floor,
+          id: window.conditions.pre_transition+(++window.conditions.LAST_TRANSITION_ID_NUM)
+        }));
+
+        result.result = true;
+        result.msg = null;
+      }
+
+    }
+    else {
 
       result.msg = "no match function.";
 
@@ -257,7 +381,7 @@ define([
           }));
 
           result.result = true;
-          result.msg = 'cancel-addnewcell';
+          result.msg = null;
         }
         break;
       case 'addnewcellboundary':
@@ -268,7 +392,7 @@ define([
           }));
 
           result.result = true;
-          result.msg = 'cancel-addnewcellboundary';
+          result.msg = null;
 
         }
         break;
@@ -280,7 +404,7 @@ define([
           }));
 
           result.result = true;
-          result.msg = 'cancel-addnewstate';
+          result.msg = null;
 
         }
 
@@ -293,7 +417,7 @@ define([
           }));
 
           result.result = true;
-          result.msg = 'cancel-addnewtransition';
+          result.msg = null;
 
         }
         break;
@@ -355,10 +479,20 @@ define([
 
     } else if (broker.isPublishable('end-addnewtransition')) {
 
-      broker.publish(new Message('end-addnewtransition', {
-        'id': window.conditions.pre_transition + (++window.conditions.LAST_TRANSITION_ID_NUM),
-        'floor': window.tmpObj.floor
-      }));
+      if (window.tmpObj.isEmpty()){
+
+        broker.publish(new Message('end-addnewcellboundary', {
+          'isEmpty': true
+        }));
+
+      } else {
+
+        broker.publish(new Message('end-addnewtransition', {
+          'id': window.conditions.pre_transition + (++window.conditions.LAST_TRANSITION_ID_NUM),
+          'floor': window.tmpObj.floor
+        }));
+
+      }
 
       result.result = true;
       result.msg = null;
@@ -374,7 +508,7 @@ define([
   /**
    * @memberof DrawEventHandler
    */
-  DrawEventHandler.prototype.moveMouse = function(broker, previousMsg, data) {
+  DrawEventHandler.prototype.stageMoveMouse = function(broker, previousMsg, data) {
 
     var result = new Result();
     var rect = window.storage.canvasContainer.stages[data.currentTarget.attrs.id].stage.content.getBoundingClientRect();
@@ -382,8 +516,8 @@ define([
     if (broker.isPublishable('snapping')) {
 
       var reqObj = {
-        'floor': data.currentTarget.attrs.id,
-        'point': {
+        floor: data.currentTarget.attrs.id,
+        point: {
           x: data.evt.clientX - rect.left,
           y: data.evt.clientY - rect.top
         }
@@ -395,6 +529,25 @@ define([
 
       result.result = true;
       result.msg = 'snapping';
+
+    } else if (broker.isPublishable('modifypoint')) {
+
+      var reqObj = {
+        floor: data.currentTarget.attrs.id,
+        point: {
+          x: data.evt.clientX - rect.left,
+          y: data.evt.clientY - rect.top
+        }
+      };
+
+      broker.publish(new Message('snapping', reqObj));
+
+      broker.publish(new Message('modifypoint', {
+        floor: data.currentTarget.attrs.id
+      }));
+
+      result.result = true;
+      result.msg = 'modifypoint';
 
     } else {
 
@@ -507,6 +660,56 @@ define([
 
     return result;
 
+  }
+
+  /**
+  * @memberof DrawEventHandler
+  */
+  DrawEventHandler.prototype.clickStairBtn = function(broker, previousMsg){
+
+    var result = new Result();
+    var isFloorExist = (window.storage.propertyContainer.floorProperties.length >= 2);
+    var isStateExist = (window.storage.propertyContainer.stateProperties.length >= 2);
+
+    if (!isFloorExist) {
+
+      result.msg = "There is too few floor ...";
+
+    } else if (!isStateExist){
+
+      result.msg = "There is too few state ...";
+
+    } else if(broker.isPublishable('start-addnewstair')){
+
+      broker.publish(new Message('start-addnewstair', null));
+
+      result.result = true;
+      result.msg = 'start-addnewstair';
+
+    } else if(broker.isPublishable('end-addnewstair')){
+
+      broker.publish(new Message('start-addnewstair', null));
+
+      result.result = true;
+      result.msg = null;
+
+    } else {
+
+      result.msg = "wrong transition : " + previousMsg + " to start-addnewstair, end-addnewstair.";
+
+    }
+
+    return result;
+
+  }
+
+  /**
+  * @memberof EventHandler
+  */
+  DrawEventHandler.prototype.lineDbclick = function(broker, previous, data){
+    log.info('dbclick : ', data);
+
+    return new Result();
   }
 
   return DrawEventHandler;

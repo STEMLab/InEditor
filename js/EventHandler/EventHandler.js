@@ -93,64 +93,106 @@ define([
   }
 
   /**
-   * @param {Obejct} obj new canvas object
+   * @param {string} type of object. This should be one of { stage, line, circle }
    * @memberof EventHandler
    */
-  EventHandler.prototype.stageEventBind = function(_type, _id) {
+  EventHandler.prototype.canvasObjectEventBind = function(type, obj) {
 
-    for (var subkey in window.eventHandler.handlerBinder[_type]) {
+    log.info('canvasObjectEventBind called : ', type, obj);
 
-      if (subkey == 'contentClick') { // event on canvas
+    if( type != 'stage' && type != 'line' && type != 'circle' ){
 
-        var stage = window.storage.canvasContainer.getElementById('stage', _id);
+      log.error('EventHandler.canvasObjectEventBind : ERROR !! ' + type + ' is not acceptable type');
 
-        stage.stage.on(
-          'contentClick',
-          function(event) {
-            window.eventHandler.callHandler('stage', event)
-          });
-      } else if( subkey == 'contentMousemove' ){
+    } else {
 
-        var stage = window.storage.canvasContainer.getElementById('stage', _id);
+        for (var subkey in window.eventHandler.handlerBinder[type]) {
+        // obj.on(
+    //   subkey,
+    //   function(event) {
+    //     window.eventHandler.callHandler(type, event)
+    //   });
 
-        stage.stage.on(
-          'contentMousemove',
-          function(event) {
-            window.eventHandler.callHandler('stage', event)
-          });
-
-      } else if( subkey == 'contentDblclick'){
-
-        var stage = window.storage.canvasContainer.getElementById('stage', _id);
-        stage.stage.on(
-          'contentDblclick',
-          function(event) {
-            window.eventHandler.callHandler('stage', event)
-          });
-      } else if( subkey == 'contentMousedown'){
-
-        var stage = window.storage.canvasContainer.getElementById('stage', _id);
-        stage.stage.on(
-          'contentMousedown',
-          function(event) {
-            window.eventHandler.callHandler('stage', event)
-          });
+          if(type == 'line'){
+            // obj.on(
+            //   subkey,
+            //   function(event) {
+            //     window.eventHandler.callHandler(type, event)
+            //   });
+            obj.on('mouseover', function(){log.info('hi')});
+          } else {
+            obj.on(
+              subkey,
+              function(event) {
+                window.eventHandler.callHandler(type, event)
+              });
+          }
       }
 
+      log.info(obj);
+
     }
+
   }
 
+  /**
+   * @memberof EventHandler
+   */
+   EventHandler.prototype.getCanvasEventHandler = function(type){
+     var result = {};
+     for (var subkey in window.eventHandler.handlerBinder[type]) {
+       result[subkey] = ( function(event) {
+         window.eventHandler.callHandler(type, event)
+       });
+     }
+
+     return result;
+   }
+
+
+  /**
+   * @memberof EventHandler
+   */
   EventHandler.prototype.keyEventBind = function() {
+    event.preventDefault();
 
     $(document).keydown(function(event) {
-      if ( event.ctrlKey ) {
+      if (event.ctrlKey) {
         window.conditions.ctrlDown = true;
       }
 
       if (window.conditions.ctrlDown == true && event.keyCode == 90) {
+
+        // ctrl + z
         event.preventDefault();
         window.myhistory.undo();
+
+      } else if (window.conditions.ctrlDown == true && event.keyCode == 83) {
+
+        // ctrl + s
+        event.preventDefault();
+        window.eventHandler.callHandler('keyboard', event);
+
+      } else if (window.conditions.ctrlDown == true && event.keyCode == 67) {
+
+        // ctrl + c
+        event.preventDefault();
+        window.eventHandler.callHandler('keyboard', event);
+
+      }  else if (window.conditions.ctrlDown == true && event.keyCode == 66) {
+
+        // ctrl + b
+        event.preventDefault();
+        window.eventHandler.callHandler('keyboard', event);
+
+      }  else if (window.conditions.ctrlDown == true && event.keyCode == 82) {
+
+        // ctrl + t
+        event.preventDefault();
+        window.eventHandler.callHandler('keyboard', event);
+
       }
+
     });
 
     $(document).keyup(function(event) {
@@ -161,13 +203,10 @@ define([
         window.eventHandler.callHandler('keyboard', event);
       }
 
-      if( event.key == 'Control' ) {
+      if (event.key == 'Control') {
         window.conditions.ctrlDown = false;
       }
     });
-
-
-
 
   }
 
@@ -203,9 +242,9 @@ define([
       type = _event.type;
       data = _event;
 
-    } else if (_target == 'stage') {
+    } else if (_target == 'stage' || _target == 'line' || _target == 'circle') {
       // target = _event.currentTarget.attrs.id;
-      target = 'stage';
+      target = _target;
       type = _event.type;
       data = _event;
 
@@ -232,6 +271,10 @@ define([
       target = _event.key;
       type = _event.type;
 
+    }
+
+    if(_target == 'line') {
+      log.info(event);
     }
 
     var result = this.handlerBinder[target][type](window.broker, window.myhistory.getPreviousMsg(), data);

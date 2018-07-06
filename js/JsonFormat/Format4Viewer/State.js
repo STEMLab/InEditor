@@ -43,13 +43,13 @@ define(["./Feature"], function(Feature) {
       return Object.prototype.toString.call(o) === '[object Array]';
     }
 
-    if (!isArray(coor)) {
+    if (!isArray(connected)) {
 
       log.warn("The given parameter is not an Array type.");
 
     } else {
 
-      this.properties['connected'] = name;
+      this.attributes['connected'] = connected;
 
     }
 
@@ -61,6 +61,14 @@ define(["./Feature"], function(Feature) {
   State.prototype.addConnection = function(state){
 
     this.properties.connected.push(state);
+
+  }
+
+  State.prototype.pushCoordinatesFromDots = function(dot) {
+
+    if(dot.point.x != undefined) this.geometry.coordinates.push([dot.point.x, dot.point.y, dot.point.z]);
+    else this.geometry.coordinates.push([dot.point.x, dot.point.y, 0]);
+
 
   }
 

@@ -9,6 +9,15 @@ define([], function() {
   /**
    * @memberof Feature
    */
+  Feature.prototype.setId = function(id) {
+
+    this.id = id;
+
+  }
+
+  /**
+   * @memberof Feature
+   */
   Feature.prototype.setName = function(name) {
 
     this.attributes['name'] = name;

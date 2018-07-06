@@ -41,13 +41,6 @@ define([
   /**
   * @memberof CellLayer
   */
-  CellLayer.prototype.getConnection = function(){
-    return this.group.getConnection();
-  }
-
-  /**
-  * @memberof CellLayer
-  */
   CellLayer.prototype.getBoundaries = function(){
     return this.group.getBoundaries();
   }

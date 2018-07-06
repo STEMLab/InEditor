@@ -95,9 +95,19 @@ define([], function() {
     this.coordinateThreshold = 10;
 
     /**
+    + @memberof Conditions
+    */
+    this.realCoordinateThreshold = this.coordinateThreshold;
+
+    /**
      * @memberof Conditions
      */
     this.snappingThreshold = 10;
+
+    /**
+    + @memberof Conditions
+    */
+    this.realSnappingThreshold = this.snappingThreshold;
 
     /**
      * @memberof Conditions
@@ -120,6 +130,16 @@ define([], function() {
     this.useMultiSpaceLayer = true;
 
     /**
+    * @memberof  Conditions
+    */
+    this.savePath = './output';
+
+    /**
+    * @memberof  Conditions
+    */
+    this.saveName = 'editor-project';
+
+    /**
      * @memberof Conditions
      * @desc If the value is 'true', the attribute will included json which exported.
      */
@@ -130,7 +150,7 @@ define([], function() {
           'description': true,
           'partialboundedBy': true,
           'externalReference': true,
-          'duality': true
+          'duality': false
         },
         'geometry': {
           'extrude': true
@@ -141,7 +161,7 @@ define([], function() {
           'name': true,
           'description': true,
           'externalReference': true,
-          'duality': true
+          'duality': false
         },
         'geometry': {
           'extrude': true
@@ -151,7 +171,7 @@ define([], function() {
         'properties': {
           'name': true,
           'description': true,
-          'duality': true,
+          'duality': false,
           'connects': true
         }
       },
@@ -159,7 +179,7 @@ define([], function() {
         'properties': {
           'name': true,
           'description': true,
-          'duality': true,
+          'duality': false,
           'weight': true,
           'connects': true
         }
@@ -270,7 +290,7 @@ define([], function() {
     this.scaleMin = values.scaleMin;
     this.scaleMax = values.scaleMax;
     this.maxHistoryLen = values.maxHistoryLen;
-    this.ctrlDown = values.ctrlDown;
+    this.ctrlDown = false;
     this.coordinateThreshold = values.coordinateThreshold;
     this.snappingThreshold = values.snappingThreshold;
     this.cursorrSize = values.cursorrSize;

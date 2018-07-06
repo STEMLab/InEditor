@@ -144,17 +144,38 @@ define(["./Feature"], function(Feature) {
   /**
    * @memberof CellSpace
    */
-  CellSpace.prototype.pushCoordinatesFromDots = function(dots) {
+  CellSpace.prototype.pushCoordinatesFromDots = function(dots, transDots) {
 
-    var len = dots.length;
+    if( transDots == undefined ) {
 
-    for (var i = 0; i < len; i++) {
+      var len = dots.length;
 
-      this.geometry.coordinates.push([dots[i].point.x, dots[i].point.y, 0]);
+      for (var i = 0; i < len; i++) {
+
+        this.geometry.coordinates.push([dots[i].point.x, dots[i].point.y, 0]);
+
+      }
+
+      this.geometry.coordinates.push([dots[0].point.x, dots[0].point.y, 0]);
+
+    }
+    else {
+
+      var len = dots.length;
+
+      for (var i = 0; i < len; i++) {
+
+        var transDot = transDots[dots[i].uuid];
+        this.geometry.coordinates.push([transDot.point.x, transDot.point.y, transDot.point.z]);
+
+      }
+
+      var transDot = transDots[dots[0].uuid];
+      this.geometry.coordinates.push([transDot.point.x, transDot.point.y, transDot.point.z]);
 
     }
 
-    this.geometry.coordinates.push([dots[0].point.x, dots[0].point.y, 0]);
+
 
   }
 

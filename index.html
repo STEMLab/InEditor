@@ -15,13 +15,13 @@
   <link rel="icon" href="./assets/favicon/favicon64.png" sizes="64x64">
 
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"> -->
   <link rel="stylesheet" href="./css/bootstrap.min.css">
   <link rel="stylesheet" href="./css/IndoorGML-Editor.css">
 
   <!-- Fancytree CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" rel="stylesheet">
+  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" rel="stylesheet"> -->
 
   <!-- Fancytree JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -48,7 +48,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.20.2/math.min.js"></script>
 
   <!-- js-bson -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-bson/2.0.4/bson.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/js-bson/2.0.4/bson.min.js"></script> -->
 
   <!-- jsts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jsts/1.6.0/jsts.min.js"></script>
@@ -63,25 +63,32 @@
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">PROJECT</a>
             <div class="dropdown-menu">
-              <a class="dropdown-item" id="project-new">New</a>
-              <a class="dropdown-item" id="project-load">Load</a><input type="file" id="project-load-file" accept=".bson" class="d-none"/>
+              <a class="dropdown-item" id="project-new" onClick="window.location.reload()">New</a>
+              <a class="dropdown-item" id="project-load">Load</a><input type="file" id="project-load-file" accept=".bson" class="d-none" />
               <a class="dropdown-item" id="project-save">Save</a>
-              <a class="dropdown-item" id="project-saveas">Save As...</a><input type="file" id="project-saveas-file" class="d-none" nwsaveas="filename.txt"  />
+              <a class="dropdown-item" id="project-saveas" data-toggle="modal" data-target="#project-save-as-modal">Save As...</a>
               <hr>
-              <a class="dropdown-item" id="project-import">Import</a>
+              <a class="dropdown-item disabled" id="project-import" data-toggle="modal" data-target="#project-import-modal">Import</a>
               <a class="dropdown-item" id="project-export" data-toggle="modal" data-target="#go-factory-modal">Export(.gml)</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">EDIT</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item disabled" id="edit-merge-cells" data-toggle="modal" data-target="#edit-merge-cells-modal">Merge Cells</a>
             </div>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SETTING</a>
             <div class="dropdown-menu">
-              <a class="dropdown-item" id="setting-">DUMMY</a>
+              <a class="dropdown-item" id="setting-conditions" data-toggle="modal" data-target="#setting-conditions-modal">Conditions</a>
             </div>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">HELP</a>
             <div class="dropdown-menu">
-              <a class="dropdown-item" id="setting-">DUMMY</a>
+              <a class="dropdown-item" id="setting-" href="https://github.com/STEMLab/InEditor" target="_blank">GitHub</a>
+              <a class="dropdown-item" id="setting-" href="https://youtu.be/eW2Tpq2Yk_c" target="_blank">Demo video</a>
             </div>
           </li>
         </ul>
@@ -106,7 +113,7 @@
             <img src="./assets/icon/transition_d.png" title="Add new Transition" id="transition-btn">
           </li>
           <li class="nav-item">
-            <img src="./assets/icon/stair_d.png" title="Add new Stair" id="staire">
+            <img src="./assets/icon/stair_d.png" title="Add new Stair" id="stair-btn">
           </li>
         </ul>
         <ul class="navbar-nav my-2 my-lg-0">
@@ -129,8 +136,10 @@
 
       <main role="main" class="workspace">
         <div id="workspace-layout-container"></div>
+        <div id="snackbar"></div>
       </main>
     </div>
+
   </div>
 
   <div class="modal fade" id="go-viewer-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -209,7 +218,7 @@
                 <div class="col-md-6">
                   <div class="form-check" id="factory-geometry-type">
                     <input class="form-check-input" type="radio" id="factory-multilayer-one" checked>
-                    <label class="form-check-label" for="factory-multilayer-one " >
+                    <label class="form-check-label" for="factory-multilayer-one ">
                       only one layer
                     </label>
                   </div>
@@ -350,13 +359,13 @@
                     <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-duality" checked>
                     <label class="form-check-label" for="factory-property-transition-duality">
                               duality
-                            </label>
+                    </label>
                   </div>
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-weight" checked>
                     <label class="form-check-label" for="factory-property-transition-weight">
                               weight
-                            </label>
+                    </label>
                   </div>
                 </div>
 
@@ -383,6 +392,262 @@
 
     </div>
   </div>
+
+  <div class="modal fade" id="setting-conditions-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Setting General Conditions</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+
+        <div class="modal-body">
+          <h6>Prefix of id of object</h6>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">Cell</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cell">
+            </div>
+          </div>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">CellSpaceBoundary</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cellBoundary">
+            </div>
+          </div>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">State</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-state">
+            </div>
+          </div>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">Transition</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-transition">
+            </div>
+          </div>
+
+          <br />
+          <h6>Canvas properties</h6>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">Aspect ratio</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-aspect-ratio">
+            </div>
+          </div>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">Scale Factor</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-factor">
+            </div>
+          </div>
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-3" style="float: left;">Scale Max</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-max">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="setting-conditions-modal-btn" aria-label="Close">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="project-import-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Import External File</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="project-import-modal-close-btn">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+
+        <div class="modal-body">
+
+          <div id="project-import-modal-option">
+            <h6>File</h6>
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="project-import-file" accept=".gml, .geojson" onChange={$( '#project-import-file-label').html(event.target.files[0].name);}>
+              <label class="custom-file-label" for="customFile" id="project-import-file-label"></label>
+            </div><br/><br/>
+
+            <h6>Import on ... </h6>
+            <form>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input disabled" type="radio" id="project-import-option-new-project" value="new-project" disabled>
+                <label class="form-check-label" for="project-import-option-new-project">
+                New Project
+              </label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="exampleRadios" id="project-import-option-floor" value="floor" checked>
+                <label class="form-check-label" for="project-import-option-floor">
+                This Floor
+              </label>
+              </div>
+            </form>
+
+            <br />
+
+
+
+            <h6>Real Coordinate </h6>
+
+            <form>
+              <div class="form-check disabled row">
+                <input class="form-check-input disabled col-1" type="radio" id="project-import-option-boundingbox" value="boundingbox" disabled>
+                <label class="form-check-label col-3" for="project-import-option-boundingbox" style="float: left;">Bounding Box</label>
+              </div><br/>
+              <div class="form-check row">
+                <input class="form-check-input col-1" type="radio" name="exampleRadios" id="project-import-option-center" value="center" checked>
+                <label class="form-check-label col-3" for="project-import-option-center" style="float: left;">Center</label>
+                <div class="col-8 row">
+                  <div class="col-4" style="padding:0;">
+                    <input type="number" style="padding:1; font-size: 9px" class="form-control" placeholder="x" id="project-import-option-center-x">
+                  </div>
+                  <div class="col-4" style="padding:0">
+                    <input type="number" style="padding:1; font-size: 9px" class="form-control" placeholder="y" id="project-import-option-center-y">
+                  </div>
+                  <div class="col-4" style="padding:0">
+                    <input type="number" style="padding:1; font-size: 9px" class="form-control" placeholder="rotation" id="project-import-option-center-rotation">
+                  </div>
+                </div>
+              </div>
+            </form>
+
+            <h6>Data Option </h6>
+
+            <form>
+              <div>
+                <label class="form-check-label col-3" for="significant-figures" style="float: left;">significant-figures</label>
+                <div class="col-8 row">
+                  <input type="number" style="padding:1; font-size: 9px" class="form-control" placeholder="x" id="project-import-option-significant-figures">
+                </div>
+              </div>
+            </form>
+            <br/>
+
+
+
+            <div id="project-import-modal-loading" class="d-none">
+              <img src="./assets/icon/ajax-loader.gif" class="mx-auto d-block p-5" />
+            </div>
+
+          </div>
+
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="project-import-modal-btn" aria-label="Close">Import</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="edit-merge-cells-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Merging</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="project-import-modal-close-btn">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="table-merged-cells"><h6>Merged Cells</h6></label>
+            <div id="table-merged-cells"></div>
+          </div>
+
+          <hr />
+
+          <div class="form-group">
+            <h6>Merge Two Cell</h6>
+            <p style="color: darkgray">
+              The two difference cell you insert theres id, will merged when export.<br /><b>Becarefull,</b> the property data of first cell will maintain but second will not.
+            </p>
+            <div>
+              <div class="row" style="margin-bottom:2px">
+                <div class="col-1" style="float: left;"></div>
+                <div class="col-3" style="float: left;">First Cell</div>
+                <div class="col-7">
+                  <input type="text" style="padding:1; font-size: 9px" class="form-control" placeholder="id" id="edit-merge-first-id">
+                </div>
+              </div>
+            </div>
+            <div class="row" style="margin-bottom:2px">
+              <div class="col-1" style="float: left;"></div>
+              <div class="col-3" style="float: left;">Second Cell</div>
+              <div class="col-7">
+                <input type="text" style="padding:1; font-size: 9px" class="form-control" placeholder="id" id="edit-merge-second-id">
+              </div>
+            </div>
+            <div>
+              <div class="col-1" style="float: left;"></div>
+              <button type="button" class="btn btn-light col-10" id="edit-merge-btn">Merge</button>
+              <div class="col-1" style="float: right;"></div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="project-save-as-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="form-group">
+            <h6>Save as...</h6>
+            <br />
+            <div>
+              <div class="row" style="margin-bottom:2px">
+                <div class="col-1" style="float: left;"></div>
+                <div class="col-3" style="float: left;">File Name</div>
+                <div class="col-7">
+                  <input type="text" style="padding:1; font-size: 11px" class="form-control" id="project-save-as-file-name">
+                </div>
+              </div>
+            </div>
+            <div class="row" style="margin-bottom:2px">
+              <div class="col-1" style="float: left;"></div>
+              <div class="col-3" style="float: left;">File Path </div>
+              <div class="col-7">
+                <input type="text" style="padding:1; font-size: 11px" class="form-control" id="project-save-as-file-path">
+              </div>
+            </div>
+            <div>
+              <div class="col-1" style="float: left;"></div>
+              <button type="button" class="btn btn-light col-10" id="project-save-as-btn">Save</button>
+              <div class="col-1" style="float: right;"></div>
+            </div>
+          </div>s
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <script data-main="js/main" src="lib/require.js"></script>
 </body>

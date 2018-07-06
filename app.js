@@ -38,9 +38,9 @@ app.post('/save-json', function(req, res) {
 app.post('/save-project', function(req, res) {
 
   var bson = new BSON();
-  var data = bson.serialize(req.body);
+  var data = bson.serialize(req.body.doc);
 
-  fs.writeFile('./output/save-project.bson', data, function(err) {
+  fs.writeFile(req.body.path, data, function(err) {
 
     if (err)  return res.status(500).send(err);
 

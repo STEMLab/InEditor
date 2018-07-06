@@ -28,7 +28,7 @@ define([], function() {
     /**
      * @memberof StateProperty
      */
-    this.duality; // CellSpace
+    this.duality = ""; // CellSpace
 
     /**
      * @memberof StateProperty

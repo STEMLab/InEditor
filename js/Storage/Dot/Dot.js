@@ -203,5 +203,12 @@ define([], function() {
       return this.memberOf;
     }
 
+    /**
+     * @memberof Dot
+     */
+    Dot.prototype.setPoint = function(point){
+      this.point = point;
+    }
+
   return Dot;
 });

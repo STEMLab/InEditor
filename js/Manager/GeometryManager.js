@@ -13,7 +13,8 @@ define([
   "../Storage/Canvas/Object/Transition.js",
   "../Storage/Dot/DotMath.js",
   "../Storage/Geometries/TransitionGeometry.js",
-  "../Storage/Geometries/StateGeometry.js"
+  "../Storage/Geometries/StateGeometry.js",
+  "../Storage/test.js"
 ], function(
   Cell,
   CellGeometry,
@@ -25,19 +26,24 @@ define([
   Transition,
   DotMath,
   TransitionGeometry,
-  StateGeometry
+  StateGeometry,
+  Test
 ) {
-  'use strict';
+  "use strict";
 
   /**
    * @class GeometryManager
    * @augments Subscriber
    */
   function GeometryManager() {
-
     Subscriber.apply(this, arguments);
 
     this.init();
+
+    var singletonTest = Test.getInstance({
+      a: "hello"
+    });
+    log.info(singletonTest);
   }
 
   GeometryManager.prototype = Object.create(Subscriber.prototype);
@@ -46,33 +52,117 @@ define([
    * @memberof GeometryManager
    */
   GeometryManager.prototype.init = function() {
-
     /**
      * @memberof GeometryManager
      */
-    this.name = 'GeometryManager';
+    this.name = "GeometryManager";
 
-    this.addCallbackFun('addnewfloor', this.addNewFloor);
+    this.addCallbackFun("addnewfloor", this.addNewFloor);
 
-    this.addCallbackFun('start-addnewcell', this.startAddNewCell, function() {}, function() {});
-    this.addCallbackFun('addnewcell', this.addNewCell, this.drawGeometry_makeHistoryObj, this.addNewCell_undo);
-    this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.makeSimpleHistoryObj, this.endAddNewCell_undo);
+    this.addCallbackFun(
+      "start-addnewcell",
+      this.startAddNewCell,
+      function() {},
+      function() {}
+    );
+    this.addCallbackFun(
+      "addnewcell",
+      this.addNewCell,
+      this.drawGeometry_makeHistoryObj,
+      this.addNewCell_undo
+    );
+    this.addCallbackFun(
+      "end-addnewcell",
+      this.endAddNewCell,
+      this.makeSimpleHistoryObj,
+      this.endAddNewCell_undo
+    );
 
-    this.addCallbackFun('start-addnewcellboundary', this.startAddNewCellBoundary, function() {}, function() {});
-    this.addCallbackFun('addnewcellboundary', this.addNewCellBoundary, this.drawGeometry_makeHistoryObj, this.addNewCellBoundary_undo);
-    this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.makeSimpleHistoryObj, this.endAddNewCellBoundary_undo);
+    this.addCallbackFun(
+      "start-addnewcellboundary",
+      this.startAddNewCellBoundary,
+      function() {},
+      function() {}
+    );
+    this.addCallbackFun(
+      "addnewcellboundary",
+      this.addNewCellBoundary,
+      this.addNewCellBoundary_makeHistoryObj,
+      this.addNewCellBoundary_undo
+    );
+    this.addCallbackFun(
+      "end-addnewcellboundary",
+      this.endAddNewCellBoundary,
+      this.makeSimpleHistoryObj,
+      this.endAddNewCellBoundary_undo
+    );
 
-    this.addCallbackFun('snapping', this.snappingMousePointer);
+    this.addCallbackFun("snapping", this.snappingMousePointer);
 
-    this.addCallbackFun('cancel-addnewcell', this.cancelDrawObj);
-    this.addCallbackFun('cancel-addnewcellboundary', this.cancelDrawObj);
-    this.addCallbackFun('cancel-addnewtransition', this.cancelDrawObj);
+    this.addCallbackFun("cancel-addnewcell", this.cancelDrawObj);
+    this.addCallbackFun("cancel-addnewcellboundary", this.cancelDrawObj);
+    this.addCallbackFun("cancel-addnewtransition", this.cancelDrawObj);
 
-    this.addCallbackFun('start-addnewtransition', this.startAddNewTransition, function() {}, function() {});
-    this.addCallbackFun('addnewtransition', this.addNewTransition, this.drawGeometry_makeHistoryObj, this.addNewTransition_undo);
-    this.addCallbackFun('end-addnewtransition', this.endAddNewTransition, this.makeSimpleHistoryObj, this.endAddNewTransition_undo);
+    this.addCallbackFun(
+      "start-addnewtransition",
+      this.startAddNewTransition,
+      function() {},
+      function() {}
+    );
+    this.addCallbackFun(
+      "addnewtransition",
+      this.addNewTransition,
+      this.drawGeometry_makeHistoryObj,
+      this.addNewTransition_undo
+    );
+    this.addCallbackFun(
+      "end-addnewtransition",
+      this.endAddNewTransition,
+      this.makeSimpleHistoryObj,
+      this.endAddNewTransition_undo
+    );
 
-  }
+    this.addCallbackFun(
+      "start-addnewstair",
+      this.startAddNewStair,
+      function() {},
+      function() {}
+    );
+    this.addCallbackFun(
+      "addnewstair",
+      this.addNewStair,
+      function() {},
+      function() {}
+    );
+    this.addCallbackFun(
+      "end-addnewstair",
+      this.endAddNewStair,
+      function() {},
+      function() {}
+    );
+
+    this.addCallbackFun("modifyline", this.modifyLine);
+    this.addCallbackFun(
+      "start-modifypoint",
+      this.startModifyPoint,
+      function() {},
+      function() {}
+    );
+    this.addCallbackFun(
+      "modifypoint",
+      this.modifyPoint,
+      function() {},
+      function() {}
+    );
+    this.addCallbackFun(
+      "end-modifypoint",
+      this.endModifyPoint,
+      function() {},
+      function() {}
+    );
+
+    this.addCallbackFun("deletecell", this.deleteCell);
+  };
 
   /**
    * @memberof GeometryManager
@@ -80,46 +170,50 @@ define([
    */
   GeometryManager.prototype.makeSimpleHistoryObj = function(reqObj) {
     return reqObj;
-  }
+  };
 
   /**
    * @memberof GeometryManager
    */
   GeometryManager.prototype.addNewFloor = function(reqObj) {
     window.storage.dotFoolContainer.addNewDotFool(reqObj.floor);
-  }
-
+  };
 
   /**
    * @memberof GeometryManager
    */
   GeometryManager.prototype.startAddNewCell = function(reqobj) {
-
-    var tmpObj = new Cell('tmpObj');
-    tmpObj.type = 'cell';
+    var tmpObj = new Cell("tmpObj");
+    tmpObj.type = "cell";
     window.tmpObj = tmpObj;
-
-  }
-
+  };
 
   /**
    * @memberof GeometryManager
    * @param {Object} reqObj floor: floor id
    */
   GeometryManager.prototype.addNewCell = function(reqObj) {
-
-    if (window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.obj == null) {
-      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.addNewObj('cell');
+    if (
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.obj ==
+      null
+    ) {
+      window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].tmpLayer.group.addNewObj("cell");
       window.tmpObj.floor = reqObj.floor;
     }
 
     // add corner
-    var point = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor.coor;
+    var point =
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor
+        .coor;
 
-    var isDotExist = window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDotByPoint({
-      x: point.x,
-      y: point.y
-    });
+    var isDotExist = window.storage.dotFoolContainer
+      .getDotFool(reqObj.floor)
+      .getDotByPoint({
+        x: point.x,
+        y: point.y
+      });
 
     var dot;
 
@@ -137,8 +231,7 @@ define([
     // window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
 
     // log.trace(window.storage.dotFoolContainer);
-
-  }
+  };
 
   /**
    * @memberof GeometryManager
@@ -149,24 +242,23 @@ define([
       floor: reqObj.floor,
       uuid: window.tmpObj.getLastDot().uuid
     };
-  }
-
+  };
 
   /**
    * @memberof GeometryManager
    * @param undoObj last dot of tmpObj
    */
   GeometryManager.prototype.addNewCell_undo = function(undoObj) {
-
     var tmpObj = window.tmpObj;
 
     tmpObj.deleteLastCorner();
     tmpObj.deleteLastPolyLine();
 
-    window.storage.dotFoolContainer.getDotFool(undoObj.floor).deleteDotFromObj(undoObj.uuid, tmpObj.id);
+    window.storage.dotFoolContainer
+      .getDotFool(undoObj.floor)
+      .deleteDotFromObj(undoObj.uuid, tmpObj.id);
     window.storage.canvasContainer.stages[undoObj.floor].tmpLayer.layer.draw();
-
-  }
+  };
 
   /**
    * @param {Object} reqObj id<br>floor: floor id
@@ -174,7 +266,6 @@ define([
    * @desc draw new cell object in canvas
    */
   GeometryManager.prototype.endAddNewCell = function(reqObj) {
-
     if (reqObj.isEmpty != null) {
       window.tmpObj = null;
       return;
@@ -184,15 +275,21 @@ define([
 
     // clear tmp obj
     window.tmpObj = null;
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.removeObj();
+    window.storage.canvasContainer.stages[
+      reqObj.floor
+    ].tmpLayer.group.removeObj();
     // window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
     for (var key in tmpObj.dots) {
-      tmpObj.dots[key].leaveObj('tmpObj');
+      tmpObj.dots[key].leaveObj("tmpObj");
     }
 
     // Twisted side validation
-    if (!window.broker.getManager('end-addnewcell', 'GeometryManager').validateTwistedSide(tmpObj.dots)) {
+    if (
+      !window.broker
+        .getManager("end-addnewcell", "GeometryManager")
+        .validateTwistedSide(tmpObj.dots)
+    ) {
       log.error("This object have twisted side !");
       return false;
     }
@@ -201,59 +298,77 @@ define([
     tmpObj.name = reqObj.id;
 
     // add cell to canvasContainer using tmpObj
-    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.add(tmpObj);
+    window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.add(
+      tmpObj
+    );
 
     // fragmenteGeometry
 
     // set corner to invisible
-    var obj = window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.cells[window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.cells.length - 1];
+    var obj =
+      window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.cells[
+        window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group
+          .cells.length - 1
+      ];
     obj.corners.visible(false);
 
     //add cell data in geometry canvasContainer
-    window.storage.geometryContainer.cellGeometry.push(new CellGeometry(reqObj.id, obj.dots));
+    window.storage.geometryContainer.cellGeometry.push(
+      new CellGeometry(reqObj.id, obj.dots)
+    );
 
     // add state if there if conditions.automGenerateState is true
     if (window.conditions.automGenerateState) {
-
-      var manager = window.broker.getManager('end-addnewcell', 'GeometryManager');
+      var manager = window.broker.getManager(
+        "end-addnewcell",
+        "GeometryManager"
+      );
       manager.generateStateUsingCell(tmpObj, reqObj.floor);
-
     }
 
     // redraw stage
     window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
-
-  }
+  };
 
   /**
    * @memberof GeometryManager
    */
   GeometryManager.prototype.generateStateUsingCell = function(tmpObj, floor) {
-
     // add state
     var wkt = tmpObj.getWKT();
     var reader = new jsts.io.WKTReader();
     var cell = reader.read(wkt);
     var centroid = cell.getCentroid();
     var realCentroid = cell.getCentroid().getCoordinates()[0];
-    var intersection = centroid.intersection(cell).getCoordinates();
+    var intersection;
+    try {
+      intersection = centroid.intersection(cell).getCoordinates();
+    } catch (e) {
+      log.error("can't auto generating state of " + tmpObj.id, e);
+      return false;
+    }
+
     var d = 87465132;
     var data = [];
 
     function setState() {
       var centroidDot = new Dot(intersection[0].x, intersection[0].y);
 
-      var stateId = window.conditions.pre_state + (++window.conditions.LAST_STATE_ID_NUM);
-      window.storage.canvasContainer.stages[floor].stateLayer.group.makeNewStateAndAdd(stateId, centroidDot);
+      var stateId =
+        window.conditions.pre_state + ++window.conditions.LAST_STATE_ID_NUM;
+      window.storage.canvasContainer.stages[
+        floor
+      ].stateLayer.group.makeNewStateAndAdd(stateId, centroidDot);
 
-      centroidDot.participateObj(stateId, 'state');
+      centroidDot.participateObj(stateId, "state");
       window.storage.dotFoolContainer.getDotFool(floor).push(centroidDot);
 
-      window.storage.geometryContainer.stateGeometry.push(new StateGeometry(stateId, centroidDot));
+      window.storage.geometryContainer.stateGeometry.push(
+        new StateGeometry(stateId, centroidDot)
+      );
     }
 
     if (intersection.length == 0) {
-
       for (var i = 0; i < tmpObj.dots.length; i++) {
         data.push(tmpObj.dots[i].point.x, tmpObj.dots[i].point.y);
       }
@@ -264,39 +379,56 @@ define([
           var triangles = JSON.parse(xhr.responseText);
 
           for (var i = 0; i < triangles.length; i += 3) {
-
-            log.info(i, i + 1, i + 2);
-            var partOfCellWKT = 'POLYGON (( ' + tmpObj.dots[triangles[i]].point.x + ' ' + tmpObj.dots[triangles[i]].point.y + ', ';
-            partOfCellWKT += tmpObj.dots[triangles[i + 1]].point.x + ' ' + tmpObj.dots[triangles[i + 1]].point.y + ', ';
-            partOfCellWKT += tmpObj.dots[triangles[i + 2]].point.x + ' ' + tmpObj.dots[triangles[i + 2]].point.y + ', ';
-            partOfCellWKT += tmpObj.dots[triangles[i]].point.x + ' ' + tmpObj.dots[triangles[i]].point.y + '))';
+            // log.info(i, i + 1, i + 2);
+            var partOfCellWKT =
+              "POLYGON (( " +
+              tmpObj.dots[triangles[i]].point.x +
+              " " +
+              tmpObj.dots[triangles[i]].point.y +
+              ", ";
+            partOfCellWKT +=
+              tmpObj.dots[triangles[i + 1]].point.x +
+              " " +
+              tmpObj.dots[triangles[i + 1]].point.y +
+              ", ";
+            partOfCellWKT +=
+              tmpObj.dots[triangles[i + 2]].point.x +
+              " " +
+              tmpObj.dots[triangles[i + 2]].point.y +
+              ", ";
+            partOfCellWKT +=
+              tmpObj.dots[triangles[i]].point.x +
+              " " +
+              tmpObj.dots[triangles[i]].point.y +
+              "))";
             var partOfCell = reader.read(partOfCellWKT);
-            intersection = partOfCell.intersection(cell).getCentroid().getCoordinates();
+            intersection = partOfCell
+              .intersection(cell)
+              .getCentroid()
+              .getCoordinates();
 
             if (intersection.length == 1) {
-              var tmpD = Math.sqrt(Math.abs(Math.pow(realCentroid.x - intersection[0].x, 2)) + Math.abs(Math.pow(realCentroid.y - intersection[0].y, 2)));
+              var tmpD = Math.sqrt(
+                Math.abs(Math.pow(realCentroid.x - intersection[0].x, 2)) +
+                  Math.abs(Math.pow(realCentroid.y - intersection[0].y, 2))
+              );
               if (tmpD < d) d = tmpD;
             }
           }
 
-          log.info(intersection);
+          // log.info(intersection);
 
           setState();
-
         }
-      }
+      };
 
       xhr.open("POST", "http://127.0.0.1:8080/triangulate", false);
       xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
       xhr.send(JSON.stringify(data));
-
     } else {
-
       setState();
-
     }
-
-  }
+  };
 
   /**
    * @param {Object} undoObj id<br>floor: floor id
@@ -304,23 +436,27 @@ define([
    * @desc Remove cell object in canvasContainer which id is undoObj.id
    */
   GeometryManager.prototype.endAddNewCell_undo = function(undoObj) {
-
     // remove  cell in canvasContainer
-    var cells = window.storage.canvasContainer.stages[undoObj.floor].cellLayer.group.cells;
+    var cells =
+      window.storage.canvasContainer.stages[undoObj.floor].cellLayer.group
+        .cells;
 
     for (var key in cells) {
       if (cells[key].id == undoObj.id) {
-
         // destroy canvas object
         cells[key].destroy(undoObj.floor);
 
         // free dot from object
         for (var cellkey in cells[key].dots) {
-          window.storage.dotFoolContainer.getDotFool(undoObj.floor).deleteDotFromObj(cells[key].dots[cellkey].uuid, cells[key].id);
+          window.storage.dotFoolContainer
+            .getDotFool(undoObj.floor)
+            .deleteDotFromObj(cells[key].dots[cellkey].uuid, cells[key].id);
         }
 
         // redraw canvas
-        window.storage.canvasContainer.stages[undoObj.floor].cellLayer.layer.draw();
+        window.storage.canvasContainer.stages[
+          undoObj.floor
+        ].cellLayer.layer.draw();
         cells.splice(key, 1);
       }
     }
@@ -335,8 +471,7 @@ define([
     }
 
     // ask remove state or not
-
-  }
+  };
 
   /**
    * @memberof GeometryManager
@@ -344,10 +479,8 @@ define([
    * @return {Boolean}
    */
   GeometryManager.prototype.validateTwistedSide = function(dots) {
-
     return true;
-
-  }
+  };
 
   /**
    * @param {Object} reqObj floor
@@ -355,24 +488,24 @@ define([
    * @desc set tmpObj to null
    */
   GeometryManager.prototype.cancelDrawObj = function(reqObj) {
+    if (reqObj.floor != undefined) {
+      for (var key in window.tmpObj.dots) {
+        window.storage.dotFoolContainer
+          .getDotFool(reqObj.floor)
+          .deleteDotFromObj(window.tmpObj.dots[key].uuid, "tmpObj");
+      }
 
-    if (reqObj.floor == undefined) {
-      window.tmpObj = null;
-      return;
-    }
-
-    for (var key in window.tmpObj.dots) {
-      window.storage.dotFoolContainer.getDotFool(reqObj.floor).deleteDotFromObj(window.tmpObj.dots[key].uuid, 'tmpObj');
+      window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].tmpLayer.group.removeObj();
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
     }
 
     // clear tmp obj
     window.tmpObj = null;
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.removeObj();
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
-    window.myhistory.history.pop_back();
-
-  }
+    window.myhistory.cancelCycle();
+  };
 
   /**
    * @memberof GeometryManager
@@ -382,19 +515,19 @@ define([
    * @return {Object} { x : coordinate of x, y : coordinate of y } or null
    */
   GeometryManager.prototype.snapping = function(dots, connections, point) {
-
-    var minimum_d = window.conditions.snappingThreshold;
+    var minimum_d = window.conditions.realSnappingThreshold;
     var minimum_connection = null;
     var minimum_point = point;
 
     for (var i = 0; connections.length > i; i++) {
-
       function distanceTo(A, B) {
-        return Math.sqrt(Math.pow(Math.abs(A.x - B.x), 2) + Math.pow(Math.abs(A.y - B.y), 2));
+        return Math.sqrt(
+          Math.pow(Math.abs(A.x - B.x), 2) + Math.pow(Math.abs(A.y - B.y), 2)
+        );
       }
 
       function dotProduct(A, B) {
-        return (A.x * B.x) + (A.y * B.y);
+        return A.x * B.x + A.y * B.y;
       }
 
       function crossProduct(A, B) {
@@ -425,20 +558,29 @@ define([
       var V2DotV3 = dotProduct(V2, V3);
 
       if (V1DotV3 * V2DotV3 <= 0) {
-        var crossP = crossProduct({
-          x: V1.x,
-          y: V1.y,
-          z: 0
-        }, {
-          x: V3.x,
-          y: V3.y,
-          z: 0
-        });
-        var A = Math.sqrt(Math.pow(crossP.x, 2) + Math.pow(crossP.y, 2) + Math.pow(crossP.z, 2));
-        var d = A / distanceTo(connections[i].dot1.point, connections[i].dot2.point);
+        var crossP = crossProduct(
+          {
+            x: V1.x,
+            y: V1.y,
+            z: 0
+          },
+          {
+            x: V3.x,
+            y: V3.y,
+            z: 0
+          }
+        );
+        var A = Math.sqrt(
+          Math.pow(crossP.x, 2) + Math.pow(crossP.y, 2) + Math.pow(crossP.z, 2)
+        );
+        var d =
+          A / distanceTo(connections[i].dot1.point, connections[i].dot2.point);
 
         if (minimum_d > d) {
-          var u = Math.pow(distanceTo(connections[i].dot1.point, connections[i].dot2.point), 2);
+          var u = Math.pow(
+            distanceTo(connections[i].dot1.point, connections[i].dot2.point),
+            2
+          );
 
           // new minimum point : dot1 + v3 unit vector * d
           var V3Unit = {
@@ -462,161 +604,263 @@ define([
       }
     }
 
-    return minimum_point;
-  }
+    return {
+      point: minimum_point,
+      line: minimum_connection
+    };
+  };
 
   /**
    * @memberof GeometryManager
    */
   GeometryManager.prototype.startAddNewCellBoundary = function(reqObj) {
-    var tmpObj = new CellBoundary('tmpObj');
-    tmpObj.type = 'cellBoundary';
+    var tmpObj = new CellBoundary("tmpObj");
+    tmpObj.type = "cellBoundary";
     window.tmpObj = tmpObj;
-  }
+  };
 
   /**
    * @memberof GeometryManager
-   * @param {Object} reqObj floor
    */
   GeometryManager.prototype.addNewCellBoundary = function(reqObj) {
-
-    if (window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.obj == null) {
-      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.addNewObj('cellBoundary');
+    if (
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.obj ==
+      null
+    ) {
+      window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].tmpLayer.group.addNewObj("cellBoundary");
       window.tmpObj.floor = reqObj.floor;
     }
 
-    var point = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor.coor;
+    var point =
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor
+        .coor;
 
-    var isDotExist = window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDotByPoint({
-      x: point.x,
-      y: point.y
-    });
+    var isDotExist = window.storage.dotFoolContainer
+      .getDotFool(reqObj.floor)
+      .getDotByPoint({
+        x: point.x,
+        y: point.y
+      });
 
     var dot;
 
-    if (window.tmpObj.cells == null) {
-
-      var manager = window.broker.getManager('addnewcellboundary', 'GeometryManager');
-      var cells = window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.getCells();
-      var line = manager.isExistOnALine(point, cells);
-
-      if (line == null) return false;
-      window.tmpObj.cells = line.cells;
-
-      if (isDotExist == null) {
-        dot = new Dot(point.x, point.y);
-        window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(dot);
-      } else {
-        dot = isDotExist;
-      }
-
+    if (isDotExist == null) {
+      dot = new Dot(point.x, point.y);
+      window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(dot);
     } else {
-
-      var isConnected;
-      var cell = window.storage.canvasContainer.getElementById('cell', window.tmpObj.cells[0]);
-
-      if (isDotExist == null) {
-        isConnected = cell.isPartOf(window.tmpObj.dots[window.tmpObj.dots.length - 1].point, point);
-
-        if (isConnected.result) {
-          dot = new Dot(point.x, point.y);
-          window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(dot);
-        } else {
-          log.info("The point you click is not on the line in " + window.tmpObj.cells);
-          return false;
-        }
-
-      } else {
-
-        isConnected = cell.isPartOf(window.tmpObj.dots[window.tmpObj.dots.length - 1].point, isDotExist.point);
-
-        if (isConnected.result) {
-          dot = isDotExist;
-        } else {
-          log.info("The point you click is not on the line in " + window.tmpObj.cells);
-        }
-
-      }
-
+      dot = isDotExist;
     }
 
-    if (dot != null) {
+    if (window.tmpObj.dots.length == 0) {
       window.tmpObj.addCorner(dot);
       window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+
+      // find all cell contain this dot and save it
+      var manager = window.broker.getManager(
+        "addnewcellboundary",
+        "GeometryManager"
+      );
+      var cells = window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].cellLayer.group.getCells();
+      var lines = manager.findAllLinesContainThePoint(point, cells);
+
+      window.tmpObj.associationCell = lines;
+    } else {
+      function copyObj(obj) {
+        var copy = {};
+        if (typeof obj === "object" && obj !== null) {
+          for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) {
+              copy[attr] = copyObj(obj[attr]);
+            }
+          }
+        } else {
+          copy = obj;
+        }
+        return copy;
+      }
+
+      var save = copyObj(window.tmpObj.associationCell);
+
+      for (var key in window.tmpObj.associationCell) {
+        var lines = window.tmpObj.associationCell[key];
+
+        for (var i = 0; i < lines.length; i++) {
+          if (!DotMath.isLineContainDot(lines[i], dot)) {
+            window.tmpObj.associationCell[key].splice(i, 1);
+            i--;
+
+            if (lines.length == 0) delete window.tmpObj.associationCell[key];
+          }
+        }
+      }
+
+      if (Object.keys(window.tmpObj.associationCell) != 0) {
+        window.tmpObj.addCorner(dot);
+        window.storage.canvasContainer.stages[
+          reqObj.floor
+        ].tmpLayer.layer.draw();
+      } else {
+        window.tmpObj.associationCell = save;
+        log.warn(
+          "Selected point is not connected with another point which participated in the cellspaceboundary what you making."
+        );
+      }
+    }
+  };
+
+  /**
+   * @memberof GeometryManager
+   */
+  GeometryManager.prototype.findAllLinesContainThePoint = function(
+    point,
+    cells
+  ) {
+    var result = {};
+
+    for (var key in cells) {
+      var isPartOf = cells[key].isPartOf(point);
+      if (isPartOf.length != 0) result[cells[key].id] = isPartOf;
     }
 
-    // log.trace(window.storage.canvasContainer);
-
-  }
-
+    return result;
+  };
 
   /**
    * @memberof GeometryManager
    * @param undoObj floor, uuid of last dot
    */
   GeometryManager.prototype.addNewCellBoundary_undo = function(undoObj) {
-
     var tmpObj = window.tmpObj;
 
     tmpObj.removeDot(undoObj.uuid);
-    window.storage.dotFoolContainer.getDotFool(undoObj.floor).deleteDotFromObj(undoObj.uuid, tmpObj.id);
+    tmpObj.associationCell = undoObj.cells;
+
+    window.storage.dotFoolContainer
+      .getDotFool(undoObj.floor)
+      .deleteDotFromObj(undoObj.uuid, tmpObj.id);
     window.storage.canvasContainer.stages[undoObj.floor].tmpLayer.layer.draw();
+  };
 
-  }
+  /**
+   * @memberof GeometryManager
+   * @param reqObj floor
+   */
+  GeometryManager.prototype.addNewCellBoundary_makeHistoryObj = function(
+    reqObj
+  ) {
+    function copyObj(obj) {
+      var copy = {};
+      if (typeof obj === "object" && obj !== null) {
+        for (var attr in obj) {
+          if (obj.hasOwnProperty(attr)) {
+            copy[attr] = copyObj(obj[attr]);
+          }
+        }
+      } else {
+        copy = obj;
+      }
+      return copy;
+    }
 
+    return {
+      floor: reqObj.floor,
+      uuid: window.tmpObj.getLastDot().uuid,
+      associationCell: copyObj(window.tmpObj.associationCell)
+    };
+  };
 
   /**
    * @memberof GeometryManager
    * @param {Object} reqObj { id, floor, isEmpty }
    */
   GeometryManager.prototype.endAddNewCellBoundary = function(reqObj) {
+    function copyObj(obj) {
+      var copy = {};
+      if (typeof obj === "object" && obj !== null) {
+        for (var attr in obj) {
+          if (obj.hasOwnProperty(attr)) {
+            copy[attr] = copyObj(obj[attr]);
+          }
+        }
+      } else {
+        copy = obj;
+      }
+      return copy;
+    }
 
     if (reqObj.isEmpty != null) {
       window.tmpObj = null;
       return;
     }
 
-    log.info("tmpObj : ", window.tmpObj);
-
     var tmpObj = window.tmpObj;
+    tmpObj.associationCell = copyObj(window.tmpObj.associationCell);
 
     // clear tmp obj
     window.tmpObj = null;
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.removeObj();
+    window.storage.canvasContainer.stages[
+      reqObj.floor
+    ].tmpLayer.group.removeObj();
     window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
     for (var key in tmpObj.dots) {
-      tmpObj.dots[key].leaveObj('tmpObj');
+      tmpObj.dots[key].leaveObj("tmpObj");
     }
 
     tmpObj.id = reqObj.id;
     tmpObj.name = reqObj.id;
 
     // add cellboundary using tmpObj
-    window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer.group.add(tmpObj);
+    window.storage.canvasContainer.stages[
+      reqObj.floor
+    ].cellBoundaryLayer.group.add(tmpObj);
+
+    // 셀이 3개 라인이 2개인 경우의 예외처리 필요 *************************************************************************************************
+    // add dots in cellboundary to cells
+    var associationCells = tmpObj.associationCell;
+    for (var key in associationCells) {
+      var cell = window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].getElementById("cell", key);
+      cell.insertLineIntoLine(associationCells[key][0], tmpObj.dots);
+
+      // update geometryContainer
+      window.storage.geometryContainer
+        .getElementById("cell", key)
+        .updatePoints(cell.getDots());
+    }
 
     // set corner to invisible
-    var obj = window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer.group.cellBoundaries[window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer.group.cellBoundaries.length - 1];
+    var obj =
+      window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer
+        .group.cellBoundaries[
+        window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer
+          .group.cellBoundaries.length - 1
+      ];
     obj.setCornersVisible(false);
 
     // redraw cellBoundaryLayer
-    window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer.layer.draw();
+    // window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer.layer.draw();
+    window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
 
     //add cellBoundary data in geometry canvasContainer
-    window.storage.geometryContainer.cellBoundaryGeometry.push(new CellBoundaryGeometry(reqObj.id, obj.dots));
-
-    log.trace(window.storage);
-
-  }
-
+    window.storage.geometryContainer.cellBoundaryGeometry.push(
+      new CellBoundaryGeometry(reqObj.id, obj.dots)
+    );
+  };
 
   /**
    * @memberof GeometryManager
    */
   GeometryManager.prototype.endAddNewCellBoundary_undo = function(undoObj) {
-
     // remove cellboundary in canvasContainer
-    var cellboundaries = window.storage.canvasContainer.stages[undoObj.floor].cellBoundaryLayer.group.cellBoundaries;
+    var cellboundaries =
+      window.storage.canvasContainer.stages[undoObj.floor].cellBoundaryLayer
+        .group.cellBoundaries;
 
     for (var key in cellboundaries) {
       if (cellboundaries[key].id == undoObj.id) {
@@ -624,11 +868,18 @@ define([
 
         // free dot from object
         for (var dotkey in cellboundaries[key].dots) {
-          window.storage.dotFoolContainer.getDotFool(undoObj.floor).deleteDotFromObj(cellboundaries[key].dots[dotkey].uuid, cellboundaries[key].id);
+          window.storage.dotFoolContainer
+            .getDotFool(undoObj.floor)
+            .deleteDotFromObj(
+              cellboundaries[key].dots[dotkey].uuid,
+              cellboundaries[key].id
+            );
         }
 
         // redraw canvas
-        window.storage.canvasContainer.stages[undoObj.floor].cellBoundaryLayer.layer.draw();
+        window.storage.canvasContainer.stages[
+          undoObj.floor
+        ].cellBoundaryLayer.layer.draw();
         cellboundaries.splice(key, 1);
 
         break;
@@ -643,50 +894,109 @@ define([
         break;
       }
     }
-
-  }
+  };
 
   /**
    * @memberof GeometryManager
    * @param {Object} reqObj floor, point
    */
   GeometryManager.prototype.snappingMousePointer = function(reqObj) {
-
     var point = reqObj.point;
-    point.x = point.x - window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.x;
-    point.x = point.x / window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleX;
+    point.x =
+      point.x -
+      window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.x;
+    point.x =
+      point.x /
+      window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleX;
 
-    point.y = point.y - window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.y;
-    point.y = point.y / window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleY;
+    point.y =
+      point.y -
+      window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.y;
+    point.y =
+      point.y /
+      window.storage.canvasContainer.stages[reqObj.floor].stage.attrs.scaleY;
 
-    var isDotExist = window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDotByPoint({
-      x: point.x,
-      y: point.y
-    });
+    var isDotExist = null;
+    if(window.myhistory.getPreviousMsg() == 'modifypoint'){
+      isDotExist = window.storage.dotFoolContainer
+        .getDotFool(reqObj.floor)
+        .getDotByPointaAllowDuplication({
+          x: point.x,
+          y: point.y
+        });
 
-    var newPoint;
-
-    if (isDotExist == null) {
-
-      var manager = window.broker.getManager('snapping', 'GeometryManager');
-      var dots = Object.values(window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDots());
-      var connections = window.storage.canvasContainer.stages[reqObj.floor].getConnection();
-      newPoint = manager.snapping(dots, connections, point);
-
-    } else {
-
-      newPoint = isDotExist.point;
+      if(isDotExist != null && isDotExist.length == 2){
+        isDotExist.splice(isDotExist.indexOf(window.tmpObj), 1)
+        isDotExist = isDotExist[0];
+      } else if(isDotExist != null && isDotExist.length == 1){
+        isDotExist = isDotExist[0];
+      }
 
     }
+    else {
+      isDotExist = window.storage.dotFoolContainer
+        .getDotFool(reqObj.floor)
+        .getDotByPoint({
+          x: point.x,
+          y: point.y
+        });
+    }
 
-    var cursor = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.getCursor();
+    var newPoint;
+    var snappingData = {
+      isSnapped: false,
+      snapedObj: {
+        type: "",
+        obj: null
+      }
+    };
+
+    if (isDotExist == null) {
+      var manager = window.broker.getManager("snapping", "GeometryManager");
+      var dots = Object.values(
+        window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDots()
+      );
+      var connections = window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].getConnection();
+      // log.info(connections);
+      var snapping = manager.snapping(dots, connections, point);
+
+      newPoint = snapping.point;
+
+      if (snapping.line != null) {
+        snappingData = {
+          isSnapped: true,
+          snapedObj: {
+            type: "line",
+            obj: snapping.line
+          }
+        };
+      }
+    } else {
+      newPoint = isDotExist.point;
+
+      snappingData = {
+        isSnapped: true,
+        snapedObj: {
+          type: "point",
+          obj: isDotExist
+        }
+      };
+    }
+
+    var cursor = window.storage.canvasContainer.stages[
+      reqObj.floor
+    ].tmpLayer.group.getCursor();
 
     cursor.setCoor(newPoint);
     cursor.setVisible(true);
+    window.storage.canvasContainer.stages[
+      reqObj.floor
+    ].tmpLayer.group.setCursorData(snappingData);
 
     window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
-
-  }
+  };
 
   /**
    * @memberof GeometryManager
@@ -695,24 +1005,23 @@ define([
    * @return {Obejct} { line : { dot1, dot2 }, cells : [ cell ] }
    */
   GeometryManager.prototype.isExistOnALine = function(point, cells) {
-
     var partof = {
       result: false
     };
     var len = cells.length;
     var i;
-    var result = null;
+    var result = [];
 
-    // find first cell which point is contain
     for (i = 0; i < len && !partof.result; i++) {
       partof = cells[i].isPartOf(point);
-      if (partof.result) result = {
-        'line': {
-          'dot1': partof.connection.dot1,
-          'dot2': partof.connection.dot2
-        },
-        'cells': []
-      };
+      if (partof.result)
+        result.push({
+          line: {
+            dot1: partof.connection.dot1,
+            dot2: partof.connection.dot2
+          },
+          cells: []
+        });
     }
 
     // if point is not on a line, return null
@@ -721,15 +1030,16 @@ define([
     // find other cell contain this line
     var candidateCells = result.line.dot1.memberOf;
     for (var key in candidateCells) {
-      if (candidateCells[key] == 'cell' && result.line.dot2.memberOf[key] != null) {
+      if (
+        candidateCells[key] == "cell" &&
+        result.line.dot2.memberOf[key] != null
+      ) {
         result.cells.push(key);
       }
     }
 
     return result;
-
-  }
-
+  };
 
   /**
    * @memberof GeometryManager
@@ -738,7 +1048,6 @@ define([
    * @param {Dot} newPoint
    */
   GeometryManager.prototype.insertDotIntoLine = function(line, newPoint) {
-
     // check newPoint is on the line
     // line.dot1 -> line.dot2
     var V1 = {
@@ -752,12 +1061,16 @@ define([
       y: newPoint.point.y - line.dot1.point.y
     };
 
-    var cos = (V1.x * V2.x + V1.y * V2.y) /
+    var cos =
+      (V1.x * V2.x + V1.y * V2.y) /
       (Math.sqrt(Math.pow(V1.x, 2) + Math.pow(V1.y, 2)) *
         Math.sqrt(Math.pow(V2.x, 2) + Math.pow(V2.y, 2)));
     var threshold = 0.0000001;
 
-    if (!(1 - threshold <= cos && cos <= 1 + threshold) || !((-1) - threshold <= cos && cos <= (-1) + threshold))
+    if (
+      !(1 - threshold <= cos && cos <= 1 + threshold) ||
+      !(-1 - threshold <= cos && cos <= -1 + threshold)
+    )
       return;
 
     // find the cells which line is included
@@ -771,57 +1084,64 @@ define([
     candidateObjs.forEach(function(obj) {
       obj.insertDotIntoLine(line, newPoint);
     });
-
-  }
+  };
 
   /**
    * @memberof GeometryManager
    */
   GeometryManager.prototype.startAddNewTransition = function(reqObj) {
-
-    var tmpObj = new Transition('tmpObj');
-    tmpObj.type = 'transition';
+    var tmpObj = new Transition("tmpObj");
+    tmpObj.type = "transition";
     window.tmpObj = tmpObj;
-
-  }
+  };
 
   /**
    * @memberof GeometryManager
    */
   GeometryManager.prototype.addNewTransition = function(reqObj) {
-
-    if (window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.obj == null) {
-      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.addNewObj('transition');
+    if (
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.obj ==
+      null
+    ) {
+      window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].tmpLayer.group.addNewObj("transition");
       window.tmpObj.floor = reqObj.floor;
     }
 
     // get  coordinate
-    var point = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor.coor;
+    var point =
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor
+        .coor;
 
-    var isDotExist = window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDotByPoint({
-      x: point.x,
-      y: point.y
-    });
+    var isDotExist = window.storage.dotFoolContainer
+      .getDotFool(reqObj.floor)
+      .getDotByPoint({
+        x: point.x,
+        y: point.y
+      });
 
     if (isDotExist != null && tmpObj.dots.length <= 1 && isDotExist.isState) {
-
       window.tmpObj.addState(isDotExist);
-      isDotExist.participateObj('tmpObj', 'transition');
+      // isDotExist.participateObj('tmpObj', 'transition');
 
       if (tmpObj.dots.length == 2) {
-        var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+        var manager = window.broker.getManager(
+          "start-addnewtransition",
+          "UIManager"
+        );
         manager.setTooltipText({
           floor: reqObj.floor,
-          text: 'If you want to set duality of this transition, click cellspacecoundry.\nIf not, please click transition button or push enter'
+          text:
+            "If you want to set duality of this transition, click cellspacecoundry.\nIf not, please click transition button or push enter"
         });
       }
-
     } else if (tmpObj.dots.length == 2) {
-
       // is part of cellBoundary
-      var cellBoundaries = window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer.group.getObjects();
+      var cellBoundaries = window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].cellBoundaryLayer.group.getObjects();
       for (var boundaryKey in cellBoundaries) {
-
         var dots = cellBoundaries[boundaryKey].getDots();
 
         // this lines shoule activate when factory support real line string
@@ -839,9 +1159,11 @@ define([
           dot2: dots[1]
         };
 
-        if (DotMath.isLineContainDot(line, {
+        if (
+          DotMath.isLineContainDot(line, {
             point: point
-          })) {
+          })
+        ) {
           var newDot = new Dot(point.x, point.y);
           window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(newDot);
           window.tmpObj.insertDot(1, newDot);
@@ -849,34 +1171,57 @@ define([
           // segmentation cellboundary
           cellBoundaries[boundaryKey].insertCorner(newDot, 1);
 
+          // segmentation cell
+          function getCommonCell(dot1, dot2){
+            var cell_1 = [];
+            var cell_1_keys = Object.keys(dot1.memberOf);
+            for(var i = 0; i < cell_1_keys.length; i++){
+              if(dot1.memberOf[cell_1_keys[i]] == 'cell')
+                cell_1.push(cell_1_keys[i])
+            }
 
+            var result = [];
+
+            var cell_2_keys = Object.keys(dot2.memberOf);
+            for(var i = 0; i < cell_2_keys.length; i++){
+              if(cell_1.indexOf(cell_2_keys[i]) != -1)
+                result.push(cell_2_keys[i])
+            }
+
+            return result;
+          }
+
+          var cells = getCommonCell(line.dot1, line.dot2);
+          for(var i in cells){
+            var cell = window.storage.canvasContainer.stages[
+              reqObj.floor
+            ].getElementById('cell', cells[i]);
+
+            cell.insertDotIntoLine(line, newDot);
+          }
         }
-
       }
-
     } else {
       return false;
     }
 
     window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
-
-    log.trace(window.storage);
-
-  }
-
+  };
 
   /**
    * @memberof GeometryManager
    * @param {Object} undoObj floor : id of floor<br>uuid : id of dot
    */
   GeometryManager.prototype.addNewTransition_undo = function(undoObj) {
-
     // change tooltip text
     if (tmpObj.dots.length == 2) {
-      var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+      var manager = window.broker.getManager(
+        "start-addnewtransition",
+        "UIManager"
+      );
       manager.setTooltipText({
         floor: undoObj.floor,
-        text: 'select state'
+        text: "select state"
       });
     }
 
@@ -884,17 +1229,15 @@ define([
 
     // remove state data from obj and free dot
     window.tmpObj.removeState(dotFool.getDotById(undoObj.uuid));
-    dotFool.deleteDotFromObj(undoObj.uuid, 'tmpObj');
+    dotFool.deleteDotFromObj(undoObj.uuid, "tmpObj");
 
     window.storage.canvasContainer.stages[undoObj.floor].tmpLayer.layer.draw();
-
-  }
+  };
 
   /**
    * @memberof GeometryManager
    */
   GeometryManager.prototype.endAddNewTransition = function(reqObj) {
-
     if (reqObj.isEmpty != null) {
       window.tmpObj = null;
       return;
@@ -904,55 +1247,68 @@ define([
 
     // clear tmp object
     window.tmpObj = null;
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.removeObj();
+    window.storage.canvasContainer.stages[
+      reqObj.floor
+    ].tmpLayer.group.removeObj();
     // window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
     for (var key in tmpObj.dots) {
-      tmpObj.dots[key].leaveObj('tmpObj');
+      tmpObj.dots[key].leaveObj("tmpObj");
     }
 
     tmpObj.id = reqObj.id;
     tmpObj.name = reqObj.id;
 
     // add transition to canvasContainer using tmpObj
-    window.storage.canvasContainer.stages[reqObj.floor].transitionLayer.group.add(tmpObj);
+    window.storage.canvasContainer.stages[
+      reqObj.floor
+    ].transitionLayer.group.add(tmpObj);
 
     //add transition data in geometry canvasContainer
-    window.storage.geometryContainer.transitionGeometry.push(new TransitionGeometry(tmpObj.id, tmpObj.getConnection(), tmpObj.getDots()));
+    window.storage.geometryContainer.transitionGeometry.push(
+      new TransitionGeometry(
+        tmpObj.id,
+        tmpObj.getConnection(),
+        tmpObj.getDots()
+      )
+    );
 
     // change color of cellboundary
     var duality = tmpObj.getDuality();
     if (duality != null) {
-      window.storage.canvasContainer.stages[reqObj.floor].getElementById('cellboundary', duality).changeLineColor('gray');
+      window.storage.canvasContainer.stages[reqObj.floor]
+        .getElementById("cellboundary", duality)
+        .changeLineColor("gray");
     }
 
     // redraw stage
     window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
-
-  }
+  };
 
   /**
    * @memberof GeometryManager
    * @param {Object} undoObj floor, id
    */
   GeometryManager.prototype.endAddNewTransition_undo = function(undoObj) {
-
     // remove transition object in canvasContainer
-    var canvasObj = window.storage.canvasContainer.stages[undoObj.floor].getElementById('transition', undoObj.id);
+    var canvasObj = window.storage.canvasContainer.stages[
+      undoObj.floor
+    ].getElementById("transition", undoObj.id);
     canvasObj.destroy();
 
     // free dot from object
     var dots = canvasObj.getDots();
     var dotFool = window.storage.dotFoolContainer.getDotFool(undoObj.floor);
     for (var dotKey in dots) {
-
       dotFool.deleteDotFromObj(dots[dotKey].uuid, undoObj.id);
 
       // if dots[dotKey] is part of cell boundary
       var memberOf = dots[dotKey].getMemberOf();
       for (var memKey in memberOf) {
-        if (memberOf[memKey] == 'cellBoundary') {
-          var boundryObj = window.storage.canvasContainer.stages[undoObj.floor].getElementById('cellboundary', memKey);
+        if (memberOf[memKey] == "cellBoundary") {
+          var boundryObj = window.storage.canvasContainer.stages[
+            undoObj.floor
+          ].getElementById("cellboundary", memKey);
           if (boundryObj.isRemovableDot(dots[dotKey])) {
             dotFool.deleteDotFromObj(dots[dotKey].uuid, boundryObj.id);
           }
@@ -960,22 +1316,592 @@ define([
       }
     }
 
-    window.storage.canvasContainer.stages[undoObj.floor].transitionLayer.group.transitions.splice(
-      window.storage.canvasContainer.stages[undoObj.floor].transitionLayer.group.transitions.indexOf(canvasObj), 1
+    window.storage.canvasContainer.stages[
+      undoObj.floor
+    ].transitionLayer.group.transitions.splice(
+      window.storage.canvasContainer.stages[
+        undoObj.floor
+      ].transitionLayer.group.transitions.indexOf(canvasObj),
+      1
     );
 
     // remove transition geometry in geometryContainer
     window.storage.geometryContainer.removeObj(
-      window.storage.geometryContainer.getElementById('transition', undoObj.id)
+      window.storage.geometryContainer.getElementById("transition", undoObj.id)
     );
 
     // redraw stage
     window.storage.canvasContainer.stages[undoObj.floor].stage.draw();
 
     log.trace(window.storage);
-  }
+  };
+
+  /**
+   * @memberof GeometryManager
+   */
+  GeometryManager.prototype.startAddNewStair = function(reqObj) {
+    var tmpObj = new Transition("tmpObj");
+    tmpObj.type = "transition";
+    window.tmpObj = tmpObj;
+  };
+
+  /**
+   * @memberof GeometryManager
+   * @desc In case of the transition which connects different floor, if will be saved to first state's container(floor)
+   */
+  GeometryManager.prototype.addNewStair = function(reqObj) {
+    if (window.tmpObj.floor == null) {
+      window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].tmpLayer.group.addNewObj("stair");
+      window.tmpObj.floor = reqObj.floor;
+    }
+
+    // get  coordinate
+    var point =
+      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor
+        .coor;
+
+    var isDotExist = window.storage.dotFoolContainer
+      .getDotFool(reqObj.floor)
+      .getDotByPoint({
+        x: point.x,
+        y: point.y
+      });
+
+    if (isDotExist != null && tmpObj.dots.length <= 1 && isDotExist.isState()) {
+      window.tmpObj.addState(isDotExist);
+      isDotExist.participateObj("tmpObj", "transition");
+
+      if (tmpObj.dots.length == 1) {
+        var manager = window.broker.getManager(
+          "start-addnewstair",
+          "UIManager"
+        );
+        manager.setTooltipText({
+          floor: reqObj.floor,
+          text: "select state on another floor"
+        });
+      } else {
+        var manager = window.broker.getManager(
+          "start-addnewstair",
+          "UIManager"
+        );
+        manager.setTooltipText({
+          text: ""
+        });
+        window.tmpObj.deleteLineObject();
+      }
+
+      var memeberof = window.tmpObj.getLastDot().getMemberOf();
+      var stateKey = null;
+      for (var key in memeberof) {
+        if (memeberof[key] == "state") {
+          stateKey = key;
+          break;
+        }
+      }
+
+      window.storage.canvasContainer.stages[reqObj.floor]
+        .getElementById("state", stateKey)
+        .setColor("blue");
+      window.storage.canvasContainer.stages[reqObj.floor]
+        .getElementById("state", stateKey)
+        .getObj()
+        .draw();
+    } else {
+      return false;
+    }
+  };
+
+  /**
+   * @memberof GeometryManager
+   */
+  GeometryManager.prototype.endAddNewStair = function(reqObj) {
+    if (reqObj.isEmpty != null) {
+      window.tmpObj = null;
+      return;
+    }
+
+    var tmpObj = window.tmpObj;
+
+    // clear tmp object
+    window.tmpObj = null;
+    window.storage.canvasContainer.stages[
+      reqObj.floor
+    ].tmpLayer.group.removeObj();
+    // window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+
+    for (var key in tmpObj.dots) {
+      tmpObj.dots[key].leaveObj("tmpObj");
+    }
+
+    tmpObj.id = reqObj.id;
+    tmpObj.name = reqObj.id;
+
+    //add transition data in geometry canvasContainer
+    window.storage.geometryContainer.transitionGeometry.push(
+      new TransitionGeometry(
+        tmpObj.id,
+        tmpObj.getConnection(),
+        tmpObj.getDots()
+      )
+    );
+
+    // log.info(window.tmpObj);
+    // log.info(window.storage);
+  };
+
+  /**
+   * @memberof GeometryManager
+   * @param {Object} reqObj floor: floor id<br>line : {dot1, dot2}
+   */
+  GeometryManager.prototype.modifyLine = function(reqObj) {
+    log.info("GeometryManager : modifyLine called");
+
+    // add dot in cursor point
+    var point = window.storage.canvasContainer.stages[
+      reqObj.floor
+    ].tmpLayer.group.getCursor().coor;
+    var newDot = new Dot(point.x, point.y);
+    window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(newDot);
+
+    // find thd objects containg the line
+    var array1 = Object.keys(reqObj.line.dot1.memberOf);
+    var array2 = Object.keys(reqObj.line.dot2.memberOf);
+
+    function isMemberOfArray1(value) {
+      return array1.indexOf(value) != -1;
+    }
+
+    var filtered = array2.filter(isMemberOfArray1);
+
+    var isPartOf = [];
+    var stage = window.storage.canvasContainer.stages[reqObj.floor];
+    for(var i in filtered){
+      var obj = stage.getElementById(reqObj.line.dot1.memberOf[filtered[i]], filtered[i]);
+      if(obj.isPartOf(reqObj.line.dot1, reqObj.line.dot2)){
+        isPartOf.push(filtered[i]);
+      }
+    }
+
+    filtered = isPartOf;
+
+    for (var i in filtered) {
+      var obj = window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].getElementById(reqObj.line.dot1.memberOf[filtered[i]], filtered[i]);
+      obj.insertDotIntoLine(reqObj.line, newDot);
+    }
+
+    // window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
+  };
+
+  /**
+   * @memberof GeometryManager
+   * @param {Object} reqObj floor: floor id<br>point : dot
+   */
+  GeometryManager.prototype.startModifyPoint = function(reqObj) {
+    log.info(reqObj);
+
+    // var cursor = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.getCursor();
+    // var cursorData = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.getCursorData();
+
+    window.tmpObj = reqObj.point;
+    // log.info(cursor, cursorData);
+  };
+
+  /**
+   * @memberof GeometryManager
+   * @param {Object} reqObj floor: floor id
+   */
+  GeometryManager.prototype.modifyPoint = function(reqObj) {
+    tmpObj.setPoint(
+      window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].tmpLayer.group.getCursor().coor
+    );
+
+    // update obj
+    var floor = window.storage.canvasContainer.stages[reqObj.floor];
+    for (var key in tmpObj.memberOf) {
+      floor.getElementById(tmpObj.memberOf[key].toLowerCase(), key).addObjectFromDots();
+    }
+
+    floor.stage.draw();
+  };
+
+  /**
+   * @memberof GeometryManager
+   * @param {Object} reqObj floor: floor id
+   */
+  GeometryManager.prototype.endModifyPoint = function(reqObj) {
+    var movedDot = window.tmpObj;
+    var geometryContainer = window.storage.geometryContainer;
+    var stageObj = window.storage.canvasContainer.stages[reqObj.floor];
+    var updateException = [];
+
+    // if dot exist
+    var isDotExist = window.storage.dotFoolContainer.dotFool[
+      reqObj.floor
+    ].getDotByPointaAllowDuplication(movedDot.point);
+
+    if (isDotExist[0] == movedDot) { }
+    else if (isDotExist.length == 2 ) {
+      isDotExist.splice(isDotExist.indexOf(movedDot), 1);
+
+      for(var exception in isDotExist[0].memberOf){
+        updateException.push(exception);
+      }
+
+      for (var key in movedDot.memberOf) {
+        var obj = stageObj.getElementById(movedDot.memberOf[key], key);
+        var dotIndex = obj.getDotIndex(movedDot.uuid);
+        obj.replaceDot(isDotExist[0], dotIndex);
+
+      }
+
+      if(Object.keys(movedDot.memberOf).length == 0)
+        window.storage.dotFoolContainer.dotFool[reqObj.floor].deleteDot(movedDot.uuid);
+      movedDot = isDotExist[0];
+
+    }
+
+    // update geometry data
+    for (var key in movedDot.memberOf) {
+      if (movedDot.memberOf[key] == "state") {
+        var dot = stageObj.getElementById(movedDot.memberOf[key], key).getDot();
+        geometryContainer.getElementById(
+          movedDot.memberOf[key],
+          key
+        ).point = dot;
+      } else if(updateException.indexOf(key) == -1){
+
+        var dots = stageObj
+          .getElementById(movedDot.memberOf[key].toLowerCase(), key)
+          .getDots();
+        geometryContainer.getElementById(
+          movedDot.memberOf[key],
+          key
+        ).points = dots;
+      }
+    }
+
+    window.tmpObj = null;
+
+    log.info(window.storage.geometryContainer);
+  };
+
+  /**
+   * @memberof GeometryManager
+   * @param {Object} reqObj id, floor
+   */
+  GeometryManager.prototype.deleteCell = function(reqObj) {
+    var floor;
+
+    if (reqObj.floor == undefined)
+      floor = window.storage.propertyContainer.getFloorById("cell", reqObj.id);
+    else floor = reqObj.floor;
+
+    // canvas
+
+    // geometry
+
+    // property
+  };
+
+  /**
+   * @memberof GeometryManager
+   * @param {Object} reqObj geojson, floor
+   */
+  GeometryManager.prototype.addObjectFromGeojson = function(reqObj) {
+    log.info("addObjectFromGeojson >> ", reqObj);
+    document
+      .getElementById("project-import-modal-option")
+      .classList.add("d-none");
+    document
+      .getElementById("project-import-modal-loading")
+      .classList.remove("d-none");
+
+    var manager = window.broker.getManager("addnewfloor", "GeometryManager");
+    var VERY_SMALL_VALUE = -99999999999;
+    var VERY_BIG_VALUE = 99999999999;
+    var boundingBox = {
+      min: {
+        x: VERY_BIG_VALUE,
+        y: VERY_BIG_VALUE
+      },
+      max: {
+        x: VERY_SMALL_VALUE,
+        y: VERY_SMALL_VALUE
+      }
+    };
+
+    window.conditions.coordinateThreshold = reqObj.condition.significant;
+    window.conditions.realCoordinateThreshold = reqObj.condition.significant;
+    window.conditions.snappingThreshold = reqObj.condition.significant;
+    window.conditions.realSnappingThreshold = reqObj.condition.significant;
+
+    var features = reqObj.geojson.features;
+    for (var i in features) {
+      switch (features[i].geometry.type) {
+        case "Polygon":
+          boundingBox = manager.addCellFromGeojson(
+            features[i].geometry.coordinates[0],
+            features[i].properties,
+            reqObj.floor[0],
+            boundingBox
+          );
+          break;
+        case "LineString":
+          manager.addCellBoundaryFromGeojson(
+            features[i].geometry.coordinates[0],
+            features[i].properties,
+            reqObj.floor[0]
+          );
+          break;
+        default:
+          log.warn(
+            "GeometryManager :: There is no match feature type with ",
+            features[i].geometry.type
+          );
+          break;
+      }
+    }
+
+    // console.log('boundingBox :: ', boundingBox);
+
+    // resize stage
+    var width = boundingBox.max.x - boundingBox.min.x;
+    var height = boundingBox.max.y - boundingBox.min.y;
+    var ratio = {};
+
+    if (width > height)
+      ratio = {
+        width: width / height,
+        height: 1
+      };
+    else
+      ratio = {
+        width: 1,
+        height: height / width
+      };
+
+    var stage = window.storage.canvasContainer.stages[reqObj.floor];
+    var containerSize = {
+      height: document.getElementById(reqObj.floor).clientHeight,
+      width: document.getElementById(reqObj.floor).clientWidth
+    };
+    var containerRatio = {};
+
+    if (containerSize.width > containerSize.height)
+      containerRatio = {
+        width: containerSize.width / containerSize.height,
+        height: 1
+      };
+    else
+      containerRatio = {
+        width: 1,
+        height: containerSize.height / containerSize.width
+      };
+
+    var newSize = {
+      height: 0,
+      width: 0
+    };
+
+    if (ratio.height == 1) {
+      newSize = {
+        width: containerSize.width,
+        height: containerSize.height / ratio.width
+      };
+    } else {
+      newSize = {
+        width: containerSize.width / ratio.height,
+        height: containerSize.height
+      };
+    }
+
+    // console.log('newSize :: ', newSize);
+
+    stage.stage.height(newSize.height);
+    stage.stage.width(newSize.width);
+    stage.backgroundLayer.setGrid(newSize.width, newSize.height);
+
+    // world to pixel
+    function affineTransformation(
+      pixelURC,
+      pixelLLC,
+      worldURC,
+      worldLLC,
+      point,
+      scale
+    ) {
+      var widthScale = pixelURC[0] / worldURC[0];
+      var heightScale = pixelURC[1] / worldURC[1];
+      var widthTrans = pixelLLC[0] - worldLLC[0];
+      var heightTrans = pixelLLC[1] - worldLLC[1];
+      var matrix = math.matrix([
+        [scale, 0, widthTrans * scale],
+        [0, scale, heightTrans * scale],
+        [0, 0, 1]
+      ]);
+
+      var pointMatrix = math.matrix([point.x, point.y, 1]);
+      var result = math.multiply(matrix, pointMatrix);
+      // log.info(result._data);
+      return {
+        x: result._data[0],
+        y: result._data[1]
+      };
+    }
+
+    // goal - original
+    /** bounding box일 경우 설정 */
+    var canvasCenter = {
+      x: newSize.width / 2,
+      y: newSize.height / 2
+    };
+
+    // console.log('trance ::', canvasCenter.x - (boundingBox.min.x + width / 2), canvasCenter.y - (boundingBox.min.y + height / 2));
+
+    var allDots = window.storage.dotFoolContainer.dotFool[
+      reqObj.floor[0]
+    ].getDots();
+
+    for (var i in allDots) {
+      allDots[i].setPoint(
+        affineTransformation(
+          [newSize.width, newSize.height],
+          [10, 10],
+          [boundingBox.max.x, boundingBox.max.y],
+          [boundingBox.min.x, boundingBox.min.y],
+          allDots[i].point,
+          1
+        )
+      );
+    }
+
+    var cells = window.storage.canvasContainer.stages[
+      reqObj.floor
+    ].cellLayer.group.getCells();
+    for (var i in cells) {
+      cells[i].addObjectFromDots();
+    }
+
+    stage.stage.draw();
+
+    // treeview updatere
+    window.uiContainer.sidebar.treeview.refresh(
+      window.storage.propertyContainer
+    );
+
+    log.info("succeed to addObjectFromGeojson");
+
+    document.getElementById("project-import-modal-close-btn").click();
+    document
+      .getElementById("project-import-modal-option")
+      .classList.remove("d-none");
+    document
+      .getElementById("project-import-modal-loading")
+      .classList.add("d-none");
+
+      window.conditions.coordinateThreshold = 10;
+      window.conditions.realCoordinateThreshold = 10;
+      window.conditions.snappingThreshold = 10;
+      window.conditions.realSnappingThreshold = 10;
+
+  };
+
+  GeometryManager.prototype.addCellFromGeojson = function(
+    coordinates,
+    properties,
+    floor,
+    boundingBox
+  ) {
+    var id = properties.Id;
+    var name = properties.Name == undefined ? id : properties.Name;
+    var manager = window.broker.getManager("end-addnewcell", "GeometryManager");
+
+    // canvas container
+    var dots = [];
+    for (var i = 0; i < coordinates.length - 1; i++) {
+      var dotFool = window.storage.dotFoolContainer.getDotFool(floor);
+      var dot = dotFool.getDotByPoint({x:coordinates[i][0], y: coordinates[i][1]});
+      if (dot == null) {
+        dot = new Dot(coordinates[i][0], coordinates[i][1]);
+        dotFool.push(dot);
+      }
+
+      var coor = dot.getCoor();
+      if (coor.x > boundingBox.max.x) boundingBox.max.x = coor.x;
+      if (coor.y > boundingBox.max.y) boundingBox.max.y = coor.y;
+      if (coor.x < boundingBox.min.x) boundingBox.min.x = coor.x;
+      if (coor.y < boundingBox.min.y) boundingBox.min.y = coor.y;
+
+      dots.push(dot);
+    }
+
+    // if(!manager.validateTwistedSide(dots)){
+    //   log.error("This object have twisted side !");
+    //   return false;
+    // }
+
+    var cellObj = new Cell(id);
+    cellObj.dots = dots;
+    // cellObj.addObjectFromDots();
+    // obj will added to stage after resizing canvas aspect ratio
+    window.storage.canvasContainer.stages[floor].cellLayer.group.add(cellObj);
+    window.storage.canvasContainer.stages[floor].cellLayer.layer.draw();
+
+    // geometry container
+    window.storage.geometryContainer.cellGeometry.push(
+      new CellGeometry(id, cellObj.getDots())
+    );
 
 
+
+    if (window.conditions.automGenerateState) {
+      manager.generateStateUsingCell(cellObj, floor);
+    }
+
+    // property container
+    manager = window.broker.getManager("end-addnewcell", "PropertyManager");
+
+    manager.endAddNewCell({
+      id: id,
+      floor: floor
+    });
+
+    manager.updateProperty({
+      type: "cell",
+      id: id,
+      updateContent: {
+        name: name,
+        description: null
+      }
+    });
+
+    window.storage.canvasContainer.stages[floor].stage.draw();
+
+    // treeview updatere
+    // window.uiContainer.sidebar.treeview.addCell(id, floor);
+
+    return boundingBox;
+  };
+
+  GeometryManager.prototype.addCellBoundaryFromGeojson = function(
+    coordinates,
+    properties,
+    floor
+  ) {
+    var id = properties.id;
+    var name = properties.name;
+
+    /**
+     * need to develop
+     */
+  };
 
   return GeometryManager;
 });

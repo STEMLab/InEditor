@@ -22,11 +22,6 @@ define([
     /**
     * @memberof CellBoundary
     */
-    this.name = id;
-
-    /**
-    * @memberof CellBoundary
-    */
     this.corners = new Konva.Group({
       x: 0,
       y: 0
@@ -192,6 +187,29 @@ define([
   }
 
   /**
+  * @memberof Transition
+  */
+  CellBoundary.prototype.insertDot = function(index, dot){
+
+    this.dots.splice(index, 0, dot);
+    dot.participateObj(this.id, 'cellBoundary');
+    this.addObjectFromDots();
+
+  }
+
+  /**
+   * @memberof CellBoundary
+   */
+  CellBoundary.prototype.replaceDot = function(dot, index) {
+    this.dots[index].leaveObj(this.id);
+    this.dots.splice(index, 1);
+    this.dots.splice(index, 0, dot);
+    dot.participateObj(this.id, 'cellBoundary');
+    this.addObjectFromDots();
+  };
+
+
+  /**
   * @memberof CellBoundary
   */
   CellBoundary.prototype.insertDotIntoLine = function(line, point){
@@ -278,6 +296,16 @@ define([
 
     return false;
 
+  }
+
+  // now this only check line case
+  CellBoundary.prototype.isPartOf = function(point1, point2){
+    for(var i = 0; i < this.dots.length - 1; i++){
+      if((this.dots[i] == point1 && this.dots[i+1] == point2) ||
+         (this.dots[i] == point2 && this.dots[i+1] == point1))
+         return true;
+    }
+    return false;
   }
 
   return CellBoundary;
