@@ -81,7 +81,8 @@ define([], function() {
     if (this.properties != null &&
         (this.properties.duality != null || window.conditions.exportConditions[this.type].properties.duality)) {
 
-      this.properties['duality'] = duality;
+      if(duality == null) delete this.properties['duality'];
+      else                this.properties['duality'] = duality;
 
     } else {
 

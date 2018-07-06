@@ -38,7 +38,7 @@ define([],function() {
     /**
     * @memberof TransitionProperty
     */
-    this.duality; // CellSpaceBoundary
+    this.duality = ""; // CellSpaceBoundary
 
     /**
     * @memberof TransitionProperty
@@ -111,7 +111,7 @@ define([],function() {
 
     if(connection == undefined) this.isStair = { tf : false, connection : [] };
     else                        this.isStair = { tf : true, connection : connection };
-    
+
   }
 
   return TransitionProperty;
