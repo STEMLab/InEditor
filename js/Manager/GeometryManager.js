@@ -1170,6 +1170,35 @@ define([
 
           // segmentation cellboundary
           cellBoundaries[boundaryKey].insertCorner(newDot, 1);
+
+          // segmentation cell
+          function getCommonCell(dot1, dot2){
+            var cell_1 = [];
+            var cell_1_keys = Object.keys(dot1.memberOf);
+            for(var i = 0; i < cell_1_keys.length; i++){
+              if(dot1.memberOf[cell_1_keys[i]] == 'cell')
+                cell_1.push(cell_1_keys[i])
+            }
+
+            var result = [];
+
+            var cell_2_keys = Object.keys(dot2.memberOf);
+            for(var i = 0; i < cell_2_keys.length; i++){
+              if(cell_1.indexOf(cell_2_keys[i]) != -1)
+                result.push(cell_2_keys[i])
+            }
+
+            return result;
+          }
+
+          var cells = getCommonCell(line.dot1, line.dot2);
+          for(var i in cells){
+            var cell = window.storage.canvasContainer.stages[
+              reqObj.floor
+            ].getElementById('cell', cells[i]);
+
+            cell.insertDotIntoLine(line, newDot);
+          }
         }
       }
     } else {
@@ -1496,7 +1525,7 @@ define([
     // update obj
     var floor = window.storage.canvasContainer.stages[reqObj.floor];
     for (var key in tmpObj.memberOf) {
-      floor.getElementById(tmpObj.memberOf[key], key).addObjectFromDots();
+      floor.getElementById(tmpObj.memberOf[key].toLowerCase(), key).addObjectFromDots();
     }
 
     floor.stage.draw();
@@ -1549,7 +1578,7 @@ define([
       } else if(updateException.indexOf(key) == -1){
 
         var dots = stageObj
-          .getElementById(movedDot.memberOf[key], key)
+          .getElementById(movedDot.memberOf[key].toLowerCase(), key)
           .getDots();
         geometryContainer.getElementById(
           movedDot.memberOf[key],
@@ -1607,6 +1636,11 @@ define([
         y: VERY_SMALL_VALUE
       }
     };
+
+    window.conditions.coordinateThreshold = reqObj.condition.significant;
+    window.conditions.realCoordinateThreshold = reqObj.condition.significant;
+    window.conditions.snappingThreshold = reqObj.condition.significant;
+    window.conditions.realSnappingThreshold = reqObj.condition.significant;
 
     var features = reqObj.geojson.features;
     for (var i in features) {
@@ -1743,7 +1777,7 @@ define([
           [boundingBox.max.x, boundingBox.max.y],
           [boundingBox.min.x, boundingBox.min.y],
           allDots[i].point,
-          3.25
+          1
         )
       );
     }
@@ -1771,6 +1805,12 @@ define([
     document
       .getElementById("project-import-modal-loading")
       .classList.add("d-none");
+
+      window.conditions.coordinateThreshold = 10;
+      window.conditions.realCoordinateThreshold = 10;
+      window.conditions.snappingThreshold = 10;
+      window.conditions.realSnappingThreshold = 10;
+
   };
 
   GeometryManager.prototype.addCellFromGeojson = function(
@@ -1785,9 +1825,9 @@ define([
 
     // canvas container
     var dots = [];
-    for (var i in coordinates) {
+    for (var i = 0; i < coordinates.length - 1; i++) {
       var dotFool = window.storage.dotFoolContainer.getDotFool(floor);
-      var dot = dotFool.getDotByPoint(coordinates[i]);
+      var dot = dotFool.getDotByPoint({x:coordinates[i][0], y: coordinates[i][1]});
       if (dot == null) {
         dot = new Dot(coordinates[i][0], coordinates[i][1]);
         dotFool.push(dot);
@@ -1812,11 +1852,14 @@ define([
     // cellObj.addObjectFromDots();
     // obj will added to stage after resizing canvas aspect ratio
     window.storage.canvasContainer.stages[floor].cellLayer.group.add(cellObj);
+    window.storage.canvasContainer.stages[floor].cellLayer.layer.draw();
 
     // geometry container
     window.storage.geometryContainer.cellGeometry.push(
       new CellGeometry(id, cellObj.getDots())
     );
+
+
 
     if (window.conditions.automGenerateState) {
       manager.generateStateUsingCell(cellObj, floor);
