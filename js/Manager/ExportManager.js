@@ -97,16 +97,25 @@ define([
     var min = {
       x: VERY_BIG_VALUE,
       y: VERY_BIG_VALUE,
-      z: VERY_BIG_VALUE,
-      d: VERY_BIG_VALUE
+      z: VERY_BIG_VALUE
     };
     var max = {
       x: VERY_SMALL_VALUE,
       y: VERY_SMALL_VALUE,
-      z: VERY_SMALL_VALUE,
-      d: VERY_SMALL_VALUE
+      z: VERY_SMALL_VALUE
     };
 
+    function getBbox(bbox, point){
+      if (point[0] > bbox.max.x)
+        bbox.max.x = point[0];
+      if (point[1] > bbox.max.y)
+        bbox.max.y = point[1];
+      if (point[0] < bbox.min.x)
+        bbox.min.x = point[0];
+      if (point[1] < bbox.min.y)
+        bbox.min.y = point[1];
+      return bbox;
+    }
 
     var geometries = window.storage.geometryContainer.cellGeometry;
     var properties = window.storage.propertyContainer.cellProperties;
@@ -117,7 +126,7 @@ define([
 
       var tmp = new FeatureFactory4Viewer('CellSpace');
       tmp.setGeometryId("CG-" + geometries[key].id);
-      tmp.pushCoordinatesFromDots(geometries[key].points);
+      tmp.pushCoordinatesFromDots(geometries[key].points, transDot);
       cells[geometries[key].id] = tmp;
 
     }
@@ -131,47 +140,69 @@ define([
       cells[id].setPartialboundedBy(properties[key].partialboundedBy);
       cells[id].setExternalReference(properties[key].externalReference);
       cells[id].setDuality(properties[key].duality);
-
     }
 
     // pixel to real world coordinates
     for (var floorKey in floorProperties) {
 
       var cellkeyInFloor = floorProperties[floorKey].cellKey;
-      var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
-
-      var pixelLLC = [0, 0, 0];
-      var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
-      var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
-      var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
-
-
       for (var cellKey in cellkeyInFloor) {
-
         cells[cellkeyInFloor[cellKey]].setHeight(floorProperties[floorKey].celingHeight);
         var points = cells[cellkeyInFloor[cellKey]].getCoordinates();
+
         if (floorProperties[floorKey].groundHeight * 1 + floorProperties[floorKey].celingHeight * 1 > max.z)
           max.z = floorProperties[floorKey].groundHeight * 1 + floorProperties[floorKey].celingHeight * 1;
         if (floorProperties[floorKey].groundHeight * 1 < min.z)
-          min.z = floorProperties[floorKey].groundHeight * 1;
+          min.z= floorProperties[floorKey].groundHeight * 1;
 
         for (var i = 0; i < points.length; i++) {
-          var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, points[i]);
-          cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'x', trans._data[0]);
-          cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'y', trans._data[1]);
-          cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
-
-          if (trans._data[0] > max.x)
-            max.x = trans._data[0];
-          if (trans._data[1] > max.y)
-            max.y = trans._data[1];
-          if (trans._data[0] < min.x)
-            min.x = trans._data[0];
-          if (trans._data[1] < min.y)
-            min.y = trans._data[1];
+          var bbox = getBbox({min: min, max: max}, points[i]);
+          min = bbox.min;
+          max = bbox.max;
         }
       }
+
+    //
+    //   var cellkeyInFloor = floorProperties[floorKey].cellKey;
+    //   var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
+    //
+    //   var pixelLLC = [0, 0, 0];
+    //   var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
+    //   var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
+    //   var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
+    //
+    //
+    //   for (var cellKey in cellkeyInFloor) {
+    //
+    //     cells[cellkeyInFloor[cellKey]].setHeight(floorProperties[floorKey].celingHeight);
+    //     var points = cells[cellkeyInFloor[cellKey]].getCoordinates();
+    //     if (floorProperties[floorKey].groundHeight * 1 + floorProperties[floorKey].celingHeight * 1 > max.z)
+    //       max.z = floorProperties[floorKey].groundHeight * 1 + floorProperties[floorKey].celingHeight * 1;
+    //     if (floorProperties[floorKey].groundHeight * 1 < min.z)
+    //       min.z = floorProperties[floorKey].groundHeight * 1;
+    //
+    //     for (var i = 0; i < points.length; i++) {
+    //       var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, points[i]);
+    //       cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'x', trans._data[0]);
+    //       cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'y', trans._data[1]);
+    //       cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
+    //
+    //       if (trans._data[0] > max.x)
+    //         max.x = trans._data[0];
+    //       if (trans._data[1] > max.y)
+    //         max.y = trans._data[1];
+    //       if (trans._data[0] < min.x)
+    //         min.x = trans._data[0];
+    //       if (trans._data[1] < min.y)
+    //         min.y = trans._data[1];
+    //     }
+    //   }
     }
+
+    log.info({
+      cells: cells,
+      bbox: [min.x, min.y, min.z, max.x, max.y, max.z]
+    });
 
     return {
       cells: cells,
@@ -214,10 +245,12 @@ define([
 
     // pixel to real world coordinates
     for (var floorKey in floorProperties) {
+      var height = floorProperties[floorKey].doorHeight;
 
       var cellBoundarykeyInFloor = floorProperties[floorKey].cellBoundaryKey;
 
       for (var cellBoundaryKey in cellBoundarykeyInFloor) {
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(height);
 
         // make reverse
         var reverseObj = new FeatureFactory4Viewer('CellSpaceBoundary', conditions);
@@ -226,6 +259,7 @@ define([
         reverseObj.setGeometryId(reverseObj.geometry.properties.id + '-REVERSE');
         reverseObj.setName(reverseObj.attributes.name + '-REVERSE')
         reverseObj.reverseCoor();
+        reverseObj.setHeight(height);
         cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'] = reverseObj;
 
       }
@@ -367,6 +401,7 @@ define([
     var edges = manager.edges4Factory(document.id, spaceLayer);
     var states = manager.stateObj4Factory(document.id, nodes, transDots);
     var transitions = manager.transitionObj4VFactory(document.id, edges, transDots);
+    log.info(cells);
 
     /********************************************************************************************************************
     *************************************** 차 후 수 정 *****************************************************************
@@ -679,28 +714,8 @@ define([
     for (var floorKey in floorProperties) {
 
       var cellkeyInFloor = floorProperties[floorKey].cellKey;
-      // var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
-      //
-      // var pixelLLC = [0, 0, 0];
-      // var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
-      // var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
-      // var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
-
 
       for (var cellKey in cellkeyInFloor) {
-
-        // solid = [];
-        //
-        // cells[cellkeyInFloor[cellKey]].setHeight(floorProperties[floorKey].celingHeight);
-        // var points = cells[cellkeyInFloor[cellKey]].getCoordinates();
-        //
-        // for (var i = 0; i < points.length; i++) {
-        //   var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, points[i]);
-        //   cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'x', trans._data[0]);
-        //   cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'y', trans._data[1]);
-        //   cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
-        //
-        // }
 
         cells[cellkeyInFloor[cellKey]].setWKT(manager.extrudCell(cells[cellkeyInFloor[cellKey]].getCoordinates(), floorProperties[floorKey].celingHeight * 1));
       }
@@ -757,28 +772,9 @@ define([
     for (var floorKey in floorProperties) {
 
       var cellBoundarykeyInFloor = floorProperties[floorKey].cellBoundaryKey;
-      // var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
-      //
-      // var pixelLLC = [0, 0, 0];
-      // var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
-      // var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
-      // var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
-
-
       for (var cellBoundaryKey in cellBoundarykeyInFloor) {
 
         var surface = [];
-
-        // cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(floorProperties[floorKey].doorHeight);
-        // var points = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
-        //
-        // for (var i = 0; i < points.length; i++) {
-        //   var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, points[i]);
-        //   cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'x', trans._data[0]);
-        //   cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'y', trans._data[1]);
-        //   cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
-        //
-        // }
 
         // make reverse
         var reverseObj = new FeatureFactory4Factory('CellSpaceBoundary', conditions);
@@ -843,20 +839,9 @@ define([
     for (var floorKey in floorProperties) {
 
       var stateKeyInFloor = floorProperties[floorKey].stateKey;
-      // var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
-      //
-      // var pixelLLC = [0, 0, 0];
-      // var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
-      // var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
-      // var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
+
 
       for (var stateKey in stateKeyInFloor) {
-
-        // var point = states[stateKeyInFloor[stateKey]].getCoordinate();
-        // var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, point);
-        // states[stateKeyInFloor[stateKey]].updateCoordinates('x', trans._data[0]);
-        // states[stateKeyInFloor[stateKey]].updateCoordinates('y', trans._data[1]);
-        // states[stateKeyInFloor[stateKey]].updateCoordinates('z', floorProperties[floorKey].groundHeight * 1);
 
         states[stateKeyInFloor[stateKey]].setWKT();
 
@@ -909,31 +894,14 @@ define([
       if (conditions.properties.duality) transitions[id].setDuality(properties[key].duality);
       if (conditions.properties.weight) transitions[id].setWeight(properties[key].weight);
       if (conditions.properties.connects) transitions[id].setConnects(properties[key].connects);
-
     }
 
     // pixel to real world coordinates
     for (var floorKey in floorProperties) {
 
       var transitionKeyInFloor = floorProperties[floorKey].transitionKey;
-      // var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
-      //
-      // var pixelLLC = [0, 0, 0];
-      // var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
-      // var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
-      // var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
 
       for (var transitionKey in transitionKeyInFloor) {
-
-        // var points = transitions[transitionKeyInFloor[transitionKey]].getCoordinates();
-        // for (var i = 0; i < points.length; i++) {
-        //
-        //   var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, points[i]);
-        //   transitions[transitionKeyInFloor[transitionKey]].updateCoordinates(i, 'x', trans._data[0]);
-        //   transitions[transitionKeyInFloor[transitionKey]].updateCoordinates(i, 'y', trans._data[1]);
-        //   transitions[transitionKeyInFloor[transitionKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
-        //
-        // }
 
         transitions[transitionKeyInFloor[transitionKey]].setWKT();
 
@@ -955,20 +923,32 @@ define([
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.affineTransformation = function(pixelURC, pixelLLC, worldURC, worldLLC, point) {
+  ExportManager.prototype.affineTransformation = function(pixelHeight, pixeWidth, worldURC, worldLLC, point) {
 
-    var widthScale = worldURC[0] / pixelURC[0];
-    var heightScale = worldURC[1] / pixelURC[1];
-    var widthTrans = worldLLC[0] - pixelLLC[0];
-    var heightTrans = worldLLC[1] - pixelLLC[1];
+    // MIRROR OPERATION
+    var mirrorMatrix = math.matrix([
+      [1, 0, 0],
+      [0, -1, pixelHeight],
+      [0, 0, 1]
+    ]);
+    var pointMatrix = math.matrix([point[0], point[1], 1]);
+    var mirroredPoint = math.multiply(mirrorMatrix, pointMatrix);
+    // log.info(mirrorMatrix, ' x ', pointMatrix, ' = ', mirroredPoint);
+
+    var widthScale = Math.abs((worldURC[0] - worldLLC[0]) / pixeWidth);
+    var heightScale = Math.abs((worldURC[1] - worldLLC[1]) / pixelHeight);
+    var widthTrans = worldLLC[0];
+    var heightTrans = worldURC[1];
     var matrix = math.matrix([
       [widthScale, 0, widthTrans],
       [0, heightScale, heightTrans],
       [0, 0, 1]
     ]);
-    var pointMatrix = math.matrix([point[0], point[1], point[2]]);
 
-    return math.multiply(matrix, pointMatrix);
+    var result = math.multiply(matrix, mirroredPoint);
+    // var result = math.multiply(matrix, pointMatrix);
+
+    return result;
 
   }
 
@@ -981,17 +961,23 @@ define([
     var up = [];
     var result = [];
 
-    var len = down.length;
+    for (var i = 0; i < down.length; i++) {
 
-    for (var i = 0; i < len; i++) {
+      //validation
+      if (i != down.length - 1) {
+        if(down[i].toString() == down[i+1].toString()){
+            down.splice(i+1, 1);
+        }
+      }
+
       var tmp = JSON.parse(JSON.stringify(down[i]));
       tmp[2] += ch;
       up.push(tmp);
     }
 
-    // result.push(down);
+    result.push(down);
 
-    for (var i = 0; i < len - 1; i++) {
+    for (var i = 0; i < down.length - 1; i++) {
 
       var downLeft = JSON.parse(JSON.stringify(down[i]));
       var downRight = JSON.parse(JSON.stringify(down[i + 1]));
@@ -1004,12 +990,12 @@ define([
 
     result.push(up);
 
-    var tmp = [];
-    for (var i = 0; i < down.length; i++) {
-      tmp.push(down[down.length - i - 1]);
-    }
-
-    result.push(tmp);
+    // var tmp = [];
+    // for (var i = 0; i < down.length; i++) {
+    //   tmp.push(down[down.length - i - 1]);
+    // }
+    //
+    // result.push(tmp);
 
     return result;
   }
@@ -1018,6 +1004,10 @@ define([
    * @memberof ExportManager
    */
   ExportManager.prototype.extrudeCellBoundary = function(line, dh) {
+
+    if(line.length > 3){
+      log.info(line);
+    }
 
     var first = line[0];
     var second = line[1];
@@ -1065,27 +1055,25 @@ define([
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
     for (var dotFoolKey in dotFools) {
+      //function(pixelHeight, pixeWidth, worldURC, worldLLC, point)
 
       var stage = window.storage.canvasContainer.stages[floorProperties[dotFoolKey].id].stage;
       var height = floorProperties[dotFoolKey].groundHeight*1;
-      var pixelLLC = [0, 0, 0];
-      var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
+      // var pixelLLC = [0, 0, 0];
+      // var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
       var worldLLC = [floorProperties[dotFoolKey].lowerCorner[0] * 1, floorProperties[dotFoolKey].lowerCorner[1] * 1, 0];
       var worldURC = [floorProperties[dotFoolKey].upperCorner[0] * 1, floorProperties[dotFoolKey].upperCorner[1] * 1, 0];
 
       for (var dotKey in dotFools[dotFoolKey].dots) {
 
         var transDot = copyDot(dotFools[dotFoolKey].dots[dotKey]);
-        var transPoint = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, [transDot.point.x, transDot.point.y, 0]);
+        var transPoint = manager.affineTransformation(stage.getAttr('height'), stage.getAttr('width'), worldURC, worldLLC, [transDot.point.x, transDot.point.y, 0]);
         transDot.setPoint({ x: transPoint._data[0], y: transPoint._data[1], z: height});
         result[transDot.uuid] = transDot;
 
       }
 
     }
-
-    log.info(result);
-
 
     return result;
 
