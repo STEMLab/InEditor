@@ -35,8 +35,9 @@ define([
       'change': this.loadProject
     };
 
-    handlerBinder['project-saveas-file'] = {
-      'change': this.saveProjectToNewPath
+
+    handlerBinder['project-save-as-btn'] = {
+      'click': this.saveProjectToNewPath
     };
 
     handlerBinder['project-saveas'] = {
@@ -51,6 +52,15 @@ define([
       'keydown': this.saveProject
     };
 
+    handlerBinder['setting-conditions'] = {
+      'click': this.clickSettingConditions
+    };
+
+    handlerBinder['setting-conditions-modal-btn'] = {
+      'click': this.updateConditions
+    };
+
+
   }
 
   /**
@@ -58,16 +68,13 @@ define([
    */
   ProjectEventHandler.prototype.clickSaveAsProjectBtn = function(broker, previousMsg) {
 
-    window.document.getElementById("project-saveas-file").addEventListener("change", function(e) {
-      window.eventHandler.callHandler('html', e);
-    });
-
-    $('#project-saveas-file').click();
+    window.document.getElementById("project-save-as-file-name").value = window.conditions.saveName;
+    window.document.getElementById("project-save-as-file-path").value = window.conditions.savePath;
 
     return {
       'result': true,
       'msg': null
-    }
+    };
 
   }
 
@@ -78,8 +85,30 @@ define([
 
     var result = new Result();
 
-    log.info(data.target);
+    var path = window.document.getElementById('project-save-as-file-path').value;
+    var name = window.document.getElementById('project-save-as-file-name').value;
+    log.info('new path:', path, ', new name:', name);
 
+    if (broker.isPublishable('saveproject')) {
+
+      window.conditions.saveName = name;
+      window.conditions.savePath = path;
+
+      // reqObj.floor will be active workspace
+      broker.publish(new Message('saveproject', null));
+
+      result = {
+        'result': true,
+        'msg': 'saveproject'
+      };
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to saveproject.";
+
+    }
+
+    $('#project-save-as-modal').modal('hide');
     return result;
   }
 
@@ -195,11 +224,12 @@ define([
         } : {
           type: 'center',
           data: {
-            x: document.getElementById('project-imoprt-optino-center-x').value,
-            y: document.getElementById('project-imoprt-optino-center-y').value,
-            rotation: document.getElementById('project-imoprt-optino-center-rotation').value
+            x: document.getElementById('project-import-option-center-x').value,
+            y: document.getElementById('project-import-option-center-y').value,
+            rotation: document.getElementById('project-import-option-center-rotation').value,
           }
-        }
+        },
+        significant: document.getElementById('project-import-option-significant-figures').value
       }));
 
       document.getElementById(data.target.id).value = '';
@@ -220,6 +250,36 @@ define([
 
     return result;
 
+  }
+
+  ProjectEventHandler.prototype.clickSettingConditions = function(broker, previousMsg, data) {
+
+    var conditions = window.conditions;
+
+    window.document.getElementById('setting-conditions-pre-cell').value = conditions.pre_cell;
+    window.document.getElementById('setting-conditions-pre-cellBoundary').value = conditions.pre_cellBoundary;
+    window.document.getElementById('setting-conditions-pre-state').value = conditions.pre_state;
+    window.document.getElementById('setting-conditions-pre-transition').value = conditions.pre_transition;
+
+    window.document.getElementById('setting-conditions-aspect-ratio').value = conditions.aspectRatio.x + ' : ' + conditions.aspectRatio.y;
+    window.document.getElementById('setting-conditions-scale-factor').value = conditions.scaleFactor;
+    window.document.getElementById('setting-conditions-scale-max').value = conditions.scaleMax;
+
+    return {
+      'result': true,
+      'msg': null
+    }
+
+  };
+
+  ProjectEventHandler.prototype.updateConditions = function(broker, previousMsg, data){
+
+    broker.getManager('setpropertyview', 'UIManager').showSnackBar({msg: 'Sorry, this function is not fully developed yet.'});
+
+    return {
+      'result': true,
+      'msg': null
+    }
   }
 
 

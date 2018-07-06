@@ -69,13 +69,19 @@ define([
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status == 200) {
-        log.info(">>>> succeed to save project");
+
+        window.broker.getManager('setpropertyview', 'UIManager').showSnackBar({msg: 'Project saved successfully ('+window.conditions.savePath+'/'+window.conditions.saveName+'.bson)'});
+
+      } else if( xhr.status == 500){
+
+        window.broker.getManager('setpropertyview', 'UIManager').showSnackBar({msg: xhr.statusText + '! '+ xhr.responseText});
+
       }
     }
 
     xhr.open("POST", "http://127.0.0.1:8080/save-project", true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify(doc));
+    xhr.send(JSON.stringify({doc : doc, path : window.conditions.savePath+'/'+window.conditions.saveName+'.bson'}));
 
   }
 
@@ -166,7 +172,7 @@ define([
          log.warn('there is no target floor')
          return -1;
        } else {
-         window.broker.getManager('addnewfloor', 'GeometryManager').addObjectFromGeojson({'geojson': geojson, 'floor': reqObj.importOn, coor: reqObj.coordinate});
+         window.broker.getManager('addnewfloor', 'GeometryManager').addObjectFromGeojson({'geojson': geojson, 'floor': reqObj.importOn, coor: reqObj.coordinate, condition:{ significant: reqObj.significant}});
        }
 
      }
