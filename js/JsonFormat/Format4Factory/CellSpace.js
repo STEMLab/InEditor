@@ -6,9 +6,9 @@ define(["./Feature"], function(Feature) {
   'user strict';
 
   /**
-  * @class CellSpace
-  * @augments Feature
-  */
+   * @class Fromat4Factory.CellSpace
+   * @augments Feature
+   */
   function CellSpace(conditions) {
 
     Feature.apply(this, arguments);
@@ -20,15 +20,15 @@ define(["./Feature"], function(Feature) {
       'properties': {
         'id': "",
         'height': "",
-        'extrude' : "",
-        'type' : 'geojson'
+        'extrude': "",
+        'type': 'geojson'
       }
     };
 
     this.properties = {};
 
     if (conditions.geometry.extrude) this.geometry.properties['extrude'] = "true";
-    else tthis.geometry.properties['extrude'] = "false";
+    else this.geometry.properties['extrude'] = "false";
 
     if (conditions.properties.name) this.properties['name'] = "";
     if (conditions.properties.description) this.properties['description'] = "";
@@ -44,15 +44,33 @@ define(["./Feature"], function(Feature) {
 
   CellSpace.prototype = Object.create(Feature.prototype);
 
-  CellSpace.prototype.setWKT = function(coor){
+  /**
+   * @memberof Fromat4Factory.CellSpace
+   * @param Array coor array of coordinates
+   * @param String type 3D(Solid) or 2D(Surface)
+   */
+  CellSpace.prototype.setWKT = function(coor, type) {
 
-    var wkt = "SOLID((";
+    if (type == '2D') this.setWKTSurface(coor);
+    else if (type == '3D') this.setWKTSolid(coor);
+    else log.error('error! wrong type ' + type + ' inserted :: Format4Factory.CellSpace.setWKT');
 
-    for (var i = 0 ; i < coor.length; i++){
+  }
+
+  /**
+   * @memberof Fromat4Factory.CellSpace
+   * @param Array coor array of coordinates
+   */
+  CellSpace.prototype.setWKTSolid = function(coor) {
+
+
+    var wkt = "SOLID ((";
+
+    for (var i = 0; i < coor.length; i++) {
 
       wkt += "((";
 
-      for(var j = 0; j < coor[i].length; j++){
+      for (var j = 0; j < coor[i].length; j++) {
 
         wkt += coor[i][j][0];
         wkt += " ";
@@ -60,21 +78,20 @@ define(["./Feature"], function(Feature) {
         wkt += " ";
         wkt += coor[i][j][2];
 
-        if(j != coor[i].length - 1) wkt += ",";
+        if (j != coor[i].length - 1) wkt += ",";
 
       }
 
 
 
-      if( i != coor.length - 1 ) wkt += ")),";
+      if (i != coor.length - 1) wkt += ")),";
       else wkt += "))";
-
 
     }
 
-   wkt += "))";
+    wkt += "))";
 
-   this.geometry.type = 'Solid';
+    this.geometry.type = 'Solid';
     this.geometry.coordinates = wkt;
     this.geometry.properties.type = "wkt";
     this.geometry.properties.extrude = 'false';
@@ -82,7 +99,35 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpace
+   * @memberof Fromat4Factory.CellSpace
+   * @param Array coor array of coordinates
+   */
+  CellSpace.prototype.setWKTSurface = function(coor) {
+
+    var wkt = "POLYGON ((";
+
+    for (var i = 0; i < coor.length; i++) {
+      wkt += coor[i][0];
+      wkt += " ";
+      wkt += coor[i][1];
+      wkt += " ";
+      wkt += coor[i][2];
+
+      if (i != coor.length - 1) wkt += ",";
+    }
+
+    wkt += "))";
+
+    this.geometry.type = 'Polygon';
+    this.geometry.coordinates = wkt;
+    this.geometry.properties.type = "wkt";
+    this.geometry.properties.extrude = 'false';
+
+  }
+
+
+  /**
+   * @memberof Fromat4Factory.CellSpace
    *
    */
   CellSpace.prototype.setPartialboundedBy = function(partialboundedBy) {
@@ -112,7 +157,7 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpace
+   * @memberof Fromat4Factory.CellSpace
    *
    */
   CellSpace.prototype.setExternalReference = function(externalReference) {
@@ -142,11 +187,11 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpace
+   * @memberof Fromat4Factory.CellSpace
    */
   CellSpace.prototype.pushCoordinatesFromDots = function(dots, transDots) {
 
-    if( transDots == undefined ) {
+    if (transDots == undefined) {
 
       var len = dots.length;
 
@@ -158,8 +203,7 @@ define(["./Feature"], function(Feature) {
 
       this.geometry.coordinates.push([dots[0].point.x, dots[0].point.y, 0]);
 
-    }
-    else {
+    } else {
 
       var len = dots.length;
 
@@ -180,9 +224,9 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpace
+   * @memberof Fromat4Factory.CellSpace
    */
-  CellSpace.prototype.updateCoordinates = function(index, position, value){
+  CellSpace.prototype.updateCoordinates = function(index, position, value) {
 
     if (position == 'x') {
 
@@ -201,7 +245,7 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpace
+   * @memberof Fromat4Factory.CellSpace
    * @return coordinates array
    */
   CellSpace.prototype.getCoordinates = function() {
@@ -211,19 +255,19 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpace
+   * @memberof Fromat4Factory.CellSpace
    * @return coordinates array
    */
   CellSpace.prototype.getCoordinate = function(i) {
 
-    if(this.geometry.coordinates.length > i){
+    if (this.geometry.coordinates.length > i) {
       return this.geometry.coordinates[i];
     }
 
   }
 
   /**
-   * @memberof CellSpace
+   * @memberof Fromat4Factory.CellSpace
    */
   CellSpace.prototype.setHeight = function(height) {
 

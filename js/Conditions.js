@@ -184,7 +184,8 @@ define([], function() {
           'connects': true
         }
       },
-      'MultiLayer': false
+      'MultiLayer': false,
+      'Geometry': '3D'
     };
 
     /**

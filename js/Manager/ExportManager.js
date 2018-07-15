@@ -401,11 +401,7 @@ define([
     var edges = manager.edges4Factory(document.id, spaceLayer);
     var states = manager.stateObj4Factory(document.id, nodes, transDots);
     var transitions = manager.transitionObj4VFactory(document.id, edges, transDots);
-    log.info(cells);
 
-    /********************************************************************************************************************
-    *************************************** 차 후 수 정 *****************************************************************
-    *********************************************************************************************************************/
     var address = {
       'post-document': baseURL + '/documents/' + document.id,
       'post-indoorfeatures': baseURL + '/documents/' + document.id + '/indoorfeatures/' + indoorfeatures.id,
@@ -478,6 +474,8 @@ define([
       }
     }
 
+    // log.info("POST ", address, 'data : ', data);
+
     xhr.open("POST", address, false);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(data);
@@ -515,6 +513,7 @@ define([
       }
     };
 
+    log.info("GET ", address);
     xhr.open("GET", address, false);
     xhr.send();
   }
@@ -594,6 +593,11 @@ define([
     // MultiLayer
     if ($('#factory-multilayer-one').prop("checked")) exportConditions.MultiLayer = false;
     if ($('#factory-multilayer-multi').prop("checked")) exportConditions.MultiLayer = true;
+
+
+    // geometry type
+    if($('#factory-geometry-type-2D').prop("checked")) exportConditions.Geometry = '2D';
+    if($('#factory-geometry-type-3D').prop("checked")) exportConditions.Geometry = '3D';
 
   }
 
@@ -682,6 +686,7 @@ define([
     var properties = window.storage.propertyContainer.cellProperties;
     var floorProperties = window.storage.propertyContainer.floorProperties;
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+    var geoType = window.conditions.exportConditions.Geometry;
 
     var solid = [];
 
@@ -716,8 +721,9 @@ define([
       var cellkeyInFloor = floorProperties[floorKey].cellKey;
 
       for (var cellKey in cellkeyInFloor) {
-
-        cells[cellkeyInFloor[cellKey]].setWKT(manager.extrudCell(cells[cellkeyInFloor[cellKey]].getCoordinates(), floorProperties[floorKey].celingHeight * 1));
+        var coor = cells[cellkeyInFloor[cellKey]].getCoordinates();
+        if(geoType == '3D') cells[cellkeyInFloor[cellKey]].setWKT(manager.extrudCell(coor, floorProperties[floorKey].celingHeight * 1), '3D');
+        else if(geoType == '2D') cells[cellkeyInFloor[cellKey]].setWKT(coor, '2D');
       }
     }
 
@@ -742,7 +748,7 @@ define([
     var properties = window.storage.propertyContainer.cellBoundaryProperties;
     var floorProperties = window.storage.propertyContainer.floorProperties;
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
-
+    var geoType = window.conditions.exportConditions.Geometry;
 
     // copy geometry coordinates
     for (var key in geometries) {
@@ -785,8 +791,16 @@ define([
         reverseObj.reverseCoor();
         cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'] = reverseObj;
 
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setWKT(manager.extrudeCellBoundary(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates(), floorProperties[floorKey].doorHeight * 1));
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setWKT(manager.extrudeCellBoundary(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].getCoordinates(), floorProperties[floorKey].doorHeight * 1));
+        var coor = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
+        var coor_reverse = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].getCoordinates();
+        if(geoType == '3D') {
+          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setWKT(manager.extrudeCellBoundary(coor, floorProperties[floorKey].doorHeight * 1), '3D');
+          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setWKT(manager.extrudeCellBoundary(coor_reverse, floorProperties[floorKey].doorHeight * 1), '3D');
+        }
+        else if(geoType == '2D') {
+          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setWKT(coor, '2D');
+          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setWKT(coor_reverse, '2D');
+        }
 
       }
     }
