@@ -6,6 +6,7 @@ var BSON = require("bson");
 var cors = require('cors');
 var earcut = require('earcut');
 var xmlBeautify = require('xml-beautifier');
+var opn = require('opn');
 var app = express();
 
 
@@ -20,6 +21,7 @@ app.use(bodyParser.text({limit: '1gb'}));
 var server = app.listen(8080, function() {
 
   console.log('IndoorGML-Editor App listening on port 8080...');
+  opn('http://127.0.0.1:8080/', {app: 'chrome'});
 
 });
 
