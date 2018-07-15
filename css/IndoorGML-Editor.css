@@ -318,3 +318,11 @@ a.disabled {
   /* And disable the pointer events */
   pointer-events: none;
 }
+
+.my-radio input {
+  margin-left: -1.2rem;
+}
+
+.my-radio label {
+  padding-left: 1.2rem;
+}
