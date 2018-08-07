@@ -184,7 +184,8 @@ define([], function() {
           'connects': true
         }
       },
-      'MultiLayer': false
+      'MultiLayer': false,
+      'Geometry': '3D'
     };
 
     /**
@@ -236,7 +237,12 @@ define([], function() {
     function s4() {
       return ((1 + Math.random()) * 0x10000 | 0).toString(16).substring(1);
     }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    function replaceFirstCharToChar(val){
+      var possible = 'abcdefghijklmnopqrstuvwxyz';
+      var first = possible.charAt(Math.floor(Math.random() * possible.length));
+      return first + val.slice(1, 4);
+    }
+    return replaceFirstCharToChar(s4()) + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
   }
 
   /**

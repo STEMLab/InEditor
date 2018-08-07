@@ -6,7 +6,7 @@ define(["./Feature"], function(Feature) {
   'user strict';
 
   /**
-   * @class CellSpaceBoundary
+   * @class Fromat4Factory.CellSpaceBoundary
    * @augments Feature
    */
   function CellSpaceBoundary(conditions) {
@@ -42,7 +42,24 @@ define(["./Feature"], function(Feature) {
 
   CellSpaceBoundary.prototype = Object.create(Feature.prototype);
 
-  CellSpaceBoundary.prototype.setWKT = function(coor) {
+  /**
+   * @memberof Fromat4Factory.CellSpaceBoundary
+   * @param Array coor array of coordinates
+   * @param String type 3D(Surface) or 2D(LineString)
+   */
+  CellSpaceBoundary.prototype.setWKT = function(coor, type) {
+
+    if (type == '2D') this.setWKTLineString(coor);
+    else if (type == '3D') this.setWKTSurface(coor);
+    else log.error('error! wrong type ' + type + ' inserted :: Format4Factory.CellSpaceBoundary.setWKT');
+
+  }
+
+  /**
+   * @memberof Fromat4Factory.CellSpaceBoundary
+   * @param Array coor array of coordinates
+   */
+  CellSpaceBoundary.prototype.setWKTSurface = function(coor) {
 
     var wkt = "POLYGON ((";
 
@@ -68,7 +85,36 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpaceBoundary
+   * @memberof Fromat4Factory.CellSpaceBoundary
+   * @param Array coor array of coordinates
+   */
+   CellSpaceBoundary.prototype.setWKTLineString = function(coor) {
+
+     var wkt = "LINESTRING (";
+
+     for (var i = 0; i < coor.length; i++) {
+
+       wkt += coor[i][0];
+       wkt += " ";
+       wkt += coor[i][1];
+       wkt += " ";
+       wkt += coor[i][2];
+
+       if (i != coor.length - 1) wkt += ", ";
+
+     }
+
+     wkt += ")";
+
+     this.geometry.type = 'LineString';
+     this.geometry.coordinates = wkt;
+     this.geometry.properties.type = "wkt";
+     this.geometry.properties.extrude = 'false';
+
+   }
+
+  /**
+   * @memberof Fromat4Factory.CellSpaceBoundary
    *
    */
   CellSpaceBoundary.prototype.setExternalReference = function(externalReference) {
@@ -98,7 +144,7 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpaceBoundary
+   * @memberof Fromat4Factory.CellSpaceBoundary
    */
   CellSpaceBoundary.prototype.pushCoordinatesFromDots = function(dots, transDots) {
 
@@ -129,7 +175,7 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpaceBoundary
+   * @memberof Fromat4Factory.CellSpaceBoundary
    */
   CellSpaceBoundary.prototype.updateCoordinates = function(index, position, value) {
 
@@ -150,7 +196,7 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpaceBoundary
+   * @memberof Fromat4Factory.CellSpaceBoundary
    */
   CellSpaceBoundary.prototype.setHeight = function(height) {
 
@@ -159,7 +205,7 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpaceBoundary
+   * @memberof Fromat4Factory.CellSpaceBoundary
    * @return coordinates array
    */
   CellSpaceBoundary.prototype.getCoordinates = function() {
@@ -169,7 +215,7 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpaceBoundary
+   * @memberof Fromat4Factory.CellSpaceBoundary
    */
   CellSpaceBoundary.prototype.reverseCoor = function() {
 
@@ -184,7 +230,7 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpaceBoundary
+   * @memberof Fromat4Factory.CellSpaceBoundary
    */
   CellSpaceBoundary.prototype.copy = function(obj) {
 
@@ -202,7 +248,7 @@ define(["./Feature"], function(Feature) {
   }
 
   /**
-   * @memberof CellSpaceBoundary
+   * @memberof Fromat4Factory.CellSpaceBoundary
    */
   CellSpaceBoundary.prototype.copyCoordinates = function(coordinates) {
 

@@ -271,7 +271,7 @@ define([
       result.children.push(floorObj);
     }
 
-    console.log(JSON.stringify(result));
+    // console.log(JSON.stringify(result));
 
     return result;
   }
