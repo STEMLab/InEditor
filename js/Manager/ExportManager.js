@@ -403,6 +403,7 @@ define([
     var transitions = manager.transitionObj4VFactory(document.id, edges, transDots);
 
     var address = {
+      'delete-document': baseURL+'/documents/' + document.id,
       'post-document': baseURL + '/documents/' + document.id,
       'post-indoorfeatures': baseURL + '/documents/' + document.id + '/indoorfeatures/' + indoorfeatures.id,
       'post-primalspacefeatures': baseURL + '/documents/' + document.id + '/primalspacefeatures/' + primalspacefeatures.id,
@@ -417,6 +418,8 @@ define([
       'post-transition': baseURL + '/documents/' + document.id + '/transition/',
       'get-document': baseURL + '/documents/' + document.id
     };
+
+    manager.deleteJson(address['delete-document']);
 
     manager.postJson(address['post-document'], JSON.stringify(document));
 
@@ -474,11 +477,31 @@ define([
       }
     }
 
-    // log.info("POST ", address, 'data : ', data);
+    log.info("POST ", address, 'data : ', data);
 
     xhr.open("POST", address, false);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(data);
+  }
+
+  /**
+   * @memberof ExportManager
+   */
+  ExportManager.prototype.deleteJson = function(address) {
+    // log.info('POST : ' + address, data);
+    var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function() {
+      if (xhr.status == 200) {
+        log.error('error');
+
+      }
+    }
+
+    log.info("DELETE ", address);
+
+    xhr.open("DELETE", address, false);
+    xhr.send(null);
   }
 
   /**
