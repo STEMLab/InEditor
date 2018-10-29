@@ -42,6 +42,9 @@ define([
     this.addCallbackFun('start-addnewcell', this.startAddNewCell);
     this.addCallbackFun('end-addnewcell', this.endAddNewCell, this.endAddNewCell_makeHistoryObj, this.removeObj);
 
+    this.addCallbackFun('start-addnewhole', this.startAddNewHole);
+    this.addCallbackFun('end-addnewhole', this.endAddNewHole, this.endAddNewCell_makeHistoryObj, this.removeObj);
+
     this.addCallbackFun('updaterefdata', this.updateRefProperty);
 
     this.addCallbackFun('activateworkspace', this.activateWorkspace);
@@ -53,15 +56,38 @@ define([
     this.addCallbackFun('start-addnewcellboundary', this.startAddNewCellBoundary);
     this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.endAddNewCellBoundary_makeHistoryObj, this.removeObj);
 
+    this.addCallbackFun('start-addnewslantdown', this.startAddNewSlantDown);
+    this.addCallbackFun('end-addnewslantdown', this.endAddNewSlantDown, this.endAddNewCell_makeHistoryObj, this.removeObj);
+
+    this.addCallbackFun('start-addnewslantupdown', this.startAddNewSlantUpDown);
+    this.addCallbackFun('end-addnewslantupdown', this.endAddNewSlantUpDown, this.endAddNewCell_makeHistoryObj, this.removeObj);
+
     this.addCallbackFun('showfactoryexportmodal', this.showFactoryExportModal);
 
     this.addCallbackFun('movetooltip', this.moveTooltip);
+
+    this.addCallbackFun('start-addnewstate', this.startAddNewState, function() {}, function() {});
+    this.addCallbackFun('end-addnewstate', this.endAddNewState, function() {}, function() {});
 
     this.addCallbackFun('start-addnewtransition', this.startAddNewTransition);
     this.addCallbackFun('end-addnewtransition', this.endAddNewTransition, this.endAddNewTransition_makeHistoryObj, this.removeObj);
 
     this.addCallbackFun('start-addnewstair', this.startAddNewStair, function() {}, function() {});
     this.addCallbackFun('end-addnewstair', this.endAddNewStair, function() {}, function() {});
+
+    this.addCallbackFun('start-addnewinterlayerconnetction', this.startAddNewInterConnetction, function() {}, function() {});
+    this.addCallbackFun('end-addnewinterlayerconnetction', this.endAddNewInterConnetction, function() {}, function() {});
+
+    this.addCallbackFun('deletecell', this.removeObj);
+    this.addCallbackFun('deletecellboundary', this.removeObj);
+    this.addCallbackFun('deletestate', this.removeObj);
+    this.addCallbackFun('deletetransition', this.removeObj);
+
+    this.addCallbackFun('makecellselectmenu', this.makeCellSelectMenu);
+
+    this.addCallbackFun('copyfloor', this.copyFloor);
+
+    this.addCallbackFun('updatedesclist', this.updateDescList);
 
   }
 
@@ -202,6 +228,7 @@ define([
 
         // add the shape to the layer
         layer.add(floorplan);
+        floorplan.moveToBottom();
         layer.draw();
       };
 
@@ -385,6 +412,95 @@ define([
     // bind stage click event
     window.eventHandler.canvasObjectEventBind('stage', newStage.stage);
 
+    // bind right click event
+    var menu = new BootstrapMenu('#' + newFloorProperty.id, {
+      fetchElementData: function() {
+        var selectedObj = window.broker.getManager('addnewhole', 'GeometryManager').isObjectSelected(newFloorProperty.id);
+        // var stateId = window.broker.getManager('addnewhole', 'GeometryManager').isStateSelected(newFloorProperty.id);
+        // var cellId = window.broker.getManager('addnewhole', 'GeometryManager').isCellSelected(newFloorProperty.id);
+
+        return {
+          type: selectedObj.type,
+          id: selectedObj.result,
+          floor:newFloorProperty.id
+        }
+      },
+      actions: function(data){
+        return makeMenus({ type: 'floor', id: [newFloorProperty.id], floor: newFloorProperty.id });
+      }()
+    });
+
+    function makeMenus(data){
+      var menus = [];
+      for(var i = 0 ; i < data.id.length; i++){
+        menus = menus.concat(makeOneMenu({type: data.type, id: data.id[i], floor: data.floor}));
+      }
+      return menus;
+    }
+
+    function makeOneMenu(data){
+      return [
+        {
+          name: function(data) {
+            return '<b>' + data.id + '</b>'
+          }
+        },
+        {
+           name: 'Edit Properties',
+           iconClass: 'fa-pencil',
+           onClick: function(data) {
+             window.uiContainer.sidebar.property.setPropertyTab(data.type, data.id, window.storage)
+           }
+       },
+       {
+         name: 'Delete',
+         iconClass: 'fa-trash-o',
+         onClick: function(data) {
+           var msg;
+           switch (data.type) {
+             case 'floor':
+               if(window.broker.isPublishable('deletefloor'))
+                 window.broker.publish({req:'deletefloor', reqObj:{floor: data.floor}});
+               break;
+             case 'cell':
+               if(window.broker.isPublishable('deletecell'))
+                 window.broker.publish({req:'deletecell', reqObj:{floor: data.floor, id: data.id}});
+               break;
+             case 'cellboundary':
+               if(window.broker.isPublishable('deletecellboundary'))
+                 window.broker.publish({req:'deletecellboundary', reqObj:{floor: data.floor, id: data.id}});
+               break;
+             case 'transition':
+               if(window.broker.isPublishable('deletetransition'))
+                 window.broker.publish({req:'deletetransition', reqObj:{floor: data.floor, id: data.id}});
+               break;
+             case 'state':
+               if(window.broker.isPublishable('deletestate'))
+                 window.broker.publish({req:'deletestate', reqObj:{floor: data.floor, id: data.id[0]}});
+               break;
+             default:
+           }
+         }
+       },
+       {
+          name: 'Rotate slant',
+          iconClass: 'fa-repeat',
+          isShown: function(data) {
+            if(data.type == 'cell'){
+              var cellGeo = window.storage.geometryContainer.getElementById('cell', data.id[0]);
+              if (cellGeo.slant != null) return true;
+              else return false;
+            }
+            else return false;
+          },
+          onClick: function(data) {
+            if(window.broker.isPublishable('rotateslant'))
+              window.broker.publish({req:'rotateslant', reqObj:{floor: data.floor, id: data.id[0]}});
+          }
+      }
+     ];
+    }
+
     // refresh sidebar > tree-view
     window.uiContainer.sidebar.treeview.addFloor(newFloorProperty);
 
@@ -393,6 +509,13 @@ define([
 
   }
 
+  /**
+   * @memberof UIManager
+   * @param {Message.reqObj} reqObj floor, cells
+   */
+  UIManager.prototype.makeCellSelectMenu = function(reqObj) {
+
+  }
 
   /**
    * @memberof UIManager
@@ -514,6 +637,41 @@ define([
     }
   }
 
+
+    /**
+     * @memberof UIManager
+     */
+    UIManager.prototype.startAddNewHole = function() {
+
+      // change cell btn color
+      document.getElementById('hole-btn').src = "../../assets/icon/hole_a.png";
+
+      var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+      manager.setTooltipText({
+        text: 'select cell'
+      });
+
+    }
+
+    /**
+     * @memberof UIManager
+     * @param {Object} reqObj { id, floor, isEmpty }
+     */
+    UIManager.prototype.endAddNewHole = function(reqObj) {
+
+      // change transition btn color
+      document.getElementById('hole-btn').src = "../../assets/icon/hole_d.png";
+
+      if (reqObj.isEmpty != null) return;
+
+      // delete tooltip
+      var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+      manager.setTooltipText({
+        text: ''
+      });
+
+    }
+
   /**
    * @memberof UIManager
    */
@@ -528,6 +686,7 @@ define([
     });
 
   }
+
 
   /**
    * @memberof UIManager
@@ -551,7 +710,41 @@ define([
     manager.setTooltipText({
       text: ''
     });
-    ``
+
+  }
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.startAddNewState = function() {
+
+    // change state btn color
+    document.getElementById('state-btn').src = "../../assets/icon/state_a.png";
+
+    // var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    // manager.setTooltipText({
+    //   text: 'select cell'
+    // });
+
+  }
+
+
+  /**
+   * @memberof UIManager
+   * @param {Object} reqObj { id, floor, isEmpty }
+   */
+  UIManager.prototype.endAddNewState = function(reqObj) {
+
+    // change state btn color
+    document.getElementById('state-btn').src = "../../assets/icon/state_d.png";
+
+    if (reqObj.isEmpty != null) return;
+
+    // set sidebar > propertyContainer
+    window.uiContainer.sidebar.property.setPropertyTab('state', reqObj.id, window.storage);
+
+    // refresh tree view
+    window.uiContainer.sidebar.treeview.addState(reqObj.id, reqObj.floor);
 
   }
 
@@ -639,6 +832,229 @@ define([
 
   }
 
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.startAddNewSlantDown = function(reqObj) {
+
+    // change floor btn color
+    document.getElementById('slant-down-btn').src = "../../assets/icon/slant_down_a.png";
+  }
+
+
+  /**
+   * @param {Message.reqObj} reqObj id : new obj id<br>floor : id of the floor where the new object will be created
+   * @memberof UIManager
+   */
+  UIManager.prototype.endAddNewSlantDown = function(reqObj) {
+
+    // change cell btn color
+    document.getElementById('slant-down-btn').src = "../../assets/icon/slant_down_d.png";
+
+    if (reqObj.isEmpty != null) {
+      return;
+    }
+
+    // set sidebar > property
+    window.uiContainer.sidebar.property.setPropertyTab('cell', reqObj.id, window.storage);
+
+    // refresh tree view
+    window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
+
+    if (window.conditions.automGenerateState)
+      window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM), reqObj.floor);
+
+    // set tooltip
+    window.broker.getManager('start-addnewslantdown', 'UIManager').setTooltipText({
+      floor: reqObj.floor,
+      text: ''
+    });
+
+  }
+
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.startAddNewSlantUpDown = function(reqObj) {
+
+    // change floor btn color
+    document.getElementById('slant-up-down-btn').src = "../../assets/icon/slant_up_down_a.png";
+  }
+
+
+  /**
+   * @param {Message.reqObj} reqObj id : new obj id<br>floor : id of the floor where the new object will be created
+   * @memberof UIManager
+   */
+  UIManager.prototype.endAddNewSlantUpDown = function(reqObj) {
+
+    // change cell btn color
+    document.getElementById('slant-up-down-btn').src = "../../assets/icon/slant_up_down_d.png";
+
+    if (reqObj.isEmpty != null) {
+      return;
+    }
+
+    // set sidebar > property
+    window.uiContainer.sidebar.property.setPropertyTab('cell', reqObj.id, window.storage);
+    window.uiContainer.sidebar.property.setPropertyTab('cell', window.conditions.pre_cell + (window.conditions.LAST_CELL_ID_NUM), window.storage);
+
+    // refresh tree view
+    window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
+    window.uiContainer.sidebar.treeview.addCell(window.conditions.pre_cell + (window.conditions.LAST_CELL_ID_NUM), reqObj.floor);
+
+    if (window.conditions.automGenerateState){
+      window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM-1), reqObj.floor);
+      window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM), reqObj.floor);
+    }
+
+    // set tooltip
+    window.broker.getManager('start-addnewslantdown', 'UIManager').setTooltipText({
+      floor: reqObj.floor,
+      text: ''
+    });
+
+  }
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.callContextMenu = function(reqObj) {}
+
+  /**
+   * @memberof UIManager
+   * @param {Message.reqObj} reqObj floor, targetFloor
+   */
+  UIManager.prototype.copyFloor = function(reqObj) {
+
+    var copyCanvas = window.storage.canvasContainer.stages[reqObj.targetFloor];
+
+    // set size
+    var stage = window.storage.canvasContainer.stages[reqObj.floor].stage;
+    var width = copyCanvas.stage.width();
+    var height = copyCanvas.stage.height()
+
+    stage.setWidth(width);
+    stage.setHeight(height);
+
+
+
+    var backgroundLayer = window.storage.canvasContainer.stages[reqObj.floor].backgroundLayer;
+    backgroundLayer.layer.destroyChildren();
+
+    // copy floor plan
+    if(copyCanvas.backgroundLayer.floorplanDataURL.length == 0) backgroundLayer.setGrid(width, height);
+    else {
+      var floorplan = copyCanvas.backgroundLayer.floorplanDataURL[0];
+      backgroundLayer.saveFloorplanDataURL(floorplan);
+
+      var childrens = copyCanvas.backgroundLayer.layer.children;
+      var copyIMG = null;
+      for(var child of childrens){
+        if(child.className == 'Image'){
+          copyIMG = child.clone();
+        }
+
+        if(copyIMG != null) break;
+      }
+      backgroundLayer.layer.add(copyIMG);
+    }
+
+    // copy obj
+    var copyCG = copyCanvas.cellLayer.group.cellGroup.clone();
+    var copyCHG = copyCanvas.cellLayer.group.holeGroup.clone();
+    var copyCBG = copyCanvas.cellBoundaryLayer.group.cellBoundaryGroup.clone();
+    backgroundLayer.layer.add(copyCG);
+    backgroundLayer.layer.add(copyCHG);
+    backgroundLayer.layer.add(copyCBG);
+
+    backgroundLayer.layer.draw();
+
+  }
+
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.startAddNewInterConnetction = function(reqObj) {
+
+    document.getElementById('interlayerconnection-btn').src = "../../assets/icon/inter_a.png";
+
+    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    manager.setTooltipText({
+      text: ''
+    });
+
+  }
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.endAddNewInterConnetction = function(reqObj) {
+
+    // change cellboundary_btw color
+    document.getElementById('interlayerconnection-btn').src = "../../assets/icon/inter_d.png";
+
+    // set sidebar > propertyContainer
+    window.uiContainer.sidebar.property.setPropertyTab('interlayerConnection', reqObj.id, window.storage);
+
+    // refresh tree view
+    window.uiContainer.sidebar.treeview.addInterLayerConnection(reqObj.id);
+
+  }
+
+  UIManager.prototype.updateDescList = function(){
+    var container = document.getElementById('setting-desc-modal-list-container');
+    $("#setting-desc-modal-list-container").empty();
+
+    var manager = window.broker.getManager(
+      "deletedesclist",
+      "PropertyManager"
+    );
+
+    function addClass(element, classArr) {
+      for (var c of classArr) {
+        element.classList.add(c);
+      }
+    }
+
+    function item(data) {
+      var item = document.createElement("div");
+      item.classList.add("item");
+      item.style.padding = '0.5rem';
+
+      var iconContiner = document.createElement("div");
+      addClass(iconContiner, ["col-2", "right", "floated", "content"]);
+
+      var icon = document.createElement("i");
+      icon.id = data;
+
+      addClass(icon, ["right", "trash", "icon"]);
+
+      var name = document.createElement("div");
+      addClass(name, ["col-7", "content"]);
+      name.style.marginLeft = '2rem';
+      name.innerHTML = data;
+
+      iconContiner.appendChild(icon);
+      item.appendChild(iconContiner);
+      item.appendChild(name);
+
+      return item;
+    }
+
+    var descs = window.conditions.descList;
+    for (var desc of descs) {
+      var i = item(desc);
+      container.appendChild(i);
+
+      document.getElementById(desc).addEventListener('click', function(event) {
+        manager.deleteDescList(event.currentTarget.id);
+      });
+    }
+  }
 
 
   return UIManager;

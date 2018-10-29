@@ -23,7 +23,11 @@ define([], function() {
     /**
      * @memberof CellBoundaryProperty
      */
-    this.description = "";
+    this.description = {};
+    var list = window.conditions.descList;
+    for(var l of list){
+      this.description[l] = "";
+    }
 
     /**
      * @memberof CellBoundaryProperty

@@ -29,6 +29,7 @@ define([], function() {
   */
   State.prototype.setDot = function(dot){
     this.dot = dot;
+    dot.participateObj(this.id, 'state');
   }
 
   /**
@@ -68,6 +69,12 @@ define([], function() {
     return this.dot;
   }
 
+  /**
+   * @memberof State
+   */
+  State.prototype.destroy = function() {
+    this.circle.destroy();
+  };
 
   return State;
 

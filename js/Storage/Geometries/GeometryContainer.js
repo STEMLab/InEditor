@@ -6,12 +6,14 @@ define([
   "./CellGeometry.js",
   "./CellBoundaryGeometry.js",
   "./StateGeometry.js",
-  "./TransitionGeometry.js"
+  "./TransitionGeometry.js",
+  "./HoleGeometry.js"
 ], function(
   CellGeometry,
   CellBoundaryGeometry,
   StateGeometry,
-  TransitionGeometry
+  TransitionGeometry,
+  HoleGeometry
 ) {
   'use strict';
 
@@ -23,6 +25,7 @@ define([
     this.cellBoundaryGeometry = [];
     this.stateGeometry = [];
     this.transitionGeometry = [];
+    this.holeGeometry = [];
   }
 
   /**
@@ -33,8 +36,8 @@ define([
   }
 
   /**
-  * @memberof GeometryContainer
-  */
+   * @memberof GeometryContainer
+   s*/
    GeometryContainer.prototype.removeObj = function(obj){
 
      if(this.cellGeometry.indexOf(obj) != -1 ) this.cellGeometry.splice(this.cellGeometry.indexOf(obj), 1);
@@ -75,6 +78,11 @@ define([
           if (this.transitionGeometry[key].id == _id) result = this.transitionGeometry[key];
         }
         break;
+      case 'hole':
+        for (var key in this.holeGeometry){
+          if (this.holeGeometry[key].id == _id) result = this.holeGeometry[key];
+        }
+        break;
       default:
 
     }
@@ -91,6 +99,7 @@ define([
     this.loadCellBoundary(values.cellBoundaryGeometry, dotFoolContainer);
     this.loadState(values.stateGeometry);
     this.loadTransition(values.transitionGeometry);
+    this.loadHole(values.HoleGeometry);
 
   }
 
@@ -173,6 +182,24 @@ define([
 
   }
 
+  /**
+   * @memberof GeometryContainer
+   */
+  GeometryContainer.prototype.loadHole = function(values) {
+
+    log.info("★★★★★★★★★★★★★★★★ need to debug ★★★★★★★★★★★★★★★★");
+
+    this.holeGeometry = [];
+
+    for (var index in values) {
+
+      var tmp = new HoleGeometry();
+      tmp.load(values[index]);
+      this.holeGeometry.push(tmp);
+
+    }
+
+  }
 
 
 

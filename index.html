@@ -32,6 +32,9 @@
   <!-- Bootstrap JS -->
   <script src="./lib/bootstrap.min.js"></script>
 
+  <!-- tree -->
+  <script src="./lib/BootstrapMenu.min.js"></script>
+
   <!-- Golden Layout -->
   <script type="text/javascript" src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
   <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css" />
@@ -52,6 +55,10 @@
 
   <!-- jsts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jsts/1.6.0/jsts.min.js"></script>
+
+  <!-- sementic ui -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
 
 </head>
 
@@ -82,6 +89,7 @@
             <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SETTING</a>
             <div class="dropdown-menu">
               <a class="dropdown-item" id="setting-conditions" data-toggle="modal" data-target="#setting-conditions-modal">Conditions</a>
+              <a class="dropdown-item" id="setting-desc" data-toggle="modal" data-target="#setting-desc-modal">Description</a>
             </div>
           </li>
           <li class="nav-item dropdown">
@@ -104,6 +112,9 @@
             <img src="./assets/icon/cell_d.png" title="Add new Cell" id="cell-btn">
           </li>
           <li class="nav-item">
+            <img src="./assets/icon/hole_d.png" title="Add hole in cell" id="hole-btn">
+          </li>
+          <li class="nav-item">
             <img src="./assets/icon/cellboundary_d.png" title="Add new CellBoundary" id="cellboundary-btn">
           </li>
           <li class="nav-item">
@@ -113,7 +124,16 @@
             <img src="./assets/icon/transition_d.png" title="Add new Transition" id="transition-btn">
           </li>
           <li class="nav-item">
+            <img src="./assets/icon/inter_d.png" title="Add new InterLayerConnection" id="interlayerconnection-btn">
+          </li>
+          <li class="nav-item">
             <img src="./assets/icon/stair_d.png" title="Add new Stair" id="stair-btn">
+          </li>
+          <li class="nav-item">
+            <img src="./assets/icon/slant_down_d.png" title="Add new Cell with slant" id="slant-down-btn">
+          </li>
+          <li class="nav-item">
+            <img src="./assets/icon/slant_up_down_d.png" title="Add new two Cell with slant" id="slant-up-down-btn">
           </li>
         </ul>
         <ul class="navbar-nav my-2 my-lg-0">
@@ -130,14 +150,14 @@
   <div class="container-fluid">
     <div class="row">
       <div class="sidebar">
-        <div class="h-50 tree-view-container" id="tree-view"></div>
+        <div class="h-50 tree-view-container" id="tree-view-container"></div>
         <div class="h-25 property-container" id="property-container"></div>
       </div>
 
-      <main role="main" class="workspace">
+      <div role="main" class="workspace">
         <div id="workspace-layout-container"></div>
         <div id="snackbar"></div>
-      </main>
+      </div>
     </div>
 
   </div>
@@ -381,6 +401,7 @@
             <h6>Download</h6>
           </a>
         </div>
+
       </div>
 
 
@@ -456,6 +477,44 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" id="setting-conditions-modal-btn" aria-label="Close">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="setting-desc-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Global Description List</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+
+        <div class="modal-body">
+          <div id="setting-desc-modal-list-container" class="ui middle aligned celled list" style="margin-bottom:2px">
+
+          </div>
+
+
+
+          <br />
+          <div class="row" style="margin-bottom:2px">
+            <div class="col-1" style="float: left;"></div>
+            <div class="col-2" style="float: left;">New Desc</div>
+            <div class="col-7">
+              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-desc-modal-newDesc">
+            </div>
+            <div class="col-1" style="padding:0;">
+              <button type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-sumit-btn">+</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
         </div>
       </div>
     </div>
@@ -636,12 +695,16 @@
               <button type="button" class="btn btn-light col-10" id="project-save-as-btn">Save</button>
               <div class="col-1" style="float: right;"></div>
             </div>
-          </div>s
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <div id="context-menu" style="display: none;position: absolute;left: 100;bottom: 100;width: 10rem;height: 10rem;z-index: 1050px;background-color: white;">
+    <ul class="dropdown-menu" role="menu">
+    </ul>
+  </div>
 
   <script data-main="js/main" src="lib/require.js"></script>
 </body>

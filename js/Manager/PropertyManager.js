@@ -49,7 +49,15 @@ define([
 
     this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.makeSimpleHistoryObj, this.endAddNewCellBoundary_undo);
     this.addCallbackFun('end-addnewtransition', this.endAddNewTransition, this.makeSimpleHistoryObj, this.endAddNewTransition_undo);
+    this.addCallbackFun('end-addnewstate', this.endAddNewState, this.makeSimpleHistoryObj, this.endAddNewState_undo);
     this.addCallbackFun('end-addnewstair', this.endAddNewStair, function() {}, function() {});
+    this.addCallbackFun('end-addnewslantdown', this.endAddNewCell, this.makeSimpleHistoryObj, this.endAddNewCell_undo);
+    this.addCallbackFun('end-addnewslantupdown', this.endAddNewSlantUpDown, this.makeSimpleHistoryObj, this.endAddNewCell_undo);
+
+    this.addCallbackFun('deletecell', this.deleteCell);
+    this.addCallbackFun('deletestate', this.deleteState);
+    this.addCallbackFun('deletedesclist', this.deleteDescList);
+    this.addCallbackFun('adddesclist', this.addDescList);
 
   }
 
@@ -85,6 +93,7 @@ define([
       case 'floor':
         obj.name = reqObj.updateContent.name;
         obj.level = reqObj.updateContent.level;
+        obj.layer = reqObj.updateContent.layer;
         obj.lowerCorner = reqObj.updateContent.lowerCorner;
         obj.upperCorner = reqObj.updateContent.upperCorner;
         obj.groundHeight = reqObj.updateContent.groundHeight;
@@ -103,11 +112,16 @@ define([
       case 'state':
         obj.name = reqObj.updateContent.name;
         obj.description = reqObj.updateContent.description;
+        obj.height = reqObj.updateContent.height;
         break;
       case 'transition':
         obj.name = reqObj.updateContent.name;
         obj.description = reqObj.updateContent.description;
         obj.weight = reqObj.updateContent.weight;
+        break;
+      case 'interlayerConnection':
+        obj.typeOfTopoExpression = reqObj.updateContent.typeOfTopoExpression;
+        obj.commnet = reqObj.updateContent.commnet;
         break;
       default:
         console.log("PropertyManager >>> wrong reqObj.type(" + reqObj.type + ")");
@@ -133,7 +147,7 @@ define([
    */
   PropertyManager.prototype.endAddNewCell = function(reqObj) {
 
-    if(reqObj.isEmpty != null ){
+    if (reqObj.isEmpty != null) {
       return;
     }
 
@@ -148,17 +162,41 @@ define([
     );
 
     // add state property if there if conditions.automGenerateState is true
-    if(window.conditions.automGenerateState){
+    if (window.conditions.automGenerateState) {
       var newState = new StateProperty(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM));
       newState.setDuality(reqObj.id);
 
-      window.storage.propertyContainer.stateProperties.push( newState );
+      window.storage.propertyContainer.stateProperties.push(newState);
       window.storage.propertyContainer.getElementById('floor', reqObj.floor).stateKey.push(
         newState.id
       );
     }
 
     // log.trace(window.storage);
+
+  }
+
+  /**
+   * @memberof PropertyManager
+   * @param {Message.reqObj} reqObj id : new obj id<br>floor : id of the floor where the new object will be created
+   */
+  PropertyManager.prototype.endAddNewState = function(reqObj) {
+
+    if (reqObj.isEmpty != null) {
+      return;
+    }
+
+    // log.trace(window.storage);
+    var newState = new StateProperty(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM));
+    if (reqObj.duality) {
+      newState.setDuality(reqObj.duality);
+    }
+
+    window.storage.propertyContainer.stateProperties.push(newState);
+    window.storage.propertyContainer.getElementById('floor', reqObj.floor).stateKey.push(
+      newState.id
+    );
+
 
   }
 
@@ -177,11 +215,24 @@ define([
    */
   PropertyManager.prototype.endAddNewCell_undo = function(undoObj) {
 
+    window.broker.getManager('end-addnewcell', 'PropertyManager').deleteCell(undoObj);
+
+    window.conditions.LAST_CELL_ID_NUM--;
+
+  }
+
+  /**
+   * @param {Object} reqObj id<br>floor: floor id
+   * @memberof PropertyManager
+   * @return cell id
+   */
+  PropertyManager.prototype.deleteCell = function(reqObj) {
+
     // remove new cellproperty object in storage.propertyContainer
     var cells = window.storage.propertyContainer.cellProperties;
 
     for (var key in cells) {
-      if (cells.id == undoObj.id)
+      if (cells[key].id == reqObj.id)
         cells.splice(key, 1);
     }
 
@@ -189,12 +240,35 @@ define([
     var floors = window.storage.propertyContainer.floorProperties;
 
     for (var key in floors) {
-      if (floors[key].id == undoObj.floor) {
-        floors[key].cellKey.splice(floors[key].cellKey.indexOf(undoObj.id), 1);
+      if (floors[key].id == reqObj.floor) {
+        floors[key].cellKey.splice(floors[key].cellKey.indexOf(reqObj.id), 1);
       }
     }
 
-    window.conditions.LAST_CELL_ID_NUM--;
+  }
+
+  /**
+   * @param {Object} reqObj id<br>floor: floor id
+   * @memberof PropertyManager
+   */
+  PropertyManager.prototype.deleteState = function(reqObj) {
+
+    // remove new stateproperty object in storage.propertyContainer
+    var states = window.storage.propertyContainer.stateProperties;
+
+    for (var key in states) {
+      if (states[key].id == reqObj.id)
+        states.splice(key, 1);
+    }
+
+    // remove cell key in floor property
+    var floors = window.storage.propertyContainer.floorProperties;
+
+    for (var key in floors) {
+      if (floors[key].id == reqObj.floor) {
+        floors[key].cellKey.splice(floors[key].cellKey.indexOf(reqObj.id), 1);
+      }
+    }
 
   }
 
@@ -206,12 +280,14 @@ define([
   }
 
   /**
-  * @memberof GeometryManager
-  * @param {Object} reqObj { id, floor, isEmpty }
-  */
-  PropertyManager.prototype.endAddNewCellBoundary = function(reqObj){
+   * @memberof GeometryManager
+   * @param {Object} reqObj { id, floor, isEmpty }
+   */
+  PropertyManager.prototype.endAddNewCellBoundary = function(reqObj) {
 
-    if(reqObj.isEmpty != null ){ return; }
+    if (reqObj.isEmpty != null) {
+      return;
+    }
 
     // add new cellspace boundary property(=CellBoundaryProperty) in stage.propertyContainer
     window.storage.propertyContainer.cellBoundaryProperties.push(
@@ -227,17 +303,17 @@ define([
   }
 
   /**
-  * @memberof PropertyManager
-  */
-  PropertyManager.prototype.endAddNewCellBoundary_undo = function(undoObj){
+   * @memberof PropertyManager
+   */
+  PropertyManager.prototype.endAddNewCellBoundary_undo = function(undoObj) {
 
     // remove new cellboundary object in storage.propertyContainer
     var cellBoundaries = window.storage.propertyContainer.cellBoundaryProperties;
 
     var i = 0;
-    for(i = cellBoundaries.length - i - 1 ; i > -1 ; i++ ){
+    for (i = cellBoundaries.length - i - 1; i > -1; i++) {
 
-      if(cellBoundaries[i].id == undoObj.id){
+      if (cellBoundaries[i].id == undoObj.id) {
         cellBoundaries.splice(i, 1);
         break;
       }
@@ -260,12 +336,12 @@ define([
   }
 
   /**
-  * @memberof PropertyManager
-  * @param {Message.reqObj} reqObj id : if of new object<br>floor : id of the floor where the new object will be created
-  */
-  PropertyManager.prototype.endAddNewTransition = function(reqObj){
+   * @memberof PropertyManager
+   * @param {Message.reqObj} reqObj id : if of new object<br>floor : id of the floor where the new object will be created
+   */
+  PropertyManager.prototype.endAddNewTransition = function(reqObj) {
 
-    if(reqObj.isEmpty != null) return;
+    if (reqObj.isEmpty != null) return;
 
     var canvasObj = window.storage.canvasContainer.stages[reqObj.floor].transitionLayer.group.getLastTransition();
     var newProperty = new TransitionProperty(reqObj.id);
@@ -288,10 +364,10 @@ define([
   }
 
   /**
-  * @memberof PropertyManager
-  * @param {Object} undoObj id : if of new object<br>floor : id of the floor where the new object will be created
-  */
-  PropertyManager.prototype.endAddNewTransition_undo = function(undoObj){
+   * @memberof PropertyManager
+   * @param {Object} undoObj id : if of new object<br>floor : id of the floor where the new object will be created
+   */
+  PropertyManager.prototype.endAddNewTransition_undo = function(undoObj) {
 
     // remove new transition object in storage.propertyContainer
     var propertyObj = window.storage.propertyContainer.getElementById('transition', undoObj.id);
@@ -309,12 +385,12 @@ define([
   }
 
   /**
-  * @memberof PropertyManager
-  * @param {Message.reqObj} reqObj id : if of new object<br>floor : id of the floor where the new object will be created
-  */
-  PropertyManager.prototype.endAddNewStair = function(reqObj){
+   * @memberof PropertyManager
+   * @param {Message.reqObj} reqObj id : if of new object<br>floor : id of the floor where the new object will be created
+   */
+  PropertyManager.prototype.endAddNewStair = function(reqObj) {
 
-    if(reqObj.isEmpty != null) return;
+    if (reqObj.isEmpty != null) return;
 
     var geometryObj = window.storage.geometryContainer.getElementById('transition', reqObj.id);
     var newProperty = new TransitionProperty(reqObj.id);
@@ -341,6 +417,53 @@ define([
     // log.info(window.storage.propertyContainer);
 
   }
+
+  /**
+   * @memberof PropertyManager
+   * @param {Message.reqObj} reqObj id : new obj id<br>floor : id of the floor where the new object will be created
+   */
+  PropertyManager.prototype.endAddNewSlantUpDown = function(reqObj) {
+
+    if (reqObj.isEmpty != null) {
+      return;
+    }
+
+    log.info(window.conditions.LAST_STATE_ID_NUM);
+    window.conditions.LAST_STATE_ID_NUM--;
+    window.broker.getManager('end-addnewcell', 'PropertyManager').endAddNewCell(reqObj);
+    window.conditions.LAST_STATE_ID_NUM++;
+    window.broker.getManager('end-addnewcell', 'PropertyManager').endAddNewCell({
+      floor: reqObj.floor,
+      id: window.conditions.pre_cell + window.conditions.LAST_CELL_ID_NUM
+    });
+
+  }
+
+  PropertyManager.prototype.deleteDescList = function(reqObj){
+    var index = window.conditions.descList.indexOf(reqObj);
+    if( index != -1){
+       window.conditions.descList.splice(index, 1);
+    }
+
+    window.broker.getManager(
+      "updatedesclist",
+      "UIManager"
+    ).updateDescList();
+  }
+
+  PropertyManager.prototype.addDescList = function(reqObj){
+    if(reqObj.data != "" && window.conditions.descList.indexOf(reqObj.data) == -1){
+       window.conditions.descList.push(reqObj.data);
+    }
+
+    window.broker.getManager(
+      "updatedesclist",
+      "UIManager"
+    ).updateDescList();
+
+    
+  }
+
 
   return PropertyManager;
 });

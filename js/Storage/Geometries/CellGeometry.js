@@ -19,6 +19,12 @@ define([], function() {
     */
     this.points = _points;
 
+
+    /**
+     * @memberof Cell
+     * @desc null, down, up
+     */
+    this.slant = null;
   }
 
   /**

@@ -23,7 +23,7 @@ define(["./Feature"], function(Feature) {
     };
 
     this.geometry = {
-      'type': 'LineString',
+      'type': 'Surface',
       'coordinates': [],
       'properties': {
         'id': "",

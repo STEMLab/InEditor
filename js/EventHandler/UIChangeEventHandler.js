@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
   "../PubSub/Message.js",
@@ -24,7 +24,11 @@ define([
    */
   UIChangeEventHandler.prototype.setHandlerBinder = function(handlerBinder) {
 
-    handlerBinder['tree-view'] = {
+    handlerBinder['tree-view-class'] = {
+      'fancytreeclick': this.clickTreeView
+    };
+
+    handlerBinder['tree-view-floor'] = {
       'fancytreeclick': this.clickTreeView
     };
 
@@ -40,9 +44,18 @@ define([
       'click': this.showFactoryExportModal
     };
 
+    handlerBinder['setting-desc'] = {
+      'click': this.updateDescList
+    };
+
+
+
+    // handlerBinder['stage']={
+    //   'contentContextmenu': this.callStageMenu
+    // }
   }
 
-  UIChangeEventHandler.prototype.showFactoryExportModal = function(broker, previousMsg){
+  UIChangeEventHandler.prototype.showFactoryExportModal = function(broker, previousMsg) {
 
     var result = new Result();
     if (broker.isPublishable('showfactoryexportmodal')) {
@@ -225,6 +238,44 @@ define([
     return result;
 
   }
+
+  /**
+   * @desc
+   * @memberof UIChangeEventHandler
+   */
+  UIChangeEventHandler.prototype.callStageMenu = function(broker, previousMsg, data) {
+
+    var result = {
+      'result': false,
+      'msg': null
+    };
+
+    event.preventDefault();
+    log.info('TEST');
+
+    return result;
+
+  }
+
+  UIChangeEventHandler.prototype.updateDescList = function(broker, previousMsg, data) {
+    var result = {
+      'result': false,
+      'msg': null
+    };
+
+    if (broker.isPublishable('updatedesclist')) {
+      broker.publish(new Message('updatedesclist', { }));
+      result = {
+        'result': true,
+        'msg': null
+      };
+    } else {
+      result.msg = "wrong state transition : " + previousMsg + " to updatedesclist.";
+    }
+
+    return result;
+  }
+
 
 
   return UIChangeEventHandler;

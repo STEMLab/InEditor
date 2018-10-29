@@ -123,6 +123,10 @@ define([
     this.reqSpecList['addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['end-addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
 
+    this.reqSpecList['start-addnewhole'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['addnewhole'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['end-addnewhole'] = new MessageSpec('cycle', 'including', ['draw'], true);
+
     this.reqSpecList['updaterefdata'] = new MessageSpec('single', 'including', null,false);
     this.reqSpecList['activateworkspace'] = new MessageSpec('single', 'excluding', ['draw'], false);
 
@@ -147,6 +151,18 @@ define([
     this.reqSpecList['addnewstair'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['end-addnewstair'] = new MessageSpec('cycle', 'including', ['draw'], true);
 
+    this.reqSpecList['start-addnewslantdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['addnewslantdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['end-addnewslantdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
+
+    this.reqSpecList['start-addnewslantupdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['addnewslantupdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['end-addnewslantupdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
+
+    this.reqSpecList['start-addnewinterlayerconnetction'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['addnewinterlayerconnetction'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['end-addnewinterlayerconnetction'] = new MessageSpec('cycle', 'including', ['draw'], true);
+
     this.reqSpecList['exporttoviewer'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['exporttofactory'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['showfactoryexportmodal'] = new MessageSpec('single', 'including', null, false);
@@ -163,6 +179,21 @@ define([
     this.reqSpecList['modifypoint'] = new MessageSpec('cycle', 'including', ['modify'], false);
     this.reqSpecList['end-modifypoint'] = new MessageSpec('cycle', 'including', ['modify'], false);
 
+    this.reqSpecList['deletecell'] = new MessageSpec('single', 'including', null, true);
+    this.reqSpecList['deletecellboundary'] = new MessageSpec('single', 'including', null, true);
+    this.reqSpecList['deletetransition'] = new MessageSpec('single', 'including', null, true);
+    this.reqSpecList['deletestate'] = new MessageSpec('single', 'including', null, true);
+    this.reqSpecList['deletefloor'] = new MessageSpec('single', 'including', null, true);
+
+    this.reqSpecList['makecellselectmenu'] = new MessageSpec('single', 'including', ['draw'], false);
+
+    this.reqSpecList['rotateslant'] = new MessageSpec('single', 'including', null, false);
+
+    this.reqSpecList['copyfloor'] = new MessageSpec('single', 'including', null, false);
+
+    this.reqSpecList['updatedesclist'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['adddesclist'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['deletedesclist'] = new MessageSpec('single', 'including', null, false);
   }
 
   /**

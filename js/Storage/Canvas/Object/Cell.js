@@ -29,15 +29,22 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
       points: [],
       fill: Konva.Util.getRandomColor(),
       stroke: "black",
-      opacity: 0.3,
       strokeWidth: 1,
-      closed: true
+      opacity: 0.3,
+      closed: true,
+      globalCompositeOperation: 'source-over'
     });
 
     /**
      * @memberof Cell
      */
     this.dots = [];
+
+    /**
+     * @memberof Cell
+     * @desc null, down, up
+     */
+    this.slant = null;
   }
 
   /**
@@ -50,6 +57,14 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
     // Modify the connect value of the input dot if there is a point added just before it.
     this.addCornerObj(dot.uuid, dot.getCoor());
   };
+
+  /**
+   * @memberof Cell
+   */
+  Cell.prototype.setFillColor = function(color) {
+    this.poly.fill(color);
+    this.poly.colorKey = color;
+  }
 
   /**
    * @memberof Cell
@@ -101,6 +116,7 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
    * @memberof Cell
    */
   Cell.prototype.deleteLastCorner = function() {
+    this.dots[this.dots.length - 1].leaveObj(this.id);
     this.dots.splice(this.dots.length - 1, 1);
     this.corners.children[this.corners.children.length - 1].destroy();
   };
@@ -154,7 +170,7 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
   /**
    * @memberof Cell
    */
-  Cell.prototype.destroy = function(floor) {
+  Cell.prototype.destroy = function() {
     this.corners.destroy();
     this.poly.destroy();
   };
@@ -219,9 +235,9 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
     var result = [];
     var lines = this.getLines();
 
-    for(var key in lines){
+    for (var key in lines) {
 
-      if(point2 == null){
+      if (point2 == null) {
 
         var tf = DotMath.isLineContainDot(lines[key], {
           point: point1
@@ -231,7 +247,7 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
           result.push(lines[key]);
         }
 
-      }else {
+      } else {
 
         var tf1 = DotMath.isLineContainDot(lines[key], {
           point: point1
@@ -283,7 +299,7 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
    * @memberof Cell
    */
   Cell.prototype.insertDot = function(dot, index) {
-    if(index != undefined){
+    if (index != undefined) {
       this.dots.splice(index, 0, dot);
       dot.participateObj(this.id, 'cell');
       this.addObjectFromDots();
@@ -309,9 +325,9 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
   };
 
   /**
-  * @memberof Cell
-  */
-  Cell.prototype.insertLineIntoLine = function(line, dots){
+   * @memberof Cell
+   */
+  Cell.prototype.insertLineIntoLine = function(line, dots) {
 
     var indexOfDot1 = this.getDotIndex(line.dot1.uuid);
     var indexOfDot2 = this.getDotIndex(line.dot2.uuid);
@@ -327,12 +343,12 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
     var V = DotMath.getVector(dots[0], dots[1]);
 
     var cos = (V.x * VD1D2.x + V.y * VD1D2.y) /
-              ( Math.sqrt(Math.pow(V.x, 2) + Math.pow(V.y, 2))
-                * Math.sqrt(Math.pow(VD1D2.x, 2) + Math.pow(VD1D2.y, 2)));
+      (Math.sqrt(Math.pow(V.x, 2) + Math.pow(V.y, 2)) *
+        Math.sqrt(Math.pow(VD1D2.x, 2) + Math.pow(VD1D2.y, 2)));
 
     var threshold = 0.0000001;
 
-    if( (-1) - threshold <= cos && cos <= (-1) + threshold ){
+    if ((-1) - threshold <= cos && cos <= (-1) + threshold) {
       dots.reverse();
     }
 
@@ -341,24 +357,23 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
 
     // if(dToDot1 > dToDto2) dots.reverse();
 
-    function insertArrayToArray(array1, array2, index){
+    function insertArrayToArray(array1, array2, index) {
       return array1.slice(0, index).concat(array2, array1.slice(index, array1.length));
     }
 
     if (
       (indexOfDot1 == 0 && indexOfDot2 == this.dots.length - 1) ||
       (indexOfDot2 == 0 && indexOfDot1 == this.dots.length - 1)
-    ){
+    ) {
 
       this.dots.concat(dots);
-    }
-    else this.dots = insertArrayToArray(this.dots, dots, indexOfDot2);
+    } else this.dots = insertArrayToArray(this.dots, dots, indexOfDot2);
 
     // else if (indexOfDot1 < indexOfDot2) this.dots = insertArrayToArray(this.dots, dots, indexOfDot2);
 
     this.addObjectFromDots();
 
-    for(var key in dots)
+    for (var key in dots)
       dots[key].participateObj(this.id, 'cell');
 
   }
@@ -402,6 +417,41 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
 
     return wkt;
   };
+
+  /**
+   * @memberof Cell
+   */
+  Cell.prototype.setSlant = function(slant) {
+    this.slant = slant;
+    this.poly.setAttrs({
+        fillLinearGradientColorStops: [0, '#ffffffff', 1, this.poly.fill()],
+        fillPriority: 'linear-gradient'
+    });
+
+    var c1 = {
+      x : (this.poly.attrs.points[0]+this.poly.attrs.points[2])/2,
+      y : (this.poly.attrs.points[1]+this.poly.attrs.points[3])/2
+    };
+
+    var c2 = {
+      x : (this.poly.attrs.points[4]+this.poly.attrs.points[6])/2,
+      y : (this.poly.attrs.points[5]+this.poly.attrs.points[7])/2
+    };
+
+    if(slant == 'up'){
+      this.poly.setAttrs({
+          fillLinearGradientStartPoint: c2,
+          fillLinearGradientEndPoint: c1
+      });
+    } else {
+      this.poly.setAttrs({
+          fillLinearGradientStartPoint: c1,
+          fillLinearGradientEndPoint: c2
+      });
+    }
+
+    delete this.poly.colorKey;
+  }
 
   return Cell;
 });

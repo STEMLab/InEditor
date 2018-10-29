@@ -2,7 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define(["./Feature"], function(Feature) {
+define(["./Feature", "js/JsonFormat/GeometryConverter.js"], function(Feature, GeometryConverter) {
   'user strict';
 
   /**
@@ -255,6 +255,22 @@ define(["./Feature"], function(Feature) {
     for (var i = 0; i < coordinates.length; i++) {
       this.geometry.coordinates.push(JSON.parse(JSON.stringify(coordinates[i])));
     }
+  }
+
+
+  /**
+  * @memberof Format4Factory.CellSpace
+  */
+  CellSpaceBoundary.prototype.convertCoor2WKT = function(){
+
+    if(this.geometry.properties.type == 'wkt'){
+      log.info('Format4Factory.CellSpaceBoundary :: Geometry type of this object is already WKT');
+      return ;
+    }
+
+    var converted = new GeometryConverter('Surface').geojson2wkt(this.getCoordinates());
+    this.geometry.coordinates = converted;
+    this.geometry.properties.type = 'wkt';
   }
 
   return CellSpaceBoundary;

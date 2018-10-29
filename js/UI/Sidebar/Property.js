@@ -41,7 +41,7 @@ define([], function() {
     else if (type == "state") this.setStateProperty(id, storage);
     else if (type == "transition") this.setTransitionProperty(id, storage);
     else if (type == "project") this.setProjectProperty(id, storage);
-
+    else if (type == "interlayerConnection") this.setInterLayerConnectionProperty(id, storage);
 
   }
 
@@ -60,6 +60,13 @@ define([], function() {
     });
 
     propertyLayout.init();
+
+    // event binding
+    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
+
+      window.eventHandler.callHandler('html', event);
+
+    });
   }
 
   /**
@@ -67,19 +74,37 @@ define([], function() {
   */
   Property.prototype.setFloorView = function(config, floorProperty) {
 
+    var floors = window.storage.propertyContainer.floorProperties;
+
+    var floorKeys=[];
+    for(var floor of floors){
+      floorKeys.push(floor.id);
+    }
+
     $('#property-container').empty();
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var canvasDiv = "<table class=\"property-table\">";
+    var canvasDiv = "<table class=\"property-table ui compact table inverted \">";
     canvasDiv += "<tr><td class=\"title\">Upload floor plan</td><td class=\"value\"><input id=\"floorplan-file\" type=\"file\" accept=\".jpg,.jpeg,.png,.gif,.bmp\"></td></tr>";
-    canvasDiv += "<tr><td class=\"title\">Resizing canvas</td><td class=\"value\"><input id=\"name-text\" type=\"button\" value=\"V\"></td></tr>";
+    // canvasDiv += "<tr><td class=\"title\">Resizing canvas</td><td class=\"value\"><input id=\"name-text\" type=\"button\" value=\"V\"></td></tr>";
+
+    canvasDiv += "<tr><td class=\"title\">Copy another floor</td><td class=\"value\"><select id=\"copyfloor-text\" style=\"width: 80%;\">";
+    canvasDiv += "<option value=\"\" selected disabled hidden></option>";
+    for (var key in floorKeys) {
+      var value = floorKeys[key];
+      if(value != floorProperty.id) canvasDiv += "<option value=\"" + value + "\">" + value + "</option>";
+    }
+
+    canvasDiv += "</select>";
+    canvasDiv += "<input id=\"copyfloor-btn\" type=\"button\" value=\"V\"></td></tr>";
+
     canvasDiv += "</table>";
 
-    var propertiesDiv = "<table id=\"property-table\" type=\"floor\" class=\"property-table\">";
+    var propertiesDiv = "<table id=\"property-table\" type=\"floor\" class=\"property-table ui compact table inverted \">";
     propertiesDiv += "<tr><td class=\"title\">id</td><td colspan=\"2\"><input id=\"id-text\" type=\"text\" value=" + floorProperty.id + " disabled></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"colspan=\"2\"><input id=\"name-text\" type=\"text\" value=" + floorProperty.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">level</td><td class=\"value\"colspan=\"2\"><input id=\"level-text\" type=\"text\" value=" + floorProperty.level + "></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">layer</td><td class=\"value\"colspan=\"2\"><input id=\"layer-text\" type=\"text\" value=" + floorProperty.layer + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\" rowspan=\"2\">Lower<br>Left<br>Corner</td>";
     propertiesDiv += "<td class=\"inner-tag\">x</td>";
     propertiesDiv += "<td class=\"inner-value\"><input id=\"lower-corner-x\" value="+floorProperty.lowerCorner[0]+"></td></tr>";
@@ -91,8 +116,7 @@ define([], function() {
     propertiesDiv += "<tr><td class=\"title\">ground height</td><td class=\"value\"colspan=\"2\"><input id=\"ground-height-text\" type=\"text\" value=" + floorProperty.groundHeight + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">celing height</td><td class=\"value\"colspan=\"2\"><input id=\"celing-height-text\" type=\"text\" value=" + floorProperty.celingHeight + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">door height</td><td class=\"value\"colspan=\"2\"><input id=\"door-height-text\" type=\"text\" value=" + floorProperty.doorHeight + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"colspan=\"2\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + floorProperty.description + "</textarea></td></tr>";
-    propertiesDiv += "<br>";
+    propertiesDiv += this.getDescString(floorProperty.description);
     propertiesDiv += "<tr><td colspan=\"3\"><button class=\"submit-btn\"  id=\"property-subimt-btn\">submit</button></td></tr></table>";
 
     var divs = {
@@ -122,6 +146,13 @@ define([], function() {
 
     });
 
+    // event binding
+    document.getElementById('copyfloor-btn').addEventListener('click', function(event) {
+
+      window.eventHandler.callHandler('html', event);
+
+    });
+
   }
 
   /**
@@ -133,10 +164,9 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
+    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table ui compact table inverted \">";
     propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + property.description + "</textarea></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">external ref</td><td class=\"value\"><select id=\"externalRef-text\" style=\"width: 100%;\">";
 
@@ -155,6 +185,7 @@ define([], function() {
     }
 
     propertiesDiv += "</select></td></tr>";
+    propertiesDiv += this.getDescString(property.description);
 
     propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
     propertiesDiv += "</table>";
@@ -202,7 +233,7 @@ define([], function() {
     var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
     propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + property.description + "</textarea></td></tr>";
+    propertiesDiv += this.getDescString(property.description);
     propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">external ref</td><td class=\"value\"><select id=\"externalRef-text\" style=\"width: 100%;\">";
 
@@ -419,10 +450,10 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#protperty-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
+    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table ui compact table inverted \">";
     propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + property.description + "</textarea></td></tr>";
+    propertiesDiv += this.getDescString(property.description);
     propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">connects</td><td class=\"value\"><select id=\"connects-text\" style=\"width: 100%;\">";
 
@@ -432,10 +463,16 @@ define([], function() {
     }
 
     propertiesDiv += "</select></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">height</td><td class=\"value\"><input id=\"height-text\" type=\"text\" value=" + property.height + "></td></tr>";
     propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
     propertiesDiv += "</table>";
 
     this.setView(config, propertiesDiv);
+
+    // event binding
+    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
+      window.eventHandler.callHandler('html', event);
+    });
 
   }
 
@@ -503,13 +540,13 @@ define([], function() {
 
     var projectProperty = storage.propertyContainer.getElementById('project', id);
 
-    var divContent = "<table id=\"property-table\" type=\"project\" class=\"property-table\">";
+    var divContent = "<table id=\"property-table\" type=\"project\" class=\"property-table  ui compact table inverted\">";
     divContent += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + projectProperty.id + " disabled></td></tr>";
     divContent += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + projectProperty.name + " ></td></tr>";
     divContent += "<tr><td class=\"title\">date</td><td class=\"value\"><input id=\"date-text\" type=\"text\" value=" + projectProperty.date + " disabled></td></tr>";
     divContent += "<tr><td class=\"title\">author</td><td class=\"value\"><input id=\"author-text\" type=\"text\" value=" + projectProperty.author + " ></td></tr>";
-    divContent += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + projectProperty.description + "</textarea></td></tr>";
-    divContent += "<br><tr><td colspan=\"2\"><button class=\"submit-btn\" id=\"property-subimt-btn\">submit</button></td></tr></table>";
+    divContent += this.getDescString(projectProperty.description);
+    divContent += "<tr><td colspan=\"2\"><button class=\"submit-btn\" id=\"property-subimt-btn\">submit</button></td></tr></table>";
 
     this.setView(config, divContent);
 
@@ -537,12 +574,10 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    log.inof
-
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
+    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table  ui compact table inverted \">";
     propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + property.description + "</textarea></td></tr>";
+    propertiesDiv += this.getDescString(property.description);
     propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">weight</td><td class=\"value\"><input id=\"weight-text\" type=\"text\" value=" + property.weight + "></td></tr>";
     propertiesDiv += "<tr><td class=\"title\">connects</td><td class=\"value\"><input id=\"connects-text\" type=\"text\" disabled value=\""+ property.getConncetsString() + "\"></td></tr>";
@@ -561,6 +596,78 @@ define([], function() {
 
   }
 
+
+  Property.prototype.setInterLayerConnectionProperty = function(id, storage) {
+
+    var config = {
+      settings: {
+        showPopoutIcon: false,
+        showMaximiseIcon: false,
+        showCloseIcon: false
+      },
+      content: [{
+        type: 'stack',
+        content: [{
+          type: 'component',
+          componentName: 'property-component',
+          title: 'properties',
+          isClosable: false,
+          componentState: {
+            id: 'propertiesProper'
+          }
+        }]
+      }]
+    };
+
+    this.setInterLayerView(config, storage.propertyContainer.getElementById('interlayerConnection', id), 'interlayerConnection');
+
+  }
+
+  Property.prototype.setInterLayerView = function(config, property, type){
+
+    $('#property-container').empty();
+
+    var propertyLayout = new GoldenLayout(config, $('#property-container'));
+
+    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table  ui compact table inverted \">";
+    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">inter\nConnects</td><td class=\"value\"><input id=\"interConnects-text\" type=\"text\" disabled value=\""+ property.getInterConnectsString() + "\"></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">connected\nLayer</td><td class=\"value\"><input id=\"connectedLayer-text\" type=\"text\" disabled value=\""+ property.getConnectedLayerString() + "\"></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">Topo\nExpression</td><td class=\"value\"><select id=\"topoExpression-text\" style=\"width: 80%;\">";
+    propertiesDiv += "<option value=\""+property.typeOfTopoExpression +"\" selected>"+property.typeOfTopoExpression +"</option>";
+    propertiesDiv += "<option value=\"CONTAINS\">CONTAINS</option>";
+    propertiesDiv += "<option value=\"OVERLAPS\">OVERLAPS</option>";
+    propertiesDiv += "<option value=\"EQUALS\">EQUALS</option>";
+    propertiesDiv += "<option value=\"WITHIN\">WITHIN</option>";
+    propertiesDiv += "<option value=\"CROSSES\">CROSSES</option>";
+    propertiesDiv += "<option value=\"INTERSECTS\">INTERSECTS</option>";
+    propertiesDiv += "</select></td></tr>";
+    propertiesDiv += "<tr><td class=\"title\">commnet</td><td class=\"value\"><textarea id=\"commnet-text\" rows=\"4\" cols=\"21\">" + property.commnet + "</textarea></td></tr>";
+    propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
+    propertiesDiv += "</table>";
+
+    this.setView(config, propertiesDiv);
+
+  }
+
+  Property.prototype.getDescString = function(desc){
+    var num = Object.keys(desc).length;
+    var i = 0;
+    var descString = "";
+    for(var key in desc){
+      descString += "<tr>";
+      if(i == 0) descString += "<tr><td rowspan=\""+num+"\">Desc</td>";
+      descString += "<td>";
+      descString += "<div class=\"ui inverted mini right labeled input\">";
+      descString += "<label for=\"desc-text-"+key+"\" class=\"ui label\">"+key+"</label>";
+      descString += "<input type=\"text\" id=\"desc-text-"+key+"\" value=\""+desc[key]+"\">";
+      descString += "<button class=\"ui label\">-</button>";
+      descString += "</div>";
+      descString += "</td></tr>";
+      i++;
+    }
+    return descString;
+  }
 
   return Property;
 });

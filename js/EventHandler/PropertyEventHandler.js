@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
   "../PubSub/Message.js"
@@ -17,8 +17,8 @@ define([
   }
 
   /**
-  * @memberof PropertyEventHandler
-  */
+   * @memberof PropertyEventHandler
+   */
   PropertyEventHandler.prototype.setHandlerBinder = function(handlerBinder) {
 
     handlerBinder['property-subimt-btn'] = {
@@ -29,12 +29,16 @@ define([
       'click': this.clickPropertRefySubmitBtn
     }
 
+    handlerBinder['setting-conditions-sumit-btn'] = {
+      'click': this.addDescList
+    }
+
   }
 
   /**
-  * @desc When PropertySubmit btn clicked `updateproperty` can publish.
-  * @memberof PropertyEventHandler
-  */
+   * @desc When PropertySubmit btn clicked `updateproperty` can publish.
+   * @memberof PropertyEventHandler
+   */
   PropertyEventHandler.prototype.clickPropertySubmitBtn = function(broker, previousMsg) {
 
     var result = {
@@ -42,7 +46,7 @@ define([
       'msg': null
     };
 
-    if(broker.isPublishable('updateproperty')){
+    if (broker.isPublishable('updateproperty')) {
 
       broker.publish(new Message('updateproperty', {
         "type": document.getElementById("property-table").getAttribute("type"),
@@ -55,7 +59,7 @@ define([
         'msg': null
       };
 
-    } else{
+    } else {
 
       result.msg = "wrong state transition : " + previousMsg + " to updateproperty.";
 
@@ -66,9 +70,9 @@ define([
   }
 
   /**
-  * @desc When PropertRefySubmit btn clicked `updaterefdata` can publish.
-  * @memberof PropertyEventHandler
-  */
+   * @desc When PropertRefySubmit btn clicked `updaterefdata` can publish.
+   * @memberof PropertyEventHandler
+   */
   PropertyEventHandler.prototype.clickPropertRefySubmitBtn = function(broker, previousMsg) {
 
     var result = {
@@ -76,7 +80,7 @@ define([
       'msg': null
     };
 
-    if(broker.isPublishable('updaterefdata')){
+    if (broker.isPublishable('updaterefdata')) {
 
       broker.publish(new Message('updaterefdata', {
         "type": document.getElementById("property-table").getAttribute("type"),
@@ -89,7 +93,7 @@ define([
         'msg': null
       };
 
-    } else{
+    } else {
 
       result.msg = "wrong state transition : " + previousMsg + " to updaterefdata.";
 
@@ -100,9 +104,9 @@ define([
   }
 
   /**
-  * @desc Read html values in sidabar > property.
-  * @memberof PropertyEventHandler
-  */
+   * @desc Read html values in sidabar > property.
+   * @memberof PropertyEventHandler
+   */
   PropertyEventHandler.prototype.getUpdateContent = function(type) {
     var result = new Object;
 
@@ -118,14 +122,20 @@ define([
       case 'floor':
         result = {
           'name': document.getElementById("name-text").value,
-          'level': document.getElementById("level-text").value,
-          'lowerCorner': [ document.getElementById("lower-corner-x").value, document.getElementById("lower-corner-y").value ],
-          'upperCorner': [ document.getElementById("upper-corner-x").value, document.getElementById("upper-corner-y").value],
+          'layer': document.getElementById("layer-text").value,
+          'lowerCorner': [document.getElementById("lower-corner-x").value, document.getElementById("lower-corner-y").value],
+          'upperCorner': [document.getElementById("upper-corner-x").value, document.getElementById("upper-corner-y").value],
           'groundHeight': document.getElementById("ground-height-text").value,
           'celingHeight': document.getElementById("celing-height-text").value,
           'doorHeight': document.getElementById("door-height-text").value,
-          'description': document.getElementById("description-text").value
+          'description': {}
         };
+        var id = document.getElementById("id-text").value;
+        var descList = window.storage.propertyContainer.getElementById('floor', id).description;
+        for(var key in descList){
+          result.description[key] = document.getElementById("desc-text-"+key).value;
+        }
+
         break;
       case 'cell':
         result = {
@@ -147,7 +157,8 @@ define([
       case 'state':
         result = {
           'name': document.getElementById("name-text").value,
-          'description': document.getElementById("description-text").value
+          'description': document.getElementById("description-text").value,
+          'height': document.getElementById("height-text").value
         };
         break;
       case 'transiton':
@@ -157,7 +168,41 @@ define([
           'description': document.getElementById("description-text").value
         };
         break;
+      case 'interlayerConnection':
+        result = {
+          'typeOfTopoExpression': document.getElementById("topoExpression-text").options[document.getElementById("topoExpression-text").selectedIndex].value,
+          'commnet': document.getElementById("commnet-text").value,
+        };
+        break;
       default:
+    }
+
+    return result;
+  }
+
+  PropertyEventHandler.prototype.addDescList = function(broker, previousMsg){
+    var result = {
+      'result': false,
+      'msg': null
+    };
+
+    if (broker.isPublishable('adddesclist')) {
+
+      broker.publish(new Message('adddesclist', {
+        data: document.getElementById('setting-desc-modal-newDesc').value
+      }));
+
+      document.getElementById('setting-desc-modal-newDesc').value = "";
+
+      result = {
+        'result': true,
+        'msg': null
+      };
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to adddesclist.";
+
     }
 
     return result;

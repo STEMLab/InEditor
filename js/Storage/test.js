@@ -1,8 +1,8 @@
 
-
 define(function(require){
   // 싱글톤을 생성해주는 모듈 객체.
   // 익명 함수 실행 결과를 받습니다.
+
   var test = (function(){
 
       // 실제 싱글톤 적용 객체
@@ -12,6 +12,10 @@ define(function(require){
           var args = args || {};
           this.a = args.a;
           this.b = args.b;
+      }
+
+      Singleton.prototype.echo = function(say){
+        log.info("SingletonTest.echo::", say);
       }
 
       // 인스턴스 객체.
@@ -31,5 +35,7 @@ define(function(require){
 
   })();
 
-    return test;
+
+
+  return test;
 });

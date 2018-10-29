@@ -1,0 +1,33 @@
+{
+  "tags": {
+    "allowUnknownTags": false
+  },
+  "source": {
+    "include": ["./js"], // 주석을 읽을 파일명이나 디렉토리명 배열
+    "includePattern": ".js$", // 읽을 파일의 패턴
+    "exclude": ["./docs"], // 제외할 파일명이나 디렉토리명 배열
+    "excludePattern": "(node_modules/|docs)" // 제외할 파일의 패턴
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "opts": {
+    "template": "node_modules/tui-jsdoc-template", // 다운받은 템플릿 경로
+    "encoding": "utf8",
+    "destination": "jsdoc", // 문서를 만들 경로
+    "recurse": true,
+    "verbose": true
+  },
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "default": {
+      "outputSourceFiles": false
+    },
+    "useCollapsibles": true
+  },
+  "docdash": { // docdash 템플릿에서 지원하는 옵션
+    "static": false,
+    "sort": false
+  }
+}

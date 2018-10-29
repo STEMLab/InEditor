@@ -33,7 +33,12 @@ define([], function() {
     /**
      * @memberof ProjectProperty
      */
-    this.description = new String();
+     this.description = {};
+     var list = window.conditions.descList;
+     for(var l of list){
+       this.description[l] = "";
+     }
+
 
     /**
      * @memberof ProjectProperty

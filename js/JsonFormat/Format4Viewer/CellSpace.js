@@ -24,7 +24,7 @@ define(["./Feature"], function(Feature) {
     };
 
     this.geometry = {
-      'type': 'Surface',
+      'type': 'Solid',
       'coordinates': [],
       'properties': {
         'id': "",
@@ -94,16 +94,18 @@ define(["./Feature"], function(Feature) {
    */
   CellSpace.prototype.pushCoordinatesFromDots = function(dots, transDots) {
 
+    var polygon = [];
+
     if (transDots == undefined) {
       var len = dots.length;
 
       for (var i = 0; i < len; i++) {
 
-        this.geometry.coordinates.push([dots[i].point.x, dots[i].point.y, 0]);
+        polygon.push([dots[i].point.x, dots[i].point.y, 0]);
 
       }
 
-      this.geometry.coordinates.push([dots[0].point.x, dots[0].point.y, 0]);
+      polygon.push([dots[0].point.x, dots[0].point.y, 0]);
 
 
     } else {
@@ -112,13 +114,15 @@ define(["./Feature"], function(Feature) {
       for (var i = 0; i < len; i++) {
 
         var transDot = transDots[dots[i].uuid];
-        this.geometry.coordinates.push([transDot.point.x, transDot.point.y, transDot.point.z]);
+        polygon.push([transDot.point.x, transDot.point.y, transDot.point.z]);
 
       }
 
       var transDot = transDots[dots[0].uuid];
-      this.geometry.coordinates.push([transDot.point.x, transDot.point.y, transDot.point.z]);
+      polygon.push([transDot.point.x, transDot.point.y, transDot.point.z]);
     }
+
+    this.geometry.coordinates.push(polygon);
   }
 
   /**
@@ -170,6 +174,15 @@ define(["./Feature"], function(Feature) {
   CellSpace.prototype.setHeight = function(height) {
 
     this.geometry.properties.height = height;
+
+  }
+
+  /**
+   * @memberof CellSpace
+   */
+  CellSpace.prototype.addHole = function(coors) {
+
+    this.geometry.coordinates.push(coors);
 
   }
 

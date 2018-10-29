@@ -105,7 +105,7 @@ define([
       z: VERY_SMALL_VALUE
     };
 
-    function getBbox(bbox, point){
+    function getBbox(bbox, point) {
       if (point[0] > bbox.max.x)
         bbox.max.x = point[0];
       if (point[1] > bbox.max.y)
@@ -120,6 +120,12 @@ define([
     var geometries = window.storage.geometryContainer.cellGeometry;
     var properties = window.storage.propertyContainer.cellProperties;
     var floorProperties = window.storage.propertyContainer.floorProperties;
+    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+
+    var holeGeometries = window.storage.geometryContainer.holeGeometry;
+    var holeMap = {};
+
+    var slantMap = {};
 
     // copy geometry coordinates
     for (var key in geometries) {
@@ -129,6 +135,7 @@ define([
       tmp.pushCoordinatesFromDots(geometries[key].points, transDot);
       cells[geometries[key].id] = tmp;
 
+      if (geometries[key].slant != null) slantMap[geometries[key].id] = geometries[key].slant;
     }
 
     // copy attributes
@@ -142,67 +149,67 @@ define([
       cells[id].setDuality(properties[key].duality);
     }
 
+    // make hole map
+    for (var key in holeGeometries) {
+      var id = holeGeometries[key].holeOf;
+      if (cells[id] != undefined) {
+        var points = holeGeometries[key].points;
+        var coordinates = [];
+
+        for (var key in points) {
+          coordinates.push(Object.values(transDot[points[key].uuid].point));
+        }
+        coordinates.push(coordinates[0]);
+
+        if (holeMap[id] != undefined) holeMap[id].push(coordinates);
+        else holeMap[id] = [coordinates];
+      }
+
+    }
+
     // pixel to real world coordinates
     for (var floorKey in floorProperties) {
 
       var cellkeyInFloor = floorProperties[floorKey].cellKey;
+
       for (var cellKey in cellkeyInFloor) {
-        cells[cellkeyInFloor[cellKey]].setHeight(floorProperties[floorKey].celingHeight);
-        var points = cells[cellkeyInFloor[cellKey]].getCoordinates();
+        var cellId = cellkeyInFloor[cellKey];
+        var coor = cells[cellId].getCoordinates();
+
+        cells[cellId].setHeight(floorProperties[floorKey].celingHeight);
+
+        if (slantMap[cellId] == undefined) cells[cellId].setCoor(manager.extrudeCell(coor[0], floorProperties[floorKey].celingHeight * 1), '3D');
+        else if (slantMap[cellId] == 'up') cells[cellId].setCoor(manager.extrudeCellWithUpSlant(coor[0], floorProperties[floorKey].celingHeight * 1), '3D');
+        else if (slantMap[cellId] == 'down') cells[cellId].setCoor(manager.extrudeCellWithDownSlant(coor[0], floorProperties[floorKey].celingHeight * 1), '3D');
+
+        // add hole
+        if (holeMap[cellId] != undefined) {
+          for (var holeKey in holeMap[cellId]) {
+            cells[cellId].addHole(manager.extrudeCell(holeMap[cellId][holeKey], floorProperties[floorKey].celingHeight * 1)[0]);
+          }
+        }
 
         if (floorProperties[floorKey].groundHeight * 1 + floorProperties[floorKey].celingHeight * 1 > max.z)
           max.z = floorProperties[floorKey].groundHeight * 1 + floorProperties[floorKey].celingHeight * 1;
         if (floorProperties[floorKey].groundHeight * 1 < min.z)
-          min.z= floorProperties[floorKey].groundHeight * 1;
+          min.z = floorProperties[floorKey].groundHeight * 1;
 
-        for (var i = 0; i < points.length; i++) {
-          var bbox = getBbox({min: min, max: max}, points[i]);
+        for (var i = 0; i < coor[0].length; i++) {
+          var bbox = getBbox({
+            min: min,
+            max: max
+          }, coor[0][i]);
           min = bbox.min;
           max = bbox.max;
         }
       }
 
-    //
-    //   var cellkeyInFloor = floorProperties[floorKey].cellKey;
-    //   var stage = window.storage.canvasContainer.stages[floorProperties[floorKey].id].stage;
-    //
-    //   var pixelLLC = [0, 0, 0];
-    //   var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
-    //   var worldLLC = [floorProperties[floorKey].lowerCorner[0] * 1, floorProperties[floorKey].lowerCorner[1] * 1, 0];
-    //   var worldURC = [floorProperties[floorKey].upperCorner[0] * 1, floorProperties[floorKey].upperCorner[1] * 1, 0];
-    //
-    //
-    //   for (var cellKey in cellkeyInFloor) {
-    //
-    //     cells[cellkeyInFloor[cellKey]].setHeight(floorProperties[floorKey].celingHeight);
-    //     var points = cells[cellkeyInFloor[cellKey]].getCoordinates();
-    //     if (floorProperties[floorKey].groundHeight * 1 + floorProperties[floorKey].celingHeight * 1 > max.z)
-    //       max.z = floorProperties[floorKey].groundHeight * 1 + floorProperties[floorKey].celingHeight * 1;
-    //     if (floorProperties[floorKey].groundHeight * 1 < min.z)
-    //       min.z = floorProperties[floorKey].groundHeight * 1;
-    //
-    //     for (var i = 0; i < points.length; i++) {
-    //       var trans = manager.affineTransformation(pixelURC, pixelLLC, worldURC, worldLLC, points[i]);
-    //       cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'x', trans._data[0]);
-    //       cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'y', trans._data[1]);
-    //       cells[cellkeyInFloor[cellKey]].updateCoordinates(i, 'z', floorProperties[floorKey].groundHeight * 1);
-    //
-    //       if (trans._data[0] > max.x)
-    //         max.x = trans._data[0];
-    //       if (trans._data[1] > max.y)
-    //         max.y = trans._data[1];
-    //       if (trans._data[0] < min.x)
-    //         min.x = trans._data[0];
-    //       if (trans._data[1] < min.y)
-    //         min.y = trans._data[1];
-    //     }
-    //   }
     }
 
-    log.info({
-      cells: cells,
-      bbox: [min.x, min.y, min.z, max.x, max.y, max.z]
-    });
+    // log.info('ExportManager :: cellObject4Viewer', {
+    //   cells: cells,
+    //   bbox: [min.x, min.y, min.z, max.x, max.y, max.z]
+    // });
 
     return {
       cells: cells,
@@ -262,8 +269,18 @@ define([
         reverseObj.setHeight(height);
         cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'] = reverseObj;
 
+        var coor = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
+        var coor_reverse = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].getCoordinates();
+
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setCoor([manager.extrudeCellBoundary(coor, floorProperties[floorKey].doorHeight * 1)]);
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setCoor([manager.extrudeCellBoundary(coor_reverse, floorProperties[floorKey].doorHeight * 1)]);
+
       }
     }
+
+    log.info('ExportManager :: cellBoundaryObj4Viewer', {
+      cellBoundaries: cellBoundaries
+    });
 
     return cellBoundaries;
 
@@ -390,6 +407,12 @@ define([
       "id": window.conditions.guid()
     }
 
+    var interEdges = {
+      "docId": document.id,
+      "parentId": multiLayeredGraph.id,
+      "id": window.conditions.guid()
+    }
+
     var baseURL = reqObj.baseURL;
 
     var transDots = manager.transAllDots(window.storage.dotFoolContainer.dotFool, window.storage.propertyContainer.getFloorObj());
@@ -401,9 +424,10 @@ define([
     var edges = manager.edges4Factory(document.id, spaceLayer);
     var states = manager.stateObj4Factory(document.id, nodes, transDots);
     var transitions = manager.transitionObj4VFactory(document.id, edges, transDots);
+    var interlayerConnections = manager.interlayerConnectionObj4Factory(document.id, interEdges);
 
     var address = {
-      'delete-document': baseURL+'/documents/' + document.id,
+      'delete-document': baseURL + '/documents/' + document.id,
       'post-document': baseURL + '/documents/' + document.id,
       'post-indoorfeatures': baseURL + '/documents/' + document.id + '/indoorfeatures/' + indoorfeatures.id,
       'post-primalspacefeatures': baseURL + '/documents/' + document.id + '/primalspacefeatures/' + primalspacefeatures.id,
@@ -416,6 +440,8 @@ define([
       'post-edges': baseURL + '/documents/' + document.id + '/edges/',
       'post-state': baseURL + '/documents/' + document.id + '/state/',
       'post-transition': baseURL + '/documents/' + document.id + '/transition/',
+      'post-interEdges': baseURL + '/documents/' + document.id + '/interedges/' + interEdges.id,
+      'post-interlayerConnection': baseURL + '/documents/' + document.id + '/interlayerconnection/',
       'get-document': baseURL + '/documents/' + document.id
     };
 
@@ -447,7 +473,7 @@ define([
       for (var i = 0; i < nodes.length; i++)
         manager.postJson(address['post-nodes'] + nodes[i].id, JSON.stringify(nodes[i]));
 
-      for (var i = 0; i < nodes.length; i++)
+      for (var i = 0; i < edges.length; i++)
         manager.postJson(address['post-edges'] + edges[i].id, JSON.stringify(edges[i]));
 
       for (var i = 0; i < states.length; i++)
@@ -459,6 +485,13 @@ define([
 
     }
 
+    if (interlayerConnections.length != 0) {
+      manager.postJson(address['post-interEdges'], JSON.stringify(interEdges));
+
+      for (var i = 0; i < interlayerConnections.length; i++)
+        manager.postJson(address['post-interlayerConnection'] + interlayerConnections[i].id, JSON.stringify(interlayerConnections[i]));
+    }
+
     manager.getDocument(address['get-document'], document.id);
 
   }
@@ -467,7 +500,7 @@ define([
    * @memberof ExportManager
    */
   ExportManager.prototype.postJson = function(address, data) {
-    // log.info('POST : ' + address, data);
+    log.info('POST : ' + address, data);
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
@@ -477,7 +510,7 @@ define([
       }
     }
 
-    log.info("POST ", address, 'data : ', data);
+    // log.info("POST ", address, 'data : ', data);
 
     xhr.open("POST", address, false);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -619,8 +652,8 @@ define([
 
 
     // geometry type
-    if($('#factory-geometry-type-2D').prop("checked")) exportConditions.Geometry = '2D';
-    if($('#factory-geometry-type-3D').prop("checked")) exportConditions.Geometry = '3D';
+    if ($('#factory-geometry-type-2D').prop("checked")) exportConditions.Geometry = '2D';
+    if ($('#factory-geometry-type-3D').prop("checked")) exportConditions.Geometry = '3D';
 
   }
 
@@ -633,21 +666,14 @@ define([
     var floors = window.storage.propertyContainer.floorProperties;
     var spaceLayers = [];
 
-    if (window.conditions.exportConditions.MultiLayer) {
-      for (var floorKey in floors) {
-        spaceLayers.push({
-          "docId": docId,
-          "parentId": parentId,
-          "id": floors[floorKey].getId()
-        });
-      }
-    } else {
+    for (var floorKey in floors) {
       spaceLayers.push({
         "docId": docId,
         "parentId": parentId,
-        "id": window.conditions.guid()
+        "id": floors[floorKey].layer
       });
     }
+
 
     return spaceLayers;
 
@@ -711,6 +737,11 @@ define([
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
     var geoType = window.conditions.exportConditions.Geometry;
 
+    var holeGeometries = window.storage.geometryContainer.holeGeometry;
+    var holeMap = {};
+
+    var slantMap = {};
+
     var solid = [];
 
     // copy geometry coordinates
@@ -723,6 +754,8 @@ define([
       tmp.setGeometryId("CG-" + geometries[key].id);
       tmp.pushCoordinatesFromDots(geometries[key].points, transDot);
       cells[geometries[key].id] = tmp;
+
+      if (geometries[key].slant != null) slantMap[geometries[key].id] = geometries[key].slant;
 
     }
 
@@ -738,15 +771,48 @@ define([
 
     }
 
+    // make hole map
+    for (var key in holeGeometries) {
+      var id = holeGeometries[key].holeOf;
+      if (cells[id] != undefined) {
+        var points = holeGeometries[key].points;
+        var coordinates = [];
+
+        for (var key in points) {
+          coordinates.push(Object.values(transDot[points[key].uuid].point));
+        }
+        coordinates.push(coordinates[0]);
+
+        if (holeMap[id] != undefined) holeMap[id].push(coordinates);
+        else holeMap[id] = [coordinates];
+      }
+
+    }
+
     // pixel to real world coordinates
     for (var floorKey in floorProperties) {
-
+      var floorString = "level="+floorProperties[floorKey].description.level+";";
       var cellkeyInFloor = floorProperties[floorKey].cellKey;
 
       for (var cellKey in cellkeyInFloor) {
-        var coor = cells[cellkeyInFloor[cellKey]].getCoordinates();
-        if(geoType == '3D') cells[cellkeyInFloor[cellKey]].setWKT(manager.extrudCell(coor, floorProperties[floorKey].celingHeight * 1), '3D');
-        else if(geoType == '2D') cells[cellkeyInFloor[cellKey]].setWKT(coor, '2D');
+        var cellId = cellkeyInFloor[cellKey];
+        var coor = cells[cellId].getCoordinates()[0];
+        if (geoType == '3D') {
+          if (slantMap[cellId] == undefined) cells[cellId].setCoor(manager.extrudeCell(coor, floorProperties[floorKey].celingHeight * 1), '3D');
+          else if (slantMap[cellId] == 'up') cells[cellId].setCoor(manager.extrudeCellWithUpSlant(coor, floorProperties[floorKey].celingHeight * 1), '3D');
+          else if (slantMap[cellId] == 'down') cells[cellId].setCoor(manager.extrudeCellWithDownSlant(coor, floorProperties[floorKey].celingHeight * 1), '3D');
+        } else if (geoType == '2D') cells[cellId].setCoor(coor, '2D');
+
+        // add hole
+        if (holeMap[cellId] != undefined) {
+          for (var holeKey in holeMap[cellId]) {
+            if (geoType == '3D') cells[cellId].addHole(manager.extrudeCell(holeMap[cellId][holeKey], floorProperties[floorKey].celingHeight * 1), '3D');
+            else if (geoType == '2D') cells[cellId].addHole(holeMap[cellId][holeKey], '2D');
+          }
+        }
+
+        cells[cellId].convertCoor2WKT();
+        cells[cellId].setDescription(floorString);
       }
     }
 
@@ -816,11 +882,10 @@ define([
 
         var coor = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
         var coor_reverse = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].getCoordinates();
-        if(geoType == '3D') {
+        if (geoType == '3D') {
           cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setWKT(manager.extrudeCellBoundary(coor, floorProperties[floorKey].doorHeight * 1), '3D');
           cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setWKT(manager.extrudeCellBoundary(coor_reverse, floorProperties[floorKey].doorHeight * 1), '3D');
-        }
-        else if(geoType == '2D') {
+        } else if (geoType == '2D') {
           cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setWKT(coor, '2D');
           cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setWKT(coor_reverse, '2D');
         }
@@ -876,14 +941,19 @@ define([
     for (var floorKey in floorProperties) {
 
       var stateKeyInFloor = floorProperties[floorKey].stateKey;
+      var prtId = "layer-0";
+      for (var nodesKey in nodes) {
+        if (nodes[nodesKey].parentId == floorProperties[floorKey].layer) {
+          prtId = nodes[nodesKey].id;
+          break;
+        }
+      }
 
 
       for (var stateKey in stateKeyInFloor) {
 
         states[stateKeyInFloor[stateKey]].setWKT();
-
-        if (nodes.length == 1) states[stateKeyInFloor[stateKey]].setParentId(nodes[0].id);
-        else states[stateKeyInFloor[stateKey]].setParentId(floorProperties[floorKey].id);
+        states[stateKeyInFloor[stateKey]].setParentId(prtId);
 
       }
     }
@@ -957,6 +1027,26 @@ define([
     return result;
   }
 
+  ExportManager.prototype.interlayerConnectionObj4Factory = function(docId, interEdges) {
+    var result = [];
+    var properties = window.storage.propertyContainer.interlayerConnections;
+
+    for (var key in properties) {
+      var tmp = new FeatureFactory4Factory('InterlayerConnection');
+      tmp.id = properties[key].id;
+      tmp.docId = docId;
+      tmp.parentId = interEdges.id;
+      tmp.setInterConnects(properties[key].interConnects);
+      tmp.setConnectedLayers(properties[key].connectedLayer);
+      tmp.setTopoExpression(properties[key].typeOfTopoExpression);
+      tmp.setComment(properties[key].comment);
+      result.push(tmp);
+    }
+
+    return result;
+
+  }
+
   /**
    * @memberof ExportManager
    */
@@ -992,18 +1082,18 @@ define([
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.extrudCell = function(surface, ch) {
+  ExportManager.prototype.extrudeCell = function(surface, ch) {
 
     var down = surface;
     var up = [];
-    var result = [];
+    var surfaces = [];
 
     for (var i = 0; i < down.length; i++) {
 
       //validation
       if (i != down.length - 1) {
-        if(down[i].toString() == down[i+1].toString()){
-            down.splice(i+1, 1);
+        if (down[i].toString() == down[i + 1].toString()) {
+          down.splice(i + 1, 1);
         }
       }
 
@@ -1012,7 +1102,9 @@ define([
       up.push(tmp);
     }
 
-    result.push(down);
+    surfaces.push([
+      [down]
+    ]);
 
     for (var i = 0; i < down.length - 1; i++) {
 
@@ -1021,20 +1113,167 @@ define([
       var upRigth = JSON.parse(JSON.stringify(up[i + 1]));
       var upLeft = JSON.parse(JSON.stringify(up[i]));
 
-      result.push([downLeft, downRight, upRigth, upLeft, downLeft]);
+      surfaces.push([
+        [
+          [downLeft, downRight, upRigth, upLeft, downLeft]
+        ]
+      ]);
 
     }
 
-    result.push(up);
+    surfaces.push([
+      [up]
+    ]);
 
-    // var tmp = [];
-    // for (var i = 0; i < down.length; i++) {
-    //   tmp.push(down[down.length - i - 1]);
-    // }
-    //
-    // result.push(tmp);
+    return [surfaces];
+  }
 
-    return result;
+  /**
+   * @memberof ExportManager
+   * @desc no floor
+   */
+  ExportManager.prototype.extrudeCellWithUpSlant = function(surface, ch) {
+
+    var down = surface;
+    var up = [];
+    var surfaces = [];
+
+    for (var i = 0; i < down.length; i++) {
+
+      //validation
+      if (i != down.length - 1) {
+        if (down[i].toString() == down[i + 1].toString()) {
+          down.splice(i + 1, 1);
+        }
+      }
+
+      var tmp = JSON.parse(JSON.stringify(down[i]));
+      tmp[2] += ch;
+      up.push(tmp);
+    }
+
+    surfaces.push([
+      [up]
+    ]);
+
+    for (var i = 0; i < down.length - 1; i++) {
+
+      var downLeft, downRight, upRight, upLeft;
+
+      if (i == 1) {
+        downLeft = JSON.parse(JSON.stringify(down[i]));
+        upRight = JSON.parse(JSON.stringify(up[i + 1]));
+        upLeft = JSON.parse(JSON.stringify(up[i]));
+        surfaces.push([
+          [
+            [downLeft, upRight, upLeft, downLeft]
+          ]
+        ]);
+      } else if (i == 2) {
+        /** do nothing */
+      } else if (i == 3) {
+        downRight = JSON.parse(JSON.stringify(down[i + 1]));
+        upRight = JSON.parse(JSON.stringify(up[i + 1]));
+        upLeft = JSON.parse(JSON.stringify(up[i]));
+        surfaces.push([
+          [
+            [downRight, upRight, upLeft, downRight]
+          ]
+        ]);
+      } else {
+        downLeft = JSON.parse(JSON.stringify(down[i]));
+        downRight = JSON.parse(JSON.stringify(down[i + 1]));
+        upRight = JSON.parse(JSON.stringify(up[i + 1]));
+        upLeft = JSON.parse(JSON.stringify(up[i]));
+        surfaces.push([
+          [
+            [downLeft, downRight, upRight, upLeft, downLeft]
+          ]
+        ]);
+      }
+    }
+
+    for (var i = 0; i < down.length; i++) {
+      if (i == 2 || i == 3) down[i] = up[i];
+    }
+
+    surfaces.push([
+      [down]
+    ]);
+
+    return [surfaces];
+  }
+
+  /**
+   * @memberof ExportManager
+   * @desc no ceilling
+   */
+  ExportManager.prototype.extrudeCellWithDownSlant = function(surface, ch) {
+
+    var down = surface;
+    var up = [];
+    var surfaces = [];
+
+    for (var i = 0; i < down.length; i++) {
+
+      //validation
+      if (i != down.length - 1) {
+        if (down[i].toString() == down[i + 1].toString()) {
+          down.splice(i + 1, 1);
+        }
+      }
+
+      var tmp = JSON.parse(JSON.stringify(down[i]));
+      tmp[2] += ch;
+      up.push(tmp);
+    }
+
+    surfaces.push([
+      [down]
+    ]);
+
+    for (var i = 0; i < down.length - 1; i++) {
+
+      var downLeft, downRight, upRight, upLeft;
+      if (i == 0) { /** do nothing */ } else if (i == 1) {
+        downLeft = JSON.parse(JSON.stringify(down[i]));
+        downRight = JSON.parse(JSON.stringify(down[i + 1]));
+        upRight = JSON.parse(JSON.stringify(up[i + 1]));
+        surfaces.push([
+          [
+            [downLeft, downRight, upRight, downLeft]
+          ]
+        ]);
+      } else if (i == 3) {
+        downLeft = JSON.parse(JSON.stringify(down[i]));
+        downRight = JSON.parse(JSON.stringify(down[i + 1]));
+        upLeft = JSON.parse(JSON.stringify(up[i]));
+        surfaces.push([
+          [
+            [downLeft, downRight, upLeft, downLeft]
+          ]
+        ]);
+      } else {
+        downLeft = JSON.parse(JSON.stringify(down[i]));
+        downRight = JSON.parse(JSON.stringify(down[i + 1]));
+        upRight = JSON.parse(JSON.stringify(up[i + 1]));
+        upLeft = JSON.parse(JSON.stringify(up[i]));
+        surfaces.push([
+          [
+            [downLeft, downRight, upRight, upLeft, downLeft]
+          ]
+        ]);
+      }
+    }
+
+    for (var i = 0; i < up.length; i++) {
+      if (i == 0 || i == 1 || i == 4) up[i] = down[i];
+    }
+    surfaces.push([
+      [up]
+    ]);
+
+    return [surfaces];
   }
 
   /**
@@ -1042,7 +1281,7 @@ define([
    */
   ExportManager.prototype.extrudeCellBoundary = function(line, dh) {
 
-    if(line.length > 3){
+    if (line.length > 3) {
       log.info(line);
     }
 
@@ -1095,7 +1334,7 @@ define([
       //function(pixelHeight, pixeWidth, worldURC, worldLLC, point)
 
       var stage = window.storage.canvasContainer.stages[floorProperties[dotFoolKey].id].stage;
-      var height = floorProperties[dotFoolKey].groundHeight*1;
+      var height = floorProperties[dotFoolKey].groundHeight * 1;
       // var pixelLLC = [0, 0, 0];
       // var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
       var worldLLC = [floorProperties[dotFoolKey].lowerCorner[0] * 1, floorProperties[dotFoolKey].lowerCorner[1] * 1, 0];
@@ -1105,11 +1344,25 @@ define([
 
         var transDot = copyDot(dotFools[dotFoolKey].dots[dotKey]);
         var transPoint = manager.affineTransformation(stage.getAttr('height'), stage.getAttr('width'), worldURC, worldLLC, [transDot.point.x, transDot.point.y, 0]);
-        transDot.setPoint({ x: transPoint._data[0], y: transPoint._data[1], z: height});
+        transDot.setPoint({
+          x: transPoint._data[0],
+          y: transPoint._data[1],
+          z: height
+        });
         result[transDot.uuid] = transDot;
 
       }
 
+    }
+
+    //change state height
+    var proeprtyContainer = window.storage.propertyContainer;
+    for (var key in result) {
+      if (result[key].isState()) {
+        var index = Object.values(result[key].memberOf).indexOf('state');
+        var stateId = Object.keys(result[key].memberOf)[index];
+        result[key].point.z += proeprtyContainer.getElementById('state', stateId).height * 1;
+      }
     }
 
     return result;

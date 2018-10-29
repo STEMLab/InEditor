@@ -6,12 +6,14 @@ define([
   "../Object/Cell.js",
   "../Object/CellBoundary.js",
   "../Object/Transition.js",
-  "../Object/Cursor.js"
+  "../Object/Cursor.js",
+  "../Object/Hole.js"
 ], function(
   Cell,
   CellBoundary,
   Transition,
-  Cursor
+  Cursor,
+  Hole
 ) {
   'use strict';
 
@@ -107,6 +109,13 @@ define([
 
       this.obj = new Transition('tmpObj');
       window.tmpObj = this.obj;
+
+    } else if (type == 'hole'){
+
+      this.obj = new Hole('tmpObj');
+      window.tmpObj = this.obj;
+      this.tmpGroup.add(this.obj.getCornersObject());
+      this.tmpGroup.add(this.obj.getPolyObject());
 
     }
 

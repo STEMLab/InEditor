@@ -52,8 +52,9 @@ define([
     /**
      * @memberof PropertyContainer
      */
-    // this.projectProperty = null;
     this.projectProperty = new ProjectProperty();
+
+    this.interlayerConnections = [];
   }
 
   /**
@@ -96,6 +97,11 @@ define([
       case 'transition':
         for (var i = 0; i < path.transitionProperties.length && result == null; i++) {
           if (path.transitionProperties[i].id == _id) result = path.transitionProperties[i];
+        }
+        break;
+      case 'interlayerConnection':
+        for (var i = 0; i < path.interlayerConnections.length && result == null; i++) {
+          if (path.interlayerConnections[i].id == _id) result = path.interlayerConnections[i];
         }
         break;
       default:
@@ -210,12 +216,12 @@ define([
 
       if (path[i].cellKey.length != 0) {
         for (var j = 0; j < path[i].cellKey.length; j++) {
-          var property = this.getElementById('cell', path[i].cellKey[j]);
+          var property = this.addnewinterlayerconnetctionById('cell', path[i].cellKey[j]);
           var cellObj = {
-            title : (property.name == '' ? property.id : property.name),
-            key : property.id,
-            type : 'cell',
-            icon : '../../assets/tree-icon/cell.png'
+            title: (property.name == '' ? property.id : property.name),
+            key: property.id,
+            type: 'cell',
+            icon: '../../assets/tree-icon/cell.png'
           }
           cells.children.push(cellObj);
         }
@@ -224,13 +230,13 @@ define([
 
       if (path[i].cellBoundaryKey.length != 0) {
         for (var j = 0; j < path[i].cellBoundaryKey.length; j++) {
-          var property = this.getElementById('cellBoundary', path[i].cellBoundaryKey[j]);
+          var property = this.addnewByinterlayerconnetctionById('cellBoundary', path[i].cellBoundaryKey[j]);
           var cellBoundaryObj = {
-            title : (property.name == '' ? property.id : property.name),
-            key : property.id,
-            folder : false,
-            type : 'cellBoundary',
-            icon : '../../assets/tree-icon/cellBoundary.png'
+            title: (property.name == '' ? property.id : property.name),
+            key: property.id,
+            folder: false,
+            type: 'cellBoundary',
+            icon: '../../assets/tree-icon/cellBoundary.png'
           };
           cellboundaries.children.push(cellBoundaryObj);
         }
@@ -242,11 +248,11 @@ define([
         for (var j = 0; j < path[i].stateKey.length; j++) {
           var property = this.getElementById('state', path[i].stateKey[j]);
           var stateObj = {
-            title : (property.name == '' ? property.id : property.name),
-            key : property.id,
-            folder : false,
-            type : 'state',
-            icon : '../../assets/tree-icon/state.png'
+            title: (property.name == '' ? property.id : property.name),
+            key: property.id,
+            folder: false,
+            type: 'state',
+            icon: '../../assets/tree-icon/state.png'
           };
           states.children.push(stateObj);
         }
@@ -257,11 +263,11 @@ define([
         var property = this.getElementById('transition', path[i].transitionKey[j]);
         for (var j = 0; j < path[i].transitionKey.length; j++) {
           var transitionObj = {
-            title : (property.name == '' ? property.id : property.name),
-            key : property.id,
-            folder : false,
-            type : 'transition',
-            icon : '../../assets/tree-icon/transition.png'
+            title: (property.name == '' ? property.id : property.name),
+            key: property.id,
+            folder: false,
+            type: 'transition',
+            icon: '../../assets/tree-icon/transition.png'
           };
           transitions.children.push(transitionObj);
         }

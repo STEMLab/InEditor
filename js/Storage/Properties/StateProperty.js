@@ -23,7 +23,12 @@ define([], function() {
     /**
      * @memberof StateProperty
      */
-    this.description = "";
+     this.description = {};
+     var list = window.conditions.descList;
+     for(var l of list){
+       this.description[l] = "";
+     }
+
 
     /**
      * @memberof StateProperty
@@ -34,6 +39,11 @@ define([], function() {
      * @memberof StateProperty
      */
     this.connects = [];
+
+    /**
+     * @memberof StateProperty
+     */
+     this.height = 0;
   }
 
   /**
@@ -46,6 +56,7 @@ define([], function() {
     this.description = values.description;
     this.duality = values.duality;
     this.connects = values.connects;
+    this.height = values.height;
 
   }
 
@@ -71,6 +82,14 @@ define([], function() {
   */
   StateProperty.prototype.addConnects = function(connect){
     this.connects.push(connect);
+  }
+
+  /**
+  * @memberof StateProperty
+  * @param {String} id of connected dot
+  */
+  StateProperty.prototype.setHeight = function(height){
+    this.height = height;
   }
 
   return StateProperty;
