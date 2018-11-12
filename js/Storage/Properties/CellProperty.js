@@ -20,11 +20,11 @@ define([], function() {
     /**
      * @memberof CellProperty
      */
-     this.description = {};
-     var list = window.conditions.descList;
-     for(var l of list){
-       this.description[l] = "";
-     }
+    this.description = {};
+    var list = window.conditions.descList;
+    for (var l of list) {
+      this.description[l] = "";
+    }
 
 
     /**
@@ -41,6 +41,18 @@ define([], function() {
      * @memberof CellProperty
      */
     this.partialboundedBy = [];
+
+    /**
+     * @memberof CellProperty
+     * @desc  NavigableSpace, GeneralSpace, TransferSpace, TransitionSpace, ConnectionSpace, AnchorSpace
+     */
+    this.naviType = "";
+
+    this.navi = {
+      class: "",
+      function: "",
+      usage: ""
+    }
   }
 
   /**

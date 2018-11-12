@@ -60,6 +60,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
   <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
 
+  <!-- layout -->
+  <script src="./lib/split.min.js"></script>
+
 </head>
 
 <body>
@@ -76,7 +79,7 @@
               <a class="dropdown-item" id="project-saveas" data-toggle="modal" data-target="#project-save-as-modal">Save As...</a>
               <hr>
               <a class="dropdown-item disabled" id="project-import" data-toggle="modal" data-target="#project-import-modal">Import</a>
-              <a class="dropdown-item" id="project-export" data-toggle="modal" data-target="#go-factory-modal">Export(.gml)</a>
+              <a class="dropdown-item" id="project-export" data-modaltype="export">Export(.gml)</a>
             </div>
           </li>
           <li class="nav-item dropdown">
@@ -148,13 +151,16 @@
 
 
   <div class="container-fluid">
-    <div class="row">
-      <div class="sidebar">
-        <div class="h-50 tree-view-container" id="tree-view-container"></div>
-        <div class="h-25 property-container" id="property-container"></div>
+    <div class="split-col-container">
+      <div class="split split-col" id="sidebar">
+        <div class="split-row-container">
+          <div class="split split-row tree-view-container" id="tree-view-container"></div>
+          <div class="split split-row property-container" id="property-container"></div>
+        </div>
       </div>
 
-      <div role="main" class="workspace">
+
+      <div role="main" class="split split-col" id="workspace">
         <div id="workspace-layout-container"></div>
         <div id="snackbar"></div>
       </div>
@@ -162,7 +168,8 @@
 
   </div>
 
-  <div class="modal fade" id="go-viewer-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+  <div class="ui modal" id="go-viewer-modal">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-body">
@@ -187,224 +194,224 @@
     </div>
   </div>
 
-  <div class="modal fade" id="go-factory-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Export to IndoorGML</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        </div>
+  <div class="ui modal small " id="go-factory-modal">
 
-        <div id="go-factory-modal-body-to-footer-before" class="">
-          <div class="modal-body">
-            <h6>Communication Options</h6>
-            <div class="form-group">
-              <label for="factory-baseURL">Base URL</label>
-              <input type="text" class="form-control" id="factory-baseURL" value="http://127.0.0.1">
-            </div>
-            <div class="form-group">
-              <label for="factory-portNum">Port Number</label>
-              <input type="number" class="form-control" id="factory-portNum" value="9797">
-            </div>
-            <hr>
-            <h6>Export Options</h6>
+    <div class="header">Export to IndoorGML</div>
 
-            <div class="form-group">
-              <label for="factory-geometry-type-container"><b>Geometry Type</b></label>
-              <form class="row" id="factory-geometry-type-container">
-                <div class="radio col-md-6 my-radio">
-                  <label class="form-check-label" title="CellSpace : Surface, CellSpaceBoundary : LineString">
-                    <input class="form-check-input" type="radio" name="optradio" id="factory-geometry-type-2D">Geomety 2D</label>
-                </div>
-                <div class="radio col-md-6 my-radio">
-                  <label class="form-check-label" title="CellSpace : Solid, CellSpaceBoundary : Surface">
-                    <input class="form-check-input" type="radio" name="optradio" id="factory-geometry-type-3D" checked>
-                    Geomety 3D
-                  </label>
-                </div>
-              </form>
-            </div>
-
-            <div class="form-group">
-              <label for="factory-geometry-type-container"><b>Multi-Layer Option</b></label>
-              <div class="row" id="factory-geometry-type-container">
-                <div class="radio col-md-6 my-radio">
-                  <label class="form-check-label">
-                    <input class="form-check-input" type="radio" name="optradio" id="factory-multilayer-one" checked>
-                    only one layer
-                  </label>
-                </div>
-
-                <div class="radio col-md-6 my-radio">
-                  <label class="form-check-label">
-                    <input class="form-check-input" type="radio" name="optradio" id="factory-multilayer-multi" disabled>
-                    make multi-layer
-                  </label>
-                </div>
-              </div>
-            </div>
-
-
-
-            <div class="form-group">
-              <b>Propeties</b>
-
-              <div class="row">
-
-                <div class="col-md-6">
-                  <div class="p-2 text-center">CellSpace</div>
-                  <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-name" checked>
-                    <label class="form-check-label" for="factory-property-cell-name">
-                          name
-                        </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-description" checked>
-                    <label class="form-check-label" for="factory-property-cell-description">
-                          description
-                        </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-partialboundedBy" checked>
-                    <label class="form-check-label" for="factory-property-cell-partialboundedBy">
-                          partialboundedBy
-                        </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-externalReference" checked>
-                    <label class="form-check-label" for="factory-property-cell-externalReference">
-                          externalReference
-                        </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-duality" checked>
-                    <label class="form-check-label" for="factory-property-cell-duality">
-                          duality
-                        </label>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-                  <div class="p-2 text-center">CellSpaceBoundary</div>
-                  <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-name" checked>
-                    <label class="form-check-label" for="factory-property-cellbondary-name">
-                        name
-                      </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-description" checked>
-                    <label class="form-check-label" for="factory-property-cellbondary-description">
-                        description
-                      </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-partialboundedBy" checked>
-                    <label class="form-check-label" for="factory-property-cellbondary-partialboundedBy">
-                        partialboundedBy
-                      </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-externalReference" checked>
-                    <label class="form-check-label" for="factory-property-cellbondary-externalReference">
-                        externalReference
-                      </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-duality" checked>
-                    <label class="form-check-label" for="factory-property-cellbondary-duality">
-                        duality
-                      </label>
-                  </div>
-                </div>
-
-              </div>
-
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="p-2 text-center">State</div>
-                  <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-state-name" checked>
-                    <label class="form-check-label" for="factory-property-state-name">
-                            name
-                          </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-state-description" checked>
-                    <label class="form-check-label" for="factory-property-state-description">
-                            description
-                          </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-state-duality" checked>
-                    <label class="form-check-label" for="factory-property-state-duality">
-                            duality
-                          </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-state-connects" checked>
-                    <label class="form-check-label" for="factory-property-state-connects">
-                            connects
-                          </label>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-
-                  <div class="p-2 text-center">Transition</div>
-                  <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-name" checked>
-                    <label class="form-check-label" for="factory-property-transition-name">name</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-description" checked>
-                    <label class="form-check-label" for="factory-property-transition-description">
-                              description
-                            </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-duality" checked>
-                    <label class="form-check-label" for="factory-property-transition-duality">
-                              duality
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-weight" checked>
-                    <label class="form-check-label" for="factory-property-transition-weight">
-                              weight
-                    </label>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <middle id="uriHelp" class="form-text text-muted">Base URL:Port Number/ </middle>
-            <button type="button" class="btn btn-primary" id="viewer-factory-btn" aria-label="Close">Export</button>
-          </div>
-        </div>
-
-        <div id="go-factory-modal-body-to-footer-loading" class="d-none">
-          <img src="./assets/icon/ajax-loader.gif" class="mx-auto d-block p-5" />
-        </div>
-
-        <div id="go-factory-modal-body-to-footer-down" class="d-none">
-          <a id="gml-down-link" href="./assets/icon/cell_a.png" class="mx-auto d-block p-3 text-center" download>
-            <h6>Download</h6>
-          </a>
-        </div>
-
+    <div class="scrolling content">
+      <h5 class="ui horizontal divider header">
+        Communication Options
+      </h5>
+      <div class="form-group">
+        <label for="factory-baseURL">Base URL</label>
+        <input type="text" class="form-control" id="factory-baseURL" value="http://127.0.0.1">
+      </div>
+      <div class="form-group">
+        <label for="factory-portNum">Port Number</label>
+        <input type="number" class="form-control" id="factory-portNum" value="9797">
       </div>
 
 
+      <h5 class="ui horizontal divider header">
+        Export Option
+      </h5>
+
+      <div class="form-group">
+        <label for="factory-geometry-type-container"><b>Geometry Type</b></label>
+        <form class="row" id="factory-geometry-type-container">
+          <div class="radio col-md-6 my-radio">
+            <label class="form-check-label" title="CellSpace : Surface, CellSpaceBoundary : LineString">
+                    <input class="form-check-input" type="radio" name="optradio" id="factory-geometry-type-2D">Geomety 2D</label>
+          </div>
+          <div class="radio col-md-6 my-radio">
+            <label class="form-check-label" title="CellSpace : Solid, CellSpaceBoundary : Surface">
+                    <input class="form-check-input" type="radio" name="optradio" id="factory-geometry-type-3D" checked>
+                    Geomety 3D
+                  </label>
+          </div>
+        </form>
+      </div>
+
+      <div class="form-group">
+        <label for="factory-geometry-type-container"><b>Multi-Layer Option</b></label>
+        <div class="row" id="factory-geometry-type-container">
+          <div class="radio col-md-6 my-radio">
+            <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="optradio" id="factory-multilayer-one" checked>
+                    only one layer
+                  </label>
+          </div>
+
+          <div class="radio col-md-6 my-radio">
+            <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="optradio" id="factory-multilayer-multi" disabled>
+                    make multi-layer
+                  </label>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="form-group">
+        <b>Propeties</b>
+
+        <div class="row">
+
+          <div class="col-md-6">
+            <div class="p-2 text-center">CellSpace</div>
+            <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-name" checked>
+              <label class="form-check-label" for="factory-property-cell-name">
+                          name
+                        </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-description" checked>
+              <label class="form-check-label" for="factory-property-cell-description">
+                          description
+                        </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-partialboundedBy" checked>
+              <label class="form-check-label" for="factory-property-cell-partialboundedBy">
+                          partialboundedBy
+                        </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-externalReference" checked>
+              <label class="form-check-label" for="factory-property-cell-externalReference">
+                          externalReference
+                        </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-duality" checked>
+              <label class="form-check-label" for="factory-property-cell-duality">
+                          duality
+                        </label>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="p-2 text-center">CellSpaceBoundary</div>
+            <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-name" checked>
+              <label class="form-check-label" for="factory-property-cellbondary-name">
+                        name
+                      </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-description" checked>
+              <label class="form-check-label" for="factory-property-cellbondary-description">
+                        description
+                      </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-partialboundedBy" checked>
+              <label class="form-check-label" for="factory-property-cellbondary-partialboundedBy">
+                        partialboundedBy
+                      </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-externalReference" checked>
+              <label class="form-check-label" for="factory-property-cellbondary-externalReference">
+                        externalReference
+                      </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-duality" checked>
+              <label class="form-check-label" for="factory-property-cellbondary-duality">
+                        duality
+                      </label>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="p-2 text-center">State</div>
+            <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-state-name" checked>
+              <label class="form-check-label" for="factory-property-state-name">
+                            name
+                          </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-state-description" checked>
+              <label class="form-check-label" for="factory-property-state-description">
+                            description
+                          </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-state-duality" checked>
+              <label class="form-check-label" for="factory-property-state-duality">
+                            duality
+                          </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-state-connects" checked>
+              <label class="form-check-label" for="factory-property-state-connects">
+                            connects
+                          </label>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+
+            <div class="p-2 text-center">Transition</div>
+            <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-name" checked>
+              <label class="form-check-label" for="factory-property-transition-name">name</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-description" checked>
+              <label class="form-check-label" for="factory-property-transition-description">
+                              description
+                            </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-duality" checked>
+              <label class="form-check-label" for="factory-property-transition-duality">
+                              duality
+                    </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-weight" checked>
+              <label class="form-check-label" for="factory-property-transition-weight">
+                              weight
+                    </label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="ui right pointing basic label">Base URL:Port Number/</a>
+      <div class="ui button" id="viewer-factory-btn">Export</div>
+      <div class="ui cancel button">Cancel</div>
+    </div>
+  </div>
+
+  <div class="ui modal small" id="go-factory-loading">
+    <div class="header">Export to IndoorGML</div>
+    <div class="content">
+      <img class="ui centered image" src="./assets/icon/ajax-loader.gif">
+    </div>
+  </div>
+
+  <div class="ui modal small" id="go-factory-download">
+    <div class="header">Export to IndoorGML</div>
+    <div class="content">
+      <a id="gml-down-link" href="./assets/icon/cell_a.png" class="mx-auto d-block p-3 text-center" download>
+        <h6>Download</h6>
+      </a>
     </div>
   </div>
 

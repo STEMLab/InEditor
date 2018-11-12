@@ -25,11 +25,15 @@ define([
       'click': this.clickPropertySubmitBtn
     }
 
-    handlerBinder['property-ref-subimt-btn'] = {
+    handlerBinder['property-ref-submit-btn'] = {
       'click': this.clickPropertRefySubmitBtn
     }
 
-    handlerBinder['setting-conditions-sumit-btn'] = {
+    handlerBinder['property-navi-submit-btn'] = {
+      'click': this.clickNaviSubmitBtn
+    }
+
+    handlerBinder['setting-conditions-submit-btn'] = {
       'click': this.addDescList
     }
 
@@ -116,20 +120,21 @@ define([
           'name': document.getElementById("name-text").value,
           'date': document.getElementById("date-text").value,
           'author': document.getElementById("author-text").value,
-          'description': document.getElementById("description-text").value
+          'description': {}
         };
         break;
       case 'floor':
         result = {
           'name': document.getElementById("name-text").value,
           'layer': document.getElementById("layer-text").value,
-          'lowerCorner': [document.getElementById("lower-corner-x").value, document.getElementById("lower-corner-y").value],
-          'upperCorner': [document.getElementById("upper-corner-x").value, document.getElementById("upper-corner-y").value],
+          'lowerCorner': [document.getElementById("lower-corner-x-text").value, document.getElementById("lower-corner-y-text").value],
+          'upperCorner': [document.getElementById("upper-corner-x-text").value, document.getElementById("upper-corner-y-text").value],
           'groundHeight': document.getElementById("ground-height-text").value,
           'celingHeight': document.getElementById("celing-height-text").value,
           'doorHeight': document.getElementById("door-height-text").value,
           'description': {}
         };
+
         var id = document.getElementById("id-text").value;
         var descList = window.storage.propertyContainer.getElementById('floor', id).description;
         for(var key in descList){
@@ -140,8 +145,15 @@ define([
       case 'cell':
         result = {
           'name': document.getElementById("name-text").value,
-          'description': document.getElementById("description-text").value
+          'description': {}
         };
+
+        var id = document.getElementById("id-text").value;
+        var descList = window.storage.propertyContainer.getElementById('cell', id).description;
+        for(var key in descList){
+          result.description[key] = document.getElementById("desc-text-"+key).value;
+        }
+
         break;
       case 'ref':
         result = {
@@ -151,22 +163,44 @@ define([
       case 'cellBoundary':
         result = {
           'name': document.getElementById("name-text").value,
-          'description': document.getElementById("description-text").value
+          'naviType': document.getElementById("navi-text").value,
+          'description': {}
         };
+
+        var id = document.getElementById("id-text").value;
+        var descList = window.storage.propertyContainer.getElementById('cellBoundary', id).description;
+        for(var key in descList){
+          result.description[key] = document.getElementById("desc-text-"+key).value;
+        }
+
         break;
       case 'state':
         result = {
           'name': document.getElementById("name-text").value,
-          'description': document.getElementById("description-text").value,
+          'description': {},
           'height': document.getElementById("height-text").value
         };
+
+        var id = document.getElementById("id-text").value;
+        var descList = window.storage.propertyContainer.getElementById('state', id).description;
+        for(var key in descList){
+          result.description[key] = document.getElementById("desc-text-"+key).value;
+        }
+
         break;
       case 'transiton':
         result = {
           'name': document.getElementById("name-text").value,
           'weight': document.getElementById("weight-text").value,
-          'description': document.getElementById("description-text").value
+          'description': {}
         };
+
+        var id = document.getElementById("id-text").value;
+        var descList = window.storage.propertyContainer.getElementById('transition', id).description;
+        for(var key in descList){
+          result.description[key] = document.getElementById("desc-text-"+key).value;
+        }
+
         break;
       case 'interlayerConnection':
         result = {
@@ -202,6 +236,49 @@ define([
     } else {
 
       result.msg = "wrong state transition : " + previousMsg + " to adddesclist.";
+
+    }
+
+    return result;
+  }
+
+  PropertyEventHandler.prototype.clickNaviSubmitBtn = function(broker, previousMsg){
+    var result = new Object;
+
+    if (broker.isPublishable('updateproperty')) {
+      var type = document.getElementById("navi-text").value;
+      if(type == "" || type == "selected") type = "";
+
+      var data = {
+        'naviType': type,
+        'navi':{
+          'class': "",
+          'function': "",
+          'usage': ""
+        }
+      };
+
+      if(data.naviType != "" && data.naviType != "selected"){
+        data.navi.class = document.getElementById("class-text").value
+        data.navi.function = document.getElementById("function-text").value
+        data.navi.usage = document.getElementById("usage-text").value
+      }
+
+      broker.publish(new Message('updateproperty', {
+        "type": document.getElementById("property-table").getAttribute("type"),
+        "id": document.getElementById("id-text").value,
+        "isNavi": true,
+        "updateContent": data
+      }));
+
+      result = {
+        'result': true,
+        'msg': null
+      };
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to updateproperty.";
 
     }
 

@@ -102,12 +102,19 @@ define([
         obj.description = reqObj.updateContent.description;
         break;
       case 'cell':
-        obj.name = reqObj.updateContent.name;
-        obj.description = reqObj.updateContent.description;
+        if(reqObj.updateContent.name == undefined){
+          obj.naviType = reqObj.updateContent.naviType;
+          obj.navi = reqObj.updateContent.navi;
+        }
+        else {
+          obj.name = reqObj.updateContent.name;
+          obj.description = reqObj.updateContent.description;
+        }
         break;
       case 'cellBoundary':
         obj.name = reqObj.updateContent.name;
         obj.description = reqObj.updateContent.description;
+        obj.naviType = reqObj.updateContent.naviType;
         break;
       case 'state':
         obj.name = reqObj.updateContent.name;
@@ -461,7 +468,7 @@ define([
       "UIManager"
     ).updateDescList();
 
-    
+
   }
 
 

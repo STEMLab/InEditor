@@ -6,6 +6,7 @@
   --workspace-bg-color: black;
   --viewport-bg-color: #eaeaea;
   --property-tab-title-color: #eaeaea;
+  --property-tab-value-color: #d0d0d0;
   --sidebar-width: 17rem;
   --property-container-width: 16.5rem;
   --property-container-title-width: 3rem;
@@ -30,6 +31,12 @@ html {
   height: 100%;
 }
 
+/* body {
+  padding-top: 1.8rem;
+  font-size: 12px;
+  height: 100%;
+} */
+
 body {
   padding-top: 1.8rem !important;
   font-size: 12px !important;
@@ -38,7 +45,7 @@ body {
 }
 
 .navbar {
-  height: 1.8rem;
+  max-height: 1.8rem;
 }
 
 .navbar img {
@@ -55,7 +62,7 @@ body {
 }
 
 .toolbar {
-  max-height: 2.2rem;
+  max-height: 2.0rem;
   border-top: solid 0.01rem #e5e5e5f5;
   background-color: var(--toolbar-bg-color);
 }
@@ -69,31 +76,19 @@ body {
 /*
  * Sidebar
  */
-
-.sidebar {
-  background-color: var(--sidebar-bg-color);
-  position: fixed;
-  top: 3.8rem;
-  bottom: 0;
-  left: 0;
-  z-index: 1000;
-  padding-top: 0.7rem;
-  padding-bottom: 0.7rem;
-  padding-right: 0.8rem;
-  padding-left: 0;
-  width: var(--sidebar-width);
-  overflow-x: auto;
-  overflow-y: auto;
-  border: none;
-}
+ .sidebar{
+   height: -webkit-fill-available;
+ }
 
 .tree-view-container {
   background: var(--treeview-bg-color);
-  min-height: 2.0rem;
-  margin: 0.5rem;
-  border-radius: 0.3rem;
-  max-height: 50rem;
-  overflow-y: auto;
+  /* min-height: 2.0rem; */
+  /* margin: 0.5rem; */
+  /* border-radius: 0.3rem; */
+  /* max-height: 50rem; */
+  margin-left: 0.5rem;
+  margin-top: 0.5rem;
+  overflow-y: hidden  ;
 }
 
 .tree-view-container ul {
@@ -102,8 +97,22 @@ body {
   color: #e5e5e5;
 }
 
-.tree-view{
-  padding-top: 0.8rem;
+.lm_items {
+  width: -webkit-fill-available !important;
+}
+
+.lm_item_container {
+  width: -webkit-fill-available !important;
+  overflow-y: auto;
+}
+
+.lm_content {
+  width: -webkit-fill-available !important;
+  height: inherit !important;
+  padding-top: .8rem;
+  padding-left: .3rem;
+  padding-right: .3rem;
+  padding-bottom: .8rem;
 }
 
 .fancytree-icon {
@@ -113,9 +122,11 @@ body {
 .property-container {
   position: relative;
   background: var(--treeview-bg-color);
-  min-height: 2.0rem;
-  margin: 0.5rem;
-  border-radius: 0.1rem;
+  margin-left: 0.5rem;
+  margin-bottom: .5rem;
+  /* min-height: 2.0rem; */
+  /* margin: 0.5rem; */
+  /* border-radius: 0.1rem; */
 }
 
 .property-container .lm_content {
@@ -128,16 +139,12 @@ body {
   width: 20%;
 }
 
-.property-container input[type=checkbox] {
-  width: 20%;
+.property-container label {
+  width: 50%;
 }
 
-
-
-.property-table {
-  position: absolute;
-  table-layout: fixed;
-  width: 100%;
+.property-container td{
+  padding: .3rem !important;
 }
 
 input[id="floorplan-file"] {
@@ -146,7 +153,7 @@ input[id="floorplan-file"] {
 }
 
 td input {
-  width: 100%;
+  width: 90%;
   left: 0;
 }
 
@@ -155,11 +162,14 @@ td select {
   left: 0;
 }
 
+.property-table {
+  background-color: rgba( 255, 255, 255, 0 ) !important;
+}
+
 .property-table .submit-btn {
   background-color: var(--treeview-bg-color);
   color: white;
   border: solid 0.001rem #5e5e5e;
-  width: 90%;
   margin: 0.2rem;
   text-align: center;
 }
@@ -167,12 +177,8 @@ td select {
 .property-table .inner-tag {
   font-weight: bold;
   text-align: center;
-  width: 10%;
 }
 
-.property-table .inner-value {
-  width: 60%;
-}
 
 .property-table .title {
   color: var(--property-tab-title-color);
@@ -184,14 +190,30 @@ td select {
 }
 
 .property-table .value {
-  color: var(--property-tab-title-color);
-  font-weight: bold;
   text-align: left;
   width: 70%;
+  vertical-align: middle !important;
 }
 
-.property-table textarea {
-  width: 90%;
+.property-table .value input{
+  color: var(--property-tab-value-color) !important;
+  font-weight: lighter;
+}
+
+.property-table .button{
+  background-color: rgba( 255, 255, 255, 0 ) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.property-table .divider{
+  margin-top: .2rem !important;
+  margin-bottom: .2rem !important;
+}
+
+
+.property-table .input{
+  width: 100%;
 }
 
 /* custom scrollbar */
@@ -223,37 +245,82 @@ td select {
 }
 
 /*
- * Workspace
+* content
+*/
+
+.container-fluid {
+  position: fixed;
+  top: 3.8rem;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.gutter {
+  background-color: var(--workspace-bg-color);
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+
+.split-col-container {
+  height: -webkit-fill-available;
+}
+
+.split-col, .gutter.gutter-horizontal {
+  float: left;
+  height: inherit;
+}
+
+.split-row-container {
+  position: fixed;
+  top: 3.8rem;
+  bottom: 0;
+  width: inherit;
+  background-color: var(--workspace-bg-color);
+}
+
+.gutter.gutter-horizontal {
+  cursor: ew-resize;
+}
+
+.gutter.gutter-vertical {
+  cursor: ns-resize;
+}
+
+/*
+ * Sidebar
  */
 
 .workspace {
-  position: fixed;
-  left: 17rem;
-  right: 0;
-  top: 3.8rem;
-  bottom: 0;
-  z-index: 1000;
   padding-top: 0.7rem;
   padding-bottom: 0.7rem;
   padding-right: 0.8rem;
-  padding-left: 0;
-  overflow-x: auto;
-  overflow-y: auto;
   background-color: var(--workspace-bg-color);
 }
 
 #workspace-layout-container {
-  height: 100%;
+  height: inherit;
   width: 100%;
-  overflow: hidden;
+  overflow: auto;
+  padding-bottom: .7rem;
+  padding-right: .8rem;
 }
 
 #workspace-layout-container .lm_items {
   background-color: #222222;
+  width: 100% !important;
+}
+
+.lm_item {
+  width: 100% !important;
 }
 
 #workspace-layout-container .lm_item_container {
-  overflow: hidden;
+  overflow: auto;
+  width: 100% !important;
 }
 
 #workspace-layout-container .canvas {
@@ -366,20 +433,4 @@ a.disabled {
 
 .my-radio label {
   padding-left: 1.2rem;
-}
-
-.dropdown-menu>li>a {
-  display: block;
-  padding: 3px 20px;
-  clear: both;
-  font-weight: 400;
-  line-height: 1.42857143;
-  color: #333;
-  white-space: nowrap;
-}
-
-.modal-body button{
-  margin: 0;
-  padding-left: 0.5rem;
-  padding-right: 1rem;
 }

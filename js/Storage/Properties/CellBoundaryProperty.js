@@ -39,6 +39,17 @@ define([], function() {
      */
     this.externalReference = [];
 
+    /**
+     * @memberof CellBoundaryProperty
+     * @desc  NavigableBoundary, TansferBoundary, ConnectionBoundary, AnchorBoundary
+     */
+     this.naviType = "";
+
+     this.navi = {
+       class: "",
+       function: "",
+       usage: ""
+     }
   }
 
   /**

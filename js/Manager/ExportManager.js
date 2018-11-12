@@ -373,10 +373,8 @@ define([
 
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
     manager.getExportConditionFromModal();
-
-    $('#go-factory-modal-body-to-footer-before').addClass('d-none');
-    $('#go-factory-modal-body-to-footer-loading').removeClass('d-none');
-    $('#go-factory-modal-body-to-footer-down').addClass('d-none');
+    $('#go-factory-modal').modal('hide');
+    $('#go-factory-loading').modal('show');
 
     var result = {};
 
@@ -432,6 +430,12 @@ define([
       'post-indoorfeatures': baseURL + '/documents/' + document.id + '/indoorfeatures/' + indoorfeatures.id,
       'post-primalspacefeatures': baseURL + '/documents/' + document.id + '/primalspacefeatures/' + primalspacefeatures.id,
       'post-cell': baseURL + '/documents/' + document.id + '/cellspace/',
+      'post-navigablespace': baseURL + '/documents/' + document.id + '/navigablespace/',
+      'post-generalspace': baseURL + '/documents/' + document.id + '/generalspace/',
+      'post-transferspace': baseURL + '/documents/' + document.id + '/transferspace/',
+      'post-transitionspace': baseURL + '/documents/' + document.id + '/transitionspace/',
+      'post-connectionspace': baseURL + '/documents/' + document.id + '/connectionspace/',
+      'post-anchorspace': baseURL + '/documents/' + document.id + '/anchorspace/',
       'post-cellspaceboundary': baseURL + '/documents/' + document.id + '/cellspaceboundary/',
       'post-multiLayeredGraph': baseURL + '/documents/' + document.id + '/multilayeredgraph/' + multiLayeredGraph.id,
       'post-spacelayers': baseURL + '/documents/' + document.id + '/spacelayers/' + spaceLayers.id,
@@ -442,6 +446,7 @@ define([
       'post-transition': baseURL + '/documents/' + document.id + '/transition/',
       'post-interEdges': baseURL + '/documents/' + document.id + '/interedges/' + interEdges.id,
       'post-interlayerConnection': baseURL + '/documents/' + document.id + '/interlayerconnection/',
+
       'get-document': baseURL + '/documents/' + document.id
     };
 
@@ -449,13 +454,39 @@ define([
 
     manager.postJson(address['post-document'], JSON.stringify(document));
 
-    if (cells.length != 0 || cellBoundaries.length != 0) {
+    if (cells.cell.length != 0 ||
+      cells.navigableSpace.length != 0 ||
+      cells.generalSpace.length != 0 ||
+      cells.transferSpace.length != 0 ||
+      cells.transitionSpace.length != 0 ||
+      cells.connectionSpace.length != 0 ||
+      cells.anchorSpace.length != 0 ||
+      cellBoundaries.length != 0) {
 
       manager.postJson(address['post-indoorfeatures'], JSON.stringify(indoorfeatures));
       manager.postJson(address['post-primalspacefeatures'], JSON.stringify(primalspacefeatures));
 
-      for (var i = 0; i < cells.length; i++)
-        manager.postJson(address['post-cell'] + cells[i].id, JSON.stringify(cells[i]));
+      for (var i = 0; i < cells.cell.length; i++)
+        manager.postJson(address['post-cell'] + cells.cell[i].id, JSON.stringify(cells.cell[i]));
+
+      for (var i = 0; i < cells.navigableSpace.length; i++)
+        manager.postJson(address['post-navigablespace'] + cells.navigableSpace[i].id, JSON.stringify(cells.navigableSpace[i]));
+
+      for (var i = 0; i < cells.generalSpace.length; i++)
+        manager.postJson(address['post-generalspace'] + cells.generalSpace[i].id, JSON.stringify(cells.generalSpace[i]));
+
+      for (var i = 0; i < cells.transferSpace.length; i++)
+        manager.postJson(address['post-transferspace'] + cells.transferSpace[i].id, JSON.stringify(cells.transferSpace[i]));
+
+      for (var i = 0; i < cells.transitionSpace.length; i++)
+        manager.postJson(address['post-transitionspace'] + cells.transitionSpace[i].id, JSON.stringify(cells.transitionSpace[i]));
+
+      for (var i = 0; i < cells.connectionSpace.length; i++)
+        manager.postJson(address['post-connectionspace'] + cells.connectionSpace[i].id, JSON.stringify(cells.connectionSpace[i]));
+
+      for (var i = 0; i < cells.anchorSpace.length; i++)
+        manager.postJson(address['post-anchorspace'] + cells.anchorSpace[i].id, JSON.stringify(cells.anchorSpace[i]));
+
 
       for (var i = 0; i < cellBoundaries.length; i++)
         manager.postJson(address['post-cellspaceboundary'] + cellBoundaries[i].id, JSON.stringify(cellBoundaries[i]));
@@ -550,9 +581,8 @@ define([
         getXhr.onreadystatechange = function() {
 
           if (getXhr.readyState == 4 && getXhr.status == 200) {
-            $('#go-factory-modal-body-to-footer-before').addClass('d-none');
-            $('#go-factory-modal-body-to-footer-loading').addClass('d-none');
-            $('#go-factory-modal-body-to-footer-down').removeClass('d-none');
+            // $('#go-factory-loading').modal('hide');
+            $('#go-factory-download').modal('show');
 
             // download gml
             window.document.getElementById('gml-down-link').href = 'http://127.0.0.1:8080/' + getXhr.responseText;
@@ -729,7 +759,7 @@ define([
   ExportManager.prototype.cellObj4VFactory = function(docId, parentId, transDot) {
 
     var cells = {};
-    var result = [];
+
     var conditions = window.conditions.exportConditions.CellSpace;
     var geometries = window.storage.geometryContainer.cellGeometry;
     var properties = window.storage.propertyContainer.cellProperties;
@@ -746,13 +776,19 @@ define([
 
     // copy geometry coordinates
     for (var key in geometries) {
+      var tmp;
 
-      var tmp = new FeatureFactory4Factory('CellSpace', conditions);
+      // if (geometries[key].naviType == "")
+        tmp = new FeatureFactory4Factory('CellSpace', conditions);
+      // else
+        // tmp = new FeatureFactory4Factory('NavigableSpace', conditions);
+
       tmp.setId(geometries[key].id);
       tmp.setDocId(docId);
       tmp.setParentId(parentId);
       tmp.setGeometryId("CG-" + geometries[key].id);
       tmp.pushCoordinatesFromDots(geometries[key].points, transDot);
+
       cells[geometries[key].id] = tmp;
 
       if (geometries[key].slant != null) slantMap[geometries[key].id] = geometries[key].slant;
@@ -767,7 +803,14 @@ define([
       if (conditions.properties.description) cells[id].setDescription(properties[key].description);
       if (conditions.properties.partialboundedBy) cells[id].setPartialboundedBy(properties[key].partialboundedBy);
       if (conditions.properties.externalReference) cells[id].setExternalReference(properties[key].externalReference);
-      if (conditions.properties.duality) cells[id].setDuality(properties[key].duality);
+      if (conditions.properties.duality) cells[id].setDuality(properties[key].duality);3
+
+      if (cells[id].type == "NavigableSpace") {
+        cells[id].setType(properties[key].naviType);
+        cells[id].setClass(properties[key].navi.class);
+        cells[id].setFunction(properties[key].navi.function);
+        cells[id].setUsage(properties[key].navi.usage);
+      }
 
     }
 
@@ -791,7 +834,6 @@ define([
 
     // pixel to real world coordinates
     for (var floorKey in floorProperties) {
-      var floorString = "level="+floorProperties[floorKey].description.level+";";
       var cellkeyInFloor = floorProperties[floorKey].cellKey;
 
       for (var cellKey in cellkeyInFloor) {
@@ -812,14 +854,31 @@ define([
         }
 
         cells[cellId].convertCoor2WKT();
-        cells[cellId].setDescription(floorString);
       }
     }
 
+    var result = {
+      'cell': [],
+      'navigableSpace': [],
+      'generalSpace': [],
+      'transferSpace': [],
+      'transitionSpace': [],
+      'connectionSpace': [],
+      'anchorSpace': []
+    };
+
     for (var key in cells) {
       cells[key].simplify();
-      result.push(cells[key]);
+      if (cells[key].type == "CellSpace") result.cell.push(cells[key]);
+      else if (cells[key].type == "NavigableSpace") result.navigableSpace.push(cells[key]);
+      else if (cells[key].type == "GeneralSpace") result.generalSpace.push(cells[key]);
+      else if (cells[key].type == "TransferSpace") result.transferSpace.push(cells[key]);
+      else if (cells[key].type == "TransitionSpace") result.transitionSpace.push(cells[key]);
+      else if (cells[key].type == "ConnectionSpace") result.connectionSpace.push(cells[key]);
+      else if (cells[key].type == "AnchorSpace") result.anchorSpace.push(cells[key]);
     }
+
+    log.info(result);
 
     return result;
 

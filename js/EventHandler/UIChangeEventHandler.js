@@ -40,12 +40,17 @@ define([
       'change': this.floorplanUpload
     };
 
-    handlerBinder['project-export'] = {
-      'click': this.showFactoryExportModal
-    };
 
     handlerBinder['setting-desc'] = {
       'click': this.updateDescList
+    };
+
+    handlerBinder['navi-text'] = {
+      'change' : this.showNaviAttr
+    };
+
+    handlerBinder['project-export'] = {
+      'click': this.showModal
     };
 
 
@@ -55,21 +60,6 @@ define([
     // }
   }
 
-  UIChangeEventHandler.prototype.showFactoryExportModal = function(broker, previousMsg) {
-
-    var result = new Result();
-    if (broker.isPublishable('showfactoryexportmodal')) {
-
-      broker.publish(new Message('showfactoryexportmodal', {}));
-
-      result.result = true;
-      result.msg = 'showfactoryexportmodal';
-
-    }
-
-    return result;
-
-  }
 
   /**
    * @desc When tree view clicked `activateworkspace` and `setpropertyview` can publish.
@@ -276,6 +266,65 @@ define([
     return result;
   }
 
+  UIChangeEventHandler.prototype.showNaviAttr = function(broker, previousMsg, data){
+    var result = new Result;
+    var pre = data.target.dataset.pre;
+
+    if(pre == "" && data.target.value != "" && data.target.value != "selected"){
+      var table = document.getElementById("property-navi-table").childNodes[0];
+      var btn = table.childNodes[1];
+      table.removeChild(btn);
+
+      var classTr = document.createElement("tr");
+      classTr.innerHTML = "<td class=\"title\">class</td><td class=\"value\"><input id=\"class-text\" type=\"text\" value=\"\"></td>";
+      var functionTr = document.createElement("tr");
+      functionTr.innerHTML = "<td class=\"title\">function</td><td class=\"value\"><input id=\"function-text\" type=\"text\" value=\"\"></td>";
+      var usageTr = document.createElement("tr");
+      usageTr.innerHTML = "<td class=\"title\">usage</td><td class=\"value\"><input id=\"usage-text\" type=\"text\" value=\"\"></td>";
+
+      table.appendChild(classTr);
+      table.appendChild(functionTr);
+      table.appendChild(usageTr);
+      table.appendChild(btn);
+      document.getElementById("navi-text").dataset.pre = data.target.value;
+    }
+    else if(pre != "" && (data.target.value == "" || data.target.value == "selected")){
+
+      var table = document.getElementById("property-navi-table").childNodes[0];
+      var len = table.childNodes.length;
+      while(table.childNodes.length > 2){
+        table.removeChild(table.childNodes[1]);
+      }
+      document.getElementById("navi-text").dataset.pre = "";
+    }
+
+
+
+    log.info(document.getElementById("navi-text"));
+    result = {
+      'result': true,
+      'msg': null
+    };
+
+    return result;
+  }
+
+  UIChangeEventHandler.prototype.showModal = function(broker, previousMsg, data){
+    switch (data.target.dataset.modaltype) {
+      case 'export':
+        $('#go-factory-modal').modal('show');
+        break;
+      default:
+
+    }
+
+    var result = {
+      'result': true,
+      'msg': null
+    };
+
+    return result;
+  }
 
 
   return UIChangeEventHandler;

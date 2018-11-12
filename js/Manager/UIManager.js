@@ -110,7 +110,8 @@ define([
    */
   UIManager.prototype.updateProperty = function(reqObj) {
 
-    window.uiContainer.sidebar.treeview.updateTitle(reqObj.id, reqObj.updateContent.name);
+    if(reqObj.updateContent.name != undefined)
+      window.uiContainer.sidebar.treeview.updateTitle(reqObj.id, reqObj.updateContent.name);
 
   }
 
