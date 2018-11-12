@@ -17,6 +17,12 @@ define([], function() {
     this.pre_cell = 'C';
 
     /**
+     * @desc Prefix of hole object
+     * @default H
+     */
+    this.pre_hole = 'H';
+
+    /**
      * @desc Prefix of cellBoundary object
      * @memberof Conditions
      * @default B
@@ -58,6 +64,7 @@ define([], function() {
     this.LAST_STATE_ID_NUM = 0;
     this.LAST_TRANSITION_ID_NUM = 0;
     this.LAST_INTER_ID_NUM = 0;
+    this.LAST_HOLE_ID_NUM = 0;
 
     /**
      * @desc The aspect ratio used to create the stage

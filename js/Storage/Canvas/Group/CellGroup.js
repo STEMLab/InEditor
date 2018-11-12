@@ -93,10 +93,14 @@ define([
 
     var newHole = new Hole(obj.id);
     newHole.corners.visible(false);
-    newHole.setFillColor(obj.poly.fill());
+
+    if(obj.poly == undefined) newHole.setFillColor('#FFFFFF');
+    else                      newHole.setFillColor(obj.poly.fill());
+
     newHole.setHoleOf(obj.holeOf);
 
-    this.copyDots(newHole, obj.dots);
+    if     (obj.dots != undefined && obj.points == undefined) this.copyDots(newHole, obj.dots);
+    else if(obj.dots == undefined && obj.points != undefined) this.copyDots(newHole, obj.points);
 
     // add corner and poly in new cell
     newHole.addObjectFromDots();

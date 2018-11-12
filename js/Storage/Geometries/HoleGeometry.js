@@ -25,11 +25,22 @@ define([
 
   HoleGeometry.prototype = Object.create(CellGeometry.prototype);
 
+
+
   /**
   * @memberof HoleGeometry
   */
   HoleGeometry.prototype.setHoleOf = function(cellId){
     this.holeOf = cellId;
+  }
+
+  /**
+  * @memberof CellGeometry
+  */
+  CellGeometry.prototype.load = function(values){
+    this.id = values.id;
+    this.points = values.points;
+    this.holeOf = values.holeOf;
   }
 
   /**

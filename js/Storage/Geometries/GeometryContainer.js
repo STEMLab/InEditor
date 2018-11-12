@@ -97,9 +97,9 @@ define([
 
     this.loadCells(values.cellGeometry, dotFoolContainer);
     this.loadCellBoundary(values.cellBoundaryGeometry, dotFoolContainer);
-    this.loadState(values.stateGeometry);
-    this.loadTransition(values.transitionGeometry);
-    this.loadHole(values.HoleGeometry);
+    this.loadState(values.stateGeometry, dotFoolContainer);
+    this.loadTransition(values.transitionGeometry, dotFoolContainer);
+    this.loadHole(values.holeGeometry, dotFoolContainer);
 
   }
 
@@ -151,7 +151,7 @@ define([
   /**
    * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.loadState = function(values) {
+  GeometryContainer.prototype.loadState = function(values, dotFoolContainer) {
 
     this.stateGeometry = [];
 
@@ -159,6 +159,7 @@ define([
 
       var tmp = new StateGeometry();
       tmp.load(values[index]);
+      tmp.point = dotFoolContainer.getDotById(tmp.point.uuid);
       this.stateGeometry.push(tmp);
 
     }
@@ -168,7 +169,7 @@ define([
   /**
    * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.loadTransition = function(values) {
+  GeometryContainer.prototype.loadTransition = function(values, dotFoolContainer) {
 
     this.transitionGeometry = [];
 
@@ -176,8 +177,12 @@ define([
 
       var tmp = new TransitionGeometry();
       tmp.load(values[index]);
-      this.transitionGeometry.push(tmp);
 
+      for(var key in tmp.points){
+        tmp.points[key] = dotFoolContainer.getDotById(tmp.points[key].uuid);
+      }
+
+      this.transitionGeometry.push(tmp);
     }
 
   }
@@ -185,9 +190,7 @@ define([
   /**
    * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.loadHole = function(values) {
-
-    log.info("★★★★★★★★★★★★★★★★ need to debug ★★★★★★★★★★★★★★★★");
+  GeometryContainer.prototype.loadHole = function(values, dotFoolContainer) {
 
     this.holeGeometry = [];
 
@@ -195,6 +198,11 @@ define([
 
       var tmp = new HoleGeometry();
       tmp.load(values[index]);
+
+      for(var key in tmp.points){
+        tmp.points[key] = dotFoolContainer.getDotById(tmp.points[key].uuid);
+      }
+
       this.holeGeometry.push(tmp);
 
     }

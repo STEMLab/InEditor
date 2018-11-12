@@ -251,7 +251,7 @@ define([
       } else {
 
         broker.publish(new Message('end-addnewhole', {
-          'id': window.tmpObj.id,
+          'id': window.conditions.pre_hole + (++window.conditions.LAST_HOLE_ID_NUM),
           'floor': window.tmpObj.floor
         }));
 
@@ -722,7 +722,7 @@ define([
       } else {
 
         broker.publish(new Message('end-addnewhole', {
-          'id':window.tmpObj.id,
+          'id': window.conditions.pre_hole + (++window.conditions.LAST_HOLE_ID_NUM),
           'floor': window.tmpObj.floor
         }));
 

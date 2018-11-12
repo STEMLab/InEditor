@@ -551,7 +551,6 @@
       window.storage.canvasContainer.stages[
         reqObj.floor
       ].tmpLayer.group.removeObj();
-      // window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
       tmpObj.setFillColor('#FFFFFF');
 

@@ -151,6 +151,13 @@ define([
       });
     }
 
+    // add hole
+    var hole = geometryContainer.holeGeometry;
+    for(var index in hole){
+      var floor = window.storage.propertyContainer.getFloorById('cell', hole[index].holeOf);
+      this.stages[floor].cellLayer.group.addHole(hole[index]);
+    }
+
     for (var index in this.stages) {
       this.stages[index].stage.draw();
     }
