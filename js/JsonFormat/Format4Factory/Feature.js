@@ -63,15 +63,43 @@ define([], function() {
     if (this.properties != null &&
       (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
 
-      var str = "";
-      for(var key in description) str += key + "=" + description[key] + ";";
-      this.properties['description'] = str;
+      this.properties['description'] = description;
 
     } else {
 
       log.warn("The given conditions said you don 't need to need to set description of Feature.");
     }
 
+  }
+
+  Feature.prototype.addPrtDesc = function(prtDesc){
+    if (this.properties != null &&
+      (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
+
+      for(var key in prtDesc){
+        if(this.properties.description[key] == "" && prtDesc[key] != "")
+          this.properties.description[key] = prtDesc[key];
+      }
+
+    } else {
+
+      log.warn("The given conditions said you don 't need to need to set description of Feature.");
+    }
+  }
+
+  Feature.prototype.convertDescObj2Str = function(){
+    if (this.properties != null &&
+      (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
+
+      var str = "";
+      for(var key in this.properties.description)
+        str += key + "=" + this.properties.description[key] + ";";
+      this.properties['description'] = str;
+
+    } else {
+
+      log.warn("The given conditions said you don 't need to need to set description of Feature.");
+    }
   }
 
   /**
@@ -166,6 +194,7 @@ define([], function() {
     }
 
   }
+
 
 
   return Feature;

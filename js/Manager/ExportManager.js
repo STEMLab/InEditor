@@ -421,7 +421,7 @@ define([
     var nodes = manager.nodes4Factory(document.id, spaceLayer);
     var edges = manager.edges4Factory(document.id, spaceLayer);
     var states = manager.stateObj4Factory(document.id, nodes, transDots);
-    var transitions = manager.transitionObj4VFactory(document.id, edges, transDots);
+    var transitions = manager.transitionObj4VFactory(document.id, edges, transDots, cellBoundaries);
     var interlayerConnections = manager.interlayerConnectionObj4Factory(document.id, interEdges);
 
     var address = {
@@ -531,7 +531,7 @@ define([
    * @memberof ExportManager
    */
   ExportManager.prototype.postJson = function(address, data) {
-    log.info('POST : ' + address, data);
+    // log.info('POST : ' + address, data);
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
@@ -697,16 +697,19 @@ define([
     var spaceLayers = [];
 
     for (var floorKey in floors) {
-      spaceLayers.push({
-        "docId": docId,
-        "parentId": parentId,
-        "id": floors[floorKey].layer
-      });
+      var layer = floors[floorKey].layer;
+      if (spaceLayers.indexOf(layer) == -1) spaceLayers.push(layer);
     }
 
+    for (var key in spaceLayers) {
+      spaceLayers[key] = {
+        "docId": docId,
+        "parentId": parentId,
+        "id": spaceLayers[key]
+      };
+    }
 
     return spaceLayers;
-
   }
 
 
@@ -779,9 +782,9 @@ define([
       var tmp;
 
       // if (geometries[key].naviType == "")
-        tmp = new FeatureFactory4Factory('CellSpace', conditions);
+      tmp = new FeatureFactory4Factory('CellSpace', conditions);
       // else
-        // tmp = new FeatureFactory4Factory('NavigableSpace', conditions);
+      // tmp = new FeatureFactory4Factory('NavigableSpace', conditions);
 
       tmp.setId(geometries[key].id);
       tmp.setDocId(docId);
@@ -803,7 +806,8 @@ define([
       if (conditions.properties.description) cells[id].setDescription(properties[key].description);
       if (conditions.properties.partialboundedBy) cells[id].setPartialboundedBy(properties[key].partialboundedBy);
       if (conditions.properties.externalReference) cells[id].setExternalReference(properties[key].externalReference);
-      if (conditions.properties.duality) cells[id].setDuality(properties[key].duality);3
+      if (conditions.properties.duality) cells[id].setDuality(properties[key].duality);
+
 
       if (cells[id].type == "NavigableSpace") {
         cells[id].setType(properties[key].naviType);
@@ -835,6 +839,7 @@ define([
     // pixel to real world coordinates
     for (var floorKey in floorProperties) {
       var cellkeyInFloor = floorProperties[floorKey].cellKey;
+      var prtDesc = floorProperties[floorKey].description;
 
       for (var cellKey in cellkeyInFloor) {
         var cellId = cellkeyInFloor[cellKey];
@@ -854,6 +859,8 @@ define([
         }
 
         cells[cellId].convertCoor2WKT();
+        cells[cellId].addPrtDesc(prtDesc);
+        cells[cellId].convertDescObj2Str();
       }
     }
 
@@ -926,6 +933,8 @@ define([
     for (var floorKey in floorProperties) {
 
       var cellBoundarykeyInFloor = floorProperties[floorKey].cellBoundaryKey;
+      var prtDesc = floorProperties[floorKey].description;
+
       for (var cellBoundaryKey in cellBoundarykeyInFloor) {
 
         var surface = [];
@@ -937,6 +946,7 @@ define([
         reverseObj.setGeometryId(reverseObj.geometry.properties.id + '-REVERSE');
         reverseObj.setName(reverseObj.properties.name + '-REVERSE')
         reverseObj.reverseCoor();
+        reverseObj.reverseDuality();
         cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'] = reverseObj;
 
         var coor = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
@@ -948,6 +958,12 @@ define([
           cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setWKT(coor, '2D');
           cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setWKT(coor_reverse, '2D');
         }
+
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].addPrtDesc(prtDesc);
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].addPrtDesc(prtDesc);
+
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].convertDescObj2Str();
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].convertDescObj2Str();
 
       }
     }
@@ -1000,6 +1016,7 @@ define([
     for (var floorKey in floorProperties) {
 
       var stateKeyInFloor = floorProperties[floorKey].stateKey;
+
       var prtId = "layer-0";
       for (var nodesKey in nodes) {
         if (nodes[nodesKey].parentId == floorProperties[floorKey].layer) {
@@ -1067,13 +1084,31 @@ define([
 
       var transitionKeyInFloor = floorProperties[floorKey].transitionKey;
 
+      var prtId = "layer-0";
+      for (var edgesKey in edges) {
+        if (edges[edgesKey].parentId == floorProperties[floorKey].layer) {
+          prtId = edges[edgesKey].id;
+          break;
+        }
+      }
+
+
       for (var transitionKey in transitionKeyInFloor) {
 
+        var reverseObj = new FeatureFactory4Factory('Transition', conditions);
+        reverseObj.copy(transitions[transitionKeyInFloor[transitionKey]]);
+        reverseObj.setId(reverseObj.id + '-REVERSE');
+        reverseObj.setGeometryId(reverseObj.geometry.properties.id + '-REVERSE');
+        reverseObj.setName(reverseObj.properties.name + '-REVERSE')
+        reverseObj.reverseCoor();
+        reverseObj.reverseDuality();
+        transitions[transitionKeyInFloor[transitionKey] + '-REVERSE'] = reverseObj;
+
         transitions[transitionKeyInFloor[transitionKey]].setWKT();
+        transitions[transitionKeyInFloor[transitionKey]].setParentId(prtId);
 
-        if (edges.length == 1) transitions[transitionKeyInFloor[transitionKey]].setParentId(edges[0].id);
-        else transitions[transitionKeyInFloor[transitionKey]].setParentId(floorProperties[floorKey].id);
-
+        transitions[transitionKeyInFloor[transitionKey] + '-REVERSE'].setWKT();
+        transitions[transitionKeyInFloor[transitionKey] + '-REVERSE'].setParentId(prtId);
       }
     }
 

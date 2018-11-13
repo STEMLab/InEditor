@@ -100,7 +100,7 @@ define([
     newHole.setHoleOf(obj.holeOf);
 
     if     (obj.dots != undefined && obj.points == undefined) this.copyDots(newHole, obj.dots);
-    else if(obj.dots == undefined && obj.points != undefined) this.copyDots(newHole, obj.points);
+    else if(obj.dots == undefined && obj.points != undefined) this.copyDots(newHole, obj.points );
 
     // add corner and poly in new cell
     newHole.addObjectFromDots();

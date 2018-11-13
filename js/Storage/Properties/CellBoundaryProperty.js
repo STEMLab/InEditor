@@ -65,5 +65,9 @@ define([], function() {
 
   }
 
+  CellBoundaryProperty.prototype.setDuality = function(_duality){
+    this.duality = _duality;
+  }
+
   return CellBoundaryProperty;
 });

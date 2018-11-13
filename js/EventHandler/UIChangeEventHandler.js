@@ -53,6 +53,10 @@ define([
       'click': this.showModal
     };
 
+    handlerBinder['viewer-btn'] = {
+      'click': this.showModal
+    };
+
 
 
     // handlerBinder['stage']={
@@ -313,6 +317,9 @@ define([
     switch (data.target.dataset.modaltype) {
       case 'export':
         $('#go-factory-modal').modal('show');
+        break;
+      case 'viewer':
+        $('#go-viewer-modal').modal('show');
         break;
       default:
 

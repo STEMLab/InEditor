@@ -159,9 +159,8 @@ define([
     }
 
     // add new cellproperty object in storage.propertyContainer
-    window.storage.propertyContainer.cellProperties.push(
-      new CellProperty(reqObj.id)
-    );
+    var newCellProperty = new CellProperty(reqObj.id);
+    window.storage.propertyContainer.cellProperties.push(newCellProperty);
 
     // add cell key in floor property
     window.storage.propertyContainer.getElementById('floor', reqObj.floor).cellKey.push(
@@ -177,6 +176,8 @@ define([
       window.storage.propertyContainer.getElementById('floor', reqObj.floor).stateKey.push(
         newState.id
       );
+
+      newCellProperty.setDuality(newState.id);
     }
 
     // log.trace(window.storage);
@@ -204,6 +205,9 @@ define([
       newState.id
     );
 
+    if(newState.duality != "" && newState.duality != ""){
+      window.storage.propertyContainer.getElementById('cell', newState.duality).setDuality(newState.id);
+    }
 
   }
 
@@ -237,10 +241,20 @@ define([
 
     // remove new cellproperty object in storage.propertyContainer
     var cells = window.storage.propertyContainer.cellProperties;
+    var duality = null;
 
     for (var key in cells) {
-      if (cells[key].id == reqObj.id)
+      if (cells[key].id == reqObj.id){
+        duality = cells[key].duality;
         cells.splice(key, 1);
+        break;
+      }
+    }
+
+    // finde state
+    if(duality != null){
+      var state = window.storage.propertyContainer.getElementById('state', duality);
+      if( state.duality == reqObj.id ) state.duality = "";
     }
 
     // remove cell key in floor property
@@ -273,7 +287,7 @@ define([
 
     for (var key in floors) {
       if (floors[key].id == reqObj.floor) {
-        floors[key].cellKey.splice(floors[key].cellKey.indexOf(reqObj.id), 1);
+        floors[key].stateKey.splice(floors[key].stateKey.indexOf(reqObj.id), 1);
       }
     }
 
@@ -367,6 +381,9 @@ define([
     window.storage.propertyContainer.getElementById('floor', reqObj.floor).transitionKey.push(
       reqObj.id
     );
+
+    if(newProperty.duality != "" && newProperty.duality != "")
+      window.storage.propertyContainer.getElementById('cellBoundary', newProperty.duality).setDuality(newProperty.id);
 
   }
 

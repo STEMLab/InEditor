@@ -141,7 +141,7 @@
         </ul>
         <ul class="navbar-nav my-2 my-lg-0">
           <li class="nav-item">
-            <img src="./assets/icon/go_viewer.png" title="go viewer" id="viewer-btn" data-toggle="modal" data-target="#go-viewer-modal">
+            <img src="./assets/icon/go_viewer.png" title="go viewer" id="viewer-btn" data-modaltype="viewer">
           </li>
         </ul>
       </div>
@@ -169,35 +169,33 @@
   </div>
 
 
-  <div class="ui modal" id="go-viewer-modal">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="viewer-baseURL">Base URL</label>
-            <input type="text" class="form-control" id="viewer-baseURL" value="http://127.0.0.1">
-          </div>
-          <div class="form-group">
-            <label for="viewer-portNum">Port Number</label>
-            <input type="number" class="form-control" id="viewer-portNum" placeholder="8080">
-          </div>
-          <div class="form-group">
-            <label for="viewer-params">Parameter</label>
-            <input type="text" class="form-control" id="viewer-params" placeholder="viewer">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <middle id="uriHelp" class="form-text text-muted">Base URL:Port Number/Parameter </middle>
-          <button type="button" class="btn btn-primary" id="viewer-modal-btn" aria-label="Close">Call Viewer</button>
-        </div>
+  <div class="ui modal small" id="go-viewer-modal">
+    <div class="header">Export to InViewer</div>
+    <div class="content">
+      <div class="form-group">
+        <label for="viewer-baseURL">Base URL</label>
+        <input type="text" class="form-control" id="viewer-baseURL" value="http://127.0.0.1">
       </div>
+      <div class="form-group">
+        <label for="viewer-portNum">Port Number</label>
+        <input type="number" class="form-control" id="viewer-portNum" placeholder="8080">
+      </div>
+      <div class="form-group">
+        <label for="viewer-params">Parameter</label>
+        <input type="text" class="form-control" id="viewer-params" placeholder="viewer">
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="ui right pointing basic label">Base URL:Port Number/Parameter</a>
+      <div class="ui button" id="viewer-modal-btn" aria-label="Close">Export</div>
+      <div class="ui cancel button" aria-label="Close">Cancel</div>
     </div>
   </div>
 
-  <div class="ui modal small " id="go-factory-modal">
 
+  <div class="ui modal small" id="go-factory-modal">
     <div class="header">Export to IndoorGML</div>
-
     <div class="scrolling content">
       <h5 class="ui horizontal divider header">
         Communication Options
