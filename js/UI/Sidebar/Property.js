@@ -197,8 +197,8 @@ define([], function() {
       naviDiv += "<tr><td class=\"title\">usage</td><td class=\"value\"><input id=\"usage-text\" type=\"text\" value=" + property.navi.usage + "></td></tr>";
     }
 
-    naviDiv += "<tr><td colspan=\"3\"><button class=\"submit-btn\"  id=\"property-navi-submit-btn\">submit</button></td></tr>";
     naviDiv += "</table>";
+    naviDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-navi-submit-btn\">Submit</div>";
 
     var divs = {
       "properties": propertiesDiv,
@@ -219,7 +219,6 @@ define([], function() {
     document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
       window.eventHandler.callHandler('html', event);
     });
-
 
     document.getElementById('property-ref-submit-btn').addEventListener('click', function(event) {
       window.eventHandler.callHandler('html', event);
@@ -246,33 +245,16 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
-    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">external ref</td><td class=\"value\"><select id=\"externalRef-text\" style=\"width: 100%;\">";
-
-    for (var key in property.externalReference) {
-      var value = property.externalReference[key];
-      propertiesDiv += "<option value=\"" + value + "\">" + value + "</option>";
-    }
-
-    propertiesDiv += "</select></td></tr>";
-
+    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table ui compact table inverted \">";
+    propertiesDiv += this.getBasicTr('id', 'id', property.id, true);
+    propertiesDiv += this.getBasicTr('name', 'name', property.name, false);
+    propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != ""? property.duality:'none', true);
+    propertiesDiv += this.getDropDownTr('externalRef-text', 'external ref', property.externalReference);
     propertiesDiv += this.getDescString(property.description);
 
-    propertiesDiv += "<tr><td class=\"title\">Navi Type</td><td class=\"value\"><select id=\"navi-text\" style=\"width: 80%;\">";
-    propertiesDiv += "<option value=" + property.naviType + " selected>" + property.naviType + "</option>";
-    propertiesDiv += "<option value=\"NavigableSpace\">NavigableSpace</option>";
-    propertiesDiv += "<option value=\"GeneralSpace\">GeneralSpace</option>";
-    propertiesDiv += "<option value=\"TransferSpace\">TransferSpace</option>";
-    propertiesDiv += "<option value=\"TransitionSpace\">TransitionSpace</option>";
-    propertiesDiv += "<option value=\"ConnectionSpace\">ConnectionSpace</option>";
-    propertiesDiv += "<option value=\"AnchorSpace\">AnchorSpace</option>";
-    propertiesDiv += "</select></td></tr>";
-
-    propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
     propertiesDiv += "</table>";
+    propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
+
 
 
     // ref tab
@@ -281,9 +263,30 @@ define([], function() {
     refDiv += "<tr><td colspan=\"2\"><button class=\"submit-btn\"  id=\"property-ref-submit-btn\">submit</button></td></tr>";
     refDiv += "</table>";
 
+    // navi tab
+    var naviDiv = "<table id=\"property-navi-table\" type=\"ref\" class=\"property-table\">";
+    naviDiv += "<tr><td class=\"title\">Navi Type</td><td class=\"value\"><select id=\"navi-text\" style=\"width: 80%;\" data-pre=" + property.naviType + ">";
+    naviDiv += "<option value=" + property.naviType + " selected>" + property.naviType + "</option>";
+    naviDiv += "<option value=\"NavigableBoundary\">NavigableSpace</option>";
+    naviDiv += "<option value=\"GeneralSpace\">GeneralSpace</option>";
+    naviDiv += "<option value=\"ConnectionBoundary\">TransferSpace</option>";
+    naviDiv += "<option value=\"AnchorBoundary\">TransitionSpace</option>";
+    naviDiv += "</select></td></tr>";
+
+    if (property.naviType != "") {
+      naviDiv += "<tr><td class=\"title\">class</td><td class=\"value\"><input id=\"class-text\" type=\"text\" value=" + property.navi.class + "></td></tr>";
+      naviDiv += "<tr><td class=\"title\">function</td><td class=\"value\"><input id=\"function-text\" type=\"text\" value=" + property.navi.function+"></td></tr>";
+      naviDiv += "<tr><td class=\"title\">usage</td><td class=\"value\"><input id=\"usage-text\" type=\"text\" value=" + property.navi.usage + "></td></tr>";
+    }
+
+    naviDiv += "</table>";
+    naviDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-navi-submit-btn\">Submit</div>";
+
+
     var divs = {
       "properties": propertiesDiv,
-      "ref": refDiv
+      "ref": refDiv,
+      "navi": naviDiv
     };
 
 
@@ -303,6 +306,15 @@ define([], function() {
     document.getElementById('property-ref-submit-btn').addEventListener('click', function(event) {
       window.eventHandler.callHandler('html', event);
     });
+
+    document.getElementById('property-navi-submit-btn').addEventListener('click', function(event) {
+      window.eventHandler.callHandler('html', event);
+    });
+
+    document.getElementById('navi-text').addEventListener('change', function(event) {
+      window.eventHandler.callHandler('html', event);
+    });
+
   }
 
 
@@ -433,6 +445,15 @@ define([], function() {
             componentState: {
               id: 'ref'
             }
+          },
+          {
+            type: 'component',
+            componentName: 'property-component',
+            title: 'navi',
+            isClosable: false,
+            componentState: {
+              id: 'navi'
+            }
           }
         ]
       }]
@@ -486,22 +507,16 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#protperty-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table ui compact table inverted \">";
-    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
+    var propertiesDiv = "<table id=\"property-table\" type=\"floor\" class=\"property-table ui compact table inverted \">";
+    propertiesDiv += this.getBasicTr('id', 'id', property .id, true);
+    propertiesDiv += this.getBasicTr('name', 'name', property .name, false);
+    propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != ""? property.duality:'none', true);
+    propertiesDiv += this.getBasicTr('height', 'height', property.height, false);
+    propertiesDiv += this.getDropDownTr('connects-text', 'connects', property.connects);
     propertiesDiv += this.getDescString(property.description);
-    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">connects</td><td class=\"value\"><select id=\"connects-text\" style=\"width: 100%;\">";
-
-    for (var key in property.connects) {
-      var value = property.connects[key];
-      propertiesDiv += "<option value=\"" + value + "\">" + value + "</option>";
-    }
-
-    propertiesDiv += "</select></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">height</td><td class=\"value\"><input id=\"height-text\" type=\"text\" value=" + property.height + "></td></tr>";
-    propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
     propertiesDiv += "</table>";
+
+    propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
 
     this.setView(config, propertiesDiv);
 
@@ -616,25 +631,32 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table  ui compact table inverted \">";
-    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
+    var propertiesDiv = "<table id=\"property-table\" type=\"floor\" class=\"property-table ui compact table inverted \">";
+    propertiesDiv += this.getBasicTr('id', 'id', property .id, true);
+    propertiesDiv += this.getBasicTr('name', 'name', property .name, false);
+    propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != ""? property.duality:'none', true);
+    propertiesDiv += this.getBasicTr('weight', 'weight', property .weight, false);
+    propertiesDiv += this.getBasicTr('connects', 'connects', "\"" + property.getConncetsString() +"\"", true);
     propertiesDiv += this.getDescString(property.description);
-    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">weight</td><td class=\"value\"><input id=\"weight-text\" type=\"text\" value=" + property.weight + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">connects</td><td class=\"value\"><input id=\"connects-text\" type=\"text\" disabled value=\"" + property.getConncetsString() + "\"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">is stair</td><td class=\"value\"><input id=\"stair-text\" type=\"checkbox\" disabled ";
 
-    if (property.isStair.tf) {
-      // propertiesDiv += "checked value =" + property.isStair.connection[0] + " + \"-\" + "+ property.isStair.connection[1];
-      propertiesDiv += "checked> <label for=\"stair-text\">" + property.isStair.connection[0] + " - " + property.isStair.connection[1] + "</label";
-    }
-
-    propertiesDiv += "></td></tr>";
-    propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
+    // propertiesDiv += "<tr><td class=\"title\">is stair</td><td class=\"value\"><input id=\"stair-text\" type=\"checkbox\" disabled ";
+    //
+    // if (property.isStair.tf) {
+    //   // propertiesDiv += "checked value =" + property.isStair.connection[0] + " + \"-\" + "+ property.isStair.connection[1];
+    //   propertiesDiv += "checked> <label for=\"stair-text\">" + property.isStair.connection[0] + " - " + property.isStair.connection[1] + "</label";
+    // }
+    //
+    // propertiesDiv += "></td></tr>";
     propertiesDiv += "</table>";
 
+    propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
+
     this.setView(config, propertiesDiv);
+
+    // event binding
+    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
+      window.eventHandler.callHandler('html', event);
+    });
 
   }
 
@@ -671,22 +693,16 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table  ui compact table inverted \">";
-    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">inter\nConnects</td><td class=\"value\"><input id=\"interConnects-text\" type=\"text\" disabled value=\"" + property.getInterConnectsString() + "\"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">connected\nLayer</td><td class=\"value\"><input id=\"connectedLayer-text\" type=\"text\" disabled value=\"" + property.getConnectedLayerString() + "\"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">Topo\nExpression</td><td class=\"value\"><select id=\"topoExpression-text\" style=\"width: 80%;\">";
-    propertiesDiv += "<option value=\"" + property.typeOfTopoExpression + "\" selected>" + property.typeOfTopoExpression + "</option>";
-    propertiesDiv += "<option value=\"CONTAINS\">CONTAINS</option>";
-    propertiesDiv += "<option value=\"OVERLAPS\">OVERLAPS</option>";
-    propertiesDiv += "<option value=\"EQUALS\">EQUALS</option>";
-    propertiesDiv += "<option value=\"WITHIN\">WITHIN</option>";
-    propertiesDiv += "<option value=\"CROSSES\">CROSSES</option>";
-    propertiesDiv += "<option value=\"INTERSECTS\">INTERSECTS</option>";
-    propertiesDiv += "</select></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">commnet</td><td class=\"value\"><textarea id=\"commnet-text\" rows=\"4\" cols=\"21\">" + property.commnet + "</textarea></td></tr>";
-    propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
+    var propertiesDiv = "<table id=\"property-table\" type=\"floor\" class=\"property-table ui compact table inverted \">";
+    propertiesDiv += this.getBasicTr('id', 'id', property .id, true);
+    propertiesDiv += this.getBasicTr('interConnects', 'inter\nConnects', "\"" + property.getInterConnectsString() + "\"", true);
+    propertiesDiv += this.getBasicTr('connectedLayer', 'connected\nLayer', "\"" +  property.getConnectedLayerString() + "\"", true);
+    propertiesDiv += this.getDropDownTr('topoExpression-text', 'Topo\nExpression', [property.typeOfTopoExpression, 'CONTAINS', 'OVERLAPS', 'EQUALS', 'WITHIN', 'CROSSES', 'INTERSECTS']);
+
+    propertiesDiv += this.getDescString(property.commnet);
     propertiesDiv += "</table>";
+    propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
+
 
     this.setView(config, propertiesDiv);
 
@@ -728,17 +744,14 @@ define([], function() {
   }
 
   Property.prototype.getDropDownTr = function(id, title, itemData){
+
     var str = "<tr><td class=\"title\">"+title+"</td><td class=\"value\">";
-    str += "<div class=\"ui selection dropdown\">";
-    str += "<div class=\"text\"></div>";
-    str += "<i class=\"dropdown icon\"></i>";
-    str += "<div id="+id+" class=\"menu\">";
-
+    str += "<select class=\"ui compact selection dropdown\" id="+id+">";
     for(var key in itemData){
-      str += "<div class=\"item\" data-text="+itemData+[key]+">"+itemData+[key]+"</div>";
+      if(key == 0) str += "<option value="+itemData[key]+" selected=\"\">"+itemData[key]+"</option>";
+      else str += "<option value="+itemData[key]+">"+itemData[key]+"</option>";
     }
-
-    str +="</div></div></td></tr>";
+    str +="</select></td></tr>";
 
     return str;
   }

@@ -302,6 +302,13 @@ define([
   /**
    * @memberof CellGroup
    */
+  CellGroup.prototype.getHoles = function() {
+    return this.holes;
+  }
+
+  /**
+   * @memberof CellGroup
+   */
    CellGroup.prototype.delete = function(id, floor){
      for(var i in this.cells){
        if(this.cells[i].id == id){

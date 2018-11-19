@@ -382,7 +382,7 @@ define([
       reqObj.id
     );
 
-    if(newProperty.duality != "" && newProperty.duality != "")
+    if(newProperty.duality != "" && newProperty.duality != "" && newProperty.duality != null && newProperty.duality != null)
       window.storage.propertyContainer.getElementById('cellBoundary', newProperty.duality).setDuality(newProperty.id);
 
   }

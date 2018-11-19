@@ -76,9 +76,10 @@ body {
 /*
  * Sidebar
  */
- .sidebar{
-   height: -webkit-fill-available;
- }
+
+.sidebar {
+  height: -webkit-fill-available;
+}
 
 .tree-view-container {
   background: var(--treeview-bg-color);
@@ -88,7 +89,11 @@ body {
   /* max-height: 50rem; */
   margin-left: 0.5rem;
   margin-top: 0.5rem;
-  overflow-y: hidden  ;
+  overflow-y: hidden;
+}
+
+#sidebar .lm_item {
+  width: 100% !important;
 }
 
 .tree-view-container ul {
@@ -97,7 +102,7 @@ body {
   color: #e5e5e5;
 }
 
-.tree-view-container .lm_content{
+.tree-view-container .lm_content {
   overflow: auto;
 }
 
@@ -147,8 +152,9 @@ body {
   width: 50%;
 }
 
-.property-container td{
+.property-container td {
   padding: .3rem !important;
+  vertical-align: middle !important;
 }
 
 input[id="floorplan-file"] {
@@ -162,12 +168,13 @@ td input {
 }
 
 td select {
-  width: 50%;
-  left: 0;
+  width: 100%;
+  height: fit-content !important;
+  padding: 0.1rem !important;
 }
 
 .property-table {
-  background-color: rgba( 255, 255, 255, 0 ) !important;
+  background-color: rgba( 255, 255, 255, 0) !important;
 }
 
 .property-table .submit-btn {
@@ -182,7 +189,6 @@ td select {
   font-weight: bold;
   text-align: center;
 }
-
 
 .property-table .title {
   color: var(--property-tab-title-color);
@@ -199,24 +205,23 @@ td select {
   vertical-align: middle !important;
 }
 
-.property-table .value input{
+.property-table .value input {
   color: var(--property-tab-value-color) !important;
   font-weight: lighter;
 }
 
-.property-table .button{
-  background-color: rgba( 255, 255, 255, 0 ) !important;
+.property-table .button {
+  background-color: rgba( 255, 255, 255, 0) !important;
   margin: 0 !important;
   padding: 0 !important;
 }
 
-.property-table .divider{
+.property-table .divider {
   margin-top: .2rem !important;
   margin-bottom: .2rem !important;
 }
 
-
-.property-table .input{
+.property-table .input {
   width: 100%;
 }
 
@@ -315,11 +320,7 @@ td select {
 
 #workspace-layout-container .lm_items {
   background-color: #222222;
-  width: 100% !important;
-}
-
-.lm_item {
-  width: 100% !important;
+  /* width: 100% !important; */
 }
 
 #workspace-layout-container .lm_item_container {

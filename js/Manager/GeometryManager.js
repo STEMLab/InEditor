@@ -782,10 +782,18 @@
           "addnewcellboundary",
           "GeometryManager"
         );
+
         var cells = window.storage.canvasContainer.stages[
           reqObj.floor
         ].cellLayer.group.getCells();
-        var lines = manager.findAllLinesContainThePoint(point, cells);
+
+        var holes  = window.storage.canvasContainer.stages[
+          reqObj.floor
+        ].cellLayer.group.getHoles();
+
+        var objects = cells.concat(holes);
+
+        var lines = manager.findAllLinesContainThePoint(point, objects  );
 
         window.tmpObj.associationCell = lines;
       } else {
