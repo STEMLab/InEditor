@@ -73,5 +73,9 @@ define([], function() {
     this.duality = _duality;
   }
 
+  CellProperty.prototype.addPartialboundedBy = function(part){
+    this.partialboundedBy.push(part);
+  }
+
   return CellProperty;
 });

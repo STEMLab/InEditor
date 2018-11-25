@@ -249,8 +249,24 @@ define([
         log.warn("The given parameter is not an Array type.");
 
       } else {
+        var cellGeo = window.storage.geometryContainer.getElementById('cell', this.id).points;
 
-        this.properties.partialboundedBy = partialboundedBy;
+        for(var key of partialboundedBy){
+          var boundaryGeo = window.storage.geometryContainer.getElementById('cellBoundary', key).points;
+          var flag = false;
+
+          function isSameDot(dot1, dot2){
+            return (dot1.point.x == dot2.point.x && dot1.point.y == dot2.point.y);
+          }
+
+          for(var i = 0 ; i < cellGeo.length - 1 && !flag; i++ ){
+            if(isSameDot(boundaryGeo[0], cellGeo[i]) && isSameDot(boundaryGeo[1], cellGeo[[i+1]]))
+              flag = true;
+          }
+
+          if(flag) this.properties.partialboundedBy.push(key);
+          else     this.properties.partialboundedBy.push(key+'-REVERSE');
+        }
 
       }
 

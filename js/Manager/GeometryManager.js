@@ -243,6 +243,13 @@
       tmpObj.id = reqObj.id;
       tmpObj.name = reqObj.id;
 
+      var v1 = DotMath.getVector(tmpObj.dots[0], tmpObj.dots[1]);
+      v1['z'] = 0;
+      var v2 = DotMath.getVector(tmpObj.dots[1], tmpObj.dots[2]);
+      v2['z'] = 0;
+      var crossProduct = DotMath.crossProduct(v1, v2);
+      if(crossProduct.z > 0) tmpObj.dots.reverse();
+
       // add cell to canvasContainer using tmpObj
       window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.add(
         tmpObj
@@ -924,7 +931,7 @@
       tmpObj.associationCell = copyObj(window.tmpObj.associationCell);
 
       // clear tmp obj
-      window.tmpObj = null;
+      //window.tmpObj = null;
       window.storage.canvasContainer.stages[
         reqObj.floor
       ].tmpLayer.group.removeObj();

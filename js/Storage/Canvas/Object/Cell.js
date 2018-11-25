@@ -366,7 +366,7 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
       (indexOfDot2 == 0 && indexOfDot1 == this.dots.length - 1)
     ) {
 
-      this.dots.concat(dots);
+      this.dots = this.dots.concat(dots);
     } else this.dots = insertArrayToArray(this.dots, dots, indexOfDot2);
 
     // else if (indexOfDot1 < indexOfDot2) this.dots = insertArrayToArray(this.dots, dots, indexOfDot2);
