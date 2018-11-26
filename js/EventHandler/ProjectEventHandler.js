@@ -35,6 +35,13 @@ define([
       'change': this.loadProject
     };
 
+    handlerBinder['project-import'] = {
+      'click': this.clickImporttBtn
+    }
+
+    handlerBinder['project-import-file'] = {
+      'change': this.importGML
+    };
 
     handlerBinder['project-save-as-btn'] = {
       'click': this.saveProjectToNewPath
@@ -159,6 +166,24 @@ define([
   /**
    * @memberof ProjectEventHandler
    */
+  ProjectEventHandler.prototype.clickImporttBtn = function(broker, previousMsg) {
+
+    window.document.getElementById("project-import-file").addEventListener("change", function(e) {
+      window.eventHandler.callHandler('html', e);
+    });
+
+    $('#project-import-file').click();
+
+    return {
+      'result': true,
+      'msg': null
+    }
+
+  }
+
+  /**
+   * @memberof ProjectEventHandler
+   */
   ProjectEventHandler.prototype.loadProject = function(broker, previousMsg, data) {
     console.log(document.getElementById(data.target.id).files)
     var result = new Result();
@@ -175,6 +200,40 @@ define([
       result = {
         'result': true,
         'msg': 'loadproject'
+      };
+    } else if (document.getElementById(data.target.id).value == "") {
+
+      result.msg = "clear file input ...";
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to saveproject.";
+
+    }
+
+    return result;
+
+  }
+
+  /**
+   * @memberof ProjectEventHandler
+   */
+  ProjectEventHandler.prototype.importGML = function(broker, previousMsg, data) {
+    console.log(document.getElementById(data.target.id).files)
+    var result = new Result();
+
+    if (broker.isPublishable('importgml') && document.getElementById(data.target.id).value != "") {
+
+      // reqObj.floor will be active workspace
+      broker.publish(new Message('importgml', {
+        file: document.getElementById(data.target.id).files[0]
+      }));
+
+      document.getElementById(data.target.id).value = '';
+
+      result = {
+        'result': true,
+        'msg': 'importgml'
       };
     } else if (document.getElementById(data.target.id).value == "") {
 
@@ -274,7 +333,23 @@ define([
 
   ProjectEventHandler.prototype.updateConditions = function(broker, previousMsg, data){
 
-    broker.getManager('setpropertyview', 'UIManager').showSnackBar({msg: 'Sorry, this function is not fully developed yet.'});
+    if(window.broker.isPublishable('updateconditions')){
+      broker.publish(new Message('updateconditions', {
+        prefix :{
+          cell : $('#setting-conditions-pre-cell').val(),
+          cellboundary : $('#setting-conditions-pre-cellBoundary').val(),
+          state : $('#setting-conditions-pre-state').val(),
+          trnsition : $('#setting-conditions-pre-transition').val()
+        },
+        canvas:{
+          aspectRatio : $('#setting-conditions-aspect-ratio').val(),
+          scaleFactor : $('#setting-conditions-scale-factor').val(),
+          scaleMax : $('#setting-conditions-scale-max').val(),
+          automGenerateState: $('#setting-conditions-auto-create-state').is(":checked") == true ? true : false
+        }
+      }));
+
+    }
 
     return {
       'result': true,

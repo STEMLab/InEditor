@@ -194,6 +194,11 @@ define([
     this.reqSpecList['updatedesclist'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['adddesclist'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['deletedesclist'] = new MessageSpec('single', 'including', null, false);
+
+    this.reqSpecList['importgml'] = new MessageSpec('single', 'including', null, false);
+
+    this.reqSpecList['showconditionmodal'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['updateconditions'] = new MessageSpec('single', 'including', null, false);
   }
 
   /**

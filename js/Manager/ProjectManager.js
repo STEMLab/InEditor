@@ -33,6 +33,9 @@ define([
     this.addCallbackFun('saveproject', this.saveProject);
     this.addCallbackFun('loadproject', this.loadProject);
     this.addCallbackFun('importfile', this.importFile);
+    this.addCallbackFun('importgml', this.importGML);
+
+    this.addCallbackFun('updateconditions', this.updateConditions);
 
   }
 
@@ -159,6 +162,61 @@ define([
   /**
    * @memberof ProjectManager
    */
+  ProjectManager.prototype.importGML = function(reqObj) {
+
+    var reader = new FileReader();
+    reader.readAsText(reqObj.file);
+
+    reader.onload=function(){
+
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          var manager = window.broker.getManager('importgml', 'ProjectManager');
+          var indoor = JSON.parse(manager.xmlToJson('./output/TMP.gml'));
+          var obj = manager.parseJson(indoor);
+        }
+      }
+
+      xhr.open("POST", "http://localhost:8080/save-gml/TMP", false);
+      xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+      xhr.send(reader.result);
+    }
+  }
+
+  /**
+   * @memberof ProjectManager
+   */
+  ProjectManager.prototype.xmlToJson = function(path){
+    var xhr = new XMLHttpRequest();
+    var result;
+    xhr.onreadystatechange = function() {
+
+      if (xhr.readyState == 4 && xhr.status == 200) {
+        result = xhr.response;
+      }
+    }
+
+    xhr.open("POST", "http://localhost:8080/xml-to-json", false);
+    xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+    xhr.send(path);
+
+    return result;
+  }
+
+  /**
+   * @memberof ProjectManager
+   */
+   ProjectManager.prototype.parseJson = function(json){
+     log.info(json);
+     /// need to develop
+   }
+
+
+  /**
+   * @memberof ProjectManager
+   */
    ProjectManager.prototype.importFile = function(reqObj) {
      var reader = new FileReader();
      reader.readAsText(reqObj.file);
@@ -177,6 +235,21 @@ define([
 
      }
 
+   }
+
+   ProjectManager.prototype.updateConditions = function(reqObj){
+     var conditions = window.conditions;
+     conditions.pre_cell = reqObj.prefix.cell;
+     conditions.pre_cellBoundary = reqObj.prefix.cellboundary;
+     conditions.pre_state = reqObj.prefix.state;
+     conditions.pre_transition  = reqObj.prefix.trnsition;
+
+     // conditions.aspectRatio = reqObj.aspectRatio;
+     conditions.scaleFactor = reqObj.canvas.scaleFactor;
+     conditions.scaleMax = reqObj.canvas.scaleMax;
+     conditions.automGenerateState = reqObj.canvas.automGenerateState;
+
+     $('#setting-conditions-modal').modal('hide');
    }
 
   return ProjectManager;

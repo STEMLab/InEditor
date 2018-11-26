@@ -89,6 +89,8 @@ define([
 
     this.addCallbackFun('updatedesclist', this.updateDescList);
 
+    this.addCallbackFun('showconditionmodal', this.showConditionModal);
+
   }
 
   /**
@@ -1055,6 +1057,24 @@ define([
         manager.deleteDescList(event.currentTarget.id);
       });
     }
+  }
+
+  UIManager.prototype.showConditionModal = function(){
+
+    $('#setting-conditions-modal').modal('show');
+    var conditions = window.conditions;
+    $('#setting-conditions-pre-cell').val(conditions.pre_cell);
+    $('#setting-conditions-pre-cellBoundary').val(conditions.pre_cellBoundary);
+    $('#setting-conditions-pre-state').val(conditions.pre_state);
+    $('#setting-conditions-pre-transition').val(conditions.pre_transition);
+
+    $('#setting-conditions-aspect-ratio').val(conditions.aspectRatio.x + " : " + conditions.aspectRatio.y);
+    $('#setting-conditions-scale-factor').val(conditions.scaleFactor);
+    $('#setting-conditions-scale-max').val(conditions.scaleMax);
+
+    if(conditions.automGenerateState) $('#setting-conditions-auto-create-state').prop("checked", true);
+    else $('#setting-conditions-auto-create-state').prop("checked", false);
+
   }
 
 

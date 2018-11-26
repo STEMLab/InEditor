@@ -78,7 +78,8 @@
               <a class="dropdown-item" id="project-save">Save</a>
               <a class="dropdown-item" id="project-saveas" data-toggle="modal" data-target="#project-save-as-modal">Save As...</a>
               <hr>
-              <a class="dropdown-item disabled" id="project-import" data-toggle="modal" data-target="#project-import-modal">Import</a>
+              <!-- <a class="dropdown-item disabled" id="project-import" data-toggle="modal" data-target="#project-import-modal">Import</a> -->
+              <a class="dropdown-item" id="project-import">Import(.gml)</a><input type="file" id="project-import-file" accept=".gml" class="d-none" />
               <a class="dropdown-item" id="project-export" data-modaltype="export">Export(.gml)</a>
             </div>
           </li>
@@ -91,7 +92,7 @@
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SETTING</a>
             <div class="dropdown-menu">
-              <a class="dropdown-item" id="setting-conditions" data-toggle="modal" data-target="#setting-conditions-modal">Conditions</a>
+              <a class="dropdown-item" id="setting-conditions" data-modaltype="conditions">Conditions</a>
               <a class="dropdown-item" id="setting-desc" data-toggle="modal" data-target="#setting-desc-modal">Description</a>
             </div>
           </li>
@@ -413,86 +414,84 @@
     </div>
   </div>
 
-  <div class="modal fade" id="setting-conditions-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-
-        <div class="modal-header">
-          <h5 class="modal-title">Setting General Conditions</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        </div>
-
-        <div class="modal-body">
-          <h6>Prefix of id of object</h6>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">Cell</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cell">
-            </div>
-          </div>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">CellSpaceBoundary</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cellBoundary">
-            </div>
-          </div>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">State</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-state">
-            </div>
-          </div>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">Transition</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-transition">
-            </div>
-          </div>
-
-          <br />
-          <h6>Canvas properties</h6>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">Aspect ratio</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-aspect-ratio">
-            </div>
-          </div>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">Scale Factor</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-factor">
-            </div>
-          </div>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">Scale Max</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-max">
-            </div>
-          </div>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">Auto Create State</div>
-            <div class="col-7">
-              <input type="checkbox" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-auto-create-state" checked>
-            </div>
+  <div class="ui modal small" id="setting-conditions-modal">
+    <div class="header">Setting General Conditions</div>
+    <div class="scrolling content">
+      <h5 class="ui horizontal divider header">
+        Prefix of id of object
+      </h5>
+      <div>
+        <div class="row" style="margin-bottom:2px">
+          <div class="col-1" style="float: left;"></div>
+          <div class="col-3" style="float: left;">Cell</div>
+          <div class="col-7">
+            <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cell">
           </div>
         </div>
+        <div class="row" style="margin-bottom:2px">
+          <div class="col-1" style="float: left;"></div>
+          <div class="col-3" style="float: left;">CellSpaceBoundary</div>
+          <div class="col-7">
+            <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cellBoundary">
+          </div>
+        </div>
+        <div class="row" style="margin-bottom:2px">
+          <div class="col-1" style="float: left;"></div>
+          <div class="col-3" style="float: left;">State</div>
+          <div class="col-7">
+            <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-state">
+          </div>
+        </div>
+        <div class="row" style="margin-bottom:2px">
+          <div class="col-1" style="float: left;"></div>
+          <div class="col-3" style="float: left;">Transition</div>
+          <div class="col-7">
+            <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-transition">
+          </div>
+        </div>
+      </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="setting-conditions-modal-btn" aria-label="Close">Update</button>
+      <br />
+
+      <h5 class="ui horizontal divider header">
+        Canvas properties
+      </h5>
+      <div class="row" style="margin-bottom:2px">
+        <div class="col-1" style="float: left;"></div>
+        <div class="col-3" style="float: left;">Aspect ratio</div>
+        <div class="col-7">
+          <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-aspect-ratio">
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:2px">
+        <div class="col-1" style="float: left;"></div>
+        <div class="col-3" style="float: left;">Scale Factor</div>
+        <div class="col-7">
+          <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-factor">
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:2px">
+        <div class="col-1" style="float: left;"></div>
+        <div class="col-3" style="float: left;">Scale Max</div>
+        <div class="col-7">
+          <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-max">
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:2px">
+        <div class="col-1" style="float: left;"></div>
+        <div class="col-3" style="float: left;">Auto Create State</div>
+        <div class="col-7">
+          <input type="checkbox" id="setting-conditions-auto-create-state">
         </div>
       </div>
     </div>
+
+    <div class="actions">
+      <div class="ui button" id="setting-conditions-modal-btn" aria-label="Close">Submit</div>
+      <div class="ui cancel button">Cancel</div>
+    </div>
   </div>
+
 
   <div class="modal fade" id="setting-desc-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">

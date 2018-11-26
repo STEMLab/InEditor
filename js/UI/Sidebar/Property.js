@@ -175,26 +175,32 @@ define([], function() {
 
 
     // ref tab
-    var refDiv = "<table id=\"property-ref-table\" type=\"ref\" class=\"property-table\">";
+    var refDiv = "<table id=\"property-ref-table\" class=\"property-table ui compact table inverted\">";
     refDiv += "<tr><td class=\"title\">ref</td><td class=\"value\"><input id=\"ref-text\" type=\"text\"></td></tr>";
     refDiv += "</table>";
     refDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-ref-submit-btn\">Submit</div>";
 
 
     // navi tab
-    var naviDiv = "<table id=\"property-navi-table\" type=\"ref\" class=\"property-table\">";
-    naviDiv += "<tr><td class=\"title\">Navi Type</td><td class=\"value\"><select id=\"navi-text\" style=\"width: 80%;\" data-pre=" + property.naviType + ">";
-    naviDiv += "<option value=" + property.naviType + " selected>" + property.naviType + "</option>";
-    naviDiv += "<option value=\"NavigableBoundary\">NavigableSpace</option>";
-    naviDiv += "<option value=\"GeneralSpace\">GeneralSpace</option>";
-    naviDiv += "<option value=\"ConnectionBoundary\">TransferSpace</option>";
-    naviDiv += "<option value=\"AnchorBoundary\">TransitionSpace</option>";
-    naviDiv += "</select></td></tr>";
+    var naviDiv = "<table id=\"property-navi-table\" class=\"property-table ui compact table inverted\">";
+    log.info(property.naviType);
+    naviDiv += this.getDropDownTr('navi-text', 'Navi Type', [property.naviType, "NavigableSpace", "GeneralSpace", "TransferSpace", "TransitionSpace"]);
+    // naviDiv += "<tr><td class=\"title\">Navi Type</td><td class=\"value\"><select id=\"navi-text\" style=\"width: 80%;\" data-pre=" + property.naviType + ">";
+    // naviDiv += "<option value=" + property.naviType + " selected>" + property.naviType + "</option>";
+    // naviDiv += "<option value=\"NavigableBoundary\"></option>";
+    // naviDiv += "<option value=\"GeneralSpace\"></option>";
+    // naviDiv += "<option value=\"ConnectionBoundary\"></option>";
+    // naviDiv += "<option value=\"AnchorBoundary\"></option>";
+    // naviDiv += "</select></td>
+    // naviDiv += "</tr>";
 
     if (property.naviType != "") {
-      naviDiv += "<tr><td class=\"title\">class</td><td class=\"value\"><input id=\"class-text\" type=\"text\" value=" + property.navi.class + "></td></tr>";
-      naviDiv += "<tr><td class=\"title\">function</td><td class=\"value\"><input id=\"function-text\" type=\"text\" value=" + property.navi.function+"></td></tr>";
-      naviDiv += "<tr><td class=\"title\">usage</td><td class=\"value\"><input id=\"usage-text\" type=\"text\" value=" + property.navi.usage + "></td></tr>";
+      naviType += this.getBasicTr('class', 'class', property.navi.class, false);
+      naviType += this.getBasicTr('function', 'function', property.navi.function, false);
+      naviType += this.getBasicTr('usage', 'usage', property.navi.usage, false);
+      // naviDiv += "<tr><td class=\"title\">class</td><td class=\"value\"><input id=\"class-text\" type=\"text\" value=" + property.navi.class + "></td></tr>";
+      // naviDiv += "<tr><td class=\"title\">function</td><td class=\"value\"><input id=\"function-text\" type=\"text\" value=" + property.navi.function+"></td></tr>";
+      // naviDiv += "<tr><td class=\"title\">usage</td><td class=\"value\"><input id=\"usage-text\" type=\"text\" value=" + property.navi.usage + "></td></tr>";
     }
 
     naviDiv += "</table>";

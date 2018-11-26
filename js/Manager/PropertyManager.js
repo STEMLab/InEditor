@@ -294,13 +294,6 @@ define([
   }
 
   /**
-   * @memberof PropertyManager
-   */
-  PropertyManager.prototype.endAddNewCellBoundary = function(reqObj) {
-    log.info('PropertyManager.endAddNewCellBoundary called');
-  }
-
-  /**
    * @memberof GeometryManager
    * @param {Object} reqObj { id, floor, isEmpty }
    */
@@ -311,16 +304,20 @@ define([
     }
 
     // add new cellspace boundary property(=CellBoundaryProperty) in stage.propertyContainer
-    window.storage.propertyContainer.cellBoundaryProperties.push(
-      new CellBoundaryProperty(reqObj.id)
-    );
+    var property = new CellBoundaryProperty(reqObj.id);
+    window.storage.propertyContainer.cellBoundaryProperties.push(property);
 
     // add key in floor property
     window.storage.propertyContainer.getElementById('floor', reqObj.floor).cellBoundaryKey.push(
       reqObj.id
     );
 
-    // log.trace(window.storage.propertyContainer);
+    var associationCells = window.tmpObj.associationCell;
+    for(var key in associationCells){
+      window.storage.propertyContainer.getElementById('cell', key).addPartialboundedBy(reqObj.id);
+    }
+
+    window.tmpObj = null;
   }
 
   /**

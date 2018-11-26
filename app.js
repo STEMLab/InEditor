@@ -79,6 +79,17 @@ app.post('/save-gml/*', function(req, res) {
   });
 });
 
+app.post('/xml-to-json', function(req,res){
+  var IndoorGML_Core_1_0_3 = require('./json/IndoorGML_Core_1_0_3.js').IndoorGML_Core_1_0_3;
+  var Jsonix = require('jsonix').Jsonix;
+  var context = new Jsonix.Context([IndoorGML_Core_1_0_3]);
+  var unmarshaller = context.createUnmarshaller();
+
+  var resume = unmarshaller.unmarshalFile(req.body, function(result) {
+  		res.send(JSON.stringify(result, null, 1));
+  	});
+});
+
 app.post('/convert-bson-to-json', function(req, res){
 
   var buffer = new Buffer(req.body, "binary");

@@ -57,6 +57,10 @@ define([
       'click': this.showModal
     };
 
+    handlerBinder['setting-conditions'] = {
+      'click': this.showModal
+    }
+
 
 
     // handlerBinder['stage']={
@@ -274,22 +278,19 @@ define([
     var result = new Result;
     var pre = data.target.dataset.pre;
 
-    if(pre == "" && data.target.value != "" && data.target.value != "selected"){
+    if(pre == undefined && data.target.value != undefined){
       var table = document.getElementById("property-navi-table").childNodes[0];
-      var btn = table.childNodes[1];
-      table.removeChild(btn);
 
       var classTr = document.createElement("tr");
-      classTr.innerHTML = "<td class=\"title\">class</td><td class=\"value\"><input id=\"class-text\" type=\"text\" value=\"\"></td>";
+      classTr.innerHTML = "<td class=\"title\">class</td><td class=\"value\"><div class=\"ui transparent inverted input\"><input id=\"class-text\" type=\"text\" value=\"\"></div></td>";
       var functionTr = document.createElement("tr");
-      functionTr.innerHTML = "<td class=\"title\">function</td><td class=\"value\"><input id=\"function-text\" type=\"text\" value=\"\"></td>";
+      functionTr.innerHTML = "<td class=\"title\">function</td><td class=\"value\"><div class=\"ui transparent inverted input\"><input id=\"function-text\" type=\"text\" value=\"\"></div></td>";
       var usageTr = document.createElement("tr");
-      usageTr.innerHTML = "<td class=\"title\">usage</td><td class=\"value\"><input id=\"usage-text\" type=\"text\" value=\"\"></td>";
+      usageTr.innerHTML = "<td class=\"title\">usage</td><td class=\"value\"><div class=\"ui transparent inverted input\"><input id=\"usage-text\" type=\"text\" value=\"\"></div></td>";
 
       table.appendChild(classTr);
       table.appendChild(functionTr);
       table.appendChild(usageTr);
-      table.appendChild(btn);
       document.getElementById("navi-text").dataset.pre = data.target.value;
     }
     else if(pre != "" && (data.target.value == "" || data.target.value == "selected")){
@@ -320,6 +321,11 @@ define([
         break;
       case 'viewer':
         $('#go-viewer-modal').modal('show');
+        break;
+      case 'conditions':
+        if(window.broker.isPublishable('showconditionmodal')){
+          broker.publish(new Message('showconditionmodal', {}));
+        }
         break;
       default:
 
