@@ -93,7 +93,7 @@ define([], function() {
 
       var str = "";
       for(var key in this.properties.description)
-        str += key + "=" + this.properties.description[key] + ";";
+        str += key + "=\"" + this.properties.description[key] + "\":";
       this.properties['description'] = str;
 
     } else {

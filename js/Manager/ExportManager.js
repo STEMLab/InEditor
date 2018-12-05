@@ -79,6 +79,7 @@ define([
         log.info(">>>> succeed to export to viewer");
       }
     }
+    log.info(result);
 
     xhr.open("POST", reqObj.address, true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -106,14 +107,11 @@ define([
     };
 
     function getBbox(bbox, point) {
-      if (point[0] > bbox.max.x)
-        bbox.max.x = point[0];
-      if (point[1] > bbox.max.y)
-        bbox.max.y = point[1];
-      if (point[0] < bbox.min.x)
-        bbox.min.x = point[0];
-      if (point[1] < bbox.min.y)
-        bbox.min.y = point[1];
+      if (point[0] > bbox.max.x) bbox.max.x = point[0];
+      if (point[1] > bbox.max.y) bbox.max.y = point[1];
+
+      if (point[0] < bbox.min.x) bbox.min.x = point[0];
+      if (point[1] < bbox.min.y) bbox.min.y = point[1];
       return bbox;
     }
 
@@ -531,7 +529,7 @@ define([
    * @memberof ExportManager
    */
   ExportManager.prototype.postJson = function(address, data) {
-    // log.info('POST : ' + address, data);
+    log.info('POST : ' + address, data);
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
@@ -848,7 +846,8 @@ define([
           if (slantMap[cellId] == undefined) cells[cellId].setCoor(manager.extrudeCell(coor, floorProperties[floorKey].celingHeight * 1), '3D');
           else if (slantMap[cellId] == 'up') cells[cellId].setCoor(manager.extrudeCellWithUpSlant(coor, floorProperties[floorKey].celingHeight * 1), '3D');
           else if (slantMap[cellId] == 'down') cells[cellId].setCoor(manager.extrudeCellWithDownSlant(coor, floorProperties[floorKey].celingHeight * 1), '3D');
-        } else if (geoType == '2D') cells[cellId].setCoor(coor, '2D');
+        } else if (geoType == '2D') cells[cellId].setCoor([coor], '2D');
+
 
         // add hole
         if (holeMap[cellId] != undefined) {
@@ -1016,6 +1015,7 @@ define([
     for (var floorKey in floorProperties) {
 
       var stateKeyInFloor = floorProperties[floorKey].stateKey;
+      var prtDesc = floorProperties[floorKey].description;
 
       var prtId = "layer-0";
       for (var nodesKey in nodes) {
@@ -1030,7 +1030,8 @@ define([
 
         states[stateKeyInFloor[stateKey]].setWKT();
         states[stateKeyInFloor[stateKey]].setParentId(prtId);
-
+        states[stateKeyInFloor[stateKey]].addPrtDesc(prtDesc);
+        states[stateKeyInFloor[stateKey]].convertDescObj2Str();
       }
     }
 
@@ -1081,7 +1082,7 @@ define([
 
     // pixel to real world coordinates
     for (var floorKey in floorProperties) {
-
+      var prtDesc = floorProperties[floorKey].description;
       var transitionKeyInFloor = floorProperties[floorKey].transitionKey;
 
       var prtId = "layer-0";
@@ -1106,9 +1107,13 @@ define([
 
         transitions[transitionKeyInFloor[transitionKey]].setWKT();
         transitions[transitionKeyInFloor[transitionKey]].setParentId(prtId);
+        transitions[transitionKeyInFloor[transitionKey]].addPrtDesc(prtDesc);
+        transitions[transitionKeyInFloor[transitionKey]].convertDescObj2Str();
 
         transitions[transitionKeyInFloor[transitionKey] + '-REVERSE'].setWKT();
         transitions[transitionKeyInFloor[transitionKey] + '-REVERSE'].setParentId(prtId);
+        transitions[transitionKeyInFloor[transitionKey] + '-REVERSE'].addPrtDesc(prtDesc);
+        transitions[transitionKeyInFloor[transitionKey] + '-REVERSE'].convertDescObj2Str();
       }
     }
 
@@ -1159,7 +1164,7 @@ define([
     var widthScale = Math.abs((worldURC[0] - worldLLC[0]) / pixeWidth);
     var heightScale = Math.abs((worldURC[1] - worldLLC[1]) / pixelHeight);
     var widthTrans = worldLLC[0];
-    var heightTrans = worldURC[1];
+    var heightTrans = worldLLC[1];
     var matrix = math.matrix([
       [widthScale, 0, widthTrans],
       [0, heightScale, heightTrans],
@@ -1168,6 +1173,7 @@ define([
 
     var result = math.multiply(matrix, mirroredPoint);
     // var result = math.multiply(matrix, pointMatrix);
+    // result = math.multiply(mirrorMatrix, result);
 
     return result;
 

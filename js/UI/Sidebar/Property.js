@@ -78,23 +78,30 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var canvasDiv = "<table id=\"property-table\" class=\"ui inverted table property-table\">";
+    var canvasDiv = "<table id=\"property-table\" data-type=\"canvas\" class=\"ui inverted table property-table\">";
     canvasDiv += "<tr><td class=\"title\">Upload floor plan</td><td class=\"value\"><input id=\"floorplan-file\" type=\"file\" accept=\".jpg,.jpeg,.png,.gif,.bmp\"></td></tr>";
-    // canvasDiv += "<tr><td class=\"title\">Resizing canvas</td><td class=\"value\"><input id=\"name-text\" type=\"button\" value=\"V\"></td></tr>";
-
-    canvasDiv += "<tr><td class=\"title\">Copy another floor</td><td class=\"value\"><select id=\"copyfloor-text\" style=\"width: 80%;\">";
+    canvasDiv += "<tr><td class=\"title\">Copy another floor</td><td class=\"value\"><select id=\"copyfloor-text\" class=\"ui compact selection dropdown\" style=\"width: 80%;\">";
     canvasDiv += "<option value=\"\" selected disabled hidden></option>";
+
     for (var key in floorKeys) {
       var value = floorKeys[key];
       if (value != floorProperty.id) canvasDiv += "<option value=\"" + value + "\">" + value + "</option>";
     }
 
     canvasDiv += "</select>";
-    canvasDiv += "<input id=\"copyfloor-btn\" type=\"button\" value=\"V\"></td></tr>";
+
+
+
+    canvasDiv += "<button class=\"ui icon button\" style=\"width:20%; position: absolute; top: 5.5rem;\">";
+    canvasDiv += "<i id=\"copyfloor-btn\" class=\"inverted grey check icon\"></i></button>";
+
+
+
+    // "<input id=\"copyfloor-btn\" type=\"button\" value=\"V\"></td></tr>";
 
     canvasDiv += "</table>";
 
-    var propertiesDiv = "<table id=\"property-table\" type=\"floor\" class=\"property-table ui compact table inverted \">";
+    var propertiesDiv = "<table id=\"property-table\" data-type=\"floor\" class=\"property-table ui compact table inverted \">";
     propertiesDiv += this.getBasicTr('id', 'id', floorProperty.id, true);
     propertiesDiv += this.getBasicTr('name', 'name', floorProperty.name, false);
     propertiesDiv += this.getBasicTr('layer', 'layer', floorProperty.layer, false);
@@ -130,27 +137,23 @@ define([], function() {
 
     propertyLayout.init();
 
-    // event binding
-    document.getElementById('floorplan-file').addEventListener('change', function(event) {
+    function bindEvent(id, action, type){
+      document.getElementById(id).addEventListener(action, function(event) {
+        window.eventHandler.callHandler(type, event);
+      });
+    }
 
-      window.eventHandler.callHandler('file', event);
+    bindEvent('floorplan-file', 'change', 'file');
+    bindEvent('add-new-local-desc-btn', 'click', 'html');
+    bindEvent('copyfloor-btn', 'click', 'html');
+    bindEvent('property-subimt-btn', 'click', 'html');
 
-    });
-
-    // event binding
-    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
-
-      window.eventHandler.callHandler('html', event);
-
-    });
-
-    // event binding
-    document.getElementById('copyfloor-btn').addEventListener('click', function(event) {
-
-      window.eventHandler.callHandler('html', event);
-
-    });
-
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
   }
 
   /**
@@ -162,7 +165,7 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table ui compact table inverted \">";
+    var propertiesDiv = "<table id=\"property-table\" data-type=" + type + " class=\"property-table ui compact table inverted \">";
     propertiesDiv += this.getBasicTr('id', 'id', property.id, true);
     propertiesDiv += this.getBasicTr('name', 'name', property.name, false);
     propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != ""? property.duality:'none', true);
@@ -175,32 +178,20 @@ define([], function() {
 
 
     // ref tab
-    var refDiv = "<table id=\"property-ref-table\" class=\"property-table ui compact table inverted\">";
+    var refDiv = "<table id=\"property-ref-table\" data-type=" + type + " class=\"property-table ui compact table inverted\">";
     refDiv += "<tr><td class=\"title\">ref</td><td class=\"value\"><input id=\"ref-text\" type=\"text\"></td></tr>";
     refDiv += "</table>";
     refDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-ref-submit-btn\">Submit</div>";
 
 
     // navi tab
-    var naviDiv = "<table id=\"property-navi-table\" class=\"property-table ui compact table inverted\">";
+    var naviDiv = "<table id=\"property-navi-table\" data-type=" + type + " class=\"property-table ui compact table inverted\">";
     log.info(property.naviType);
     naviDiv += this.getDropDownTr('navi-text', 'Navi Type', [property.naviType, "NavigableSpace", "GeneralSpace", "TransferSpace", "TransitionSpace"]);
-    // naviDiv += "<tr><td class=\"title\">Navi Type</td><td class=\"value\"><select id=\"navi-text\" style=\"width: 80%;\" data-pre=" + property.naviType + ">";
-    // naviDiv += "<option value=" + property.naviType + " selected>" + property.naviType + "</option>";
-    // naviDiv += "<option value=\"NavigableBoundary\"></option>";
-    // naviDiv += "<option value=\"GeneralSpace\"></option>";
-    // naviDiv += "<option value=\"ConnectionBoundary\"></option>";
-    // naviDiv += "<option value=\"AnchorBoundary\"></option>";
-    // naviDiv += "</select></td>
-    // naviDiv += "</tr>";
-
     if (property.naviType != "") {
       naviType += this.getBasicTr('class', 'class', property.navi.class, false);
       naviType += this.getBasicTr('function', 'function', property.navi.function, false);
       naviType += this.getBasicTr('usage', 'usage', property.navi.usage, false);
-      // naviDiv += "<tr><td class=\"title\">class</td><td class=\"value\"><input id=\"class-text\" type=\"text\" value=" + property.navi.class + "></td></tr>";
-      // naviDiv += "<tr><td class=\"title\">function</td><td class=\"value\"><input id=\"function-text\" type=\"text\" value=" + property.navi.function+"></td></tr>";
-      // naviDiv += "<tr><td class=\"title\">usage</td><td class=\"value\"><input id=\"usage-text\" type=\"text\" value=" + property.navi.usage + "></td></tr>";
     }
 
     naviDiv += "</table>";
@@ -222,21 +213,25 @@ define([], function() {
     propertyLayout.init();
 
     // event binding
-    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    function bindEvent(id, action, type){
+      document.getElementById(id).addEventListener(action, function(event) {
+        window.eventHandler.callHandler(type, event);
+      });
+    }
 
-    document.getElementById('property-ref-submit-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    bindEvent('property-subimt-btn', 'click', 'html');
+    bindEvent('property-ref-submit-btn', 'click', 'html');
+    bindEvent('property-navi-submit-btn', 'click', 'html');
+    bindEvent('navi-text', 'click', 'html');
+    bindEvent('add-new-local-desc-btn', 'click', 'html');
 
-    document.getElementById('property-navi-submit-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
 
-    document.getElementById('navi-text').addEventListener('change', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
 
   }
 
@@ -251,7 +246,7 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table ui compact table inverted \">";
+    var propertiesDiv = "<table id=\"property-table\" data-type=" + type + " class=\"property-table ui compact table inverted \">";
     propertiesDiv += this.getBasicTr('id', 'id', property.id, true);
     propertiesDiv += this.getBasicTr('name', 'name', property.name, false);
     propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != ""? property.duality:'none', true);
@@ -264,13 +259,13 @@ define([], function() {
 
 
     // ref tab
-    var refDiv = "<table id=\"property-ref-table\" type=\"ref\" class=\"property-table\">";
+    var refDiv = "<table id=\"property-ref-table\" data-type=\"ref\" class=\"property-table\">";
     refDiv += "<tr><td class=\"title\">ref</td><td class=\"value\"><input id=\"ref-text\" type=\"text\"></td></tr>";
     refDiv += "<tr><td colspan=\"2\"><button class=\"submit-btn\"  id=\"property-ref-submit-btn\">submit</button></td></tr>";
     refDiv += "</table>";
 
     // navi tab
-    var naviDiv = "<table id=\"property-navi-table\" type=\"ref\" class=\"property-table\">";
+    var naviDiv = "<table id=\"property-navi-table\" data-type=\"navi\" class=\"property-table\">";
     naviDiv += "<tr><td class=\"title\">Navi Type</td><td class=\"value\"><select id=\"navi-text\" style=\"width: 80%;\" data-pre=" + property.naviType + ">";
     naviDiv += "<option value=" + property.naviType + " selected>" + property.naviType + "</option>";
     naviDiv += "<option value=\"NavigableBoundary\">NavigableSpace</option>";
@@ -305,21 +300,24 @@ define([], function() {
     propertyLayout.init();
 
     // event binding
-    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    function bindEvent(id, action, type){
+      document.getElementById(id).addEventListener(action, function(event) {
+        window.eventHandler.callHandler(type, event);
+      });
+    }
 
-    document.getElementById('property-ref-submit-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    bindEvent('property-subimt-btn', 'click', 'html');
+    bindEvent('property-ref-submit-btn', 'click', 'html');
+    bindEvent('property-navi-submit-btn', 'click', 'html');
+    bindEvent('navi-text', 'click', 'html');
+    bindEvent('add-new-local-desc-btn', 'click', 'html');
 
-    document.getElementById('property-navi-submit-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
-
-    document.getElementById('navi-text').addEventListener('change', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
 
   }
 
@@ -513,7 +511,7 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#protperty-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=\"floor\" class=\"property-table ui compact table inverted \">";
+    var propertiesDiv = "<table id=\"property-table\" data-type=\"state\" class=\"property-table ui compact table inverted \">";
     propertiesDiv += this.getBasicTr('id', 'id', property .id, true);
     propertiesDiv += this.getBasicTr('name', 'name', property .name, false);
     propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != ""? property.duality:'none', true);
@@ -527,9 +525,21 @@ define([], function() {
     this.setView(config, propertiesDiv);
 
     // event binding
-    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    function bindEvent(id, action, type){
+      document.getElementById(id).addEventListener(action, function(event) {
+        window.eventHandler.callHandler(type, event);
+      });
+    }
+
+    bindEvent('property-subimt-btn', 'click', 'html');
+    bindEvent('add-new-local-desc-btn', 'click', 'html');
+
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
 
   }
 
@@ -597,7 +607,7 @@ define([], function() {
 
     var projectProperty = storage.propertyContainer.getElementById('project', id);
 
-    var divContent = "<table id=\"property-table\" type=\"project\" class=\"ui inverted table property-table\">";
+    var divContent = "<table id=\"property-table\" data-type=\"project\" class=\"ui inverted table property-table\">";
     divContent += this.getBasicTr('id', 'id', projectProperty.id, true);
     divContent += this.getBasicTr('name', 'name', projectProperty.name, false);
     divContent += this.getBasicTr('date', 'date', projectProperty.date, false);
@@ -609,14 +619,21 @@ define([], function() {
     this.setView(config, divContent);
 
     // event binding
-    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
-    log.info(document.getElementById('add-new-local-desc-btn'));
-    document.getElementById('add-new-local-desc-btn').addEventListener('click', function(event) {
-      log.info('hi');
-      window.eventHandler.callHandler('html', event);
-    });
+    function bindEvent(id, action, type){
+      document.getElementById(id).addEventListener(action, function(event) {
+        window.eventHandler.callHandler(type, event);
+      });
+    }
+
+    bindEvent('property-subimt-btn', 'click', 'html');
+    bindEvent('add-new-local-desc-btn', 'click', 'html');
+
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
 
   }
 
@@ -637,22 +654,13 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=\"floor\" class=\"property-table ui compact table inverted \">";
+    var propertiesDiv = "<table id=\"property-table\" data-type=\"transition\" class=\"property-table ui compact table inverted \">";
     propertiesDiv += this.getBasicTr('id', 'id', property .id, true);
     propertiesDiv += this.getBasicTr('name', 'name', property .name, false);
     propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != ""? property.duality:'none', true);
     propertiesDiv += this.getBasicTr('weight', 'weight', property .weight, false);
     propertiesDiv += this.getBasicTr('connects', 'connects', "\"" + property.getConncetsString() +"\"", true);
     propertiesDiv += this.getDescString(property.description);
-
-    // propertiesDiv += "<tr><td class=\"title\">is stair</td><td class=\"value\"><input id=\"stair-text\" type=\"checkbox\" disabled ";
-    //
-    // if (property.isStair.tf) {
-    //   // propertiesDiv += "checked value =" + property.isStair.connection[0] + " + \"-\" + "+ property.isStair.connection[1];
-    //   propertiesDiv += "checked> <label for=\"stair-text\">" + property.isStair.connection[0] + " - " + property.isStair.connection[1] + "</label";
-    // }
-    //
-    // propertiesDiv += "></td></tr>";
     propertiesDiv += "</table>";
 
     propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
@@ -660,9 +668,21 @@ define([], function() {
     this.setView(config, propertiesDiv);
 
     // event binding
-    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    function bindEvent(id, action, type){
+      document.getElementById(id).addEventListener(action, function(event) {
+        window.eventHandler.callHandler(type, event);
+      });
+    }
+
+    bindEvent('property-subimt-btn', 'click', 'html');
+    bindEvent('add-new-local-desc-btn', 'click', 'html');
+
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
 
   }
 
@@ -690,7 +710,6 @@ define([], function() {
     };
 
     this.setInterLayerView(config, storage.propertyContainer.getElementById('interlayerConnection', id), 'interlayerConnection');
-
   }
 
   Property.prototype.setInterLayerView = function(config, property, type) {
@@ -712,6 +731,17 @@ define([], function() {
 
     this.setView(config, propertiesDiv);
 
+    document.getElementById('add-new-local-desc-btn').addEventListener('click', function(event) {
+      window.eventHandler.callHandler('html', event);
+    });
+
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
+
   }
 
   Property.prototype.getDescString = function(desc) {
@@ -726,13 +756,13 @@ define([], function() {
       descString += "<tr>";
       descString += "<td>"+key+"</td>";
       descString += "<td><div class=\"ui transparent inverted input value\"><input type=\"text\" id=\"desc-text-" + key + "\" value=\"" + desc[key] + "\"></div></td>";
-      descString += "<td><i class=\"fitted trash alternate inverted icon\"></i></td>";
+      descString += "<td><i class=\"fitted trash alternate inverted icon delete-local-desc-icon\" data-key=" + key + "></i></td>";
       descString += "<tr>";
       i++;
     }
     descString += "</table><div class=\"ui divider\"></div>";
     descString += "Add Local Desc";
-    descString += "<div class=\"ui transparent icon inverted input\"><input type=\"text\" placeHolder=\"New Desc...\"><button class=\"mini ui icon button\"><i id=\"add-new-local-desc-btn\" class=\"plus icon inverted\"></i></button>";
+    descString += "<div class=\"ui transparent icon inverted input\"><input type=\"text\" id=\"add-new-local-desc-text\" placeHolder=\"New Desc...\"><button class=\"mini ui icon button\"><i id=\"add-new-local-desc-btn\" class=\"plus icon inverted\"></i></button>";
     descString += "</div></div></td></tr>";
 
     return descString;

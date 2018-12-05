@@ -40,11 +40,6 @@ define([
       'change': this.floorplanUpload
     };
 
-
-    handlerBinder['setting-desc'] = {
-      'click': this.updateDescList
-    };
-
     handlerBinder['navi-text'] = {
       'change' : this.showNaviAttr
     };
@@ -58,6 +53,10 @@ define([
     };
 
     handlerBinder['setting-conditions'] = {
+      'click': this.showModal
+    }
+
+    handlerBinder['setting-desc'] = {
       'click': this.showModal
     }
 
@@ -255,25 +254,6 @@ define([
 
   }
 
-  UIChangeEventHandler.prototype.updateDescList = function(broker, previousMsg, data) {
-    var result = {
-      'result': false,
-      'msg': null
-    };
-
-    if (broker.isPublishable('updatedesclist')) {
-      broker.publish(new Message('updatedesclist', { }));
-      result = {
-        'result': true,
-        'msg': null
-      };
-    } else {
-      result.msg = "wrong state transition : " + previousMsg + " to updatedesclist.";
-    }
-
-    return result;
-  }
-
   UIChangeEventHandler.prototype.showNaviAttr = function(broker, previousMsg, data){
     var result = new Result;
     var pre = data.target.dataset.pre;
@@ -326,6 +306,13 @@ define([
         if(window.broker.isPublishable('showconditionmodal')){
           broker.publish(new Message('showconditionmodal', {}));
         }
+        break;
+      case 'desc':
+        if (broker.isPublishable('updatedesclist')) {
+          broker.publish(new Message('updatedesclist', { }));
+        }
+
+        $('#setting-desc-modal').modal('show');
         break;
       default:
 

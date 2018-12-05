@@ -210,7 +210,79 @@ define([
    */
    ProjectManager.prototype.parseJson = function(json){
      log.info(json);
-     /// need to develop
+
+     var docId = json.value.id;
+     var multiLayeredGraph = json.value.multiLayeredGraph.multiLayeredGraph;
+     var primalSpaceFeatures = json.value.primalSpaceFeatures.primalSpaceFeatures;
+
+     // primalSpaceFeatures
+     var primalSpaceFeaturesId = primalSpaceFeatures.id;
+     var cellSpaceMember = primalSpaceFeatures.cellSpaceMember;
+     var cellSpaceBoundaryMember = primalSpaceFeatures.cellSpaceBoundaryMember;
+
+     var cells = {};
+     var cellListByHight = {};
+     for(var cell of cellSpaceMember){
+       cell = cell.cellSpace;
+
+       var cellData = {};
+
+       // properties
+       cellData['id'] = cell.id;
+       cellData['name'] = cell.name[0].value.trim();
+       cellData['duality'] = cell.duality.href.substring(1);
+       cellData['description'] = {};
+       cellData['partialboundedBy'] = [];
+
+       var descArr = cell.description.value.trim().split(':');
+       for(var obj of descArr){
+         if(obj != ""){
+           var parse = obj.split('=');
+           cellData['description'][parse[0]] = parse[1].substring(1, parse[1].length-1);
+         }
+       }
+
+       for(var obj of cell.partialboundedBy){
+         cellData['partialboundedBy'].push(obj.href.substring(1));
+       }
+
+       // geometry
+       if(cell.cellSpaceGeometry.geometry3D != undefined){
+         var exterior;
+         var points = [];
+         var z_low = 999999999999, z_high = -999999999999;
+
+         if(cell.cellSpaceGeometry.geometry3D.abstractSolid.value.exterior != undefined)
+          exterior = cell.cellSpaceGeometry.geometry3D.abstractSolid.value.exterior.shell.surfaceMember;
+
+        for(var surface of exterior){
+          var posOrPointPropertyOrPointRep = surface.abstractSurface.value.exterior.abstractRing.value.posOrPointPropertyOrPointRep;
+
+          var hight = -1;
+          for(var point of posOrPointPropertyOrPointRep){
+            if(hight == -1) point.value.value[2];
+            else if(height != point.value.value[2]) { height = -1; break;}
+          }
+
+          if(height != -1 && points.lenght == 0){
+            if(points.length == 0)
+              for(var point of posOrPointPropertyOrPointRep){
+                points.push([point.value.value[0], point.value.value[1]]);
+            }
+          }
+        }
+
+        // need to develop : interior
+        var interior;
+        if(cell.cellSpaceGeometry.geometry3D.abstractSolid.value.interior != undefined)
+         interior = cell.cellSpaceGeometry.geometry3D.abstractSolid.value.interior.shell.surfaceMember;
+
+
+       } else {
+         // 2D
+       }
+
+     }
    }
 
 

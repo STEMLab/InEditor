@@ -37,6 +37,14 @@ define([
       'click': this.addDescList
     }
 
+    handlerBinder['add-new-local-desc-btn'] = {
+      'click': this.addLocalDesc
+    }
+
+    handlerBinder['delete-local-desc-btn'] = {
+      'click': this.deleteLocalDesc
+    }
+
   }
 
   /**
@@ -53,9 +61,9 @@ define([
     if (broker.isPublishable('updateproperty')) {
 
       broker.publish(new Message('updateproperty', {
-        "type": document.getElementById("property-table").getAttribute("type"),
+        "type": $('#property-table').data('type'),
         "id": document.getElementById("id-text").value,
-        "updateContent": window.eventHandler.handlers['propertyEventHandler'].getUpdateContent(document.getElementById("property-table").getAttribute("type"))
+        "updateContent": window.eventHandler.handlers['propertyEventHandler'].getUpdateContent($('#property-table').data('type'))
       }));
 
       result = {
@@ -87,7 +95,7 @@ define([
     if (broker.isPublishable('updaterefdata')) {
 
       broker.publish(new Message('updaterefdata', {
-        "type": document.getElementById("property-table").getAttribute("type"),
+        "type": $('#property-table').data('type'),
         "id": document.getElementById("id-text").value,
         "updateContent": window.eventHandler.handlers['propertyEventHandler'].getUpdateContent('ref')
       }));
@@ -137,8 +145,8 @@ define([
 
         var id = document.getElementById("id-text").value;
         var descList = window.storage.propertyContainer.getElementById('floor', id).description;
-        for(var key in descList){
-          result.description[key] = document.getElementById("desc-text-"+key).value;
+        for (var key in descList) {
+          result.description[key] = document.getElementById("desc-text-" + key).value;
         }
 
         break;
@@ -150,8 +158,8 @@ define([
 
         var id = document.getElementById("id-text").value;
         var descList = window.storage.propertyContainer.getElementById('cell', id).description;
-        for(var key in descList){
-          result.description[key] = document.getElementById("desc-text-"+key).value;
+        for (var key in descList) {
+          result.description[key] = document.getElementById("desc-text-" + key).value;
         }
 
         break;
@@ -169,8 +177,8 @@ define([
 
         var id = document.getElementById("id-text").value;
         var descList = window.storage.propertyContainer.getElementById('cellBoundary', id).description;
-        for(var key in descList){
-          result.description[key] = document.getElementById("desc-text-"+key).value;
+        for (var key in descList) {
+          result.description[key] = document.getElementById("desc-text-" + key).value;
         }
 
         break;
@@ -183,8 +191,8 @@ define([
 
         var id = document.getElementById("id-text").value;
         var descList = window.storage.propertyContainer.getElementById('state', id).description;
-        for(var key in descList){
-          result.description[key] = document.getElementById("desc-text-"+key).value;
+        for (var key in descList) {
+          result.description[key] = document.getElementById("desc-text-" + key).value;
         }
 
         break;
@@ -197,8 +205,8 @@ define([
 
         var id = document.getElementById("id-text").value;
         var descList = window.storage.propertyContainer.getElementById('transition', id).description;
-        for(var key in descList){
-          result.description[key] = document.getElementById("desc-text-"+key).value;
+        for (var key in descList) {
+          result.description[key] = document.getElementById("desc-text-" + key).value;
         }
 
         break;
@@ -214,15 +222,15 @@ define([
     return result;
   }
 
-  PropertyEventHandler.prototype.addDescList = function(broker, previousMsg){
+  PropertyEventHandler.prototype.addDescList = function(broker, previousMsg) {
     var result = {
       'result': false,
       'msg': null
     };
 
-    if (broker.isPublishable('adddesclist')) {
+    if (broker.isPublishable('addnewglobaldesc')) {
 
-      broker.publish(new Message('adddesclist', {
+      broker.publish(new Message('addnewglobaldesc', {
         data: document.getElementById('setting-desc-modal-newDesc').value
       }));
 
@@ -235,37 +243,37 @@ define([
 
     } else {
 
-      result.msg = "wrong state transition : " + previousMsg + " to adddesclist.";
+      result.msg = "wrong state transition : " + previousMsg + " to addnewglobaldesc.";
 
     }
 
     return result;
   }
 
-  PropertyEventHandler.prototype.clickNaviSubmitBtn = function(broker, previousMsg){
+  PropertyEventHandler.prototype.clickNaviSubmitBtn = function(broker, previousMsg) {
     var result = new Object;
 
     if (broker.isPublishable('updateproperty')) {
       var type = document.getElementById("navi-text").value;
-      if(type == "" || type == "selected") type = "";
+      if (type == "" || type == "selected") type = "";
 
       var data = {
         'naviType': type,
-        'navi':{
+        'navi': {
           'class': "",
           'function': "",
           'usage': ""
         }
       };
 
-      if(data.naviType != "" && data.naviType != "selected"){
+      if (data.naviType != "" && data.naviType != "selected") {
         data.navi.class = document.getElementById("class-text").value
         data.navi.function = document.getElementById("function-text").value
         data.navi.usage = document.getElementById("usage-text").value
       }
 
       broker.publish(new Message('updateproperty', {
-        "type": document.getElementById("property-table").getAttribute("type"),
+        "type": $('#property-table').data('type'),
         "id": document.getElementById("id-text").value,
         "isNavi": true,
         "updateContent": data
@@ -279,6 +287,54 @@ define([
     } else {
 
       result.msg = "wrong state transition : " + previousMsg + " to updateproperty.";
+
+    }
+
+    return result;
+  }
+
+  PropertyEventHandler.prototype.addLocalDesc = function(broker) {
+    var result = new Object;
+    var text = $('#add-new-local-desc-text').val();
+
+    if (broker.isPublishable('addlocaldesc') && (text != "" && text != null)) {
+      broker.publish(new Message('addlocaldesc', {
+        "id": $('#id-text').val(),
+        "type": $('#property-table').data('type'),
+        "desc": text
+      }));
+
+      result = {
+        'result': true,
+        'msg': null
+      };
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to addlocaldesc.";
+
+    }
+
+    return result;
+  }
+
+  PropertyEventHandler.prototype.deleteLocalDesc = function(broker, previousMsg, data) {
+    var result = new Object;
+
+    if (broker.isPublishable('deletelocaldesc')) {
+      broker.publish(new Message('deletelocaldesc', {
+        "id": $('#id-text').val(),
+        "type": $('#property-table').data('type'),
+        "desc": data.target.dataset.key
+      }));
+      result = {
+        'result': true,
+        'msg': null
+      };
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to addlocaldesc.";
 
     }
 

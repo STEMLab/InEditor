@@ -112,7 +112,9 @@
       this.addCallbackFun("end-modifypoint", this.endModifyPoint, function() {}, function() {});
 
       this.addCallbackFun("deletecell", this.deleteCell);
+      this.addCallbackFun('deletecellboundary', this.deleteCellBoundary);
       this.addCallbackFun("deletestate", this.deleteState);
+      this.addCallbackFun('deletetransition', this.deleteTransition);
 
       this.addCallbackFun("rotateslant", this.rotateSlant);
     };
@@ -406,8 +408,6 @@
     GeometryManager.prototype.endAddNewCell_undo = function(undoObj) {
       // remove  cell in canvasContainer
       window.broker.getManager("end-addnewcell", "GeometryManager").deleteCell(undoObj);
-
-
 
       // ask remove state or not
     };
@@ -987,19 +987,23 @@
      * @memberof GeometryManager
      */
     GeometryManager.prototype.endAddNewCellBoundary_undo = function(undoObj) {
+      window.broker.getManager("end-addnewcell", "GeometryManager").deleteCellBoundary(undoObj);
+    };
+
+    GeometryManager.prototype.deleteCellBoundary = function(reqObj){
       // remove cellboundary in canvasContainer
       var cellboundaries =
-        window.storage.canvasContainer.stages[undoObj.floor].cellBoundaryLayer
+        window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer
         .group.cellBoundaries;
 
       for (var key in cellboundaries) {
-        if (cellboundaries[key].id == undoObj.id) {
+        if (cellboundaries[key].id == reqObj.id) {
           cellboundaries[key].destroy();
 
           // free dot from object
           for (var dotkey in cellboundaries[key].dots) {
             window.storage.dotFoolContainer
-              .getDotFool(undoObj.floor)
+              .getDotFool(reqObj.floor)
               .deleteDotFromObj(
                 cellboundaries[key].dots[dotkey].uuid,
                 cellboundaries[key].id
@@ -1008,7 +1012,7 @@
 
           // redraw canvas
           window.storage.canvasContainer.stages[
-            undoObj.floor
+            reqObj.floor
           ].cellBoundaryLayer.layer.draw();
           cellboundaries.splice(key, 1);
 
@@ -1019,12 +1023,12 @@
       // remove cell in geometryContainer
       cellboundaries = window.storage.geometryContainer.cellBoundaryGeometry;
       for (var key in cellboundaries) {
-        if (cellboundaries[key].id == undoObj.id) {
+        if (cellboundaries[key].id == reqObj.id) {
           cellboundaries.splice(key, 1);
           break;
         }
       }
-    };
+    }
 
     /**
      * @memberof GeometryManager
@@ -1361,6 +1365,51 @@
       window.storage.canvasContainer.stages[undoObj.floor].tmpLayer.layer.draw();
     };
 
+    GeometryManager.prototype.deleteTransition = function(reqObj){
+      // remove transition object in canvasContainer
+      var canvasObj = window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].getElementById("transition", reqObj.id);
+      canvasObj.destroy();
+
+      // free dot from object
+      var dots = canvasObj.getDots();
+      var dotFool = window.storage.dotFoolContainer.getDotFool(reqObj.floor);
+      for (var dotKey in dots) {
+        dotFool.deleteDotFromObj(dots[dotKey].uuid, reqObj.id);
+
+        // if dots[dotKey] is part of cell boundary
+        var memberOf = dots[dotKey].getMemberOf();
+        for (var memKey in memberOf) {
+          if (memberOf[memKey] == "cellBoundary") {
+            var boundryObj = window.storage.canvasContainer.stages[
+              reqObj.floor
+            ].getElementById("cellboundary", memKey);
+            if (boundryObj.isRemovableDot(dots[dotKey])) {
+              dotFool.deleteDotFromObj(dots[dotKey].uuid, boundryObj.id);
+            }
+          }
+        }
+      }
+
+      window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].transitionLayer.group.transitions.splice(
+        window.storage.canvasContainer.stages[
+          reqObj.floor
+        ].transitionLayer.group.transitions.indexOf(canvasObj),
+        1
+      );
+
+      // remove transition geometry in geometryContainer
+      window.storage.geometryContainer.removeObj(
+        window.storage.geometryContainer.getElementById("transition", reqObj.id)
+      );
+
+      // redraw stage
+      window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
+    }
+
     /**
      * @memberof GeometryManager
      */
@@ -1417,50 +1466,7 @@
      * @param {Object} undoObj floor, id
      */
     GeometryManager.prototype.endAddNewTransition_undo = function(undoObj) {
-      // remove transition object in canvasContainer
-      var canvasObj = window.storage.canvasContainer.stages[
-        undoObj.floor
-      ].getElementById("transition", undoObj.id);
-      canvasObj.destroy();
-
-      // free dot from object
-      var dots = canvasObj.getDots();
-      var dotFool = window.storage.dotFoolContainer.getDotFool(undoObj.floor);
-      for (var dotKey in dots) {
-        dotFool.deleteDotFromObj(dots[dotKey].uuid, undoObj.id);
-
-        // if dots[dotKey] is part of cell boundary
-        var memberOf = dots[dotKey].getMemberOf();
-        for (var memKey in memberOf) {
-          if (memberOf[memKey] == "cellBoundary") {
-            var boundryObj = window.storage.canvasContainer.stages[
-              undoObj.floor
-            ].getElementById("cellboundary", memKey);
-            if (boundryObj.isRemovableDot(dots[dotKey])) {
-              dotFool.deleteDotFromObj(dots[dotKey].uuid, boundryObj.id);
-            }
-          }
-        }
-      }
-
-      window.storage.canvasContainer.stages[
-        undoObj.floor
-      ].transitionLayer.group.transitions.splice(
-        window.storage.canvasContainer.stages[
-          undoObj.floor
-        ].transitionLayer.group.transitions.indexOf(canvasObj),
-        1
-      );
-
-      // remove transition geometry in geometryContainer
-      window.storage.geometryContainer.removeObj(
-        window.storage.geometryContainer.getElementById("transition", undoObj.id)
-      );
-
-      // redraw stage
-      window.storage.canvasContainer.stages[undoObj.floor].stage.draw();
-
-      log.trace(window.storage);
+      window.broker.getManager("end-addnewcell", "GeometryManager").deleteTransition(undoObj);
     };
 
     /**

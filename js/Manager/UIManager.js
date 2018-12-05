@@ -88,9 +88,12 @@ define([
     this.addCallbackFun('copyfloor', this.copyFloor);
 
     this.addCallbackFun('updatedesclist', this.updateDescList);
+    this.addCallbackFun('addnewglobaldesc', this.addDescList);
 
     this.addCallbackFun('showconditionmodal', this.showConditionModal);
-
+    this.addCallbackFun('deletedesclist', this.deleteDescList);
+    this.addCallbackFun('addlocaldesc', this.setPropertyView);
+    this.addCallbackFun('deletelocaldesc', this.setPropertyView);
   }
 
   /**
@@ -1054,7 +1057,8 @@ define([
       container.appendChild(i);
 
       document.getElementById(desc).addEventListener('click', function(event) {
-        manager.deleteDescList(event.currentTarget.id);
+        if(window.broker.isPublishable('deletedesclist'))
+          window.broker.publish({req : 'deletedesclist', reqObj : event.currentTarget.id});
       });
     }
   }
@@ -1077,6 +1081,21 @@ define([
 
   }
 
+  UIManager.prototype.addDescList = function(reqObj){
+
+    // update modal ui
+    window.broker.getManager("updatedesclist", "UIManager").updateDescList();
+
+    // update property tab
+    window.uiContainer.sidebar.property.setPropertyTab($('#property-table').data('type'), $('#id-text').val(), window.storage);
+  }
+
+  UIManager.prototype.deleteDescList = function(reqObj){
+    window.broker.getManager("updatedesclist","UIManager").updateDescList();
+
+    // update property tab
+    window.uiContainer.sidebar.property.setPropertyTab($('#property-table').data('type'), $('#id-text').val(), window.storage);
+  }
 
   return UIManager;
 });

@@ -199,6 +199,10 @@ define([
 
     this.reqSpecList['showconditionmodal'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['updateconditions'] = new MessageSpec('single', 'including', null, false);
+
+    this.reqSpecList['addnewglobaldesc'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['addlocaldesc'] = new MessageSpec('single', 'inclunding', null, false);
+    this.reqSpecList['deletelocaldesc'] = new MessageSpec('single', 'inclunding', null, false);
   }
 
   /**

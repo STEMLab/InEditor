@@ -425,7 +425,12 @@ define([
       return ;
     }
 
-    var converted = new GeometryConverter('Solid').geojson2wkt(this.getCoordinates());
+    var converted;
+    if(this.geometry.type == 'Surface')
+      converted = new GeometryConverter('Surface').geojson2wkt(this.getCoordinates());
+    else
+      converted = new GeometryConverter('Solid').geojson2wkt(this.getCoordinates());
+
     this.geometry.coordinates = converted;
     this.geometry.properties.type = 'wkt';
   }

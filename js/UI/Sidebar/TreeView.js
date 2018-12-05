@@ -285,6 +285,7 @@ define([], function() {
             iconClass: 'fa-trash-o',
             onClick: function(id) {
               if (window.broker.isPublishable(req)) {
+                if(type == 'cellboundary') type = 'cellBoundary';
                 var floor = window.storage.propertyContainer.getFloorById(type, id);
                 window.broker.publish({
                   req: req,

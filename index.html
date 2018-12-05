@@ -93,7 +93,7 @@
             <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SETTING</a>
             <div class="dropdown-menu">
               <a class="dropdown-item" id="setting-conditions" data-modaltype="conditions">Conditions</a>
-              <a class="dropdown-item" id="setting-desc" data-toggle="modal" data-target="#setting-desc-modal">Description</a>
+              <a class="dropdown-item" id="setting-desc" data-modaltype="desc">Description</a>
             </div>
           </li>
           <li class="nav-item dropdown">
@@ -230,27 +230,6 @@
           </div>
         </form>
       </div>
-
-      <!-- <div class="form-group">
-        <label for="factory-geometry-type-container"><b>Multi-Layer Option</b></label>
-        <div class="row" id="factory-geometry-type-container">
-          <div class="radio col-md-6 my-radio">
-            <label class="form-check-label">
-                    <input class="form-check-input" type="radio" name="optradio" id="factory-multilayer-one" checked>
-                    only one layer
-                  </label>
-          </div>
-
-          <div class="radio col-md-6 my-radio">
-            <label class="form-check-label">
-                    <input class="form-check-input" type="radio" name="optradio" id="factory-multilayer-multi" disabled>
-                    make multi-layer
-                  </label>
-          </div>
-        </div>
-      </div> -->
-
-
 
       <div class="form-group">
         <b>Propeties</b>
@@ -414,7 +393,7 @@
     </div>
   </div>
 
-  <div class="ui modal small" id="setting-conditions-modal">
+  <div class="ui modal tiny " id="setting-conditions-modal">
     <div class="header">Setting General Conditions</div>
     <div class="scrolling content">
       <h5 class="ui horizontal divider header">
@@ -492,40 +471,20 @@
     </div>
   </div>
 
-
-  <div class="modal fade" id="setting-desc-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-
-        <div class="modal-header">
-          <h5 class="modal-title">Global Description List</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+  <div class="ui modal tiny" id="setting-desc-modal">
+    <div class="header">Global Description List</div>
+    <div class="content">
+      <div id="setting-desc-modal-list-container" class="ui middle aligned celled list" style="margin-bottom:2px">
+      </div>
+      <br />
+      <div class="row" style="margin-bottom:2px">
+        <div class="col-1" style="float: left;"></div>
+        <div class="col-2" style="float: left;">New Desc</div>
+        <div class="col-7">
+          <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-desc-modal-newDesc">
         </div>
-
-        <div class="modal-body">
-          <div id="setting-desc-modal-list-container" class="ui middle aligned celled list" style="margin-bottom:2px">
-
-          </div>
-
-
-
-          <br />
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-2" style="float: left;">New Desc</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-desc-modal-newDesc">
-            </div>
-            <div class="col-1" style="padding:0;">
-              <button type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-sumit-btn">+</button>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="modal-footer">
+        <div class="col-1" style="padding:0;">
+          <button type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-submit-btn">+</button>
         </div>
       </div>
     </div>
