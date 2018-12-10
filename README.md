@@ -11,10 +11,6 @@ Start server by executing `node app.js` and launch a web browser and open the ed
 ## License
 This project is licensed under the GPL Version 2 licenses. - see the [LICENSE](https://github.com/STEMLab/IndoorGML-Editor/blob/master/LICENSE) file for details
 
-## Video Guide
-[Overall](https://youtu.be/eW2Tpq2Yk_c)<br>
-[Stairs/Escalator]()<br>
-[Hierarchical Structure]()<br>
-[Fine Network]()<br>
-
-
+## Guide
+User Guide : [Here](https://github.com/STEMLab/InEditor/blob/master/Guide/UserGuide/Index.md) are some guides on how to use InEditor.<br>
+Develop Guide : check [wiki page](https://github.com/STEMLab/InEditor/wiki)
