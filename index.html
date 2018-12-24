@@ -15,19 +15,17 @@
   <link rel="icon" href="./assets/favicon/favicon64.png" sizes="64x64">
 
   <!-- Bootstrap CSS -->
-  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"> -->
   <link rel="stylesheet" href="./css/bootstrap.min.css">
   <link rel="stylesheet" href="./css/IndoorGML-Editor.css">
 
   <!-- Fancytree CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" rel="stylesheet"> -->
 
   <!-- Fancytree JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.27.0/jquery.fancytree-all.js"></script>
-
+  <script src="./lib/jquery-3.3.1.min.js"></script>
+  <script src="./lib/jquery-ui.min.js"></script>
+  <script src="./lib/jquery.fancytree.min.js"></script>
+  <script src="./lib/jquery.fancytree-all.min.js"></script>
 
   <!-- Bootstrap JS -->
   <script src="./lib/bootstrap.min.js"></script>
@@ -36,28 +34,24 @@
   <script src="./lib/BootstrapMenu.min.js"></script>
 
   <!-- Golden Layout -->
-  <script type="text/javascript" src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
-  <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css" />
-  <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-dark-theme.css" />
-  <!--      <link type="text/css" rel="style  sheet" href="https://golden-layout.com/files/latest/css/goldenlayout-light-theme.css" />-->
+  <script type="text/javascript" src="./lib/goldenlayout.min.js"></script>
+  <link type="text/css" rel="stylesheet" href="./css/goldenlayout-base.css" />
+  <link type="text/css" rel="stylesheet" href="./css/goldenlayout-dark-theme.css" />
 
   <!-- konvajs -->
-  <script src="https://cdn.rawgit.com/konvajs/konva/1.7.6/konva.js"></script>
+  <script src="./lib/konva.js"></script>
 
   <!-- loglevel -->
-  <script src="https://unpkg.com/loglevel/dist/loglevel.min.js"></script>
+  <script src="./lib/loglevel.min.js"></script>
 
   <!-- math -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.20.2/math.min.js"></script>
-
-  <!-- js-bson -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/js-bson/2.0.4/bson.min.js"></script> -->
+  <script src="./lib/math.min.js"></script>
 
   <!-- jsts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsts/1.6.0/jsts.min.js"></script>
+  <script src="./lib/jsts.js"></script>
 
   <!-- sementic ui -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+  <script src="./lib/semantic.min.js"></script>
   <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
 
   <!-- layout -->
@@ -135,6 +129,9 @@
           </li>
           <li class="nav-item">
             <img src="./assets/icon/slant_down_d.png" title="Add new Cell with slant" id="slant-down-btn">
+          </li>
+          <li class="nav-item">
+            <img src="./assets/icon/slant_up_d.png" title="Add new Cell with slant" id="slant-up-btn">
           </li>
           <li class="nav-item">
             <img src="./assets/icon/slant_up_down_d.png" title="Add new two Cell with slant" id="slant-up-down-btn">
