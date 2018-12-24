@@ -177,8 +177,26 @@ define([
         cells[cellId].setHeight(floorProperties[floorKey].celingHeight);
 
         if (slantMap[cellId] == undefined) cells[cellId].setCoor(manager.extrudeCell(coor[0], floorProperties[floorKey].celingHeight * 1), '3D');
-        else if (slantMap[cellId] == 'up') cells[cellId].setCoor(manager.extrudeCellWithUpSlant(coor[0], floorProperties[floorKey].celingHeight * 1), '3D');
-        else if (slantMap[cellId] == 'down') cells[cellId].setCoor(manager.extrudeCellWithDownSlant(coor[0], floorProperties[floorKey].celingHeight * 1), '3D');
+        else if (slantMap[cellId].direction == 'up')
+          cells[cellId].setCoor(
+            manager.extrudeCellWithUpSlant(
+              coor[0], [
+                [transDot[slantMap[cellId].line[0][0].uuid], transDot[slantMap[cellId].line[0][1].uuid]],
+                [transDot[slantMap[cellId].line[1][0].uuid], transDot[slantMap[cellId].line[1][1].uuid]]
+              ],
+              floorProperties[floorKey].celingHeight * 1),
+            '3D'
+          );
+        else if (slantMap[cellId].direction == 'down')
+          cells[cellId].setCoor(
+            manager.extrudeCellWithDownSlant(
+              coor[0], [
+                [transDot[slantMap[cellId].line[0][0].uuid], transDot[slantMap[cellId].line[0][1].uuid]],
+                [transDot[slantMap[cellId].line[1][0].uuid], transDot[slantMap[cellId].line[1][1].uuid]]
+              ],
+              floorProperties[floorKey].celingHeight * 1),
+            '3D'
+          );
 
         // add hole
         if (holeMap[cellId] != undefined) {
@@ -844,8 +862,26 @@ define([
         var coor = cells[cellId].getCoordinates()[0];
         if (geoType == '3D') {
           if (slantMap[cellId] == undefined) cells[cellId].setCoor(manager.extrudeCell(coor, floorProperties[floorKey].celingHeight * 1), '3D');
-          else if (slantMap[cellId] == 'up') cells[cellId].setCoor(manager.extrudeCellWithUpSlant(coor, floorProperties[floorKey].celingHeight * 1), '3D');
-          else if (slantMap[cellId] == 'down') cells[cellId].setCoor(manager.extrudeCellWithDownSlant(coor, floorProperties[floorKey].celingHeight * 1), '3D');
+          else if (slantMap[cellId].direction == 'up')
+            cells[cellId].setCoor(
+              manager.extrudeCellWithUpSlant(
+                coor, [
+                  [transDot[slantMap[cellId].line[0][0].uuid], transDot[slantMap[cellId].line[0][1].uuid]],
+                  [transDot[slantMap[cellId].line[1][0].uuid], transDot[slantMap[cellId].line[1][1].uuid]]
+                ],
+                floorProperties[floorKey].celingHeight * 1),
+              '3D'
+            );
+          else if (slantMap[cellId].direction == 'down')
+          cells[cellId].setCoor(
+            manager.extrudeCellWithDownSlant(
+              coor, [
+                [transDot[slantMap[cellId].line[0][0].uuid], transDot[slantMap[cellId].line[0][1].uuid]],
+                [transDot[slantMap[cellId].line[1][0].uuid], transDot[slantMap[cellId].line[1][1].uuid]]
+              ],
+              floorProperties[floorKey].celingHeight * 1),
+            '3D'
+          );
         } else if (geoType == '2D') cells[cellId].setCoor([coor], '2D');
 
 
@@ -1232,7 +1268,7 @@ define([
    * @memberof ExportManager
    * @desc no floor
    */
-  ExportManager.prototype.extrudeCellWithUpSlant = function(surface, ch) {
+  ExportManager.prototype.extrudeCellWithUpSlant = function(surface, lines, ch) {
 
     var down = surface;
     var up = [];
@@ -1256,11 +1292,14 @@ define([
       [up]
     ]);
 
+    var downToUpIndex = [];
+    var flag = false;
+
     for (var i = 0; i < down.length - 1; i++) {
 
       var downLeft, downRight, upRight, upLeft;
 
-      if (i == 1) {
+      if (lines[0][0].point.x == down[i][0] && lines[0][0].point.y == down[i][1]) {
         downLeft = JSON.parse(JSON.stringify(down[i]));
         upRight = JSON.parse(JSON.stringify(up[i + 1]));
         upLeft = JSON.parse(JSON.stringify(up[i]));
@@ -1269,9 +1308,8 @@ define([
             [downLeft, upRight, upLeft, downLeft]
           ]
         ]);
-      } else if (i == 2) {
-        /** do nothing */
-      } else if (i == 3) {
+        flag = false;
+      } else if (lines[1][0].point.x == down[i][0] && lines[1][0].point.y == down[i][1]) {
         downRight = JSON.parse(JSON.stringify(down[i + 1]));
         upRight = JSON.parse(JSON.stringify(up[i + 1]));
         upLeft = JSON.parse(JSON.stringify(up[i]));
@@ -1280,7 +1318,14 @@ define([
             [downRight, upRight, upLeft, downRight]
           ]
         ]);
-      } else {
+        flag = false;
+        downToUpIndex.push(i);
+      } else if (lines[0][1].point.x == down[i][0] && lines[0][1].point.y == down[i][1]) {
+        flag = true;
+        downToUpIndex.push(i);
+      } else if(flag){
+        downToUpIndex.push(i);
+      }else {
         downLeft = JSON.parse(JSON.stringify(down[i]));
         downRight = JSON.parse(JSON.stringify(down[i + 1]));
         upRight = JSON.parse(JSON.stringify(up[i + 1]));
@@ -1293,8 +1338,8 @@ define([
       }
     }
 
-    for (var i = 0; i < down.length; i++) {
-      if (i == 2 || i == 3) down[i] = up[i];
+    for (var i = 0; i < downToUpIndex.length; i++) {
+      down[downToUpIndex[i]] = up[downToUpIndex[i]];
     }
 
     surfaces.push([
@@ -1308,7 +1353,7 @@ define([
    * @memberof ExportManager
    * @desc no ceilling
    */
-  ExportManager.prototype.extrudeCellWithDownSlant = function(surface, ch) {
+  ExportManager.prototype.extrudeCellWithDownSlant = function(surface, lines, ch) {
 
     var down = surface;
     var up = [];
@@ -1332,10 +1377,13 @@ define([
       [down]
     ]);
 
+    var upToDownIndex = [];
+    var flag = false;
+
     for (var i = 0; i < down.length - 1; i++) {
 
       var downLeft, downRight, upRight, upLeft;
-      if (i == 0) { /** do nothing */ } else if (i == 1) {
+      if (lines[0][0].point.x == down[i][0] && lines[0][0].point.y == down[i][1]) {
         downLeft = JSON.parse(JSON.stringify(down[i]));
         downRight = JSON.parse(JSON.stringify(down[i + 1]));
         upRight = JSON.parse(JSON.stringify(up[i + 1]));
@@ -1344,7 +1392,10 @@ define([
             [downLeft, downRight, upRight, downLeft]
           ]
         ]);
-      } else if (i == 3) {
+
+        flag = false;
+        upToDownIndex.push(i);
+      } else if (lines[1][0].point.x == down[i][0] && lines[1][0].point.y == down[i][1]) {
         downLeft = JSON.parse(JSON.stringify(down[i]));
         downRight = JSON.parse(JSON.stringify(down[i + 1]));
         upLeft = JSON.parse(JSON.stringify(up[i]));
@@ -1353,6 +1404,13 @@ define([
             [downLeft, downRight, upLeft, downLeft]
           ]
         ]);
+
+        flag = false;
+      } else if(lines[1][1].point.x == down[i][0] && lines[1][1].point.y == down[i][1]){
+        flag = true;
+        upToDownIndex.push(i);
+      } else if(flag){
+        upToDownIndex.push(i);
       } else {
         downLeft = JSON.parse(JSON.stringify(down[i]));
         downRight = JSON.parse(JSON.stringify(down[i + 1]));
@@ -1366,9 +1424,14 @@ define([
       }
     }
 
-    for (var i = 0; i < up.length; i++) {
-      if (i == 0 || i == 1 || i == 4) up[i] = down[i];
+    for (var i = 0; i < upToDownIndex.length; i++) {
+      up[upToDownIndex[i]] = down[upToDownIndex[i]];
+
+      if(upToDownIndex[i] == 0)           up[up.length-1] = up[0];
+      if(upToDownIndex[i] == up.length-1) up[0] = up[up.length-1];
+
     }
+
     surfaces.push([
       [up]
     ]);

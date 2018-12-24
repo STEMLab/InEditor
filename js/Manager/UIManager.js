@@ -59,6 +59,9 @@ define([
     this.addCallbackFun('start-addnewslantdown', this.startAddNewSlantDown);
     this.addCallbackFun('end-addnewslantdown', this.endAddNewSlantDown, this.endAddNewCell_makeHistoryObj, this.removeObj);
 
+    this.addCallbackFun('start-addnewslantup', this.startAddNewSlantUp);
+    this.addCallbackFun('end-addnewslantup', this.endAddNewSlantUp, this.endAddNewCell_makeHistoryObj, this.removeObj);
+
     this.addCallbackFun('start-addnewslantupdown', this.startAddNewSlantUpDown);
     this.addCallbackFun('end-addnewslantupdown', this.endAddNewSlantUpDown, this.endAddNewCell_makeHistoryObj, this.removeObj);
 
@@ -94,6 +97,12 @@ define([
     this.addCallbackFun('deletedesclist', this.deleteDescList);
     this.addCallbackFun('addlocaldesc', this.setPropertyView);
     this.addCallbackFun('deletelocaldesc', this.setPropertyView);
+
+    this.addCallbackFun("addcellsfromgml", this.addCellsFromGML);
+    this.addCallbackFun('addcellboundariesfromgml', this.addCellBoundariesFromGML);
+
+
+
   }
 
   /**
@@ -115,9 +124,32 @@ define([
    */
   UIManager.prototype.updateProperty = function(reqObj) {
 
-    if(reqObj.updateContent.name != undefined)
+    if (reqObj.updateContent.name != undefined)
       window.uiContainer.sidebar.treeview.updateTitle(reqObj.id, reqObj.updateContent.name);
 
+
+
+      if(reqObj.type == 'floor'){
+        var root = window.uiContainer.workspace.workspaceLayout.root;
+        var items = [];
+
+        function getComponent(item){
+          if(item.isComponent == true){
+            items.push(item);
+          }
+          else{
+            for(var next of item.contentItems){
+              getComponent(next);
+            }
+          }
+        }
+
+        getComponent(root);
+
+        for(var item of items){
+          if(item.config.id == reqObj.id) item.setTitle(reqObj.updateContent.name);
+        }
+      }
   }
 
   /**
@@ -418,93 +450,133 @@ define([
     // bind stage click event
     window.eventHandler.canvasObjectEventBind('stage', newStage.stage);
 
+
     // bind right click event
     var menu = new BootstrapMenu('#' + newFloorProperty.id, {
       fetchElementData: function() {
         var selectedObj = window.broker.getManager('addnewhole', 'GeometryManager').isObjectSelected(newFloorProperty.id);
-        // var stateId = window.broker.getManager('addnewhole', 'GeometryManager').isStateSelected(newFloorProperty.id);
-        // var cellId = window.broker.getManager('addnewhole', 'GeometryManager').isCellSelected(newFloorProperty.id);
 
         return {
           type: selectedObj.type,
           id: selectedObj.result,
-          floor:newFloorProperty.id
+          floor: newFloorProperty.id
         }
       },
-      actions: function(data){
-        return makeMenus({ type: 'floor', id: [newFloorProperty.id], floor: newFloorProperty.id });
+      actions: function(data) {
+        return makeMenus({
+          type: 'floor',
+          id: [newFloorProperty.id],
+          floor: newFloorProperty.id
+        });
       }()
     });
 
-    function makeMenus(data){
+    function makeMenus(data) {
       var menus = [];
-      for(var i = 0 ; i < data.id.length; i++){
-        menus = menus.concat(makeOneMenu({type: data.type, id: data.id[i], floor: data.floor}));
+      for (var i = 0; i < data.id.length; i++) {
+        menus = menus.concat(makeOneMenu({
+          type: data.type,
+          id: data.id[i],
+          floor: data.floor
+        }));
       }
       return menus;
     }
 
-    function makeOneMenu(data){
-      return [
-        {
+    function makeOneMenu(data) {
+      return [{
           name: function(data) {
             return '<b>' + data.id + '</b>'
           }
         },
         {
-           name: 'Edit Properties',
-           iconClass: 'fa-pencil',
-           onClick: function(data) {
-             window.uiContainer.sidebar.property.setPropertyTab(data.type, data.id, window.storage)
-           }
-       },
-       {
-         name: 'Delete',
-         iconClass: 'fa-trash-o',
-         onClick: function(data) {
-           var msg;
-           switch (data.type) {
-             case 'floor':
-               if(window.broker.isPublishable('deletefloor'))
-                 window.broker.publish({req:'deletefloor', reqObj:{floor: data.floor}});
-               break;
-             case 'cell':
-               if(window.broker.isPublishable('deletecell'))
-                 window.broker.publish({req:'deletecell', reqObj:{floor: data.floor, id: data.id}});
-               break;
-             case 'cellboundary':
-               if(window.broker.isPublishable('deletecellboundary'))
-                 window.broker.publish({req:'deletecellboundary', reqObj:{floor: data.floor, id: data.id}});
-               break;
-             case 'transition':
-               if(window.broker.isPublishable('deletetransition'))
-                 window.broker.publish({req:'deletetransition', reqObj:{floor: data.floor, id: data.id}});
-               break;
-             case 'state':
-               if(window.broker.isPublishable('deletestate'))
-                 window.broker.publish({req:'deletestate', reqObj:{floor: data.floor, id: data.id[0]}});
-               break;
-             default:
-           }
-         }
-       },
-       {
+          name: 'Edit Properties',
+          iconClass: 'fa-pencil',
+          onClick: function(data) {
+            window.uiContainer.sidebar.property.setPropertyTab(data.type, data.id, window.storage)
+          }
+        },
+        {
+          name: 'Delete',
+          iconClass: 'fa-trash-o',
+          onClick: function(data) {
+            var msg;
+            switch (data.type) {
+              case 'floor':
+                if (window.broker.isPublishable('deletefloor'))
+                  window.broker.publish({
+                    req: 'deletefloor',
+                    reqObj: {
+                      floor: data.floor
+                    }
+                  });
+                break;
+              case 'cell':
+                if (window.broker.isPublishable('deletecell'))
+                  window.broker.publish({
+                    req: 'deletecell',
+                    reqObj: {
+                      floor: data.floor,
+                      id: data.id
+                    }
+                  });
+                break;
+              case 'cellboundary':
+                if (window.broker.isPublishable('deletecellboundary'))
+                  window.broker.publish({
+                    req: 'deletecellboundary',
+                    reqObj: {
+                      floor: data.floor,
+                      id: data.id
+                    }
+                  });
+                break;
+              case 'transition':
+                if (window.broker.isPublishable('deletetransition'))
+                  window.broker.publish({
+                    req: 'deletetransition',
+                    reqObj: {
+                      floor: data.floor,
+                      id: data.id
+                    }
+                  });
+                break;
+              case 'state':
+                if (window.broker.isPublishable('deletestate'))
+                  window.broker.publish({
+                    req: 'deletestate',
+                    reqObj: {
+                      floor: data.floor,
+                      id: data.id[0]
+                    }
+                  });
+                break;
+              default:
+            }
+          }
+        },
+        {
           name: 'Rotate slant',
           iconClass: 'fa-repeat',
           isShown: function(data) {
-            if(data.type == 'cell'){
+            if (data.type == 'cell') {
               var cellGeo = window.storage.geometryContainer.getElementById('cell', data.id[0]);
               if (cellGeo.slant != null) return true;
               else return false;
-            }
-            else return false;
+            } else return false;
           },
           onClick: function(data) {
-            if(window.broker.isPublishable('rotateslant'))
-              window.broker.publish({req:'rotateslant', reqObj:{floor: data.floor, id: data.id[0]}});
+            if (window.broker.isPublishable('rotateslant'))
+              window.broker.publish({
+                req: 'rotateslant',
+                reqObj: {
+                  floor: data.floor,
+                  id: data.id[0]
+                }
+              });
           }
-      }
-     ];
+        }
+      ];
     }
 
     // refresh sidebar > tree-view
@@ -644,39 +716,39 @@ define([
   }
 
 
-    /**
-     * @memberof UIManager
-     */
-    UIManager.prototype.startAddNewHole = function() {
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.startAddNewHole = function() {
 
-      // change cell btn color
-      document.getElementById('hole-btn').src = "../../assets/icon/hole_a.png";
+    // change cell btn color
+    document.getElementById('hole-btn').src = "../../assets/icon/hole_a.png";
 
-      var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
-      manager.setTooltipText({
-        text: 'select cell'
-      });
+    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    manager.setTooltipText({
+      text: 'select cell'
+    });
 
-    }
+  }
 
-    /**
-     * @memberof UIManager
-     * @param {Object} reqObj { id, floor, isEmpty }
-     */
-    UIManager.prototype.endAddNewHole = function(reqObj) {
+  /**
+   * @memberof UIManager
+   * @param {Object} reqObj { id, floor, isEmpty }
+   */
+  UIManager.prototype.endAddNewHole = function(reqObj) {
 
-      // change transition btn color
-      document.getElementById('hole-btn').src = "../../assets/icon/hole_d.png";
+    // change transition btn color
+    document.getElementById('hole-btn').src = "../../assets/icon/hole_d.png";
 
-      if (reqObj.isEmpty != null) return;
+    if (reqObj.isEmpty != null) return;
 
-      // delete tooltip
-      var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
-      manager.setTooltipText({
-        text: ''
-      });
+    // delete tooltip
+    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    manager.setTooltipText({
+      text: ''
+    });
 
-    }
+  }
 
   /**
    * @memberof UIManager
@@ -880,6 +952,48 @@ define([
   }
 
 
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.startAddNewSlantUp = function(reqObj) {
+
+    // change floor btn color
+    document.getElementById('slant-up-btn').src = "../../assets/icon/slant_up_a.png";
+  }
+
+  /**
+   * @param {Message.reqObj} reqObj id : new obj id<br>floor : id of the floor where the new object will be created
+   * @memberof UIManager
+   */
+  UIManager.prototype.endAddNewSlantUp = function(reqObj) {
+
+    // change cell btn color
+    document.getElementById('slant-up-btn').src = "../../assets/icon/slant_up_d.png";
+
+    if (reqObj.isEmpty != null) {
+      return;
+    }
+
+    // set sidebar > property
+    window.uiContainer.sidebar.property.setPropertyTab('cell', reqObj.id, window.storage);
+
+    // refresh tree view
+    window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
+
+    if (window.conditions.automGenerateState)
+      window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM), reqObj.floor);
+
+    // set tooltip
+    window.broker.getManager('start-addnewslantdown', 'UIManager').setTooltipText({
+      floor: reqObj.floor,
+      text: ''
+    });
+
+  }
+
+
+
   /**
    * @memberof UIManager
    */
@@ -911,8 +1025,8 @@ define([
     window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
     window.uiContainer.sidebar.treeview.addCell(window.conditions.pre_cell + (window.conditions.LAST_CELL_ID_NUM), reqObj.floor);
 
-    if (window.conditions.automGenerateState){
-      window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM-1), reqObj.floor);
+    if (window.conditions.automGenerateState) {
+      window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM - 1), reqObj.floor);
       window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM), reqObj.floor);
     }
 
@@ -951,19 +1065,19 @@ define([
     backgroundLayer.layer.destroyChildren();
 
     // copy floor plan
-    if(copyCanvas.backgroundLayer.floorplanDataURL.length == 0) backgroundLayer.setGrid(width, height);
+    if (copyCanvas.backgroundLayer.floorplanDataURL.length == 0) backgroundLayer.setGrid(width, height);
     else {
       var floorplan = copyCanvas.backgroundLayer.floorplanDataURL[0];
       backgroundLayer.saveFloorplanDataURL(floorplan);
 
       var childrens = copyCanvas.backgroundLayer.layer.children;
       var copyIMG = null;
-      for(var child of childrens){
-        if(child.className == 'Image'){
+      for (var child of childrens) {
+        if (child.className == 'Image') {
           copyIMG = child.clone();
         }
 
-        if(copyIMG != null) break;
+        if (copyIMG != null) break;
       }
       backgroundLayer.layer.add(copyIMG);
     }
@@ -1011,7 +1125,7 @@ define([
 
   }
 
-  UIManager.prototype.updateDescList = function(){
+  UIManager.prototype.updateDescList = function() {
     var container = document.getElementById('setting-desc-modal-list-container');
     $("#setting-desc-modal-list-container").empty();
 
@@ -1057,13 +1171,16 @@ define([
       container.appendChild(i);
 
       document.getElementById(desc).addEventListener('click', function(event) {
-        if(window.broker.isPublishable('deletedesclist'))
-          window.broker.publish({req : 'deletedesclist', reqObj : event.currentTarget.id});
+        if (window.broker.isPublishable('deletedesclist'))
+          window.broker.publish({
+            req: 'deletedesclist',
+            reqObj: event.currentTarget.id
+          });
       });
     }
   }
 
-  UIManager.prototype.showConditionModal = function(){
+  UIManager.prototype.showConditionModal = function() {
 
     $('#setting-conditions-modal').modal('show');
     var conditions = window.conditions;
@@ -1076,12 +1193,12 @@ define([
     $('#setting-conditions-scale-factor').val(conditions.scaleFactor);
     $('#setting-conditions-scale-max').val(conditions.scaleMax);
 
-    if(conditions.automGenerateState) $('#setting-conditions-auto-create-state').prop("checked", true);
+    if (conditions.automGenerateState) $('#setting-conditions-auto-create-state').prop("checked", true);
     else $('#setting-conditions-auto-create-state').prop("checked", false);
 
   }
 
-  UIManager.prototype.addDescList = function(reqObj){
+  UIManager.prototype.addDescList = function(reqObj) {
 
     // update modal ui
     window.broker.getManager("updatedesclist", "UIManager").updateDescList();
@@ -1090,11 +1207,33 @@ define([
     window.uiContainer.sidebar.property.setPropertyTab($('#property-table').data('type'), $('#id-text').val(), window.storage);
   }
 
-  UIManager.prototype.deleteDescList = function(reqObj){
-    window.broker.getManager("updatedesclist","UIManager").updateDescList();
+  UIManager.prototype.deleteDescList = function(reqObj) {
+    window.broker.getManager("updatedesclist", "UIManager").updateDescList();
 
     // update property tab
     window.uiContainer.sidebar.property.setPropertyTab($('#property-table').data('type'), $('#id-text').val(), window.storage);
+  }
+
+  UIManager.prototype.addCellsFromGML = function(reqObj){
+
+    for(var cell of reqObj.data){
+      // set sidebar > property
+      window.uiContainer.sidebar.property.setPropertyTab('cell', cell.id, window.storage);
+
+      // refresh tree view
+      window.uiContainer.sidebar.treeview.addCell(cell.id, reqObj.floor);
+    }
+  }
+
+  UIManager.prototype.addCellBoundariesFromGML = function(reqObj){
+
+    for(var cb of reqObj.data){
+      // set sidebar > propertyContainer
+      window.uiContainer.sidebar.property.setPropertyTab('cellBoundary', cb.id, window.storage);
+
+      // refresh tree view
+      window.uiContainer.sidebar.treeview.addCellBoundary(cb.id, reqObj.floor);
+    }
   }
 
   return UIManager;

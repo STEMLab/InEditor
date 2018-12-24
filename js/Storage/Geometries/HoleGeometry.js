@@ -37,7 +37,7 @@ define([
   /**
   * @memberof CellGeometry
   */
-  CellGeometry.prototype.load = function(values){
+  HoleGeometry.prototype.load = function(values){
     this.id = values.id;
     this.points = values.points;
     this.holeOf = values.holeOf;

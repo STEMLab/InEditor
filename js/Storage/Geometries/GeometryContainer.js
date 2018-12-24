@@ -37,6 +37,17 @@ define([
 
   /**
    * @memberof GeometryContainer
+   */
+  GeometryContainer.prototype.clear = function() {
+    this.cellGeometry = [];
+    this.cellBoundaryGeometry = [];
+    this.stateGeometry = [];
+    this.transitionGeometry = [];
+    this.holeGeometry = [];
+  }
+
+  /**
+   * @memberof GeometryContainer
    s*/
    GeometryContainer.prototype.removeObj = function(obj){
 

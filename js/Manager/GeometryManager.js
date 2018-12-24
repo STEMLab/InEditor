@@ -98,6 +98,10 @@
       this.addCallbackFun("addnewslantdown", this.addNewCell, this.drawGeometry_makeHistoryObj, this.addNewCell_undo);
       this.addCallbackFun("end-addnewslantdown", this.endAddNewSlantDown, this.makeSimpleHistoryObj, this.deleteCell);
 
+      this.addCallbackFun("start-addnewslantup", this.startAddNewSlantDown, function() {}, function() {});
+      this.addCallbackFun("addnewslantup", this.addNewCell, this.drawGeometry_makeHistoryObj, this.addNewCell_undo);
+      this.addCallbackFun("end-addnewslantup", this.endAddNewSlantUp, this.makeSimpleHistoryObj, this.deleteCell);
+
       this.addCallbackFun("start-addnewslantupdown", this.startAddNewSlantDown, function() {}, function() {});
       this.addCallbackFun("addnewslantupdown", this.addNewCell, this.drawGeometry_makeHistoryObj, this.addNewCell_undo);
       this.addCallbackFun("end-addnewslantupdown", this.endAddNewSlantUpDown, this.makeSimpleHistoryObj, this.deleteCell);
@@ -117,6 +121,9 @@
       this.addCallbackFun('deletetransition', this.deleteTransition);
 
       this.addCallbackFun("rotateslant", this.rotateSlant);
+
+      this.addCallbackFun("addcellsfromgml", this.addCellsFromGML);
+      this.addCallbackFun('addcellboundariesfromgml', this.addCellBoundariesFromGML);
     };
 
     /**
@@ -381,16 +388,16 @@
         xhr.send(JSON.stringify(data));
       } else {
 
-        if (tmpObj.slant == 'down') {
+        if (tmpObj.slant != null && tmpObj.slant.direction == 'down') {
+          var y_offset = (tmpObj.dots[2].point.y - tmpObj.dots[1].point.y) / 4;
           var x_offset = (tmpObj.dots[2].point.x - tmpObj.dots[0].point.x) / 4;
-          var y_offset = (tmpObj.dots[2].point.y - tmpObj.dots[1].point.y) / 2;
 
           intersection[0].x = tmpObj.dots[2].point.x - x_offset;
           intersection[0].y = tmpObj.dots[2].point.y - y_offset;
 
-        } else if (tmpObj.slant == 'up') {
+        } else if (tmpObj.slant != null && tmpObj.slant.direction == 'up') {
           var x_offset = (tmpObj.dots[2].point.x - tmpObj.dots[0].point.x) / 4;
-          var y_offset = (tmpObj.dots[2].point.y - tmpObj.dots[1].point.y) / 2;
+          var y_offset = (tmpObj.dots[2].point.y - tmpObj.dots[1].point.y) / 4;
 
           intersection[0].x = tmpObj.dots[0].point.x + x_offset;
           intersection[0].y = tmpObj.dots[0].point.y + y_offset;
@@ -493,6 +500,15 @@
         var cell = reader.read(cells[i].getWKT());
         var intersection = point.intersection(cell).getCoordinates();
         if (intersection.length != 0) result.push(cells[i].id);
+
+      }
+
+      var holes = window.storage.canvasContainer.stages[floor].cellLayer.group.getHoles();
+      for (var i in holes) {
+
+        var hole = reader.read(holes[i].getWKT());
+        var intersection = point.intersection(hole).getCoordinates();
+        if (intersection.length != 0 && result.indexOf(holes[i].holeOf) != -1) result.splice(result.indexOf(holes[i].holeOf), 1);
 
       }
 
@@ -959,9 +975,11 @@
         cell.insertLineIntoLine(associationCells[key][0], tmpObj.dots);
 
         // update geometryContainer
-        window.storage.geometryContainer
-          .getElementById("cell", key)
-          .updatePoints(cell.getDots());
+        if(cell.holeOf == undefined){
+          window.storage.geometryContainer
+            .getElementById("cell", key)
+            .updatePoints(cell.getDots());
+        }
       }
 
       // set corner to invisible
@@ -1374,8 +1392,10 @@
 
       // free dot from object
       var dots = canvasObj.getDots();
-      var dotFool = window.storage.dotFoolContainer.getDotFool(reqObj.floor);
+      // var dotFool = window.storage.dotFoolContainer.getDotFool(reqObj.floor);
       for (var dotKey in dots) {
+        var floorId = window.storage.propertyContainer.getFloorById(Object.values(dots[dotKey].memberOf)[0],Object.keys(dots[dotKey].memberOf)[0]);
+        var dotFool = window.storage.dotFoolContainer.getDotFool(floorId);
         dotFool.deleteDotFromObj(dots[dotKey].uuid, reqObj.id);
 
         // if dots[dotKey] is part of cell boundary
@@ -2079,6 +2099,7 @@
         "GeometryManager"
       );
 
+      window.tmpObj.setSlant('down');
       manager.endAddNewCell(reqObj);
 
       if (reqObj.isEmpty != null) {
@@ -2087,7 +2108,32 @@
       }
 
       window.storage.canvasContainer.stages[reqObj.floor].getElementById('cell', reqObj.id).setSlant('down');
-      window.storage.geometryContainer.getElementById('cell', reqObj.id).slant = 'down';
+      window.storage.geometryContainer.getElementById('cell', reqObj.id).slant = window.storage.canvasContainer.stages[reqObj.floor].getElementById('cell', reqObj.id).slant;
+
+      window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
+
+    }
+
+    /**
+     * @memberof GeometryManager
+     */
+    GeometryManager.prototype.endAddNewSlantUp = function(reqObj) {
+
+      var manager = window.broker.getManager(
+        "end-addnewcell",
+        "GeometryManager"
+      );
+
+      window.tmpObj.setSlant('up');
+      manager.endAddNewCell(reqObj);
+
+      if (reqObj.isEmpty != null) {
+        window.tmpObj = null;
+        return;
+      }
+
+      window.storage.canvasContainer.stages[reqObj.floor].getElementById('cell', reqObj.id).setSlant('up');
+      window.storage.geometryContainer.getElementById('cell', reqObj.id).slant = window.storage.canvasContainer.stages[reqObj.floor].getElementById('cell', reqObj.id).slant;
 
       window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
 
@@ -2117,12 +2163,10 @@
 
       var tmpObj4Up = copyCell(window.tmpObj, upId);
 
-      window.tmpObj.setSlant('down');
-      manager.endAddNewCell(reqObj);
+      manager.endAddNewSlantDown(reqObj);
 
       window.tmpObj = tmpObj4Up;
-      window.tmpObj.setSlant('up');
-      manager.endAddNewCell({
+      manager.endAddNewSlantUp({
         floor: reqObj.floor,
         id: upId
       });
@@ -2132,12 +2176,12 @@
         return;
       }
 
-      window.storage.canvasContainer.stages[reqObj.floor].getElementById('cell', reqObj.id).setSlant('down');
-      window.storage.geometryContainer.getElementById('cell', reqObj.id).slant = 'down';
-
-      window.storage.canvasContainer.stages[reqObj.floor].getElementById('cell', upId).setSlant('up');
-      window.storage.geometryContainer.getElementById('cell', upId).slant = 'up';
-
+      // window.storage.canvasContainer.stages[reqObj.floor].getElementById('cell', reqObj.id).setSlant('down');
+      // window.storage.geometryContainer.getElementById('cell', reqObj.id).slant = 'down';
+      //
+      // window.storage.canvasContainer.stages[reqObj.floor].getElementById('cell', upId).setSlant('up');
+      // window.storage.geometryContainer.getElementById('cell', upId).slant = 'up';
+      //
       window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
 
     }
@@ -2188,13 +2232,14 @@
       var geo = window.storage.geometryContainer.getElementById('cell', reqObj.id);
 
       if (geo != null) {
-        geo.points.splice(0, 0, geo.points[geo.points.length - 1]);
-        geo.points.splice(geo.points.length - 1, 1);
+        geo.points.splice(geo.points.length, 0, geo.points[0]);
+        geo.points.splice(0, 1);
 
         var canvasObj = window.storage.canvasContainer.getElementById('cell', reqObj.id);
         canvasObj.dots = geo.points;
         canvasObj.addObjectFromDots();
-        canvasObj.setSlant(canvasObj.slant);
+        canvasObj.setSlant(canvasObj.slant.direction);
+        geo.slant = canvasObj.slant;
 
         window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
       }
@@ -2232,7 +2277,78 @@
       window.storage.propertyContainer.interlayerConnections.push(newInter);
     }
 
+    GeometryManager.prototype.addCellsFromGML = function(reqObj){
 
+      var dotFool = window.storage.dotFoolContainer.getDotFool(reqObj.floor);
+
+      // add cellspace
+      for(var cell of reqObj.data){
+
+        if(cell.points.length == 0) continue;
+
+        var dots = [];
+        for(var point of cell.points){
+          var dot = dotFool.getDotByPoint({
+            x: point[0],
+            y: point[1]
+          });
+
+          if (dot == null) {
+            dot = new Dot(point[0], point[1]);
+            dotFool.push(dot);
+          }
+
+          dots.push(dot);
+        }
+
+        var cellObj = new Cell(cell.id);
+        cellObj.dots = dots;
+        window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.add(cellObj);
+        window.storage.canvasContainer.stages[reqObj.floor].cellLayer.layer.draw();
+
+        // geometry container
+        window.storage.geometryContainer.cellGeometry.push(
+          new CellGeometry(cell.id, cellObj.getDots())
+        );
+      }
+    }
+
+    GeometryManager.prototype.addCellBoundariesFromGML = function(reqObj){
+
+      var dotFool = window.storage.dotFoolContainer.getDotFool(reqObj.floor);
+
+      for(var cb of reqObj.data){
+
+        if(cb.points.length == 0) continue;
+
+        var dots = [];
+        for(var point of cb.points){
+          var dot = dotFool.getDotByPoint({
+            x: point[0],
+            y: point[1]
+          });
+
+          if (dot == null) {
+            dot = new Dot(point[0], point[1]);
+            dotFool.push(dot);
+          }
+
+          dots.push(dot);
+        }
+
+        var cbObj = new CellBoundary(cb.id);
+        cbObj.dots = dots;
+        cbObj.setCornersVisible(false);
+        window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer.group.add(cbObj);
+        window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer.layer.draw();
+
+
+        window.storage.geometryContainer.cellBoundaryGeometry.push(
+          new CellBoundaryGeometry(cbObj.id, cbObj.dots)
+        );
+
+      }
+    }
 
     return GeometryManager;
   });

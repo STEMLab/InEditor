@@ -77,6 +77,8 @@ define([
     newCell.dots = obj.dots;
     newCell.addObjectFromDots();
     newCell.corners.visible(false);
+    if(obj.slant != null) newCell.setSlant(obj.slant.direction);
+
 
     this.cells.push(newCell);
 

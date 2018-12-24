@@ -57,6 +57,10 @@ define([
       'click': this.clickSlantDownBtn
     }
 
+    handlerBinder['slant-up-btn'] = {
+      'click': this.clickSlantUpBtn
+    }
+
     handlerBinder['slant-up-down-btn'] = {
       'click': this.clickSlantUpDownBtn
     }
@@ -356,6 +360,31 @@ define([
       } else {
 
         result.msg = "wrong state transition : " + previousMsg + " to addnewslantdown.";
+
+      }
+    }
+    else if (broker.isPublishable('addnewslantup')) {
+
+      var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
+      var isFirstClick = (window.tmpObj.floor == null);
+
+      if (isFirstClick || (!isFirstClick && isSameFloor)) {
+
+        broker.publish(new Message('addnewslantup', {
+          'floor': data.currentTarget.attrs.id
+        }));
+
+        result.result = true;
+        result.msg = 'addnewslantup';
+
+
+      } else if (!isFirstClick && !isSameFloor) {
+
+        result.msg = "you clicked different floor!";
+
+      } else {
+
+        result.msg = "wrong state transition : " + previousMsg + " to addnewslantup.";
 
       }
     }
@@ -1095,6 +1124,61 @@ define([
     } else {
 
       result.msg = "wrong state transition : " + previousMsg + " to start-addnewslantdown, end-addnewslantdown.";
+
+    }
+
+    return result;
+
+  }
+
+  /**
+  * @memberof DrawEventHandler
+  */
+  DrawEventHandler.prototype.clickSlantUpBtn = function(broker, previous, data){
+
+    var result = new Result();
+
+    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
+
+    if (isFloorExist && broker.isPublishable('start-addnewslantup')) {
+
+      // reqObj.floor will be active workspace
+      broker.publish(new Message('start-addnewslantup', null));
+
+      result = {
+        'result': true,
+        'msg': 'start-addnewslantup'
+      };
+
+    } else if (broker.isPublishable('end-addnewslantup')) {
+
+      if (window.tmpObj.isEmpty()) {
+
+        broker.publish(new Message('end-addnewslantup', {
+          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+          'floor': window.tmpObj.floor,
+          'isEmpty': true
+        }));
+
+      } else {
+
+        broker.publish(new Message('end-addnewslantup', {
+          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+          'floor': window.tmpObj.floor
+        }));
+
+      }
+
+      result.result = true;
+      result.msg = null;
+
+    } else if (!isFloorExist) {
+
+      result.msg = "There is no floor ...";
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to start-addnewslantup, end-addnewslantup.";
 
     }
 

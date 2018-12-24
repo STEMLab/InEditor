@@ -155,6 +155,10 @@ define([
     this.reqSpecList['addnewslantdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['end-addnewslantdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
 
+    this.reqSpecList['start-addnewslantup'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['addnewslantup'] = new MessageSpec('cycle', 'including', ['draw'], true);
+    this.reqSpecList['end-addnewslantup'] = new MessageSpec('cycle', 'including', ['draw'], true);
+
     this.reqSpecList['start-addnewslantupdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['addnewslantupdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['end-addnewslantupdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
@@ -203,6 +207,9 @@ define([
     this.reqSpecList['addnewglobaldesc'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['addlocaldesc'] = new MessageSpec('single', 'inclunding', null, false);
     this.reqSpecList['deletelocaldesc'] = new MessageSpec('single', 'inclunding', null, false);
+
+    this.reqSpecList['addcellsfromgml'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['addcellboundariesfromgml'] = new MessageSpec('single', 'inclunding', null, false);
   }
 
   /**

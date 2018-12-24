@@ -52,6 +52,7 @@ define([
     this.addCallbackFun('end-addnewstate', this.endAddNewState, this.makeSimpleHistoryObj, this.endAddNewState_undo);
     this.addCallbackFun('end-addnewstair', this.endAddNewStair, function() {}, function() {});
     this.addCallbackFun('end-addnewslantdown', this.endAddNewCell, this.makeSimpleHistoryObj, this.endAddNewCell_undo);
+    this.addCallbackFun('end-addnewslantup', this.endAddNewSlantUp, this.makeSimpleHistoryObj, this.endAddNewCell_undo);
     this.addCallbackFun('end-addnewslantupdown', this.endAddNewSlantUpDown, this.makeSimpleHistoryObj, this.endAddNewCell_undo);
 
     this.addCallbackFun('deletecell', this.deleteCell);
@@ -63,6 +64,10 @@ define([
     this.addCallbackFun('addnewglobaldesc', this.addDescList);
     this.addCallbackFun('addlocaldesc', this.addLocalDesc);
     this.addCallbackFun('deletelocaldesc', this.deleteLocalDesc);
+
+    this.addCallbackFun("addcellsfromgml", this.addCellsFromGML);
+    this.addCallbackFun('addcellboundariesfromgml', this.addCellBoundariesFromGML);
+
 
   }
 
@@ -334,7 +339,12 @@ define([
 
     var associationCells = window.tmpObj.associationCell;
     for (var key in associationCells) {
-      window.storage.propertyContainer.getElementById('cell', key).addPartialboundedBy(reqObj.id);
+      var cell = window.storage.propertyContainer.getElementById('cell', key);
+      if(cell == null){
+        var holeObj = window.storage.canvasContainer.stages[reqObj.floor].getElementById('cell', key);
+        cell = window.storage.propertyContainer.getElementById('cell', holeObj.holeOf);
+      }
+      cell.addPartialboundedBy(reqObj.id)
     }
 
     window.tmpObj = null;
@@ -444,6 +454,20 @@ define([
 
   }
 
+  PropertyManager.prototype.endAddNewSlantUp = function(reqObj) {
+
+    if (reqObj.isEmpty != null) {
+      return;
+    }
+
+    if(window.conditions.automGenerateState){
+      window.broker.getManager('end-addnewcell', 'PropertyManager').endAddNewCell(reqObj);
+
+      var state = window.storage.propertyContainer.getElementById('state', window.conditions.pre_state + window.conditions.LAST_STATE_ID_NUM);
+      state.height = window.storage.propertyContainer.getElementById('floor', reqObj.floor).celingHeight;
+    }
+  }
+
   /**
    * @memberof PropertyManager
    * @param {Message.reqObj} reqObj id : new obj id<br>floor : id of the floor where the new object will be created
@@ -454,15 +478,19 @@ define([
       return;
     }
 
-    log.info(window.conditions.LAST_STATE_ID_NUM);
     window.conditions.LAST_STATE_ID_NUM--;
-    window.broker.getManager('end-addnewcell', 'PropertyManager').endAddNewCell(reqObj);
-    window.conditions.LAST_STATE_ID_NUM++;
+    var num = window.conditions.LAST_CELL_ID_NUM-1;
     window.broker.getManager('end-addnewcell', 'PropertyManager').endAddNewCell({
+      floor: reqObj.floor,
+      id: window.conditions.pre_cell + num
+    });
+
+
+    window.conditions.LAST_STATE_ID_NUM++;
+    window.broker.getManager('end-addnewcell', 'PropertyManager').endAddNewSlantUp({
       floor: reqObj.floor,
       id: window.conditions.pre_cell + window.conditions.LAST_CELL_ID_NUM
     });
-
   }
 
   PropertyManager.prototype.deleteDescList = function(reqObj) {
@@ -531,6 +559,48 @@ define([
     if (window.conditions.descList.indexOf(reqObj.desc) == -1)
       delete obj.description[reqObj.desc];
   }
+
+
+  PropertyManager.prototype.addCellsFromGML = function(reqObj){
+
+    for(var cell of reqObj.data){
+      // add new cellproperty object in storage.propertyContainer
+      var newCellProperty = new CellProperty(cell.id);
+      newCellProperty.name = cell.name;
+      newCellProperty.description = cell.description;
+      newCellProperty.duality = cell.duality;
+      newCellProperty.externalReference = cell.externalReference;
+      newCellProperty.partialboundedBy = cell.partialboundedBy;
+      window.storage.propertyContainer.cellProperties.push(newCellProperty);
+
+      // add cell key in floor property
+      window.storage.propertyContainer.getElementById('floor', reqObj.floor).cellKey.push(
+        cell.id
+      );
+    }
+
+  }
+
+  PropertyManager.prototype.addCellBoundariesFromGML = function(reqObj){
+
+    for(var cb of reqObj.data){
+      // add new cellproperty object in storage.propertyContainer
+      var newCBProperty = new CellBoundaryProperty(cb.id);
+      newCBProperty.name = cb.name;
+      newCBProperty.description = cb.description;
+      newCBProperty.duality = cb.duality;
+      newCBProperty.externalReference = cb.externalReference;
+      window.storage.propertyContainer.cellBoundaryProperties.push(newCBProperty);
+
+      // add cell key in floor property
+      window.storage.propertyContainer.getElementById('floor', reqObj.floor).cellBoundaryKey.push(
+        cb.id
+      );
+    }
+
+  }
+
+
 
 
   return PropertyManager;

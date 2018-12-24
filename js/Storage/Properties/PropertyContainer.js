@@ -57,6 +57,16 @@ define([
     this.interlayerConnections = [];
   }
 
+  PropertyContainer.prototype.clear = function(){
+    this.floorProperties = [];
+    this.cellProperties = [];
+    this.cellBoundaryProperties = [];
+    this.stateProperties = [];
+    this.transitionProperties = [];
+    this.projectProperty = new ProjectProperty();
+    this.interlayerConnections = [];
+  }
+
   /**
    * @param {String} _type
    * @param {String} _id

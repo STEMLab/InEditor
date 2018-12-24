@@ -179,6 +179,10 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
    * @memberof Cell
    */
   Cell.prototype.addNewDot = function(dot) {
+
+    if(dot == undefined || dot == null){
+      log.info(dot);
+    }
     dot.participateObj(this.id, "cell");
 
     this.dots.push(dot);
@@ -422,7 +426,7 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
    * @memberof Cell
    */
   Cell.prototype.setSlant = function(slant) {
-    this.slant = slant;
+    this.slant = { direction: slant, line:[[this.dots[1], this.dots[2]], [this.dots[3], this.dots[0]]] };
     this.poly.setAttrs({
         fillLinearGradientColorStops: [0, '#ffffffff', 1, this.poly.fill()],
         fillPriority: 'linear-gradient'
