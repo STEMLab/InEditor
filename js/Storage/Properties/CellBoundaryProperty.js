@@ -23,7 +23,11 @@ define([], function() {
     /**
      * @memberof CellBoundaryProperty
      */
-    this.description = "";
+    this.description = {};
+    var list = window.conditions.descList;
+    for(var l of list){
+      this.description[l] = "";
+    }
 
     /**
      * @memberof CellBoundaryProperty
@@ -35,6 +39,17 @@ define([], function() {
      */
     this.externalReference = [];
 
+    /**
+     * @memberof CellBoundaryProperty
+     * @desc  NavigableBoundary, TansferBoundary, ConnectionBoundary, AnchorBoundary
+     */
+     this.naviType = "";
+
+     this.navi = {
+       class: "",
+       function: "",
+       usage: ""
+     }
   }
 
   /**
@@ -48,6 +63,10 @@ define([], function() {
     this.duality = values.duality;
     this.externalReference = values.externalReference;
 
+  }
+
+  CellBoundaryProperty.prototype.setDuality = function(_duality){
+    this.duality = _duality;
   }
 
   return CellBoundaryProperty;

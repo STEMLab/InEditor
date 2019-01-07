@@ -1,315 +1,428 @@
 :root {
-    --menubar-bg-color: black;
-    --toolbar-bg-color: black;
-    --sidebar-bg-color: black;
-    --treeview-bg-color: #222222;
-    --workspace-bg-color: black;
-    --viewport-bg-color: #eaeaea;
-
-    --property-tab-title-color : #eaeaea;
-
-    --sidebar-width: 17rem;
-
-    --property-container-width: 16.5rem;
-    --property-container-title-width: 3rem;
-    --property-container-value-width: 11.5rem;
+  --menubar-bg-color: black;
+  --toolbar-bg-color: black;
+  --sidebar-bg-color: black;
+  --treeview-bg-color: #222222;
+  --workspace-bg-color: black;
+  --viewport-bg-color: #eaeaea;
+  --property-tab-title-color: #eaeaea;
+  --property-tab-value-color: #d0d0d0;
+  --sidebar-width: 17rem;
+  --property-container-width: 16.5rem;
+  --property-container-title-width: 3rem;
+  --property-container-value-width: 11.5rem;
 }
 
 * {
   -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 .Panel {
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    -o-user-select: none;
-    user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
 }
 
 html {
   height: 100%;
 }
 
+/* body {
+  padding-top: 1.8rem;
+  font-size: 12px;
+  height: 100%;
+} */
 
 body {
-    padding-top: 1.8rem;
-    font-size: 12px;
-    height: 100%;
+  padding-top: 1.8rem !important;
+  font-size: 12px !important;
+  height: 100% !important;
+  background: black !important;
 }
-
 
 .navbar {
-    max-height: 1.8rem;
+  max-height: 1.8rem;
 }
 
-.navbar img{
-    max-height: 1.5rem;
-    margin-right: 0.4rem;
+.navbar img {
+  max-height: 1.5rem;
+  margin-right: 0.4rem;
 }
 
 /**
 * menu bar
 */
-.menubar{
-    background-color: var(--menubar-bg-color);
 
+.menubar {
+  background-color: var(--menubar-bg-color);
 }
 
 .toolbar {
-    max-height: 2.0rem;
-    border-top: solid 0.01rem #e5e5e5f5;
-    background-color: var(--toolbar-bg-color);
+  max-height: 2.0rem;
+  border-top: solid 0.01rem #e5e5e5f5;
+  background-color: var(--toolbar-bg-color);
 }
 
-.navbar-expand .navbar-nav .dropdown-menu{
-    background-color: #fefefefe;
-    font-size: 11px;
-    border-radius: 0px;
+.navbar-expand .navbar-nav .dropdown-menu {
+  background-color: #fefefefe;
+  font-size: 11px;
+  border-radius: 0px;
 }
-
 
 /*
  * Sidebar
  */
 
 .sidebar {
-    background-color: var(--sidebar-bg-color);
-    position: fixed;
-    top: 3.8rem;
-    bottom: 0;
-    left: 0;
-    z-index: 1000;
-    padding-top : 0.7rem;
-    padding-bottom: 0.7rem;
-    padding-right: 0.8rem;
-    padding-left: 0;
-    width: var(--sidebar-width);
-    overflow-x: auto;
-    overflow-y: auto;
-    border: none;
+  height: -webkit-fill-available;
 }
 
-
-.tree-view-container{
-    background: var(--treeview-bg-color);
-    min-height: 2.0rem;
-    margin:0.5rem;
-    border-radius: 0.3rem;
-    max-height: 50rem;
-    padding-top: 0.5rem;
-    overflow-y: auto;
+.tree-view-container {
+  background: var(--treeview-bg-color);
+  /* min-height: 2.0rem; */
+  /* margin: 0.5rem; */
+  /* border-radius: 0.3rem; */
+  /* max-height: 50rem; */
+  margin-left: 0.5rem;
+  margin-top: 0.5rem;
+  overflow-y: hidden;
 }
 
-.tree-view-container ul{
-    list-style : none;
-    padding-left: 0.8rem;
-    color: #e5e5e5;
+#sidebar .lm_item {
+  width: 100% !important;
 }
 
-.fancytree-icon{
-    margin-right: 0.3rem;
+.tree-view-container ul {
+  list-style: none;
+  padding-left: 0.8rem;
+  color: #e5e5e5;
 }
 
-.property-container{
-    position: relative;
-    background: var(--treeview-bg-color);
-    min-height: 2.0rem;
-    margin:0.5rem;
-    border-radius: 0.1rem;
+.tree-view-container .lm_content {
+  overflow: auto;
 }
 
-.property-container .lm_content{
-    color : #e5e5e5;
-    box-shadow: none;
-    overflow-y: auto;
+.lm_items {
+  width: -webkit-fill-available !important;
 }
 
-.property-container input[type=checkbox]{
-    width: 20%;
+.lm_item_container {
+  width: -webkit-fill-available !important;
+  overflow-y: auto;
 }
 
-.property-container label{
-    width: 50%;
+.lm_content {
+  width: -webkit-fill-available !important;
+  height: inherit !important;
+  padding-top: .8rem;
+  padding-left: .3rem;
+  padding-right: .3rem;
+  padding-bottom: .8rem;
+}
+
+.fancytree-icon {
+  margin-right: 0.3rem;
+}
+
+.property-container {
+  position: relative;
+  background: var(--treeview-bg-color);
+  margin-left: 0.5rem;
+  margin-bottom: .5rem;
+  /* min-height: 2.0rem; */
+  /* margin: 0.5rem; */
+  /* border-radius: 0.1rem; */
+}
+
+.property-container .lm_content {
+  color: #e5e5e5;
+  box-shadow: none;
+  overflow-y: auto;
+}
+
+.property-container input[type=checkbox] {
+  width: 20%;
+}
+
+.property-container label {
+  width: 50%;
+}
+
+.property-container td {
+  padding: .3rem !important;
+  vertical-align: middle !important;
+}
+
+input[id="floorplan-file"] {
+  width: inherit;
+  overflow-x: hidden;
+}
+
+td input {
+  width: 90%;
+  left: 0;
+}
+
+td select {
+  width: 100%;
+  height: fit-content !important;
+  padding: 0.1rem !important;
 }
 
 .property-table {
-    position: absolute;
-    table-layout: fixed;
-    width: 100%;
+  background-color: rgba( 255, 255, 255, 0) !important;
 }
 
-input[id="floorplan-file"]{
-    width: inherit;
-    overflow-x: hidden;
+.property-table .submit-btn {
+  background-color: var(--treeview-bg-color);
+  color: white;
+  border: solid 0.001rem #5e5e5e;
+  margin: 0.2rem;
+  text-align: center;
 }
 
-td input{
-  width: 90%;
-  left: 0;
+.property-table .inner-tag {
+  font-weight: bold;
+  text-align: center;
 }
 
-td select{
-  width: 50%;
-  left: 0;
+.property-table .title {
+  color: var(--property-tab-title-color);
+  font-weight: bold;
+  text-align: right;
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+  width: 30%;
 }
 
-.property-table .submit-btn{
-    background-color : var(--treeview-bg-color);
-    color : white;
-    border : solid 0.001rem #5e5e5e;
-    width: 90%;
-    margin: 0.2rem;
-    text-align: center;
+.property-table .value {
+  text-align: left;
+  width: 70%;
+  vertical-align: middle !important;
 }
 
-.property-table .inner-tag{
-    font-weight: bold;
-    text-align: center;
-    width: 10%;
+.property-table .value input {
+  color: var(--property-tab-value-color) !important;
+  font-weight: lighter;
 }
 
-.property-table .inner-value{
-    width: 60%;
+.property-table .button {
+  background-color: rgba( 255, 255, 255, 0) !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-.property-table .title{
-    color : var(--property-tab-title-color);
-    font-weight : bold;
-    text-align: right;
-    padding-right: 0.5rem;
-    padding-left: 0.5rem;
-    width: 30%;
+.property-table .divider {
+  margin-top: .2rem !important;
+  margin-bottom: .2rem !important;
 }
 
-.property-table .value{
-    color : var(--property-tab-title-color);
-    font-weight : bold;
-    text-align: left;
-    width: 70%;
-}
-
-.property-table textarea{
-  width: 90%;
+.property-table .input {
+  width: 100%;
 }
 
 /* custom scrollbar */
+
 /* width */
+
 ::-webkit-scrollbar {
-    position : absolute;
-    right: 0;
-    width: 0.5rem;
+  position: absolute;
+  right: 0;
+  width: 0.5rem;
 }
 
 /* Track */
+
 ::-webkit-scrollbar-track {
-    background: var(--treeview-bg-color);
+  background: var(--treeview-bg-color);
 }
 
 /* Handle */
+
 ::-webkit-scrollbar-thumb {
-    background: #333;
+  background: #333;
 }
 
 /* Handle on hover */
+
 ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+  background: #555;
 }
 
+/*
+* content
+*/
+
+.container-fluid {
+  position: fixed;
+  top: 3.8rem;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.gutter {
+  background-color: var(--workspace-bg-color);
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+
+.split-col-container {
+  height: -webkit-fill-available;
+}
+
+.split-col, .gutter.gutter-horizontal {
+  float: left;
+  height: inherit;
+}
+
+.split-row-container {
+  position: fixed;
+  top: 3.8rem;
+  bottom: 0;
+  width: inherit;
+  background-color: var(--workspace-bg-color);
+}
+
+.gutter.gutter-horizontal {
+  cursor: ew-resize;
+}
+
+.gutter.gutter-vertical {
+  cursor: ns-resize;
+}
 
 /*
- * Workspace
+ * Sidebar
  */
 
-.workspace{
-    position: fixed;
-    left: 17rem;
-    right: 0;
-    top: 3.8rem;
-    bottom: 0;
-    z-index: 1000;
-    padding-top : 0.7rem;
-    padding-bottom: 0.7rem;
-    padding-right: 0.8rem;
-    padding-left: 0;
-    overflow-x: auto;
-    overflow-y: auto;
-    background-color: var(--workspace-bg-color);
+.workspace {
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+  padding-right: 0.8rem;
+  background-color: var(--workspace-bg-color);
 }
 
 #workspace-layout-container {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
+  height: inherit;
+  width: 100%;
+  overflow: auto;
+  padding-bottom: .7rem;
+  padding-right: .8rem;
 }
 
 #workspace-layout-container .lm_items {
-    background-color : #222222;
+  background-color: #222222;
+  /* width: 100% !important; */
 }
 
-#workspace-layout-container .lm_item_container{
-    overflow: hidden;
+#workspace-layout-container .lm_item_container {
+  overflow: auto;
+  width: 100% !important;
 }
 
-#workspace-layout-container .canvas{
-    background-color : black;
+#workspace-layout-container .canvas {
+  background-color: black;
 }
 
-
-#workspace-layout-container .konvajs-content{
-    width: inherit;
-    height: inherit;
-    overflow: hidden;
-    background-color : var(--viewport-bg-color);
+#workspace-layout-container .konvajs-content {
+  width: inherit;
+  height: inherit;
+  overflow: hidden;
+  background-color: var(--viewport-bg-color);
 }
 
 /* The snackbar - position it at the bottom and in the middle of the screen */
+
 #snackbar {
-    visibility: hidden; /* Hidden by default. Visible on click */
-    min-width: 250px; /* Set a default minimum width */
-    margin-left: -125px; /* Divide value of min-width by 2 */
-    background-color: white; /* Black background color */
-    color: black; /* White text color */
-    text-align: center; /* Centered text */
-    border-radius: 2px; /* Rounded borders */
-    padding: 16px; /* Padding */
-    position: fixed; /* Sit on top of the screen */
-    z-index: 1; /* Add a z-index if needed */
-    left: 50%; /* Center the snackbar */
-    bottom: 30px; /* 30px from the bottom */
+  visibility: hidden;
+  /* Hidden by default. Visible on click */
+  min-width: 250px;
+  /* Set a default minimum width */
+  margin-left: -125px;
+  /* Divide value of min-width by 2 */
+  background-color: white;
+  /* Black background color */
+  color: black;
+  /* White text color */
+  text-align: center;
+  /* Centered text */
+  border-radius: 2px;
+  /* Rounded borders */
+  padding: 16px;
+  /* Padding */
+  position: fixed;
+  /* Sit on top of the screen */
+  z-index: 1;
+  /* Add a z-index if needed */
+  left: 50%;
+  /* Center the snackbar */
+  bottom: 30px;
+  /* 30px from the bottom */
 }
 
 /* Show the snackbar when clicking on a button (class added with JavaScript) */
-#snackbar.show {
-    visibility: visible; /* Show the snackbar */
 
-/* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+#snackbar.show {
+  visibility: visible;
+  /* Show the snackbar */
+  /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
 However, delay the fade out process for 2.5 seconds */
-    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
 }
 
 /* Animations to fade the snackbar in and out */
+
 @-webkit-keyframes fadein {
-    from {bottom: 0; opacity: 0;}
-    to {bottom: 30px; opacity: 1;}
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
 }
 
 @keyframes fadein {
-    from {bottom: 0; opacity: 0;}
-    to {bottom: 30px; opacity: 1;}
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
 }
 
 @-webkit-keyframes fadeout {
-    from {bottom: 30px; opacity: 1;}
-    to {bottom: 0; opacity: 0;}
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
 }
 
 @keyframes fadeout {
-    from {bottom: 30px; opacity: 1;}
-    to {bottom: 0; opacity: 0;}
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
 }
 
 a.disabled {

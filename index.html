@@ -15,43 +15,47 @@
   <link rel="icon" href="./assets/favicon/favicon64.png" sizes="64x64">
 
   <!-- Bootstrap CSS -->
-  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"> -->
   <link rel="stylesheet" href="./css/bootstrap.min.css">
   <link rel="stylesheet" href="./css/IndoorGML-Editor.css">
 
   <!-- Fancytree CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" rel="stylesheet"> -->
 
   <!-- Fancytree JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.27.0/jquery.fancytree-all.js"></script>
-
+  <script src="./lib/jquery-3.3.1.min.js"></script>
+  <script src="./lib/jquery-ui.min.js"></script>
+  <script src="./lib/jquery.fancytree.min.js"></script>
+  <script src="./lib/jquery.fancytree-all.min.js"></script>
 
   <!-- Bootstrap JS -->
   <script src="./lib/bootstrap.min.js"></script>
 
+  <!-- tree -->
+  <script src="./lib/BootstrapMenu.min.js"></script>
+
   <!-- Golden Layout -->
-  <script type="text/javascript" src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
-  <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css" />
-  <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-dark-theme.css" />
-  <!--      <link type="text/css" rel="style  sheet" href="https://golden-layout.com/files/latest/css/goldenlayout-light-theme.css" />-->
+  <script type="text/javascript" src="./lib/goldenlayout.min.js"></script>
+  <link type="text/css" rel="stylesheet" href="./css/goldenlayout-base.css" />
+  <link type="text/css" rel="stylesheet" href="./css/goldenlayout-dark-theme.css" />
 
   <!-- konvajs -->
-  <script src="https://cdn.rawgit.com/konvajs/konva/1.7.6/konva.js"></script>
+  <script src="./lib/konva.js"></script>
 
   <!-- loglevel -->
-  <script src="https://unpkg.com/loglevel/dist/loglevel.min.js"></script>
+  <script src="./lib/loglevel.min.js"></script>
 
   <!-- math -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.20.2/math.min.js"></script>
-
-  <!-- js-bson -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/js-bson/2.0.4/bson.min.js"></script> -->
+  <script src="./lib/math.min.js"></script>
 
   <!-- jsts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsts/1.6.0/jsts.min.js"></script>
+  <script src="./lib/jsts.js"></script>
+
+  <!-- sementic ui -->
+  <script src="./lib/semantic.min.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
+
+  <!-- layout -->
+  <script src="./lib/split.min.js"></script>
 
 </head>
 
@@ -68,8 +72,9 @@
               <a class="dropdown-item" id="project-save">Save</a>
               <a class="dropdown-item" id="project-saveas" data-toggle="modal" data-target="#project-save-as-modal">Save As...</a>
               <hr>
-              <a class="dropdown-item disabled" id="project-import" data-toggle="modal" data-target="#project-import-modal">Import</a>
-              <a class="dropdown-item" id="project-export" data-toggle="modal" data-target="#go-factory-modal">Export(.gml)</a>
+              <!-- <a class="dropdown-item disabled" id="project-import" data-toggle="modal" data-target="#project-import-modal">Import</a> -->
+              <a class="dropdown-item disabled" id="project-import">Import(.gml)</a><input type="file" id="project-import-file" accept=".gml" class="d-none" />
+              <a class="dropdown-item" id="project-export" data-modaltype="export">Export(.gml)</a>
             </div>
           </li>
           <li class="nav-item dropdown">
@@ -81,7 +86,8 @@
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SETTING</a>
             <div class="dropdown-menu">
-              <a class="dropdown-item" id="setting-conditions" data-toggle="modal" data-target="#setting-conditions-modal">Conditions</a>
+              <a class="dropdown-item" id="setting-conditions" data-modaltype="conditions">Conditions</a>
+              <a class="dropdown-item" id="setting-desc" data-modaltype="desc">Description</a>
             </div>
           </li>
           <li class="nav-item dropdown">
@@ -104,6 +110,9 @@
             <img src="./assets/icon/cell_d.png" title="Add new Cell" id="cell-btn">
           </li>
           <li class="nav-item">
+            <img src="./assets/icon/hole_d.png" title="Add hole in cell" id="hole-btn">
+          </li>
+          <li class="nav-item">
             <img src="./assets/icon/cellboundary_d.png" title="Add new CellBoundary" id="cellboundary-btn">
           </li>
           <li class="nav-item">
@@ -113,12 +122,24 @@
             <img src="./assets/icon/transition_d.png" title="Add new Transition" id="transition-btn">
           </li>
           <li class="nav-item">
+            <img src="./assets/icon/inter_d.png" title="Add new InterLayerConnection" id="interlayerconnection-btn">
+          </li>
+          <li class="nav-item">
             <img src="./assets/icon/stair_d.png" title="Add new Stair" id="stair-btn">
+          </li>
+          <li class="nav-item">
+            <img src="./assets/icon/slant_down_d.png" title="Add new Cell with slant" id="slant-down-btn">
+          </li>
+          <li class="nav-item">
+            <img src="./assets/icon/slant_up_d.png" title="Add new Cell with slant" id="slant-up-btn">
+          </li>
+          <li class="nav-item">
+            <img src="./assets/icon/slant_up_down_d.png" title="Add new two Cell with slant" id="slant-up-down-btn">
           </li>
         </ul>
         <ul class="navbar-nav my-2 my-lg-0">
           <li class="nav-item">
-            <img src="./assets/icon/go_viewer.png" title="go viewer" id="viewer-btn" data-toggle="modal" data-target="#go-viewer-modal">
+            <img src="./assets/icon/go_viewer.png" title="go viewer" id="viewer-btn" data-modaltype="viewer">
           </li>
         </ul>
       </div>
@@ -128,334 +149,339 @@
 
 
   <div class="container-fluid">
-    <div class="row">
-      <div class="sidebar">
-        <div class="h-50 tree-view-container" id="tree-view"></div>
-        <div class="h-25 property-container" id="property-container"></div>
+    <div class="split-col-container">
+      <div class="split split-col" id="sidebar">
+        <div class="split-row-container">
+          <div class="split split-row tree-view-container" id="tree-view-container"></div>
+          <div class="split split-row property-container" id="property-container"></div>
+        </div>
       </div>
 
-      <main role="main" class="workspace">
+
+      <div role="main" class="split split-col" id="workspace">
         <div id="workspace-layout-container"></div>
         <div id="snackbar"></div>
-      </main>
-    </div>
-
-  </div>
-
-  <div class="modal fade" id="go-viewer-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="viewer-baseURL">Base URL</label>
-            <input type="text" class="form-control" id="viewer-baseURL" value="http://127.0.0.1">
-          </div>
-          <div class="form-group">
-            <label for="viewer-portNum">Port Number</label>
-            <input type="number" class="form-control" id="viewer-portNum" placeholder="8080">
-          </div>
-          <div class="form-group">
-            <label for="viewer-params">Parameter</label>
-            <input type="text" class="form-control" id="viewer-params" placeholder="viewer">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <middle id="uriHelp" class="form-text text-muted">Base URL:Port Number/Parameter </middle>
-          <button type="button" class="btn btn-primary" id="viewer-modal-btn" aria-label="Close">Call Viewer</button>
-        </div>
       </div>
     </div>
+
   </div>
 
-  <div class="modal fade" id="go-factory-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Export to IndoorGML</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        </div>
 
-        <div id="go-factory-modal-body-to-footer-before" class="">
-          <div class="modal-body">
-            <h6>Communication Options</h6>
-            <div class="form-group">
-              <label for="factory-baseURL">Base URL</label>
-              <input type="text" class="form-control" id="factory-baseURL" value="http://127.0.0.1">
-            </div>
-            <div class="form-group">
-              <label for="factory-portNum">Port Number</label>
-              <input type="number" class="form-control" id="factory-portNum" value="9797">
-            </div>
-            <hr>
-            <h6>Export Options</h6>
+  <div class="ui modal small" id="go-viewer-modal">
+    <div class="header">Export to InViewer</div>
+    <div class="content">
+      <div class="form-group">
+        <label for="viewer-baseURL">Base URL</label>
+        <input type="text" class="form-control" id="viewer-baseURL" value="http://127.0.0.1">
+      </div>
+      <div class="form-group">
+        <label for="viewer-portNum">Port Number</label>
+        <input type="number" class="form-control" id="viewer-portNum" placeholder="8080">
+      </div>
+      <div class="form-group">
+        <label for="viewer-params">Parameter</label>
+        <input type="text" class="form-control" id="viewer-params" placeholder="viewer">
+      </div>
+    </div>
 
-            <div class="form-group">
-              <label for="factory-geometry-type-container"><b>Geometry Type</b></label>
-              <form class="row" id="factory-geometry-type-container">
-                <div class="radio col-md-6 my-radio">
-                  <label class="form-check-label" title="CellSpace : Surface, CellSpaceBoundary : LineString">
+    <div class="actions">
+      <a class="ui right pointing basic label">Base URL:Port Number/Parameter</a>
+      <div class="ui button" id="viewer-modal-btn" aria-label="Close">Export</div>
+      <div class="ui cancel button" aria-label="Close">Cancel</div>
+    </div>
+  </div>
+
+
+  <div class="ui modal small" id="go-factory-modal">
+    <div class="header">Export to IndoorGML</div>
+    <div class="scrolling content">
+      <h5 class="ui horizontal divider header">
+        Communication Options
+      </h5>
+      <div class="form-group">
+        <label for="factory-baseURL">Base URL</label>
+        <input type="text" class="form-control" id="factory-baseURL" value="http://127.0.0.1">
+      </div>
+      <div class="form-group">
+        <label for="factory-portNum">Port Number</label>
+        <input type="number" class="form-control" id="factory-portNum" value="9797">
+      </div>
+
+
+      <h5 class="ui horizontal divider header">
+        Export Option
+      </h5>
+
+      <div class="form-group">
+        <label for="factory-geometry-type-container"><b>Geometry Type</b></label>
+        <form class="row" id="factory-geometry-type-container">
+          <div class="radio col-md-6 my-radio">
+            <label class="form-check-label" title="CellSpace : Surface, CellSpaceBoundary : LineString">
                     <input class="form-check-input" type="radio" name="optradio" id="factory-geometry-type-2D">Geomety 2D</label>
-                </div>
-                <div class="radio col-md-6 my-radio">
-                  <label class="form-check-label" title="CellSpace : Solid, CellSpaceBoundary : Surface">
+          </div>
+          <div class="radio col-md-6 my-radio">
+            <label class="form-check-label" title="CellSpace : Solid, CellSpaceBoundary : Surface">
                     <input class="form-check-input" type="radio" name="optradio" id="factory-geometry-type-3D" checked>
                     Geomety 3D
                   </label>
-                </div>
-              </form>
-            </div>
-
-            <div class="form-group">
-              <label for="factory-geometry-type-container"><b>Multi-Layer Option</b></label>
-              <div class="row" id="factory-geometry-type-container">
-                <div class="radio col-md-6 my-radio">
-                  <label class="form-check-label">
-                    <input class="form-check-input" type="radio" name="optradio" id="factory-multilayer-one" checked>
-                    only one layer
-                  </label>
-                </div>
-
-                <div class="radio col-md-6 my-radio">
-                  <label class="form-check-label">
-                    <input class="form-check-input" type="radio" name="optradio" id="factory-multilayer-multi" disabled>
-                    make multi-layer
-                  </label>
-                </div>
-              </div>
-            </div>
-
-
-
-            <div class="form-group">
-              <b>Propeties</b>
-
-              <div class="row">
-
-                <div class="col-md-6">
-                  <div class="p-2 text-center">CellSpace</div>
-                  <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-name" checked>
-                    <label class="form-check-label" for="factory-property-cell-name">
-                          name
-                        </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-description" checked>
-                    <label class="form-check-label" for="factory-property-cell-description">
-                          description
-                        </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-partialboundedBy" checked>
-                    <label class="form-check-label" for="factory-property-cell-partialboundedBy">
-                          partialboundedBy
-                        </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-externalReference" checked>
-                    <label class="form-check-label" for="factory-property-cell-externalReference">
-                          externalReference
-                        </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-duality" checked>
-                    <label class="form-check-label" for="factory-property-cell-duality">
-                          duality
-                        </label>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-                  <div class="p-2 text-center">CellSpaceBoundary</div>
-                  <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-name" checked>
-                    <label class="form-check-label" for="factory-property-cellbondary-name">
-                        name
-                      </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-description" checked>
-                    <label class="form-check-label" for="factory-property-cellbondary-description">
-                        description
-                      </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-partialboundedBy" checked>
-                    <label class="form-check-label" for="factory-property-cellbondary-partialboundedBy">
-                        partialboundedBy
-                      </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-externalReference" checked>
-                    <label class="form-check-label" for="factory-property-cellbondary-externalReference">
-                        externalReference
-                      </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-duality" checked>
-                    <label class="form-check-label" for="factory-property-cellbondary-duality">
-                        duality
-                      </label>
-                  </div>
-                </div>
-
-              </div>
-
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="p-2 text-center">State</div>
-                  <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-state-name" checked>
-                    <label class="form-check-label" for="factory-property-state-name">
-                            name
-                          </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-state-description" checked>
-                    <label class="form-check-label" for="factory-property-state-description">
-                            description
-                          </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-state-duality" checked>
-                    <label class="form-check-label" for="factory-property-state-duality">
-                            duality
-                          </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-state-connects" checked>
-                    <label class="form-check-label" for="factory-property-state-connects">
-                            connects
-                          </label>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-
-                  <div class="p-2 text-center">Transition</div>
-                  <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-name" checked>
-                    <label class="form-check-label" for="factory-property-transition-name">name</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-description" checked>
-                    <label class="form-check-label" for="factory-property-transition-description">
-                              description
-                            </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-duality" checked>
-                    <label class="form-check-label" for="factory-property-transition-duality">
-                              duality
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-weight" checked>
-                    <label class="form-check-label" for="factory-property-transition-weight">
-                              weight
-                    </label>
-                  </div>
-                </div>
-
-              </div>
-            </div>
           </div>
-          <div class="modal-footer">
-            <middle id="uriHelp" class="form-text text-muted">Base URL:Port Number/ </middle>
-            <button type="button" class="btn btn-primary" id="viewer-factory-btn" aria-label="Close">Export</button>
-          </div>
-        </div>
-
-        <div id="go-factory-modal-body-to-footer-loading" class="d-none">
-          <img src="./assets/icon/ajax-loader.gif" class="mx-auto d-block p-5" />
-        </div>
-
-        <div id="go-factory-modal-body-to-footer-down" class="d-none">
-          <a id="gml-down-link" href="./assets/icon/cell_a.png" class="mx-auto d-block p-3 text-center" download>
-            <h6>Download</h6>
-          </a>
-        </div>
+        </form>
       </div>
 
+      <div class="form-group">
+        <b>Propeties</b>
 
+        <div class="row">
+
+          <div class="col-md-6">
+            <div class="p-2 text-center">CellSpace</div>
+            <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-name" checked>
+              <label class="form-check-label" for="factory-property-cell-name">
+                          name
+                        </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-description" checked>
+              <label class="form-check-label" for="factory-property-cell-description">
+                          description
+                        </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-partialboundedBy" checked>
+              <label class="form-check-label" for="factory-property-cell-partialboundedBy">
+                          partialboundedBy
+                        </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-externalReference" checked>
+              <label class="form-check-label" for="factory-property-cell-externalReference">
+                          externalReference
+                        </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cell-duality" checked>
+              <label class="form-check-label" for="factory-property-cell-duality">
+                          duality
+                        </label>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="p-2 text-center">CellSpaceBoundary</div>
+            <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-name" checked>
+              <label class="form-check-label" for="factory-property-cellbondary-name">
+                        name
+                      </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-description" checked>
+              <label class="form-check-label" for="factory-property-cellbondary-description">
+                        description
+                      </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-partialboundedBy" checked>
+              <label class="form-check-label" for="factory-property-cellbondary-partialboundedBy">
+                        partialboundedBy
+                      </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-externalReference" checked>
+              <label class="form-check-label" for="factory-property-cellbondary-externalReference">
+                        externalReference
+                      </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-cellbondary-duality" checked>
+              <label class="form-check-label" for="factory-property-cellbondary-duality">
+                        duality
+                      </label>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="p-2 text-center">State</div>
+            <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-state-name" checked>
+              <label class="form-check-label" for="factory-property-state-name">
+                            name
+                          </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-state-description" checked>
+              <label class="form-check-label" for="factory-property-state-description">
+                            description
+                          </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-state-duality" checked>
+              <label class="form-check-label" for="factory-property-state-duality">
+                            duality
+                          </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-state-connects" checked>
+              <label class="form-check-label" for="factory-property-state-connects">
+                            connects
+                          </label>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+
+            <div class="p-2 text-center">Transition</div>
+            <hr style="margin-top : 0.2rem; margin-bottom : 0.2rem;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-name" checked>
+              <label class="form-check-label" for="factory-property-transition-name">name</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-description" checked>
+              <label class="form-check-label" for="factory-property-transition-description">
+                              description
+                            </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-duality" checked>
+              <label class="form-check-label" for="factory-property-transition-duality">
+                              duality
+                    </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="factory-property-transition-weight" checked>
+              <label class="form-check-label" for="factory-property-transition-weight">
+                              weight
+                    </label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="ui right pointing basic label">Base URL:Port Number/</a>
+      <div class="ui button" id="viewer-factory-btn">Export</div>
+      <div class="ui cancel button">Cancel</div>
     </div>
   </div>
 
-  <div class="modal fade" id="setting-conditions-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
+  <div class="ui modal small" id="go-factory-loading">
+    <div class="header">Export to IndoorGML</div>
+    <div class="content">
+      <img class="ui centered image" src="./assets/icon/ajax-loader.gif">
+    </div>
+  </div>
 
-        <div class="modal-header">
-          <h5 class="modal-title">Setting General Conditions</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-        </div>
+  <div class="ui modal small" id="go-factory-download">
+    <div class="header">Export to IndoorGML</div>
+    <div class="content">
+      <a id="gml-down-link" href="./assets/icon/cell_a.png" class="mx-auto d-block p-3 text-center" download>
+        <h6>Download</h6>
+      </a>
+    </div>
+  </div>
 
-        <div class="modal-body">
-          <h6>Prefix of id of object</h6>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">Cell</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cell">
-            </div>
-          </div>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">CellSpaceBoundary</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cellBoundary">
-            </div>
-          </div>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">State</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-state">
-            </div>
-          </div>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">Transition</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-transition">
-            </div>
-          </div>
-
-          <br />
-          <h6>Canvas properties</h6>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">Aspect ratio</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-aspect-ratio">
-            </div>
-          </div>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">Scale Factor</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-factor">
-            </div>
-          </div>
-          <div class="row" style="margin-bottom:2px">
-            <div class="col-1" style="float: left;"></div>
-            <div class="col-3" style="float: left;">Scale Max</div>
-            <div class="col-7">
-              <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-max">
-            </div>
+  <div class="ui modal tiny " id="setting-conditions-modal">
+    <div class="header">Setting General Conditions</div>
+    <div class="scrolling content">
+      <h5 class="ui horizontal divider header">
+        Prefix of id of object
+      </h5>
+      <div>
+        <div class="row" style="margin-bottom:2px">
+          <div class="col-1" style="float: left;"></div>
+          <div class="col-3" style="float: left;">Cell</div>
+          <div class="col-7">
+            <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cell">
           </div>
         </div>
+        <div class="row" style="margin-bottom:2px">
+          <div class="col-1" style="float: left;"></div>
+          <div class="col-3" style="float: left;">CellSpaceBoundary</div>
+          <div class="col-7">
+            <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cellBoundary">
+          </div>
+        </div>
+        <div class="row" style="margin-bottom:2px">
+          <div class="col-1" style="float: left;"></div>
+          <div class="col-3" style="float: left;">State</div>
+          <div class="col-7">
+            <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-state">
+          </div>
+        </div>
+        <div class="row" style="margin-bottom:2px">
+          <div class="col-1" style="float: left;"></div>
+          <div class="col-3" style="float: left;">Transition</div>
+          <div class="col-7">
+            <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-transition">
+          </div>
+        </div>
+      </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="setting-conditions-modal-btn" aria-label="Close">Update</button>
+      <br />
+
+      <h5 class="ui horizontal divider header">
+        Canvas properties
+      </h5>
+      <div class="row" style="margin-bottom:2px">
+        <div class="col-1" style="float: left;"></div>
+        <div class="col-3" style="float: left;">Aspect ratio</div>
+        <div class="col-7">
+          <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-aspect-ratio">
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:2px">
+        <div class="col-1" style="float: left;"></div>
+        <div class="col-3" style="float: left;">Scale Factor</div>
+        <div class="col-7">
+          <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-factor">
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:2px">
+        <div class="col-1" style="float: left;"></div>
+        <div class="col-3" style="float: left;">Scale Max</div>
+        <div class="col-7">
+          <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-max">
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:2px">
+        <div class="col-1" style="float: left;"></div>
+        <div class="col-3" style="float: left;">Auto Create State</div>
+        <div class="col-7">
+          <input type="checkbox" id="setting-conditions-auto-create-state">
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <div class="ui button" id="setting-conditions-modal-btn" aria-label="Close">Submit</div>
+      <div class="ui cancel button">Cancel</div>
+    </div>
+  </div>
+
+  <div class="ui modal tiny" id="setting-desc-modal">
+    <div class="header">Global Description List</div>
+    <div class="content">
+      <div id="setting-desc-modal-list-container" class="ui middle aligned celled list" style="margin-bottom:2px">
+      </div>
+      <br />
+      <div class="row" style="margin-bottom:2px">
+        <div class="col-1" style="float: left;"></div>
+        <div class="col-2" style="float: left;">New Desc</div>
+        <div class="col-7">
+          <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-desc-modal-newDesc">
+        </div>
+        <div class="col-1" style="padding:0;">
+          <button type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-submit-btn">+</button>
         </div>
       </div>
     </div>
@@ -636,12 +662,16 @@
               <button type="button" class="btn btn-light col-10" id="project-save-as-btn">Save</button>
               <div class="col-1" style="float: right;"></div>
             </div>
-          </div>s
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <div id="context-menu" style="display: none;position: absolute;left: 100;bottom: 100;width: 10rem;height: 10rem;z-index: 1050px;background-color: white;">
+    <ul class="dropdown-menu" role="menu">
+    </ul>
+  </div>
 
   <script data-main="js/main" src="lib/require.js"></script>
 </body>

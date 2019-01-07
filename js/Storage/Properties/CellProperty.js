@@ -20,7 +20,12 @@ define([], function() {
     /**
      * @memberof CellProperty
      */
-    this.description = "";
+    this.description = {};
+    var list = window.conditions.descList;
+    for (var l of list) {
+      this.description[l] = "";
+    }
+
 
     /**
      * @memberof CellProperty
@@ -36,6 +41,18 @@ define([], function() {
      * @memberof CellProperty
      */
     this.partialboundedBy = [];
+
+    /**
+     * @memberof CellProperty
+     * @desc  NavigableSpace, GeneralSpace, TransferSpace, TransitionSpace, ConnectionSpace, AnchorSpace
+     */
+    this.naviType = "";
+
+    this.navi = {
+      class: "",
+      function: "",
+      usage: ""
+    }
   }
 
   /**
@@ -50,6 +67,14 @@ define([], function() {
     this.externalReference = values.externalReference;
     this.partialboundedBy = values.partialboundedBy;
 
+  }
+
+  CellProperty.prototype.setDuality = function(_duality){
+    this.duality = _duality;
+  }
+
+  CellProperty.prototype.addPartialboundedBy = function(part){
+    this.partialboundedBy.push(part);
   }
 
   return CellProperty;

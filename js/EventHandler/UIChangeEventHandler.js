@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([
   "../PubSub/Message.js",
@@ -24,7 +24,11 @@ define([
    */
   UIChangeEventHandler.prototype.setHandlerBinder = function(handlerBinder) {
 
-    handlerBinder['tree-view'] = {
+    handlerBinder['tree-view-class'] = {
+      'fancytreeclick': this.clickTreeView
+    };
+
+    handlerBinder['tree-view-floor'] = {
       'fancytreeclick': this.clickTreeView
     };
 
@@ -36,27 +40,33 @@ define([
       'change': this.floorplanUpload
     };
 
-    handlerBinder['project-export'] = {
-      'click': this.showFactoryExportModal
+    handlerBinder['navi-text'] = {
+      'change' : this.showNaviAttr
     };
 
-  }
+    handlerBinder['project-export'] = {
+      'click': this.showModal
+    };
 
-  UIChangeEventHandler.prototype.showFactoryExportModal = function(broker, previousMsg){
+    handlerBinder['viewer-btn'] = {
+      'click': this.showModal
+    };
 
-    var result = new Result();
-    if (broker.isPublishable('showfactoryexportmodal')) {
-
-      broker.publish(new Message('showfactoryexportmodal', {}));
-
-      result.result = true;
-      result.msg = 'showfactoryexportmodal';
-
+    handlerBinder['setting-conditions'] = {
+      'click': this.showModal
     }
 
-    return result;
+    handlerBinder['setting-desc'] = {
+      'click': this.showModal
+    }
 
+
+
+    // handlerBinder['stage']={
+    //   'contentContextmenu': this.callStageMenu
+    // }
   }
+
 
   /**
    * @desc When tree view clicked `activateworkspace` and `setpropertyview` can publish.
@@ -224,6 +234,96 @@ define([
 
     return result;
 
+  }
+
+  /**
+   * @desc
+   * @memberof UIChangeEventHandler
+   */
+  UIChangeEventHandler.prototype.callStageMenu = function(broker, previousMsg, data) {
+
+    var result = {
+      'result': false,
+      'msg': null
+    };
+
+    event.preventDefault();
+    log.info('TEST');
+
+    return result;
+
+  }
+
+  UIChangeEventHandler.prototype.showNaviAttr = function(broker, previousMsg, data){
+    var result = new Result;
+    var pre = data.target.dataset.pre;
+
+    if(pre == undefined && data.target.value != undefined){
+      var table = document.getElementById("property-navi-table").childNodes[0];
+
+      var classTr = document.createElement("tr");
+      classTr.innerHTML = "<td class=\"title\">class</td><td class=\"value\"><div class=\"ui transparent inverted input\"><input id=\"class-text\" type=\"text\" value=\"\"></div></td>";
+      var functionTr = document.createElement("tr");
+      functionTr.innerHTML = "<td class=\"title\">function</td><td class=\"value\"><div class=\"ui transparent inverted input\"><input id=\"function-text\" type=\"text\" value=\"\"></div></td>";
+      var usageTr = document.createElement("tr");
+      usageTr.innerHTML = "<td class=\"title\">usage</td><td class=\"value\"><div class=\"ui transparent inverted input\"><input id=\"usage-text\" type=\"text\" value=\"\"></div></td>";
+
+      table.appendChild(classTr);
+      table.appendChild(functionTr);
+      table.appendChild(usageTr);
+      document.getElementById("navi-text").dataset.pre = data.target.value;
+    }
+    else if(pre != "" && (data.target.value == "" || data.target.value == "selected")){
+
+      var table = document.getElementById("property-navi-table").childNodes[0];
+      var len = table.childNodes.length;
+      while(table.childNodes.length > 2){
+        table.removeChild(table.childNodes[1]);
+      }
+      document.getElementById("navi-text").dataset.pre = "";
+    }
+
+
+
+    log.info(document.getElementById("navi-text"));
+    result = {
+      'result': true,
+      'msg': null
+    };
+
+    return result;
+  }
+
+  UIChangeEventHandler.prototype.showModal = function(broker, previousMsg, data){
+    switch (data.target.dataset.modaltype) {
+      case 'export':
+        $('#go-factory-modal').modal('show');
+        break;
+      case 'viewer':
+        $('#go-viewer-modal').modal('show');
+        break;
+      case 'conditions':
+        if(window.broker.isPublishable('showconditionmodal')){
+          broker.publish(new Message('showconditionmodal', {}));
+        }
+        break;
+      case 'desc':
+        if (broker.isPublishable('updatedesclist')) {
+          broker.publish(new Message('updatedesclist', { }));
+        }
+
+        $('#setting-desc-modal').modal('show');
+        break;
+      default:
+
+    }
+
+    var result = {
+      'result': true,
+      'msg': null
+    };
+
+    return result;
   }
 
 

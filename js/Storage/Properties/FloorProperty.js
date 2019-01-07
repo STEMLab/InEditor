@@ -57,7 +57,11 @@ define([], function() {
     /**
      * @memberof FloorProperty
      */
-    this.description = new String();
+     this.description = {};
+     var list = window.conditions.descList;
+     for(var l of list){
+       this.description[l] = "";
+     }
 
     /**
      * @memberof FloorProperty
@@ -79,6 +83,10 @@ define([], function() {
      */
     this.transitionKey = [];
 
+    /**
+    * @memberof FloorProperty
+    */
+    this.layer = "base";
   }
 
   FloorProperty.prototype.load = function(values) {
@@ -106,6 +114,8 @@ define([], function() {
     this.stateKey = values.stateKey;
 
     this.transitionKey = values.transitionKey;
+
+    this.layer = values.layer;
 
   }
 

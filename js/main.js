@@ -52,6 +52,7 @@ require([
   log.info(window.storage);
 
   var singletonTest = Test.getInstance();
+  singletonTest.echo('hi');
   log.info(singletonTest);
 
 });

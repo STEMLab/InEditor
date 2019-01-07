@@ -7,7 +7,9 @@ define(function(require){
         'CellSpace': require('JsonFormat/Format4Factory/CellSpace'),
         'CellSpaceBoundary': require('JsonFormat/Format4Factory/CellSpaceBoundary'),
         'State': require('JsonFormat/Format4Factory/State'),
-        'Transition': require('JsonFormat/Format4Factory/Transition')
+        'Transition': require('JsonFormat/Format4Factory/Transition'),
+        'InterlayerConnection' : require('JsonFormat/Format4Factory/InterLayerConnection'),
+        'NavigableSpace': require('JsonFormat/Format4Factory/NavigableSpace')
     };
 
     return function(type, conditions){

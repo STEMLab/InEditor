@@ -8,7 +8,7 @@ define([], function() {
   /**
    * @class Publisher
    */
-  function Publisher(_broker) {
+  function Publisher(broker) {
 
     /**
     * @memberof Publisher

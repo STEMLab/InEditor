@@ -23,7 +23,12 @@ define([],function() {
     /**
     * @memberof TransitionProperty
     */
-    this.description = "";
+    this.description = {};
+    var list = window.conditions.descList;
+    for(var l of list){
+      this.description[l] = "";
+    }
+
 
     /**
     * @memberof TransitionProperty

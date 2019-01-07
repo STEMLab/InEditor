@@ -16,6 +16,16 @@ define([
    */
   function UIContainer() {
 
+    Split(['#sidebar', '#workspace'], {
+      sizes: [20, 80]
+    });
+
+    Split(['#tree-view-container', '#property-container'], {
+      direction: 'vertical',
+      cursor: 'row-resize',
+      sizes: [60, 38]
+    });
+
     /**
      * @memberof UIContainer
      */

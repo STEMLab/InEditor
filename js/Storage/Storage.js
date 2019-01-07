@@ -50,5 +50,12 @@ define([
     log.info(this);
   }
 
+  Storage.prototype.clear = function(){
+    this.geometryContainer.clear();
+    this.propertyContainer.clear();
+    this.canvasContainer.clear();
+    this.dotFoolContainer.clear();
+  }
+
   return Storage;
 });

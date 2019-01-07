@@ -2,7 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define(["./Feature"], function(Feature) {
+define(["./Feature", "js/JsonFormat/GeometryConverter.js", "js/Storage/Dot/DotMath.js"], function(Feature, GeometryConverter, DotMath) {
   'user strict';
 
   /**
@@ -88,30 +88,30 @@ define(["./Feature"], function(Feature) {
    * @memberof Fromat4Factory.CellSpaceBoundary
    * @param Array coor array of coordinates
    */
-   CellSpaceBoundary.prototype.setWKTLineString = function(coor) {
+  CellSpaceBoundary.prototype.setWKTLineString = function(coor) {
 
-     var wkt = "LINESTRING (";
+    var wkt = "LINESTRING (";
 
-     for (var i = 0; i < coor.length; i++) {
+    for (var i = 0; i < coor.length; i++) {
 
-       wkt += coor[i][0];
-       wkt += " ";
-       wkt += coor[i][1];
-       wkt += " ";
-       wkt += coor[i][2];
+      wkt += coor[i][0];
+      wkt += " ";
+      wkt += coor[i][1];
+      wkt += " ";
+      wkt += coor[i][2];
 
-       if (i != coor.length - 1) wkt += ", ";
+      if (i != coor.length - 1) wkt += ", ";
 
-     }
+    }
 
-     wkt += ")";
+    wkt += ")";
 
-     this.geometry.type = 'LineString';
-     this.geometry.coordinates = wkt;
-     this.geometry.properties.type = "wkt";
-     this.geometry.properties.extrude = 'false';
+    this.geometry.type = 'LineString';
+    this.geometry.coordinates = wkt;
+    this.geometry.properties.type = "wkt";
+    this.geometry.properties.extrude = 'false';
 
-   }
+  }
 
   /**
    * @memberof Fromat4Factory.CellSpaceBoundary
@@ -158,8 +158,7 @@ define(["./Feature"], function(Feature) {
 
       }
 
-    }
-    else {
+    } else {
 
       var len = dots.length;
 
@@ -254,6 +253,78 @@ define(["./Feature"], function(Feature) {
 
     for (var i = 0; i < coordinates.length; i++) {
       this.geometry.coordinates.push(JSON.parse(JSON.stringify(coordinates[i])));
+    }
+  }
+
+
+  /**
+   * @memberof Format4Factory.CellSpace
+   */
+  CellSpaceBoundary.prototype.convertCoor2WKT = function() {
+
+    if (this.geometry.properties.type == 'wkt') {
+      log.info('Format4Factory.CellSpaceBoundary :: Geometry type of this object is already WKT');
+      return;
+    }
+
+    var converted = new GeometryConverter('Surface').geojson2wkt(this.getCoordinates());
+    this.geometry.coordinates = converted;
+    this.geometry.properties.type = 'wkt';
+  }
+
+
+  /**
+   * @memberof CellSpaceBoundary
+   */
+  CellSpaceBoundary.prototype.setDuality = function(duality) {
+
+    if (this.properties != null &&
+      (this.properties.duality != null || window.conditions.exportConditions[this.type].properties.duality)) {
+
+      if (duality == null || duality == "") delete this.properties['duality'];
+      else {
+
+        var transitionGeo = window.storage.geometryContainer.getElementById('transition', duality);
+        var startPoint = transitionGeo.points[0];
+        var endPoint;
+
+        for(var i = 1 ; i < transitionGeo.points.length; i++){
+          if(transitionGeo.points[i].isPartOfCellBoundary()){
+            endPoint = transitionGeo.points[i];
+            break;
+          } else{
+            startPoint = transitionGeo.points[i];
+          }
+        }
+
+        var result = DotMath.crossProduct(
+          DotMath.getVector(
+            {'point' : { x:startPoint.point.x, y:startPoint.point.y  , z:0 }},
+            {'point' : { x:endPoint.point.x,   y:endPoint.point.y ,   z:0 }}
+          ),
+          DotMath.getVector(
+            {'point':{ x:this.geometry.coordinates[0][0], y:this.geometry.coordinates[0][1], z:0 }},
+            {'point':{ x:this.geometry.coordinates[1][0], y:this.geometry.coordinates[1][1], z:0 }}
+          )
+        );
+
+        if(result.z > 0) this.properties['duality'] = duality;
+        else             this.properties['duality'] = duality+'-REVERSE';
+      }
+
+    } else {
+
+      log.warn("The given conditions said you don 't need to need to set duality of Feature.");
+    }
+
+  }
+
+
+  CellSpaceBoundary.prototype.reverseDuality = function() {
+    if(this.properties.duality != "" && this.properties.duality != undefined && this.properties.duality != null){
+      var word = this.properties.duality.split("-");
+      if(word.length == 1) this.properties.duality = word[0]+'-REVERSE';
+      else this.properties.duality = word[0];
     }
   }
 

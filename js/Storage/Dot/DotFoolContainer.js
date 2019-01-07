@@ -23,6 +23,10 @@ define([
 
   }
 
+  DotFoolContainer.prototype.clear = function(){
+    this.dotFool = {};
+  }
+
   /**
    * @memberof DotFoolContainer
    * @param String floor id

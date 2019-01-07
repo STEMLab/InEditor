@@ -71,7 +71,7 @@ define(["./Feature"], function(Feature) {
 
     } else{
 
-      this.properties['connects'] = connects;
+      this.attributes['connects'] = connects;
 
     }
   }

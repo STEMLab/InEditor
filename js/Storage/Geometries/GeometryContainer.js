@@ -6,12 +6,14 @@ define([
   "./CellGeometry.js",
   "./CellBoundaryGeometry.js",
   "./StateGeometry.js",
-  "./TransitionGeometry.js"
+  "./TransitionGeometry.js",
+  "./HoleGeometry.js"
 ], function(
   CellGeometry,
   CellBoundaryGeometry,
   StateGeometry,
-  TransitionGeometry
+  TransitionGeometry,
+  HoleGeometry
 ) {
   'use strict';
 
@@ -23,6 +25,7 @@ define([
     this.cellBoundaryGeometry = [];
     this.stateGeometry = [];
     this.transitionGeometry = [];
+    this.holeGeometry = [];
   }
 
   /**
@@ -33,8 +36,19 @@ define([
   }
 
   /**
-  * @memberof GeometryContainer
-  */
+   * @memberof GeometryContainer
+   */
+  GeometryContainer.prototype.clear = function() {
+    this.cellGeometry = [];
+    this.cellBoundaryGeometry = [];
+    this.stateGeometry = [];
+    this.transitionGeometry = [];
+    this.holeGeometry = [];
+  }
+
+  /**
+   * @memberof GeometryContainer
+   s*/
    GeometryContainer.prototype.removeObj = function(obj){
 
      if(this.cellGeometry.indexOf(obj) != -1 ) this.cellGeometry.splice(this.cellGeometry.indexOf(obj), 1);
@@ -75,6 +89,11 @@ define([
           if (this.transitionGeometry[key].id == _id) result = this.transitionGeometry[key];
         }
         break;
+      case 'hole':
+        for (var key in this.holeGeometry){
+          if (this.holeGeometry[key].id == _id) result = this.holeGeometry[key];
+        }
+        break;
       default:
 
     }
@@ -89,8 +108,9 @@ define([
 
     this.loadCells(values.cellGeometry, dotFoolContainer);
     this.loadCellBoundary(values.cellBoundaryGeometry, dotFoolContainer);
-    this.loadState(values.stateGeometry);
-    this.loadTransition(values.transitionGeometry);
+    this.loadState(values.stateGeometry, dotFoolContainer);
+    this.loadTransition(values.transitionGeometry, dotFoolContainer);
+    this.loadHole(values.holeGeometry, dotFoolContainer);
 
   }
 
@@ -142,7 +162,7 @@ define([
   /**
    * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.loadState = function(values) {
+  GeometryContainer.prototype.loadState = function(values, dotFoolContainer) {
 
     this.stateGeometry = [];
 
@@ -150,6 +170,7 @@ define([
 
       var tmp = new StateGeometry();
       tmp.load(values[index]);
+      tmp.point = dotFoolContainer.getDotById(tmp.point.uuid);
       this.stateGeometry.push(tmp);
 
     }
@@ -159,7 +180,7 @@ define([
   /**
    * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.loadTransition = function(values) {
+  GeometryContainer.prototype.loadTransition = function(values, dotFoolContainer) {
 
     this.transitionGeometry = [];
 
@@ -167,12 +188,37 @@ define([
 
       var tmp = new TransitionGeometry();
       tmp.load(values[index]);
-      this.transitionGeometry.push(tmp);
 
+      for(var key in tmp.points){
+        tmp.points[key] = dotFoolContainer.getDotById(tmp.points[key].uuid);
+      }
+
+      this.transitionGeometry.push(tmp);
     }
 
   }
 
+  /**
+   * @memberof GeometryContainer
+   */
+  GeometryContainer.prototype.loadHole = function(values, dotFoolContainer) {
+
+    this.holeGeometry = [];
+
+    for (var index in values) {
+
+      var tmp = new HoleGeometry();
+      tmp.load(values[index]);
+
+      for(var key in tmp.points){
+        tmp.points[key] = dotFoolContainer.getDotById(tmp.points[key].uuid);
+      }
+
+      this.holeGeometry.push(tmp);
+
+    }
+
+  }
 
 
 

@@ -64,23 +64,29 @@ define([
         if (subkey == 'click' && document.getElementById(key) != null) {
 
           // event on html ui element
-          document.getElementById(key).addEventListener('click', function(event) {
-            window.eventHandler.callHandler('html', event);
-          });
+            document.getElementById(key).addEventListener('click', function(event) {
+              window.eventHandler.callHandler('html', event);
+            });
 
         } else if (subkey == 'fancytreeclick') {
 
-          $("#tree-view").fancytree({
-            click: function(event, data) {
-              window.eventHandler.callHandler('tree', event, data)
-            }
-          });
+          // $("#tree-view-floor").fancytree({
+          //   click: function(event, data) {
+          //     window.eventHandler.callHandler('tree', event, data)
+          //   }
+          // });
+          // $("#tree-view-class").fancytree({
+          //   click: function(event, data) {
+          //     window.eventHandler.callHandler('tree', event, data)
+          //   }
+          // });
 
         } else if (subkey == 'wheel') {
 
           window.addEventListener('wheel', function(event, data) {
 
             if (event.target.tagName == 'CANVAS') {
+              event.preventDefault();
               window.eventHandler.callHandler('canvas', event);
             }
 
@@ -107,26 +113,11 @@ define([
     } else {
 
         for (var subkey in window.eventHandler.handlerBinder[type]) {
-        // obj.on(
-    //   subkey,
-    //   function(event) {
-    //     window.eventHandler.callHandler(type, event)
-    //   });
-
-          if(type == 'line'){
-            // obj.on(
-            //   subkey,
-            //   function(event) {
-            //     window.eventHandler.callHandler(type, event)
-            //   });
-            obj.on('mouseover', function(){log.info('hi')});
-          } else {
-            obj.on(
-              subkey,
-              function(event) {
-                window.eventHandler.callHandler(type, event)
-              });
-          }
+        obj.on(
+          subkey,
+          function(event) {
+            window.eventHandler.callHandler(type, event)
+          });
       }
 
       log.info(obj);

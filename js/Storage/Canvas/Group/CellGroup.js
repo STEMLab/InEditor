@@ -3,9 +3,11 @@
  */
 
 define([
-  "../Object/Cell.js"
+  "../Object/Cell.js",
+  "../Object/Hole.js"
 ], function(
-  Cell
+  Cell,
+  Hole
 ) {
   'use strict';
 
@@ -22,12 +24,24 @@ define([
       y: 0
     });
 
-
+    /**
+     * @memberof CellGroup
+     */
+    this.holeGroup = new Konva.Group({
+      x: 0,
+      y: 0
+    })
 
     /**
      * @memberof CellGroup
      */
     this.cells = []; // Cell array
+
+    /**
+     * @memberof CellGroup
+     */
+    this.holes = [];
+
 
   }
 
@@ -39,6 +53,7 @@ define([
 
     var newCell = new Cell(obj.id);
     newCell.corners.visible(false);
+    newCell.setFillColor(obj.poly.fill());
 
     this.copyDots(newCell, obj.dots);
 
@@ -62,11 +77,40 @@ define([
     newCell.dots = obj.dots;
     newCell.addObjectFromDots();
     newCell.corners.visible(false);
+    if(obj.slant != null) newCell.setSlant(obj.slant.direction);
+
 
     this.cells.push(newCell);
 
     this.cellGroup.add(this.cells[this.cells.length - 1].getPolyObject());
     this.cellGroup.add(this.cells[this.cells.length - 1].getCornersObject());
+
+  }
+
+  /**
+   * @memberof CellGroup
+   */
+  CellGroup.prototype.addHole = function(obj) {
+    log.info('cell-group : addHole ', obj);
+
+    var newHole = new Hole(obj.id);
+    newHole.corners.visible(false);
+
+    if(obj.poly == undefined) newHole.setFillColor('#FFFFFF');
+    else                      newHole.setFillColor(obj.poly.fill());
+
+    newHole.setHoleOf(obj.holeOf);
+
+    if     (obj.dots != undefined && obj.points == undefined) this.copyDots(newHole, obj.dots);
+    else if(obj.dots == undefined && obj.points != undefined) this.copyDots(newHole, obj.points );
+
+    // add corner and poly in new cell
+    newHole.addObjectFromDots();
+
+    this.holes.push(newHole);
+
+    this.holeGroup.add(this.holes[this.holes.length - 1].getPolyObject());
+    this.holeGroup.add(this.holes[this.holes.length - 1].getCornersObject());
 
   }
 
@@ -170,6 +214,13 @@ define([
     return this.cellGroup;
   }
 
+  /**
+   * @memberof CellGroup
+   */
+  CellGroup.prototype.getHoleGroup = function() {
+    return this.holeGroup;
+  }
+
 
   /**
    * @memberof CellGroup
@@ -204,6 +255,9 @@ define([
     return result;
   }
 
+  /**
+   * @memberof CellGroup
+   */
   CellGroup.prototype.getBoundaries = function() {
 
     var result = [];
@@ -240,9 +294,44 @@ define([
 
   }
 
+  /**
+   * @memberof CellGroup
+   */
   CellGroup.prototype.getCells = function() {
     return this.cells;
   }
+
+  /**
+   * @memberof CellGroup
+   */
+  CellGroup.prototype.getHoles = function() {
+    return this.holes;
+  }
+
+  /**
+   * @memberof CellGroup
+   */
+   CellGroup.prototype.delete = function(id, floor){
+     for(var i in this.cells){
+       if(this.cells[i].id == id){
+
+         if(floor != undefined){
+           var dotFool = window.storage.dotFoolContainer.getDotFool(floor);
+           for(var j in this.cells[i].dots){
+             dotFool.deleteDotFromObj(this.cells[i].dots[j].uuid, this.cells[i].id);
+           }
+         } else {
+           log.warn('CellGroup.delete:: there is no floor data for cell, you need to free dots of', id, 'manually.');
+         }
+
+         this.cells[i].destroy();
+         this.cells.splice(i, 1);
+         break;
+       }
+     }
+
+
+   }
 
   return CellGroup;
 

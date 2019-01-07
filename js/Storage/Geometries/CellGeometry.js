@@ -19,6 +19,12 @@ define([], function() {
     */
     this.points = _points;
 
+
+    /**
+     * @memberof Cell
+     * @desc null, down, up
+     */
+    this.slant = null;
   }
 
   /**
@@ -27,6 +33,7 @@ define([], function() {
   CellGeometry.prototype.load = function(values){
     this.id = values.id;
     this.points = values.points;
+    this.slant = values.slant;
   }
 
   /**

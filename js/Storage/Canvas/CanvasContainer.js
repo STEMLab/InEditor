@@ -103,6 +103,20 @@ define([
 
   }
 
+  /**
+   * @memberof CanvasContainer
+   */
+  CanvasContainer.prototype.clear = function() {
+
+    for (var key in this.stages) {
+      this.stages[key].stage.destroyChildren();
+      this.stages[key].stage.destroy();
+    }
+
+    this.stages = [];
+
+  }
+
 
   /**
    * @memberof CanvasContainer
@@ -117,7 +131,8 @@ define([
       var floor = window.storage.propertyContainer.getFloorById('cell', cells[index].id);
       this.stages[floor].cellLayer.group.simpleAdd({
         id: cells[index].id,
-        dots: cells[index].points
+        dots: cells[index].points,
+        slant: cells[index].slant
       });
     }
 
@@ -149,6 +164,13 @@ define([
         id: transition[index].id,
         points: transition[index].points
       });
+    }
+
+    // add hole
+    var hole = geometryContainer.holeGeometry;
+    for(var index in hole){
+      var floor = window.storage.propertyContainer.getFloorById('cell', hole[index].holeOf);
+      this.stages[floor].cellLayer.group.addHole(hole[index]);
     }
 
     for (var index in this.stages) {

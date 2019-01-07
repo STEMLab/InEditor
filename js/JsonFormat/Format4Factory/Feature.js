@@ -2,8 +2,8 @@ define([], function() {
   'user strict';
 
   /**
-  * @class Feature
-  */
+   * @class Feature
+   */
   function Feature(conditions) {
 
     this.id = "";
@@ -45,7 +45,7 @@ define([], function() {
   Feature.prototype.setName = function(name) {
 
     if (this.properties != null &&
-        (this.properties.name != null || window.conditions.exportConditions[this.type].properties.name)) {
+      (this.properties.name != null || window.conditions.exportConditions[this.type].properties.name)) {
 
       this.properties['name'] = name;
 
@@ -60,9 +60,8 @@ define([], function() {
    * @memberof Feature
    */
   Feature.prototype.setDescription = function(description) {
-
     if (this.properties != null &&
-        (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
+      (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
 
       this.properties['description'] = description;
 
@@ -73,16 +72,46 @@ define([], function() {
 
   }
 
+  Feature.prototype.addPrtDesc = function(prtDesc){
+    if (this.properties != null &&
+      (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
+
+      for(var key in prtDesc){
+        if(this.properties.description[key] == "" && prtDesc[key] != "")
+          this.properties.description[key] = prtDesc[key];
+      }
+
+    } else {
+
+      log.warn("The given conditions said you don 't need to need to set description of Feature.");
+    }
+  }
+
+  Feature.prototype.convertDescObj2Str = function(){
+    if (this.properties != null &&
+      (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
+
+      var str = "";
+      for(var key in this.properties.description)
+        str += key + "=\"" + this.properties.description[key] + "\":";
+      this.properties['description'] = str;
+
+    } else {
+
+      log.warn("The given conditions said you don 't need to need to set description of Feature.");
+    }
+  }
+
   /**
    * @memberof Feature
    */
   Feature.prototype.setDuality = function(duality) {
 
     if (this.properties != null &&
-        (this.properties.duality != null || window.conditions.exportConditions[this.type].properties.duality)) {
+      (this.properties.duality != null || window.conditions.exportConditions[this.type].properties.duality)) {
 
-      if(duality == null) delete this.properties['duality'];
-      else                this.properties['duality'] = duality;
+      if (duality == null || duality == "") delete this.properties['duality'];
+      else this.properties['duality'] = duality;
 
     } else {
 
@@ -128,28 +157,44 @@ define([], function() {
 
   }
 
+
   /**
-  * @memberof Feature
-  * @desc Simplify feature object using `exportSimplifyCondition`.
-  */
-  Feature.prototype.simplify = function(){
+   * @memberof Feature
+   * @desc Simplify feature object using `exportSimplifyCondition`.
+   */
+  Feature.prototype.simplify = function() {
 
     function isArray(o) {
       return Object.prototype.toString.call(o) === '[object Array]';
     }
 
-    var condition = window.conditions.exportSimplifyCondition[this.type].properties;
+    var condition;
+    if (this.type == "NavigableSpace" ||
+      this.type == "GeneralSpace" ||
+      this.type == "TransferSpace" ||
+      this.type == "TransitionSpace" ||
+      this.type == "ConnectionSpace" ||
+      this.type == "AnchorSpace")
+      condition = window.conditions.exportSimplifyCondition["CellSpace"].properties;
+    else if (this.type == "NavigableBoundary" ||
+      this.type == "TansferBoundary" ||
+      this.type == "ConnectionBoundary" ||
+      this.type == "AnchorBoundary")
+      condition = window.conditions.exportSimplifyCondition["CellSpaceBoundary"].properties;
+    else
+      condition = window.conditions.exportSimplifyCondition[this.type].properties;
 
     var keys = Object.keys(condition);
 
-    for(var i = 0; i < keys.length; i++){
+    for (var i = 0; i < keys.length; i++) {
       var obj = this.properties[keys[i]];
-      if( !condition[keys[i]] && ( obj == "" || (isArray(obj) && obj.lenght == 0))){
+      if (!condition[keys[i]] && (obj == "" || (isArray(obj) && obj.lenght == 0))) {
         delete this.properties[keys[i]];
       }
     }
 
   }
+
 
 
   return Feature;

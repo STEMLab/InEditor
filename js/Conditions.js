@@ -17,6 +17,12 @@ define([], function() {
     this.pre_cell = 'C';
 
     /**
+     * @desc Prefix of hole object
+     * @default H
+     */
+    this.pre_hole = 'H';
+
+    /**
      * @desc Prefix of cellBoundary object
      * @memberof Conditions
      * @default B
@@ -44,11 +50,21 @@ define([], function() {
      */
     this.pre_transition = 'T';
 
+    /**
+     * @desc Prefix of interlayerConnection object
+     * @memberof Conditions
+     * @default I
+     */
+    this.pre_inter = 'I';
+
+
     this.LAST_CELL_ID_NUM = 0;
     this.LAST_CELLBOUNDARY_ID_NUM = 0;
     this.LAST_FLOOR_ID_NUM = 0;
     this.LAST_STATE_ID_NUM = 0;
     this.LAST_TRANSITION_ID_NUM = 0;
+    this.LAST_INTER_ID_NUM = 0;
+    this.LAST_HOLE_ID_NUM = 0;
 
     /**
      * @desc The aspect ratio used to create the stage
@@ -122,7 +138,9 @@ define([], function() {
     /**
     * @memberof  Conditions
     */
+    // this.automGenerateState = false;
     this.automGenerateState = true;
+
 
     /**
     * @memberof  Conditions
@@ -138,6 +156,10 @@ define([], function() {
     * @memberof  Conditions
     */
     this.saveName = 'editor-project';
+
+    this.descList = ['story'];
+
+    this.loadDataIds = {};
 
     /**
      * @memberof Conditions

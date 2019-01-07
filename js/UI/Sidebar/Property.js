@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([], function() {
   'use strict';
@@ -12,18 +12,11 @@ define([], function() {
 
   };
 
-  Property.prototype.resize = function(){
+  Property.prototype.resize = function() {
 
     var sidebarH = document.getElementById('property-container').parentElement.clientHeight;
     var treeviewH = document.getElementById('tree-view').clientHeight
-    log.info("sidebarH : " + sidebarH);
-    log.info("treeviewH : " + treeviewH);
-    log.info("sidebarH - treeviewH : " + (sidebarH - treeviewH));
-    log.info("property-container : " + document.getElementById('property-container').style);
     document.getElementById('property-container').style.height = sidebarH - treeviewH;
-    log.info(document.getElementById('property-container').style.height);
-    log.info(document.getElementById('property-container').clientHeight)
-
   }
 
   /**
@@ -41,7 +34,7 @@ define([], function() {
     else if (type == "state") this.setStateProperty(id, storage);
     else if (type == "transition") this.setTransitionProperty(id, storage);
     else if (type == "project") this.setProjectProperty(id, storage);
-
+    else if (type == "interlayerConnection") this.setInterLayerConnectionProperty(id, storage);
 
   }
 
@@ -60,40 +53,76 @@ define([], function() {
     });
 
     propertyLayout.init();
+
+    // event binding
+    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
+
+      window.eventHandler.callHandler('html', event);
+
+    });
   }
 
   /**
-  * @memberof Property
-  */
+   * @memberof Property
+   */
   Property.prototype.setFloorView = function(config, floorProperty) {
+
+    var floors = window.storage.propertyContainer.floorProperties;
+
+    var floorKeys = [];
+    for (var floor of floors) {
+      floorKeys.push(floor.id);
+    }
 
     $('#property-container').empty();
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var canvasDiv = "<table class=\"property-table\">";
+    var canvasDiv = "<table id=\"property-table\" data-type=\"canvas\" class=\"ui inverted table property-table\">";
     canvasDiv += "<tr><td class=\"title\">Upload floor plan</td><td class=\"value\"><input id=\"floorplan-file\" type=\"file\" accept=\".jpg,.jpeg,.png,.gif,.bmp\"></td></tr>";
-    canvasDiv += "<tr><td class=\"title\">Resizing canvas</td><td class=\"value\"><input id=\"name-text\" type=\"button\" value=\"V\"></td></tr>";
+    canvasDiv += "<tr><td class=\"title\">Copy another floor</td><td class=\"value\"><select id=\"copyfloor-text\" class=\"ui compact selection dropdown\" style=\"width: 80%;\">";
+    canvasDiv += "<option value=\"\" selected disabled hidden></option>";
+
+    for (var key in floorKeys) {
+      var value = floorKeys[key];
+      if (value != floorProperty.id) canvasDiv += "<option value=\"" + value + "\">" + value + "</option>";
+    }
+
+    canvasDiv += "</select>";
+
+
+
+    canvasDiv += "<button class=\"ui icon button\" style=\"width:20%; position: absolute; top: 5.5rem;\">";
+    canvasDiv += "<i id=\"copyfloor-btn\" class=\"inverted grey check icon\"></i></button>";
+
+
+
+    // "<input id=\"copyfloor-btn\" type=\"button\" value=\"V\"></td></tr>";
+
     canvasDiv += "</table>";
 
-    var propertiesDiv = "<table id=\"property-table\" type=\"floor\" class=\"property-table\">";
-    propertiesDiv += "<tr><td class=\"title\">id</td><td colspan=\"2\"><input id=\"id-text\" type=\"text\" value=" + floorProperty.id + " disabled></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"colspan=\"2\"><input id=\"name-text\" type=\"text\" value=" + floorProperty.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">level</td><td class=\"value\"colspan=\"2\"><input id=\"level-text\" type=\"text\" value=" + floorProperty.level + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\" rowspan=\"2\">Lower<br>Left<br>Corner</td>";
-    propertiesDiv += "<td class=\"inner-tag\">x</td>";
-    propertiesDiv += "<td class=\"inner-value\"><input id=\"lower-corner-x\" value="+floorProperty.lowerCorner[0]+"></td></tr>";
-    propertiesDiv += "<tr><td class=\"inner-tag\">y</td><td class=\"inner-value\"><input id=\"lower-corner-y\" value="+floorProperty.lowerCorner[1]+"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\" rowspan=\"2\">Upper<br>Right<br>Corner</td>";
-    propertiesDiv += "<td class=\"inner-tag\">x</td>";
-    propertiesDiv += "<td class=\"inner-value\"><input id=\"upper-corner-x\" value="+floorProperty.upperCorner[0]+"></td></tr>";
-    propertiesDiv += "<tr><td class=\"inner-tag\">y</td><td class=\"inner-value\"><input id=\"upper-corner-y\" value="+floorProperty.upperCorner[1]+"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">ground height</td><td class=\"value\"colspan=\"2\"><input id=\"ground-height-text\" type=\"text\" value=" + floorProperty.groundHeight + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">celing height</td><td class=\"value\"colspan=\"2\"><input id=\"celing-height-text\" type=\"text\" value=" + floorProperty.celingHeight + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">door height</td><td class=\"value\"colspan=\"2\"><input id=\"door-height-text\" type=\"text\" value=" + floorProperty.doorHeight + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"colspan=\"2\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + floorProperty.description + "</textarea></td></tr>";
-    propertiesDiv += "<br>";
-    propertiesDiv += "<tr><td colspan=\"3\"><button class=\"submit-btn\"  id=\"property-subimt-btn\">submit</button></td></tr></table>";
+    var propertiesDiv = "<table id=\"property-table\" data-type=\"floor\" class=\"property-table ui compact table inverted \">";
+    propertiesDiv += this.getBasicTr('id', 'id', floorProperty.id, true);
+    propertiesDiv += this.getBasicTr('name', 'name', floorProperty.name, false);
+    propertiesDiv += this.getBasicTr('layer', 'layer', floorProperty.layer, false);
+
+    propertiesDiv += "<tr><td class=\"title\" >Lower<br>Left<br>Corner</td>";
+    propertiesDiv += "<td><table>" + this.getBasicTr('lower-corner-x', 'x', floorProperty.lowerCorner[0], false);
+    propertiesDiv += this.getBasicTr('lower-corner-y', 'y', floorProperty.lowerCorner[1], false) + "</table></td></tr>";
+
+    propertiesDiv += "<tr><td class=\"title\" >Upper<br>Right<br>Corner</td>";
+    propertiesDiv += "<td><table>" + this.getBasicTr('upper-corner-x', 'x', floorProperty.upperCorner[0], false);
+    propertiesDiv += this.getBasicTr('upper-corner-y', 'y', floorProperty.upperCorner[1], false) + "</table></td></tr>";
+
+    propertiesDiv += this.getBasicTr('ground-height', 'floor height', floorProperty.groundHeight, false);
+    propertiesDiv += this.getBasicTr('celing-height', 'wall height', floorProperty.celingHeight, false);
+    propertiesDiv += this.getBasicTr('door-height', 'door height', floorProperty.doorHeight, false);
+    propertiesDiv += this.getDescString(floorProperty.description);
+
+    propertiesDiv += "</table>";
+
+    propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
+
 
     var divs = {
       "cavas": canvasDiv,
@@ -108,67 +137,70 @@ define([], function() {
 
     propertyLayout.init();
 
-    // event binding
-    document.getElementById('floorplan-file').addEventListener('change', function(event) {
+    function bindEvent(id, action, type){
+      document.getElementById(id).addEventListener(action, function(event) {
+        window.eventHandler.callHandler(type, event);
+      });
+    }
 
-      window.eventHandler.callHandler('file', event);
+    bindEvent('floorplan-file', 'change', 'file');
+    bindEvent('add-new-local-desc-btn', 'click', 'html');
+    bindEvent('copyfloor-btn', 'click', 'html');
+    bindEvent('property-subimt-btn', 'click', 'html');
 
-    });
-
-    // event binding
-    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
-
-      window.eventHandler.callHandler('html', event);
-
-    });
-
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
   }
 
   /**
-  * @memberof Property
-  */
+   * @memberof Property
+   */
   Property.prototype.setViewWithRef = function(config, property, type) {
 
     $('#property-container').empty();
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
-    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + property.description + "</textarea></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">external ref</td><td class=\"value\"><select id=\"externalRef-text\" style=\"width: 100%;\">";
+    var propertiesDiv = "<table id=\"property-table\" data-type=" + type + " class=\"property-table ui compact table inverted \">";
+    propertiesDiv += this.getBasicTr('id', 'id', property.id, true);
+    propertiesDiv += this.getBasicTr('name', 'name', property.name, false);
+    propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != ""? property.duality:'none', true);
+    propertiesDiv += this.getDropDownTr('externalRef-text', 'external ref', property.externalReference);
+    propertiesDiv += this.getDropDownTr('partialboundedBy-text', 'partial-<br>bounded<br>by', property.partialboundedBy);
+    propertiesDiv += this.getDescString(property.description);
 
-    for (var key in property.externalReference) {
-      var value = property.externalReference[key];
-      propertiesDiv += "<option value=\"" + value + "\">" + value + "</option>";
-    }
-
-    propertiesDiv += "</select></td></tr>";
-
-    propertiesDiv += "<tr><td class=\"title\">partial-<br>bounded<br>by</td><td class=\"value\"><select id=\"partialboundedBy-text\" style=\"width: 100%;\">";
-
-    for (var key in property.partialboundedBy) {
-      var value = property.partialboundedBy[key];
-      propertiesDiv += "<option value=\"" + value + "\"></option>";
-    }
-
-    propertiesDiv += "</select></td></tr>";
-
-    propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
     propertiesDiv += "</table>";
+    propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
 
 
     // ref tab
-    var refDiv = "<table id=\"property-ref-table\" type=\"ref\" class=\"property-table\">";
+    var refDiv = "<table id=\"property-ref-table\" data-type=" + type + " class=\"property-table ui compact table inverted\">";
     refDiv += "<tr><td class=\"title\">ref</td><td class=\"value\"><input id=\"ref-text\" type=\"text\"></td></tr>";
-    refDiv += "<tr><td colspan=\"2\"><button class=\"submit-btn\"  id=\"property-ref-submit-btn\">submit</button></td></tr>";
     refDiv += "</table>";
+    refDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-ref-submit-btn\">Submit</div>";
+
+
+    // navi tab
+    var naviDiv = "<table id=\"property-navi-table\" data-type=" + type + " class=\"property-table ui compact table inverted\">";
+    log.info(property.naviType);
+    naviDiv += this.getDropDownTr('navi-text', 'Navi Type', [property.naviType, "NavigableSpace", "GeneralSpace", "TransferSpace", "TransitionSpace"]);
+    if (property.naviType != "") {
+      naviType += this.getBasicTr('class', 'class', property.navi.class, false);
+      naviType += this.getBasicTr('function', 'function', property.navi.function, false);
+      naviType += this.getBasicTr('usage', 'usage', property.navi.usage, false);
+    }
+
+    naviDiv += "</table>";
+    naviDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-navi-submit-btn\">Submit</div>";
 
     var divs = {
       "properties": propertiesDiv,
-      "ref": refDiv
+      "ref": refDiv,
+      "navi": naviDiv
     };
 
 
@@ -181,51 +213,81 @@ define([], function() {
     propertyLayout.init();
 
     // event binding
-    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    function bindEvent(id, action, type){
+      document.getElementById(id).addEventListener(action, function(event) {
+        window.eventHandler.callHandler(type, event);
+      });
+    }
 
-    document.getElementById('property-ref-submit-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    bindEvent('property-subimt-btn', 'click', 'html');
+    bindEvent('property-ref-submit-btn', 'click', 'html');
+    bindEvent('property-navi-submit-btn', 'click', 'html');
+    bindEvent('navi-text', 'click', 'html');
+    bindEvent('add-new-local-desc-btn', 'click', 'html');
+
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
+
+
   }
 
+
+
   /**
-  * @memberof Property
-  */
+   * @memberof Property
+   */
   Property.prototype.setCellBoundaryView = function(config, property, type) {
 
     $('#property-container').empty();
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
-    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + property.description + "</textarea></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">external ref</td><td class=\"value\"><select id=\"externalRef-text\" style=\"width: 100%;\">";
+    var propertiesDiv = "<table id=\"property-table\" data-type=" + type + " class=\"property-table ui compact table inverted \">";
+    propertiesDiv += this.getBasicTr('id', 'id', property.id, true);
+    propertiesDiv += this.getBasicTr('name', 'name', property.name, false);
+    propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != ""? property.duality:'none', true);
+    propertiesDiv += this.getDropDownTr('externalRef-text', 'external ref', property.externalReference);
+    propertiesDiv += this.getDescString(property.description);
 
-    for (var key in property.externalReference) {
-      var value = property.externalReference[key];
-      propertiesDiv += "<option value=\"" + value + "\">" + value + "</option>";
-    }
-
-    propertiesDiv += "</select></td></tr>";
-
-    propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
     propertiesDiv += "</table>";
+    propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
+
 
 
     // ref tab
-    var refDiv = "<table id=\"property-ref-table\" type=\"ref\" class=\"property-table\">";
+    var refDiv = "<table id=\"property-ref-table\" data-type=\"ref\" class=\"property-table\">";
     refDiv += "<tr><td class=\"title\">ref</td><td class=\"value\"><input id=\"ref-text\" type=\"text\"></td></tr>";
     refDiv += "<tr><td colspan=\"2\"><button class=\"submit-btn\"  id=\"property-ref-submit-btn\">submit</button></td></tr>";
     refDiv += "</table>";
 
+    // navi tab
+    var naviDiv = "<table id=\"property-navi-table\" data-type=\"navi\" class=\"property-table\">";
+    naviDiv += "<tr><td class=\"title\">Navi Type</td><td class=\"value\"><select id=\"navi-text\" style=\"width: 80%;\" data-pre=" + property.naviType + ">";
+    naviDiv += "<option value=" + property.naviType + " selected>" + property.naviType + "</option>";
+    naviDiv += "<option value=\"NavigableBoundary\">NavigableSpace</option>";
+    naviDiv += "<option value=\"GeneralSpace\">GeneralSpace</option>";
+    naviDiv += "<option value=\"ConnectionBoundary\">TransferSpace</option>";
+    naviDiv += "<option value=\"AnchorBoundary\">TransitionSpace</option>";
+    naviDiv += "</select></td></tr>";
+
+    if (property.naviType != "") {
+      naviDiv += "<tr><td class=\"title\">class</td><td class=\"value\"><input id=\"class-text\" type=\"text\" value=" + property.navi.class + "></td></tr>";
+      naviDiv += "<tr><td class=\"title\">function</td><td class=\"value\"><input id=\"function-text\" type=\"text\" value=" + property.navi.function+"></td></tr>";
+      naviDiv += "<tr><td class=\"title\">usage</td><td class=\"value\"><input id=\"usage-text\" type=\"text\" value=" + property.navi.usage + "></td></tr>";
+    }
+
+    naviDiv += "</table>";
+    naviDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-navi-submit-btn\">Submit</div>";
+
+
     var divs = {
       "properties": propertiesDiv,
-      "ref": refDiv
+      "ref": refDiv,
+      "navi": naviDiv
     };
 
 
@@ -238,13 +300,25 @@ define([], function() {
     propertyLayout.init();
 
     // event binding
-    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    function bindEvent(id, action, type){
+      document.getElementById(id).addEventListener(action, function(event) {
+        window.eventHandler.callHandler(type, event);
+      });
+    }
 
-    document.getElementById('property-ref-submit-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    bindEvent('property-subimt-btn', 'click', 'html');
+    bindEvent('property-ref-submit-btn', 'click', 'html');
+    bindEvent('property-navi-submit-btn', 'click', 'html');
+    bindEvent('navi-text', 'click', 'html');
+    bindEvent('add-new-local-desc-btn', 'click', 'html');
+
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
+
   }
 
 
@@ -324,6 +398,15 @@ define([], function() {
             componentState: {
               id: 'ref'
             }
+          },
+          {
+            type: 'component',
+            componentName: 'property-component',
+            title: 'navi',
+            isClosable: false,
+            componentState: {
+              id: 'navi'
+            }
           }
         ]
       }]
@@ -365,6 +448,15 @@ define([], function() {
             isClosable: false,
             componentState: {
               id: 'ref'
+            }
+          },
+          {
+            type: 'component',
+            componentName: 'property-component',
+            title: 'navi',
+            isClosable: false,
+            componentState: {
+              id: 'navi'
             }
           }
         ]
@@ -409,9 +501,9 @@ define([], function() {
   }
 
   /**
-  * @memberof Property
-  */
-  Property.prototype.setStateyView = function(config, property, type){
+   * @memberof Property
+   */
+  Property.prototype.setStateyView = function(config, property, type) {
 
     // id, name, desc, duality, connects[]
 
@@ -419,23 +511,35 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#protperty-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
-    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + property.description + "</textarea></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">connects</td><td class=\"value\"><select id=\"connects-text\" style=\"width: 100%;\">";
-
-    for (var key in property.connects) {
-      var value = property.connects[key];
-      propertiesDiv += "<option value=\"" + value + "\">" + value + "</option>";
-    }
-
-    propertiesDiv += "</select></td></tr>";
-    propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
+    var propertiesDiv = "<table id=\"property-table\" data-type=\"state\" class=\"property-table ui compact table inverted \">";
+    propertiesDiv += this.getBasicTr('id', 'id', property .id, true);
+    propertiesDiv += this.getBasicTr('name', 'name', property .name, false);
+    propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != ""? property.duality:'none', true);
+    propertiesDiv += this.getBasicTr('height', 'height', property.height, false);
+    propertiesDiv += this.getDropDownTr('connects-text', 'connects', property.connects);
+    propertiesDiv += this.getDescString(property.description);
     propertiesDiv += "</table>";
 
+    propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
+
     this.setView(config, propertiesDiv);
+
+    // event binding
+    function bindEvent(id, action, type){
+      document.getElementById(id).addEventListener(action, function(event) {
+        window.eventHandler.callHandler(type, event);
+      });
+    }
+
+    bindEvent('property-subimt-btn', 'click', 'html');
+    bindEvent('add-new-local-desc-btn', 'click', 'html');
+
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
 
   }
 
@@ -503,33 +607,46 @@ define([], function() {
 
     var projectProperty = storage.propertyContainer.getElementById('project', id);
 
-    var divContent = "<table id=\"property-table\" type=\"project\" class=\"property-table\">";
-    divContent += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + projectProperty.id + " disabled></td></tr>";
-    divContent += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + projectProperty.name + " ></td></tr>";
-    divContent += "<tr><td class=\"title\">date</td><td class=\"value\"><input id=\"date-text\" type=\"text\" value=" + projectProperty.date + " disabled></td></tr>";
-    divContent += "<tr><td class=\"title\">author</td><td class=\"value\"><input id=\"author-text\" type=\"text\" value=" + projectProperty.author + " ></td></tr>";
-    divContent += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + projectProperty.description + "</textarea></td></tr>";
-    divContent += "<br><tr><td colspan=\"2\"><button class=\"submit-btn\" id=\"property-subimt-btn\">submit</button></td></tr></table>";
+    var divContent = "<table id=\"property-table\" data-type=\"project\" class=\"ui inverted table property-table\">";
+    divContent += this.getBasicTr('id', 'id', projectProperty.id, true);
+    divContent += this.getBasicTr('name', 'name', projectProperty.name, false);
+    divContent += this.getBasicTr('date', 'date', projectProperty.date, false);
+    divContent += this.getBasicTr('author', 'author', projectProperty.author, false);
+    divContent += this.getDescString(projectProperty.description);
+    divContent += "</table>";
+    divContent += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
 
     this.setView(config, divContent);
 
     // event binding
-    document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
-    });
+    function bindEvent(id, action, type){
+      document.getElementById(id).addEventListener(action, function(event) {
+        window.eventHandler.callHandler(type, event);
+      });
+    }
+
+    bindEvent('property-subimt-btn', 'click', 'html');
+    bindEvent('add-new-local-desc-btn', 'click', 'html');
+
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
 
   }
 
   /**
-  * @memberof Property
-  */
-  Property.prototype.clear = function(){
+   * @memberof Property
+   */
+  Property.prototype.clear = function() {
 
     document.getElementById('property-container').innerHTML = "";
 
   }
 
-  Property.prototype.setTransitionView = function(config, property, type){
+  Property.prototype.setTransitionView = function(config, property, type) {
 
     // id, name, description, weight, connects, duality, isInterLayerConnetion
 
@@ -537,30 +654,147 @@ define([], function() {
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    log.inof
-
-    var propertiesDiv = "<table id=\"property-table\" type=" + type + " class=\"property-table\">";
-    propertiesDiv += "<tr><td class=\"title\">id</td><td class=\"value\"><input id=\"id-text\" type=\"text\" value=" + property.id + " disabled></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">name</td><td class=\"value\"><input id=\"name-text\" type=\"text\" value=" + property.name + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">desc</td><td class=\"value\"><textarea id=\"description-text\" rows=\"4\" cols=\"21\">" + property.description + "</textarea></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">duality</td><td class=\"value\"><input id=\"duality-text\" type=\"text\" disabled value=" + property.duality + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">weight</td><td class=\"value\"><input id=\"weight-text\" type=\"text\" value=" + property.weight + "></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">connects</td><td class=\"value\"><input id=\"connects-text\" type=\"text\" disabled value=\""+ property.getConncetsString() + "\"></td></tr>";
-    propertiesDiv += "<tr><td class=\"title\">is stair</td><td class=\"value\"><input id=\"stair-text\" type=\"checkbox\" disabled ";
-
-    if( property.isStair.tf ){
-      // propertiesDiv += "checked value =" + property.isStair.connection[0] + " + \"-\" + "+ property.isStair.connection[1];
-      propertiesDiv += "checked> <label for=\"stair-text\">" + property.isStair.connection[0] + " - "+ property.isStair.connection[1]+"</label";
-    }
-
-    propertiesDiv += "></td></tr>";
-    propertiesDiv += "<tr><td colspan=\"2\"><button id=\"property-subimt-btn\" class=\"submit-btn\" >submit</button></td></tr></table>";
+    var propertiesDiv = "<table id=\"property-table\" data-type=\"transition\" class=\"property-table ui compact table inverted \">";
+    propertiesDiv += this.getBasicTr('id', 'id', property .id, true);
+    propertiesDiv += this.getBasicTr('name', 'name', property .name, false);
+    propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != ""? property.duality:'none', true);
+    propertiesDiv += this.getBasicTr('weight', 'weight', property .weight, false);
+    propertiesDiv += this.getBasicTr('connects', 'connects', "\"" + property.getConncetsString() +"\"", true);
+    propertiesDiv += this.getDescString(property.description);
     propertiesDiv += "</table>";
+
+    propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
 
     this.setView(config, propertiesDiv);
 
+    // event binding
+    function bindEvent(id, action, type){
+      document.getElementById(id).addEventListener(action, function(event) {
+        window.eventHandler.callHandler(type, event);
+      });
+    }
+
+    bindEvent('property-subimt-btn', 'click', 'html');
+    bindEvent('add-new-local-desc-btn', 'click', 'html');
+
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
+
   }
 
+
+  Property.prototype.setInterLayerConnectionProperty = function(id, storage) {
+
+    var config = {
+      settings: {
+        showPopoutIcon: false,
+        showMaximiseIcon: false,
+        showCloseIcon: false
+      },
+      content: [{
+        type: 'stack',
+        content: [{
+          type: 'component',
+          componentName: 'property-component',
+          title: 'properties',
+          isClosable: false,
+          componentState: {
+            id: 'propertiesProper'
+          }
+        }]
+      }]
+    };
+
+    this.setInterLayerView(config, storage.propertyContainer.getElementById('interlayerConnection', id), 'interlayerConnection');
+  }
+
+  Property.prototype.setInterLayerView = function(config, property, type) {
+
+    $('#property-container').empty();
+
+    var propertyLayout = new GoldenLayout(config, $('#property-container'));
+
+    var propertiesDiv = "<table id=\"property-table\" type=\"floor\" class=\"property-table ui compact table inverted \">";
+    propertiesDiv += this.getBasicTr('id', 'id', property .id, true);
+    propertiesDiv += this.getBasicTr('interConnects', 'inter\nConnects', "\"" + property.getInterConnectsString() + "\"", true);
+    propertiesDiv += this.getBasicTr('connectedLayer', 'connected\nLayer', "\"" +  property.getConnectedLayerString() + "\"", true);
+    propertiesDiv += this.getDropDownTr('topoExpression-text', 'Topo\nExpression', [property.typeOfTopoExpression, 'CONTAINS', 'OVERLAPS', 'EQUALS', 'WITHIN', 'CROSSES', 'INTERSECTS']);
+
+    propertiesDiv += this.getDescString(property.commnet);
+    propertiesDiv += "</table>";
+    propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
+
+
+    this.setView(config, propertiesDiv);
+
+    document.getElementById('add-new-local-desc-btn').addEventListener('click', function(event) {
+      window.eventHandler.callHandler('html', event);
+    });
+
+    var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
+    for(var obj of deleteLocalDescIcons)
+      obj.addEventListener('click', function(event) {
+        event.target.id = 'delete-local-desc-btn';
+        window.eventHandler.callHandler('html', event);
+      });
+
+  }
+
+  Property.prototype.getDescString = function(desc) {
+    var num = Object.keys(desc).length;
+    var i = 0;
+    var descString = "";
+    descString += "<tr><td colspan=\"2\">Desc";
+    descString += "<div style=\"padding-left: .5rem;\">";
+    descString += "<table style=\"width:100%\">";
+
+    for (var key in desc) {
+      descString += "<tr>";
+      descString += "<td>"+key+"</td>";
+      descString += "<td><div class=\"ui transparent inverted input value\"><input type=\"text\" id=\"desc-text-" + key + "\" value=\"" + desc[key] + "\"></div></td>";
+      descString += "<td><i class=\"fitted trash alternate inverted icon delete-local-desc-icon\" data-key=" + key + "></i></td>";
+      descString += "<tr>";
+      i++;
+    }
+    descString += "</table><div class=\"ui divider\"></div>";
+    descString += "Add Local Desc";
+    descString += "<div class=\"ui transparent icon inverted input\"><input type=\"text\" id=\"add-new-local-desc-text\" placeHolder=\"New Desc...\"><button class=\"mini ui icon button\"><i id=\"add-new-local-desc-btn\" class=\"plus icon inverted\"></i></button>";
+    descString += "</div></div></td></tr>";
+
+    return descString;
+  }
+
+  Property.prototype.getBasicTr = function(id, title, value, disable){
+    var str = "<tr><td class=\"title\">"+title+"</td><td class=\"value\">";
+    str += "<div class=\"ui transparent inverted input\">";
+    str += "<input id=\""+id+"-text\" type=\"text\" value=" + value;
+
+    if(disable == true) str += " disabled";
+
+    str +="></div></td></tr>";
+    return str;
+  }
+
+  Property.prototype.getDropDownTr = function(id, title, itemData){
+
+    var str = "<tr><td class=\"title\">"+title+"</td><td class=\"value\">";
+    str += "<select class=\"ui compact selection dropdown\" id="+id+">";
+    for(var key in itemData){
+      if(key == 0) str += "<option value="+itemData[key]+" selected=\"\">"+itemData[key]+"</option>";
+      else str += "<option value="+itemData[key]+">"+itemData[key]+"</option>";
+    }
+    str +="</select></td></tr>";
+
+    return str;
+  }
+
+  Property.prototype.getDropDownSearchTr = function(id, title, itemData){
+
+  }
 
   return Property;
 });

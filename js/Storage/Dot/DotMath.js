@@ -274,5 +274,7 @@ define([], function() {
       var numerator = 0;
 
     }
+
+
   };
 });
