@@ -113,6 +113,10 @@ define([
 
   }
 
+  TransitionGroup.prototype.getObjects = function(){
+    return this.transitions;
+  }
+
 
 
   return TransitionGroup;

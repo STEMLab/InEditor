@@ -308,6 +308,20 @@ define([
     return false;
   }
 
+  CellBoundary.prototype.getWKT = function(){
+    var wkt = "LINESTRING (";
+
+    for (var i = 0; i < this.dots.length; i++) {
+      wkt += this.dots[i].point.x + " " + this.dots[i].point.y;
+
+      if( i != this.dots.length -1 ) wkt += ", ";
+    }
+
+    wkt += ")";
+
+    return wkt;
+  }
+
   return CellBoundary;
 
 });

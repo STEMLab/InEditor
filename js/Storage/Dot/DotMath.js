@@ -34,6 +34,21 @@ define([], function() {
     },
 
     /**
+     * @desc check the given
+     */
+    isClockWise: function(dot1, dot2, dot3){
+      var A = this.getVector(dot1, dot2);
+      var B = this.getVector(dot2, dot3);
+
+      A['z'] = 0; B['z'] = 0;
+      var cross = this.crossProduct(A, B);
+      if(cross.z > 0 )log.info("hi")
+      if(cross.z > 0 ) return 1; // counterclockwise
+      else if(cross.z < 0) return -1; // clockwise
+      else return 0;
+    },
+
+    /**
      * @desc return vector(dot1 -> dot2)
      */
     getVector: function(dot1, dot2) {

@@ -5,11 +5,13 @@
 define([
   "../PubSub/Subscriber.js",
   "../Conditions.js",
-  "../Storage/Canvas/Stage.js"
+  "../Storage/Canvas/Stage.js",
+  "../UI/ContextMenu.js"
 ], function(
   Subscriber,
   Conditions,
-  Stage
+  Stage,
+  ContextMenu
 ) {
   'use strict';
 
@@ -183,132 +185,7 @@ define([
     var floorId = newFloorProperty.id;
 
     // bind right click event
-    var menu = new BootstrapMenu('#' + floorId, {
-      fetchElementData: function() {
-        var selectedObj = window.broker.getManager('addnewhole', 'GeometryManager').isObjectSelected(floorId);
-
-        return {
-          type: selectedObj.type,
-          id: selectedObj.result,
-          floor: floorId
-        }
-      },
-      actions: function(data) {
-        return makeMenus({
-          type: 'floor',
-          id: [floorId],
-          floor: floorId
-        });
-      }()
-    });
-
-    function makeMenus(data) {
-      var menus = [];
-      for (var i = 0; i < data.id.length; i++) {
-        menus = menus.concat(makeOneMenu({
-          type: data.type,
-          id: data.id[i],
-          floor: data.floor
-        }));
-      }
-      return menus;
-    }
-
-    function makeOneMenu(data) {
-      return [{
-          name: function(data) {
-            return '<b>' + data.id + '</b>'
-          }
-        },
-        {
-          name: 'Edit Properties',
-          iconClass: 'fa-pencil',
-          onClick: function(data) {
-            window.uiContainer.sidebar.property.setPropertyTab(data.type, data.id, window.storage)
-          }
-        },
-        {
-          name: 'Delete',
-          iconClass: 'fa-trash-o',
-          onClick: function(data) {
-            var msg;
-            switch (data.type) {
-              case 'floor':
-                if (window.broker.isPublishable('deletefloor'))
-                  window.broker.publish({
-                    req: 'deletefloor',
-                    reqObj: {
-                      floor: data.floor
-                    }
-                  });
-                break;
-              case 'cell':
-                if (window.broker.isPublishable('deletecell'))
-                  window.broker.publish({
-                    req: 'deletecell',
-                    reqObj: {
-                      floor: data.floor,
-                      id: data.id
-                    }
-                  });
-                break;
-              case 'cellboundary':
-                if (window.broker.isPublishable('deletecellboundary'))
-                  window.broker.publish({
-                    req: 'deletecellboundary',
-                    reqObj: {
-                      floor: data.floor,
-                      id: data.id
-                    }
-                  });
-                break;
-              case 'transition':
-                if (window.broker.isPublishable('deletetransition'))
-                  window.broker.publish({
-                    req: 'deletetransition',
-                    reqObj: {
-                      floor: data.floor,
-                      id: data.id
-                    }
-                  });
-                break;
-              case 'state':
-                if (window.broker.isPublishable('deletestate'))
-                  window.broker.publish({
-                    req: 'deletestate',
-                    reqObj: {
-                      floor: data.floor,
-                      id: data.id[0]
-                    }
-                  });
-                break;
-              default:
-            }
-          }
-        },
-        {
-          name: 'Rotate slant',
-          iconClass: 'fa-repeat',
-          isShown: function(data) {
-            if (data.type == 'cell') {
-              var cellGeo = window.storage.geometryContainer.getElementById('cell', data.id[0]);
-              if (cellGeo.slant != null) return true;
-              else return false;
-            } else return false;
-          },
-          onClick: function(data) {
-            if (window.broker.isPublishable('rotateslant'))
-              window.broker.publish({
-                req: 'rotateslant',
-                reqObj: {
-                  floor: data.floor,
-                  id: data.id[0]
-                }
-              });
-          }
-        }
-      ];
-    }
+    ContextMenu.bindContextMenu(floorId);
 
   }
 
@@ -710,8 +587,8 @@ define([
     window.uiContainer.sidebar.treeview.init();
     window.conditions.automGenerateState = false;
     window.conditions.LAST_FLOOR_ID_NUM = 0;
-    window.coordinateThreshold = 0.0000000001;
-    window.snappingThreshold = 0.0000000001;
+      window.conditions.coordinateThreshold = 0.0000000001;
+    window.conditions.snappingThreshold = 0.0000000001;
 
     var floorId;
     var floorDic = {};

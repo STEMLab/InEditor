@@ -515,6 +515,54 @@
       return result;
     }
 
+
+    GeometryManager.prototype.isThisTypeObjectSeleted = function(type, floor){
+      var reader = new jsts.io.WKTReader();
+
+      var pointCoor = window.storage.canvasContainer.stages[floor].tmpLayer.group.cursor.coor;
+      var point = reader.read('POINT(' + pointCoor.x + ' ' + pointCoor.y + ')');
+
+      var objects;
+      if(type == 'cell') objects = window.storage.canvasContainer.stages[floor].cellLayer.group.getCells();
+      else if(type == 'cellBoundary') objects = window.storage.canvasContainer.stages[floor].cellBoundaryLayer.group.getObjects();
+      else if(type == 'transition') objects = window.storage.canvasContainer.stages[floor].transitionLayer.group.getObjects();
+      else if(type == 'state'){
+        var isDotExist = window.storage.dotFoolContainer.getDotFool(floor).getDotByPoint({
+          x: pointCoor.x,
+          y: pointCoor.y
+        });
+
+        if (isDotExist == null) return [];
+        else return [Object.keys(isDotExist.memberOf)[0]];
+      }
+
+      var result = [];
+
+      for(var o of objects){
+        var obj = reader.read(o.getWKT());
+        if(type == 'cellBoundary' || type == 'transition'){
+          if(point.distance(obj) < window.conditions.realSnappingThreshold) result.push(o.id);
+        }
+        else {
+          var intersection = point.intersection(obj).getCoordinates();
+          if (intersection.length != 0) result.push(o.id);
+        }
+      }
+
+      if(type == 'cell'){
+        var holes = window.storage.canvasContainer.stages[floor].cellLayer.group.getHoles();
+        for (var i in holes) {
+
+          var hole = reader.read(holes[i].getWKT());
+          var intersection = point.intersection(hole).getCoordinates();
+          if (intersection.length != 0 && result.indexOf(holes[i].holeOf) != -1) result.splice(result.indexOf(holes[i].holeOf), 1);
+
+        }
+      }
+
+      return result;
+    }
+
     /**
      * @memberof GeometryManager
      */
@@ -531,6 +579,15 @@
       else return [Object.keys(isDotExist.memberOf)[0]];
     }
 
+    GeometryManager.prototype.isTransitionSeleted = function(floor){
+      var reader = new jsts.io.WKTReader();
+
+      var pointCoor = window.storage.canvasContainer.stages[floor].tmpLayer.group.cursor.coor;
+      var point = reader.read('POINT(' + pointCoor.x + ' ' + pointCoor.y + ')');
+
+      var transitions = window.storage.canvasContainer.stages[floor].transitionLayer.group.getTransitions();
+    }
+
     /**
      * @memberof GeometryManager
      */
@@ -538,17 +595,34 @@
       var manager = window.broker.getManager("end-addnewcell", "GeometryManager");
 
       var type = 'state';
-      var result = manager.isStateSelected(floor);
+      var result = manager.isThisTypeObjectSeleted(type, floor);
 
       if (result.length == 0) {
-        result = manager.isCellSelected(floor);
+        type = 'transition';
+        result = manager.isThisTypeObjectSeleted(type, floor);
+      }
+
+      if (result.length == 0) {
+        type = 'cellBoundary';
+        result = manager.isThisTypeObjectSeleted(type, floor);
+      }
+
+      if (result.length == 0) {
         type = 'cell';
+        result = manager.isThisTypeObjectSeleted(type, floor);
       }
 
       if (result.length == 0) {
         result = [floor]
         type = 'floor';
       }
+
+      // if (result.length == 0) {
+      //   result = manager.isCellSelected(floor);
+      //   type = 'cell';
+      // }
+      //
+
 
       return {
         result: result,
@@ -593,15 +667,19 @@
       tmpObj.id = reqObj.id;
       tmpObj.name = reqObj.id;
 
+      var v1 = DotMath.getVector(tmpObj.dots[0], tmpObj.dots[1]);
+      v1['z'] = 0;
+      var v2 = DotMath.getVector(tmpObj.dots[1], tmpObj.dots[2]);
+      v2['z'] = 0;
+      var crossProduct = DotMath.crossProduct(v1, v2);
+      if(crossProduct.z > 0) tmpObj.dots.reverse();
+
       // add cell to canvasContainer using tmpObj
       window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.addHole(
         tmpObj
       );
 
-      // fragmenteGeometry
-
       // set corner to invisible
-      log.info(window.storage.canvasContainer.stages[reqObj.floor].cellLayer);
       var obj =
         window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.holes[
           window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group

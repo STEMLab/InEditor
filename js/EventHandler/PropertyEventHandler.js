@@ -196,7 +196,7 @@ define([
         }
 
         break;
-      case 'transiton':
+      case 'transition':
         result = {
           'name': document.getElementById("name-text").value,
           'weight': document.getElementById("weight-text").value,

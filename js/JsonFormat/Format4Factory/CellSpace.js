@@ -88,6 +88,20 @@ define([
 
   }
 
+  CellSpace.prototype.getWKT = function(type){
+    var coor = this.geometry.coordinates[0];
+    var wkt = "POLYGON ((";
+
+    for (var i = 0; i < coor.length; i++) {
+      wkt += coor[i][0] + " " + coor[i][1] + " " + coor[i][2];
+
+      if (i != coor.length - 1) wkt += ",";
+    }
+
+    wkt += coor[0][0] + " " + coor[0][1] + " " + coor[0][2] + "))";
+    return wkt;
+  }
+
   /**
    * @memberof Fromat4Factory.CellSpace
    * @param Array coor array of coordinates
@@ -398,9 +412,8 @@ define([
   CellSpace.prototype.addHole = function(surfaces, type) {
 
     if(type == '3D') this.addSolidHole(surfaces);
-    else if(type == '2D'){
-
-    } else {
+    else if(type == '2D') this.addSurfaceHole(surfaces);
+    else {
       log.error('JsonFormat.Format4Factory.CellSpace.addHole :: wrong type ' + type + ' inserted.');
     }
 
@@ -411,8 +424,18 @@ define([
    */
   CellSpace.prototype.addSolidHole = function(solid) {
     for(var s of solid){
+      for(var surface of s) {
+        surface[0][0].reverse();
+      }
       this.geometry.coordinates.push(s);
     }
+  }
+
+  /**
+   * @memberof Fromat4Factory.CellSpace
+   */
+  CellSpace.prototype.addSurfaceHole = function(surface) {
+    this.geometry.coordinates.push(surface);
   }
 
   /**

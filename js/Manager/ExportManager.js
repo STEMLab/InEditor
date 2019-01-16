@@ -6,12 +6,14 @@ define([
   "../PubSub/Subscriber.js",
   "../JsonFormat/FeatureFactory4Factory.js",
   "../JsonFormat/FeatureFactory4Viewer.js",
-  "../Storage/Dot/Dot.js"
+  "../Storage/Dot/Dot.js",
+  "../Storage/Dot/DotMath.js"
 ], function(
   Subscriber,
   FeatureFactory4Factory,
   FeatureFactory4Viewer,
-  Dot
+  Dot,
+  DotMath
 ) {
   'use strict';
 
@@ -434,6 +436,10 @@ define([
     var spaceLayer = manager.spaceLayer4Factory(document.id, spaceLayers.id);
     var cells = manager.cellObj4VFactory(document.id, primalspacefeatures.id, transDots);
     var cellBoundaries = manager.cellBoundaryObj4VFactory(document.id, primalspacefeatures.id, transDots);
+
+    // tmp(190114)
+    // manager.renameCellBoundary(cells.cell, cellBoundaries);
+
     var nodes = manager.nodes4Factory(document.id, spaceLayer);
     var edges = manager.edges4Factory(document.id, spaceLayer);
     var states = manager.stateObj4Factory(document.id, nodes, transDots);
@@ -852,6 +858,23 @@ define([
 
     }
 
+    function isCCW(coor){
+      var wkt = "POLYGON ((";
+
+      for (var i = 0; i < coor.length; i++) {
+        wkt += coor[i][0] + " " + coor[i][1] + " " + coor[i][2];
+
+        if (i != coor.length - 1) wkt += ",";
+      }
+
+      wkt += coor[0][0] + " " + coor[0][1] + " " + coor[0][2] + "))";
+
+      var reader = new jsts.io.WKTReader();
+      var c = reader.read(wkt);
+
+      return jsts.algorithm.Orientation.isCCW(c.getCoordinates());
+    }
+
     // pixel to real world coordinates
     for (var floorKey in floorProperties) {
       var cellkeyInFloor = floorProperties[floorKey].cellKey;
@@ -859,7 +882,10 @@ define([
 
       for (var cellKey in cellkeyInFloor) {
         var cellId = cellkeyInFloor[cellKey];
+
         var coor = cells[cellId].getCoordinates()[0];
+        if(isCCW(coor)) coor.reverse();;
+
         if (geoType == '3D') {
           if (slantMap[cellId] == undefined) cells[cellId].setCoor(manager.extrudeCell(coor, floorProperties[floorKey].celingHeight * 1), '3D');
           else if (slantMap[cellId].direction == 'up')
@@ -882,14 +908,24 @@ define([
               floorProperties[floorKey].celingHeight * 1),
             '3D'
           );
-        } else if (geoType == '2D') cells[cellId].setCoor([coor], '2D');
+        } else if (geoType == '2D') {
+          coor.reverse();
+          cells[cellId].setCoor([coor], '2D');
+        }
+
 
 
         // add hole
         if (holeMap[cellId] != undefined) {
           for (var holeKey in holeMap[cellId]) {
-            if (geoType == '3D') cells[cellId].addHole(manager.extrudeCell(holeMap[cellId][holeKey], floorProperties[floorKey].celingHeight * 1), '3D');
-            else if (geoType == '2D') cells[cellId].addHole(holeMap[cellId][holeKey], '2D');
+
+            var holeCoor = holeMap[cellId][holeKey];
+            if(isCCW(holeCoor)) holeCoor.reverse();
+
+            if (geoType == '3D') cells[cellId].addHole(manager.extrudeCell(holeCoor, floorProperties[floorKey].celingHeight * 1), '3D');
+            else if (geoType == '2D') {
+              cells[cellId].addHole(holeCoor, '2D');
+            }
           }
         }
 
@@ -979,7 +1015,8 @@ define([
         reverseObj.copy(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]]);
         reverseObj.setId(reverseObj.id + '-REVERSE');
         reverseObj.setGeometryId(reverseObj.geometry.properties.id + '-REVERSE');
-        reverseObj.setName(reverseObj.properties.name + '-REVERSE')
+        // reverseObj.setName(reverseObj.properties.name + '-REVERSE');
+        reverseObj.setName(reverseObj.properties.name);
         reverseObj.reverseCoor();
         reverseObj.reverseDuality();
         cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'] = reverseObj;
@@ -1224,6 +1261,14 @@ define([
     var up = [];
     var surfaces = [];
 
+    // check down is now clockwise
+    // var dot1 = {point: { x: down[0][0], y: down[0][1]}};
+    // var dot2 = {point: { x: down[1][0], y: down[1][1]}};
+    // var dot3 = {point: { x: down[2][0], y: down[2][1]}};
+    // if(DotMath.isClockWise(dot1, dot2, dot3) == 1)
+    //   down.reverse();
+
+    // set up
     for (var i = 0; i < down.length; i++) {
 
       //validation
@@ -1239,7 +1284,7 @@ define([
     }
 
     surfaces.push([
-      [down]
+      [up]
     ]);
 
     for (var i = 0; i < down.length - 1; i++) {
@@ -1257,8 +1302,11 @@ define([
 
     }
 
+    // rotate down surface
+    down.reverse();
+
     surfaces.push([
-      [up]
+      [down]
     ]);
 
     return [surfaces];
@@ -1342,6 +1390,8 @@ define([
       down[downToUpIndex[i]] = up[downToUpIndex[i]];
     }
 
+    down.reverse();
+
     surfaces.push([
       [down]
     ]);
@@ -1372,10 +1422,6 @@ define([
       tmp[2] += ch;
       up.push(tmp);
     }
-
-    surfaces.push([
-      [down]
-    ]);
 
     var upToDownIndex = [];
     var flag = false;
@@ -1432,9 +1478,10 @@ define([
 
     }
 
-    surfaces.push([
-      [up]
-    ]);
+    down.reverse();
+
+    surfaces.push([[down]]);
+    surfaces.push([[up]]);
 
     return [surfaces];
   }
@@ -1532,6 +1579,47 @@ define([
 
   }
 
+  ExportManager.prototype.renameCellBoundary = function(cells, cellBoundaries){
+    log.info('renameCellBoundary !!' , cells, cellBoundaries);
+
+    var cbo = {} ,co = {};
+    for(var c of cells) co[c.properties.name] = c;
+    for(var cb of cellBoundaries) cbo[cb.id] = cb;
+
+    function getReverseName(str){
+      if(str.indexOf('REVERSE') == -1) return str += '-REVERSE';
+      else return str.substr(0, str.indexOf('-REVERSE'));
+    }
+
+    function isPartOfPBB(pbb, bid){
+      if(pbb === undefined) return false;
+      for(var i of pbb) if(i === bid) return true;
+      return false;
+    }
+
+    for(var key in cbo){
+      var cb = cbo[key];
+      var cbname = cb.properties.name;
+      var cname = cbname.substring(cbname.indexOf('C'), cbname.indexOf('-') == -1 ? cbname.length : cbname.indexOf('-'));
+      var post = "", postr = "";
+
+      if(co[cname] != undefined && isPartOfPBB(co[cname].properties.partialboundedBy, cb.id)){
+        post = 'I';
+        postr = 'E';
+      }
+      else if(co[cname] != undefined && isPartOfPBB(co[cname].properties.partialboundedBy, getReverseName(cb.id))){
+        post = 'E';
+        postr = 'I';
+      }
+
+      cb.properties.name += post;
+      cbo[getReverseName(cb.id)].properties.name += postr;
+      delete cbo[cb.id];
+      delete cbo[getReverseName(cb.id)];
+    }
+
+    log.info(cells, cellBoundaries);
+  }
 
   return ExportManager;
 });
