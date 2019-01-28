@@ -208,8 +208,10 @@ define([
     this.reqSpecList['addlocaldesc'] = new MessageSpec('single', 'inclunding', null, false);
     this.reqSpecList['deletelocaldesc'] = new MessageSpec('single', 'inclunding', null, false);
 
-    this.reqSpecList['addcellsfromgml'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['addcellboundariesfromgml'] = new MessageSpec('single', 'inclunding', null, false);
+    // this.reqSpecList['addcellsfromgml'] = new MessageSpec('single', 'including', null, false);
+    // this.reqSpecList['addcellboundariesfromgml'] = new MessageSpec('single', 'inclunding', null, false);
+    this.reqSpecList['addobjectfromgml'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['addproeprtydatafromgml'] = new MessageSpec('single', 'including', null ,false);
   }
 
   /**

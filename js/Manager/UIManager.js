@@ -99,12 +99,7 @@ define([
     this.addCallbackFun('deletedesclist', this.deleteDescList);
     this.addCallbackFun('addlocaldesc', this.setPropertyView);
     this.addCallbackFun('deletelocaldesc', this.setPropertyView);
-
-    this.addCallbackFun("addcellsfromgml", this.addCellsFromGML);
-    this.addCallbackFun('addcellboundariesfromgml', this.addCellBoundariesFromGML);
-
-
-
+    
   }
 
   /**
@@ -1090,28 +1085,6 @@ define([
 
     // update property tab
     window.uiContainer.sidebar.property.setPropertyTab($('#property-table').data('type'), $('#id-text').val(), window.storage);
-  }
-
-  UIManager.prototype.addCellsFromGML = function(reqObj){
-
-    for(var cell of reqObj.data){
-      // set sidebar > property
-      window.uiContainer.sidebar.property.setPropertyTab('cell', cell.id, window.storage);
-
-      // refresh tree view
-      window.uiContainer.sidebar.treeview.addCell(cell.id, reqObj.floor);
-    }
-  }
-
-  UIManager.prototype.addCellBoundariesFromGML = function(reqObj){
-
-    for(var cb of reqObj.data){
-      // set sidebar > propertyContainer
-      window.uiContainer.sidebar.property.setPropertyTab('cellBoundary', cb.id, window.storage);
-
-      // refresh tree view
-      window.uiContainer.sidebar.treeview.addCellBoundary(cb.id, reqObj.floor);
-    }
   }
 
   return UIManager;

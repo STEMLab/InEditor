@@ -56,6 +56,8 @@ define([
 
     this.addCornerObj(dot.uuid, dot.getCoor());
 
+    dot.participateObj(this.id, 'cellBoundary');
+
   }
 
   /**
@@ -121,6 +123,7 @@ define([
     this.corners.add(rect);
 
     this.line.points().push(coor.x, coor.y);
+
 
   }
 

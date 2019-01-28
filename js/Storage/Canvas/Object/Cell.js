@@ -110,6 +110,7 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
     this.corners.add(rect);
 
     this.poly.points().push(dot.point.x, dot.point.y);
+
   };
 
   /**
@@ -196,7 +197,6 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
     this.poly.attrs.points = [];
 
     for (var key in this.dots) {
-      // this.addCornerObj(this.dots[key].uuid, this.dots[key].getCoor());
       this.addCornerObjFromDot(this.dots[key]);
     }
   };

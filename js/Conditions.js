@@ -157,7 +157,7 @@ define([], function() {
     */
     this.saveName = 'editor-project';
 
-    this.descList = ['story'];
+    this.descList = ['storey'];
 
     this.loadDataIds = {};
 

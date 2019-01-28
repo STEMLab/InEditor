@@ -42,7 +42,6 @@ define([], function() {
 
       A['z'] = 0; B['z'] = 0;
       var cross = this.crossProduct(A, B);
-      if(cross.z > 0 )log.info("hi")
       if(cross.z > 0 ) return 1; // counterclockwise
       else if(cross.z < 0) return -1; // clockwise
       else return 0;

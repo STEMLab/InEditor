@@ -616,6 +616,7 @@ define([
         getXhr.open("POST", "http://localhost:8080/save-gml/" + documentId, false);
         getXhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
         // save gml
+        log.info(xhr.responseXML);
         getXhr.send(xhr.responseXML);
 
       }
@@ -1491,18 +1492,13 @@ define([
    */
   ExportManager.prototype.extrudeCellBoundary = function(line, dh) {
 
-    if (line.length > 3) {
-      log.info(line);
-    }
+    var result = JSON.parse(JSON.stringify(line));
 
-    var first = line[0];
-    var second = line[1];
-    var doorCoor = first[2] + dh;
+    line.reverse();
+    for(var i in line) line[i][2] += dh;
 
-    var result = [first, second, [second[0], second[1], doorCoor],
-      [first[0], first[1], doorCoor], first
-    ];
-
+    result = result.concat(line);
+    result.push(result[0]);
 
     return result;
 

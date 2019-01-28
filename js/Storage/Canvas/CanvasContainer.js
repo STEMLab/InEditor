@@ -136,7 +136,7 @@ define([
       });
     }
 
-    // add cellBoundary
+    // add cellBou==ndary
     var cellBoundary = geometryContainer.cellBoundaryGeometry;
     for (var index in cellBoundary) {
       var floor = window.storage.propertyContainer.getFloorById('cellBoundary', cellBoundary[index].id);
