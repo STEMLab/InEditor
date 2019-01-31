@@ -192,15 +192,20 @@ define([
       if (window.tmpObj.isEmpty()) {
 
         broker.publish(new Message('end-addnewcell', {
-          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
-          'floor': window.tmpObj.floor,
           'isEmpty': true
         }));
 
       } else {
 
+        var newId = null;
+        var flag = false;
+        while(!flag){
+          newId = window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM);
+          flag = window.storage.propertyContainer.getElementById('cell', newId) == null ? true : false;
+        }
+
         broker.publish(new Message('end-addnewcell', {
-          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+          'id': newId,
           'floor': window.tmpObj.floor
         }));
 
@@ -469,9 +474,17 @@ define([
       var isCellSelected = window.broker.getManager("end-addnewstate", "GeometryManager").isCellSelected(floor);
 
       if( isCellSelected.length == 1 ){
+
+        var newId = null;
+        var flag = false;
+        while(!flag){
+          newId = window.conditions.pre_state + (++window.conditions.LAST_STATE_ID_NUM);
+          flag = window.storage.propertyContainer.getElementById('state', newId) == null ? true : false;
+        }
+
         broker.publish(new Message('end-addnewstate', {
           floor: floor,
-          id: window.conditions.pre_state+(++window.conditions.LAST_STATE_ID_NUM),
+          id: newId,
           duality: isCellSelected[0]
         }));
 
@@ -479,7 +492,6 @@ define([
         result.msg = 'end-addnewstate';
 
       } else if( isCellSelected.length > 1 ){
-        log.info(data);
         broker.publish(new Message('makecellselectmenu', {
           floor: floor,
           cells: isCellSelected,
@@ -491,9 +503,16 @@ define([
 
       } else {
 
+        var newId = null;
+        var flag = false;
+        while(!flag){
+          newId = window.conditions.pre_state + (++window.conditions.LAST_STATE_ID_NUM);
+          flag = window.storage.propertyContainer.getElementById('state', newId) == null ? true : false;
+        }
+
         broker.publish(new Message('end-addnewstate', {
           floor: floor,
-          id: window.conditions.pre_state+(++window.conditions.LAST_STATE_ID_NUM),
+          id: newId,
         }));
 
         result.result = true;
@@ -524,9 +543,16 @@ define([
 
       if(window.tmpObj.dots.length == 3){
 
+        var newId = null;
+        var flag = false;
+        while(!flag){
+          newId = window.conditions.pre_transition + (++window.conditions.LAST_TRANSITION_ID_NUM);
+          flag = window.storage.propertyContainer.getElementById('transition', newId) == null ? true : false;
+        }
+
         broker.publish(new Message('end-addnewtransition', {
           floor: data.currentTarget.attrs.id,
-          id: window.conditions.pre_transition+(++window.conditions.LAST_TRANSITION_ID_NUM)
+          id: newId
         }));
 
         result.result = true;
@@ -690,8 +716,15 @@ define([
 
       } else {
 
+        var newId = null;
+        var flag = false;
+        while(!flag){
+          newId = window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM);
+          flag = window.storage.propertyContainer.getElementById('cell', newId) == null ? true : false;
+        }
+
         broker.publish(new Message('end-addnewcell', {
-          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+          'id': newId,
           'floor': window.tmpObj.floor
         }));
 
@@ -769,9 +802,15 @@ define([
         }));
 
       } else {
+        var newId = null;
+        var flag = false;
+        while(!flag){
+          newId = window.conditions.pre_cellBoundary + (++window.conditions.LAST_CELLBOUNDARY_ID_NUM);
+          flag = window.storage.propertyContainer.getElementById('cellBoundary', newId) == null ? true : false;
+        }
 
         broker.publish(new Message('end-addnewcellboundary', {
-          'id': window.conditions.pre_cellBoundary + (++window.conditions.LAST_CELLBOUNDARY_ID_NUM),
+          'id': newId,
           'floor': window.tmpObj.floor
         }));
 
@@ -792,9 +831,16 @@ define([
 
       } else {
 
+        var newId = null;
+        var flag = false;
+        while(!flag){
+          newId = window.conditions.pre_transition + (++window.conditions.LAST_TRANSITION_ID_NUM);
+          flag = window.storage.propertyContainer.getElementById('transition', newId) == null ? true : false;
+        }
+
         broker.publish(new Message('end-addnewtransition', {
-          'id': window.conditions.pre_transition + (++window.conditions.LAST_TRANSITION_ID_NUM),
-          'floor': window.tmpObj.floor
+          floor: data.currentTarget.attrs.id,
+          id: newId
         }));
 
       }
@@ -897,8 +943,15 @@ define([
 
       } else {
 
+        var newId = null;
+        var flag = false;
+        while(!flag){
+          newId = window.conditions.pre_cellBoundary + (++window.conditions.LAST_CELLBOUNDARY_ID_NUM);
+          flag = window.storage.propertyContainer.getElementById('cellBoundary', newId) == null ? true : false;
+        }
+
         broker.publish(new Message('end-addnewcellboundary', {
-          'id': window.conditions.pre_cellBoundary + (++window.conditions.LAST_CELLBOUNDARY_ID_NUM),
+          'id': newId,
           'floor': window.tmpObj.floor
         }));
 
