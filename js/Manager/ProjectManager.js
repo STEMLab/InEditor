@@ -248,6 +248,7 @@ define([
     window.conditions.realCoordinateThreshold = 0;
     window.conditions.realSnappingThreshold = 0;
     window.conditions.snappingThreshold = 0;
+    window.conditions.descList = [];
 
     // extend bbox
     function extendBBox(bbox, width, height) {

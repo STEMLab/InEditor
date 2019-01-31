@@ -271,7 +271,7 @@ define(function(require) {
       }
       return false;
     }
-    log.info(surface);
+
     var posOrPointPropertyOrPointRep = surface.abstractSurface.value.exterior.abstractRing.value.posOrPointPropertyOrPointRep;
     var _points = [];
     var low = 999999999999,
@@ -480,7 +480,8 @@ define(function(require) {
       // connections
       for (var t of s.connects) {
         if (thisFloor.transitions[t] == undefined &&
-            spaceLayers[thisFloor.layer].transitions[t] != undefined)
+            spaceLayers[thisFloor.layer].transitions[t] != undefined &&
+            spaceLayers[thisFloor.layer].transitions[t].connects[0] == s.id)
           setTransitionFloor(spaceLayers[thisFloor.layer].transitions[t], thisFloor);
       }
 
@@ -497,13 +498,13 @@ define(function(require) {
         setCellBoundaryFloor(cbm.cellBoundaries[t.duality], thisFloor);
 
       // connects(state)
-      for (var i = 0; i < 2; i++) {
-        var sid = t.connects[i];
-        if (sid != undefined &&
-            sid != null && thisFloor.states[sid] == undefined &&
-            spaceLayers[thisFloor.layer].states[sid] != undefined)
-          setStateFloor(spaceLayers[thisFloor.layer].states[sid], thisFloor);
-      }
+      // for (var i = 0; i < 2; i++) {
+      //   var sid = t.connects[i];
+      //   if (sid != undefined &&
+      //       sid != null && thisFloor.states[sid] == undefined &&
+      //       spaceLayers[thisFloor.layer].states[sid] != undefined)
+      //     setStateFloor(spaceLayers[thisFloor.layer].states[sid], thisFloor);
+      // }
 
       delete spaceLayers[thisFloor.layer].transitions[t.id];
     }

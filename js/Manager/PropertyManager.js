@@ -573,7 +573,8 @@ define([
       else if(type == 'transition') newProperty = new TransitionProperty(obj.id);
 
       for(var key in newProperty){
-        newProperty[key] = obj[key];
+        if(obj[key] != undefined)
+          newProperty[key] = obj[key];
       }
 
       return newProperty;
