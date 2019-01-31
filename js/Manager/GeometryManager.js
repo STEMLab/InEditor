@@ -545,7 +545,13 @@
         if (type == 'cellBoundary' || type == 'transition') {
           if (point.distance(obj) < window.conditions.realSnappingThreshold) result.push(o.id);
         } else {
-          var intersection = point.intersection(obj).getCoordinates();
+          var intersection = [];
+          try {
+            intersection = point.intersection(obj).getCoordinates();
+          }
+          catch(err) {
+            // do nothing
+          }
           if (intersection.length != 0) result.push(o.id);
         }
       }
