@@ -33,9 +33,9 @@ define([], function() {
 
     /**
      * @memberof FloorProperty
-     * @default x : 100, y : 100
+     * @default x : 400, y : 100
      */
-    this.upperCorner = [100, 100];
+    this.upperCorner = [400, 300];
 
     /**
      * @memberof FloorProperty

@@ -77,7 +77,8 @@ define([], function() {
       (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
 
       for(var key in prtDesc){
-        if(this.properties.description[key] == "" && prtDesc[key] != "")
+        if(this.properties.description[key] == undefined) {} 
+        else if(this.properties.description[key] == "" && prtDesc[key] != "")
           this.properties.description[key] = prtDesc[key];
       }
 

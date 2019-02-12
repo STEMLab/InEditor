@@ -56,6 +56,8 @@ define([
 
     this.addCornerObj(dot.uuid, dot.getCoor());
 
+    dot.participateObj(this.id, 'cellBoundary');
+
   }
 
   /**
@@ -121,6 +123,7 @@ define([
     this.corners.add(rect);
 
     this.line.points().push(coor.x, coor.y);
+
 
   }
 
@@ -306,6 +309,20 @@ define([
          return true;
     }
     return false;
+  }
+
+  CellBoundary.prototype.getWKT = function(){
+    var wkt = "LINESTRING (";
+
+    for (var i = 0; i < this.dots.length; i++) {
+      wkt += this.dots[i].point.x + " " + this.dots[i].point.y;
+
+      if( i != this.dots.length -1 ) wkt += ", ";
+    }
+
+    wkt += ")";
+
+    return wkt;
   }
 
   return CellBoundary;

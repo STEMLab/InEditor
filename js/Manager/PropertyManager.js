@@ -65,8 +65,10 @@ define([
     this.addCallbackFun('addlocaldesc', this.addLocalDesc);
     this.addCallbackFun('deletelocaldesc', this.deleteLocalDesc);
 
-    this.addCallbackFun("addcellsfromgml", this.addCellsFromGML);
-    this.addCallbackFun('addcellboundariesfromgml', this.addCellBoundariesFromGML);
+    // this.addCallbackFun("addcellsfromgml", this.addCellsFromGML);
+    // this.addCallbackFun('addcellboundariesfromgml', this.addCellBoundariesFromGML);
+
+    this.addCallbackFun('addproeprtydatafromgml', this.addobjectFromGML);
 
 
   }
@@ -301,10 +303,10 @@ define([
       default:
     }
 
-    if(reqObj.type == 'cellBoundary'){
+    if (reqObj.type == 'cellBoundary') {
       var cells = window.storage.propertyContainer.cellProperties;
-      for(var cell of cells){
-        if(cell.partialboundedBy.indexOf(obj.id) != -1){
+      for (var cell of cells) {
+        if (cell.partialboundedBy.indexOf(obj.id) != -1) {
           cell.partialboundedBy.splice(cell.partialboundedBy.indexOf(cell.id), 1);
         }
       }
@@ -340,7 +342,7 @@ define([
     var associationCells = window.tmpObj.associationCell;
     for (var key in associationCells) {
       var cell = window.storage.propertyContainer.getElementById('cell', key);
-      if(cell == null){
+      if (cell == null) {
         var holeObj = window.storage.canvasContainer.stages[reqObj.floor].getElementById('cell', key);
         cell = window.storage.propertyContainer.getElementById('cell', holeObj.holeOf);
       }
@@ -460,7 +462,7 @@ define([
       return;
     }
 
-    if(window.conditions.automGenerateState){
+    if (window.conditions.automGenerateState) {
       window.broker.getManager('end-addnewcell', 'PropertyManager').endAddNewCell(reqObj);
 
       var state = window.storage.propertyContainer.getElementById('state', window.conditions.pre_state + window.conditions.LAST_STATE_ID_NUM);
@@ -479,7 +481,7 @@ define([
     }
 
     window.conditions.LAST_STATE_ID_NUM--;
-    var num = window.conditions.LAST_CELL_ID_NUM-1;
+    var num = window.conditions.LAST_CELL_ID_NUM - 1;
     window.broker.getManager('end-addnewcell', 'PropertyManager').endAddNewCell({
       floor: reqObj.floor,
       id: window.conditions.pre_cell + num
@@ -561,47 +563,60 @@ define([
   }
 
 
-  PropertyManager.prototype.addCellsFromGML = function(reqObj){
+  PropertyManager.prototype.addobjectFromGML = function(reqObj) {
+    function copyObj(obj, type){
+      var newProperty;
 
-    for(var cell of reqObj.data){
-      // add new cellproperty object in storage.propertyContainer
-      var newCellProperty = new CellProperty(cell.id);
-      newCellProperty.name = cell.name;
-      newCellProperty.description = cell.description;
-      newCellProperty.duality = cell.duality;
-      newCellProperty.externalReference = cell.externalReference;
-      newCellProperty.partialboundedBy = cell.partialboundedBy;
-      window.storage.propertyContainer.cellProperties.push(newCellProperty);
+      if(type == 'cell') newProperty = new CellProperty(obj.id);
+      else if(type == 'cellBoundary') newProperty = new CellBoundaryProperty(obj.id);
+      else if(type == 'state') newProperty = new StateProperty(obj.id);
+      else if(type == 'transition') newProperty = new TransitionProperty(obj.id);
 
-      // add cell key in floor property
-      window.storage.propertyContainer.getElementById('floor', reqObj.floor).cellKey.push(
-        cell.id
-      );
+      for(var key in newProperty){
+        if(obj[key] != undefined)
+          newProperty[key] = obj[key];
+      }
+
+      return newProperty;
     }
 
-  }
+    var propertyContainer = window.storage.propertyContainer;
 
-  PropertyManager.prototype.addCellBoundariesFromGML = function(reqObj){
+    for (var floor of Object.values(reqObj)) {
 
-    for(var cb of reqObj.data){
-      // add new cellproperty object in storage.propertyContainer
-      var newCBProperty = new CellBoundaryProperty(cb.id);
-      newCBProperty.name = cb.name;
-      newCBProperty.description = cb.description;
-      newCBProperty.duality = cb.duality;
-      newCBProperty.externalReference = cb.externalReference;
-      window.storage.propertyContainer.cellBoundaryProperties.push(newCBProperty);
+      for (var c of Object.values(floor.cells)) {
+        var newProperty = copyObj(c, 'cell');
+        propertyContainer.cellProperties.push(newProperty);
+        propertyContainer.getElementById('floor', floor.id).cellKey.push(
+          c.id
+        );
+      }
 
-      // add cell key in floor property
-      window.storage.propertyContainer.getElementById('floor', reqObj.floor).cellBoundaryKey.push(
-        cb.id
-      );
+      for (var cb of Object.values(floor.cellBoundaries)) {
+        var newProperty = copyObj(cb, 'cellBoundary');
+        propertyContainer.cellBoundaryProperties.push(newProperty);
+        propertyContainer.getElementById('floor', floor.id).cellBoundaryKey.push(
+          cb.id
+        );
+      }
+
+      for(var s of Object.values(floor.states)){
+        var newProperty = copyObj(s, 'state');
+        propertyContainer.stateProperties.push(newProperty);
+        propertyContainer.getElementById('floor', floor.id).stateKey.push(
+          s.id
+        );
+      }
+
+      for(var t of Object.values(floor.transitions)){
+        var newProperty = copyObj(t, 'transition');
+        propertyContainer.transitionProperties.push(newProperty);
+        propertyContainer.getElementById('floor', floor.id).transitionKey.push(
+          t.id
+        );
+      }
     }
-
   }
-
-
-
 
   return PropertyManager;
 });

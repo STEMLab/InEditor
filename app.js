@@ -1,11 +1,10 @@
 var express = require("express");
 var bodyParser = require('body-parser');
-var jsonFormat = require("json-format");
+var vkbeautify = require('vkbeautify');
 var fs = require("fs");
 var BSON = require("bson");
 var cors = require('cors');
 var earcut = require('earcut');
-var xmlBeautify = require('xml-beautifier');
 var opn = require('opn');
 var app = express();
 
@@ -69,8 +68,7 @@ app.get('/load-project', function(req, res) {
 });
 
 app.post('/save-gml/*', function(req, res) {
-
-  fs.writeFile('./output/'+ req.params[0] +'.gml', xmlBeautify(req.body) , function(err) {
+  fs.writeFile('./output/'+ req.params[0] +'.gml', vkbeautify.xml(req.body) , function(err) {
 
     if (err)  return res.status(500).send(err);
 
