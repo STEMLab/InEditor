@@ -19,7 +19,6 @@ IndoorGML-Editor is an open source Javascript program that provides tools for si
        - Build Project : Open command prompt on project folder and build project by executing `mvn clean install`
        - Start API Server : Start server by executing `mvn jetty:run “-Djetty.port=9797”` 
 
-
 ## Quick Start
 A simple example to create IndoorGML document include one cellspace.
 1. Add a new floor.<br>
@@ -41,3 +40,7 @@ A simple example to create IndoorGML document include one cellspace.
 
 ## License
 This project is licensed under the GPL Version 2 licenses. - see the [LICENSE](https://github.com/STEMLab/IndoorGML-Editor/blob/master/LICENSE) file for details
+
+## Guide
+User Guide : [Here](https://github.com/STEMLab/InEditor/blob/master/Guide/UserGuide/Index.md) are some guides on how to use InEditor.<br>
+Develop Guide : check [wiki page](https://github.com/STEMLab/InEditor/wiki)
