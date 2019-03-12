@@ -41,6 +41,3 @@ A simple example to create IndoorGML document include one cellspace.
 ## License
 This project is licensed under the GPL Version 2 licenses. - see the [LICENSE](https://github.com/STEMLab/IndoorGML-Editor/blob/master/LICENSE) file for details
 
-## Guide
-User Guide : [Here](https://github.com/STEMLab/InEditor/blob/master/Guide/UserGuide/Index.md) are some guides on how to use InEditor.<br>
-Develop Guide : check [wiki page](https://github.com/STEMLab/InEditor/wiki)
