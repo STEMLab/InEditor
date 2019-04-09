@@ -86,7 +86,7 @@ define([
           window.addEventListener('wheel', function(event, data) {
 
             if (event.target.tagName == 'CANVAS') {
-              event.preventDefault();
+              //event.preventDefault();
               window.eventHandler.callHandler('canvas', event);
             }
 
@@ -261,6 +261,12 @@ define([
 
       target = _event.key;
       type = _event.type;
+
+    } else if (_target == 'code-modal-trash'){
+
+      target = _target;
+      type = _event.type;
+      data = _event;
 
     }
 

@@ -42,7 +42,10 @@ define([], function() {
   }
 
   InterLayerConnectionProperty.prototype.load = function(values) {
-
+    var keys = Object.keys(values);
+    for(var key of keys){
+      if(this[key] != undefined) this[key] = values[key];
+    }
   }
 
   InterLayerConnectionProperty.prototype.addState = function(state) {

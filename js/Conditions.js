@@ -72,8 +72,8 @@ define([], function() {
      * @default { x : 4, y : 3 }
      */
     this.aspectRatio = {
-      x: 4,
-      y: 3
+      x: 7,
+      y: 5
     };
 
     /**
@@ -95,7 +95,8 @@ define([], function() {
      * @memberof Conditions
      * @default 50
      */
-    this.scaleMax = 50;
+    // this.scaleMax = 50;
+    this.scaleMax = 100;
 
     /**
      * @memberof Conditions
@@ -128,7 +129,7 @@ define([], function() {
     /**
      * @memberof Conditions
      */
-    this.cursorrSize = 5;
+    this.cursorrSize = 1;
 
     /**
      * @memberof Conditions
@@ -157,7 +158,7 @@ define([], function() {
     */
     this.saveName = 'editor-project';
 
-    this.descList = ['storey'];
+    this.descList = [];
 
     this.loadDataIds = {};
 

@@ -68,9 +68,13 @@ app.get('/load-project', function(req, res) {
 });
 
 app.post('/save-gml/*', function(req, res) {
+
   fs.writeFile('./output/'+ req.params[0] +'.gml', vkbeautify.xml(req.body) , function(err) {
 
-    if (err)  return res.status(500).send(err);
+    if (err)  {
+      console.log(err);
+      return res.status(500).send(err);
+    }
 
     res.send('/output/'+ req.params[0] +'.gml');
 
@@ -78,9 +82,11 @@ app.post('/save-gml/*', function(req, res) {
 });
 
 app.post('/xml-to-json', function(req,res){
-  var IndoorGML_Core_1_0_3 = require('./json/IndoorGML_Core_1_0_3.js').IndoorGML_Core_1_0_3;
+  var IndoorGML_Non_Navi_1_0_3 = require('./json/IndoorGML_Non_Navi_1_0_3.js').IndoorGML_Non_Navi_1_0_3;
+  var IndoorGML_Navi_1_0_3 = require('./json/IndoorGML_Navi_1_0_3.js').IndoorGML_Navi_1_0_3;
+  var IndoorGML_Storey = require('./json/IndoorGML_Storey.js').IndoorGML_Storey;
   var Jsonix = require('jsonix').Jsonix;
-  var context = new Jsonix.Context([IndoorGML_Core_1_0_3]);
+  var context = new Jsonix.Context([IndoorGML_Storey, IndoorGML_Non_Navi_1_0_3, IndoorGML_Navi_1_0_3]);
   var unmarshaller = context.createUnmarshaller();
 
   var resume = unmarshaller.unmarshalFile(req.body, function(result) {

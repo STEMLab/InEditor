@@ -75,8 +75,10 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
     var rect = new Konva.Rect({
       x: coor.x,
       y: coor.y,
-      width: 3,
-      height: 3,
+      // width: 3,
+      // height: 3,
+      width: 1,
+      height: 1,
       fill: "white",
       stroke: "black",
       strokeWidth: 1
@@ -95,6 +97,11 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
    * @param String uuid of dot
    */
   Cell.prototype.addCornerObjFromDot = function(dot) {
+    if(dot == undefined) {
+      log.info(this, dot);
+      return;
+    }
+
     var rect = new Konva.Rect({
       x: dot.point.x,
       y: dot.point.y,
@@ -335,6 +342,7 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
 
     var indexOfDot1 = this.getDotIndex(line.dot1.uuid);
     var indexOfDot2 = this.getDotIndex(line.dot2.uuid);
+    var reverse = false;
 
     if (indexOfDot1 == -1 || indexOfDot2 == -1) {
       log.warn(
@@ -354,6 +362,7 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
 
     if ((-1) - threshold <= cos && cos <= (-1) + threshold) {
       dots.reverse();
+      reverse = true;
     }
 
     // var dToDot1 = DotMath.distanceTo(line.dot1.point, dots[0].point);
@@ -362,10 +371,17 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
     // if(dToDot1 > dToDto2) dots.reverse();
 
     function insertArrayToArray(array1, array2, index) {
-      return array1.slice(0, index).concat(array2, array1.slice(index, array1.length));
+      var target = array2;
+      if(array1[index-1] == target[0]) target = target.slice(1,target.length);
+      if(array1[index] == target[target.length-1]) target = target.slice(0, target.length-1);
+      return array1.slice(0, index).concat(target, array1.slice(index, array1.length));
     }
 
-    if (
+    if(this.dots[indexOfDot1].uuid == dots[0].uuid && this.dots[indexOfDot2].uuid == dots[1].uuid){
+      // do nothing
+      if(indexOfDot1 > indexOfDot2 && indexOfDot2 != 0) reverse = true;
+    }
+    else if (
       (indexOfDot1 == 0 && indexOfDot2 == this.dots.length - 1) ||
       (indexOfDot2 == 0 && indexOfDot1 == this.dots.length - 1)
     ) {
@@ -380,6 +396,7 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
     for (var key in dots)
       dots[key].participateObj(this.id, 'cell');
 
+      return reverse;
   }
 
   /**

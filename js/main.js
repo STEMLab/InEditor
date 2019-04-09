@@ -3,6 +3,15 @@ require.config({
   paths: {
     text: "../json/text",
     json: "../json/json" //alias to plugin
+  },
+  map: {
+    "*": {
+      'Property' : 'js/Storage/Properties/index.js',
+      'Subscriber' : 'js/PubSub/Subscriber.js',
+      'Popup' : 'js/UI/Popup.js',
+      'CodeList' : 'js/Storage/Properties/CodeList.js',
+      'ObjectType': 'js/GlobalConst.js'
+    }
   }
 });
 

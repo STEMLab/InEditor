@@ -36,6 +36,7 @@ define([
 
     this.layer.add(this.group.getCellGroup());
     this.layer.add(this.group.getHoleGroup());
+    this.layer.add(this.group.getHatchGroup());
 
   }
 

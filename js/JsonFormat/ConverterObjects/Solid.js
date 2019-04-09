@@ -15,8 +15,7 @@ define(function(require) {
   };
 
   Solid.prototype.geojson2wkt = function(gj){
-    log.info(gj);
-
+    
     var result = "SOLID (";
 
     for(var solid in gj){

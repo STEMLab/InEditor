@@ -2,35 +2,16 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define([], function() {
+define(function(require) {
   'use strict';
 
   function CellProperty(_id) {
 
-    /**
-     * @memberof CellProperty
-     */
-    this.id = _id;
+    require('./PropertyBase.js').apply(this, arguments);
+    this.featrueType = require('ObjectType').PROPERTY_TYPE.CELL_SPACE;
 
-    /**
-     * @memberof CellProperty
-     */
-    this.name = _id;
-
-    /**
-     * @memberof CellProperty
-     */
-    this.description = {};
-    var list = window.conditions.descList;
-    for (var l of list) {
-      this.description[l] = "";
-    }
-
-
-    /**
-     * @memberof CellProperty
-     */
-    this.duality = "";
+    let EB = require('./ExtensionBase.js');
+    this.extend = new EB();
 
     /**
      * @memberof CellProperty
@@ -42,30 +23,24 @@ define([], function() {
      */
     this.partialboundedBy = [];
 
-    /**
-     * @memberof CellProperty
-     * @desc  NavigableSpace, GeneralSpace, TransferSpace, TransitionSpace, ConnectionSpace, AnchorSpace
-     */
-    this.naviType = "";
+    this.storey = "";
 
-    this.navi = {
-      class: "",
-      function: "",
-      usage: ""
-    }
+    this.bottom = 0; // floor ~ bottom
+    this.height = 0; // bottom ~ top
+
   }
+
+  CellProperty.prototype = Object.create(require('./PropertyBase.js').prototype);
 
   /**
    * @memberof CellProperty
    */
   CellProperty.prototype.load = function(values) {
 
-    this.id = values.id;
-    this.name = values.name;
-    this.description = values.description;
-    this.duality = values.duality;
-    this.externalReference = values.externalReference;
-    this.partialboundedBy = values.partialboundedBy;
+    var keys = Object.keys(values);
+    for(var key of keys){
+      if(this[key] != undefined) this[key] = values[key];
+    }
 
   }
 
@@ -74,7 +49,26 @@ define([], function() {
   }
 
   CellProperty.prototype.addPartialboundedBy = function(part){
-    this.partialboundedBy.push(part);
+    if(this.partialboundedBy.indexOf(part) == -1)
+      this.partialboundedBy.push(part);
+  }
+
+  CellProperty.prototype.getAvailbleFeatureType = function(){
+    let ot = require('ObjectType');
+    let result = [""];
+
+    if(this.extend.moduleType == "navi" ){
+      result = result.concat(["GeneralSpace", "TransitionSpace", "ConnectionSpace", "AnchorSpace"]);
+    }
+    else if(this.extend.moduleType == "non-navi"){
+      result.push("NonNavigableSpace");
+    }
+
+    return result;
+  }
+
+  CellProperty.prototype.getAvailbleModuleType = function(){
+    return ["", "navi", "non-navi"];
   }
 
   return CellProperty;

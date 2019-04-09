@@ -2,7 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define([], function() {
+ define(function(require) {
   'use strict';
 
   /**
@@ -10,46 +10,21 @@ define([], function() {
    */
   function CellBoundaryProperty(id) {
 
-    /**
-     * @memberof CellBoundaryProperty
-     */
-    this.id = id;
+    require('./PropertyBase.js').apply(this, arguments);
+    this.featrueType = require('ObjectType').PROPERTY_TYPE.CELL_SPACE_BOUNDARY;
 
-    /**
-     * @memberof CellBoundaryProperty
-     */
-    this.name = id;
-
-    /**
-     * @memberof CellBoundaryProperty
-     */
-    this.description = {};
-    var list = window.conditions.descList;
-    for(var l of list){
-      this.description[l] = "";
-    }
-
-    /**
-     * @memberof CellBoundaryProperty
-     */
-    this.duality = "";
+    let EB = require('./ExtensionBase.js');
+    this.extend = new EB();
 
     /**
      * @memberof CellBoundaryProperty
      */
     this.externalReference = [];
 
-    /**
-     * @memberof CellBoundaryProperty
-     * @desc  NavigableBoundary, TansferBoundary, ConnectionBoundary, AnchorBoundary
-     */
-     this.naviType = "";
+    this.storey = "";
 
-     this.navi = {
-       class: "",
-       function: "",
-       usage: ""
-     }
+     this.bottom = 0; // floor ~ bottom
+     this.height = 0; // bottom ~ top
   }
 
   /**
@@ -57,16 +32,31 @@ define([], function() {
    */
   CellBoundaryProperty.prototype.load = function(values) {
 
-    this.id = values.id;
-    this.name = values.name;
-    this.description = values.description;
-    this.duality = values.duality;
-    this.externalReference = values.externalReference;
+    var keys = Object.keys(values);
+    for(var key of keys){
+      if(this[key] != undefined) this[key] = values[key];
+    }
+
 
   }
 
   CellBoundaryProperty.prototype.setDuality = function(_duality){
     this.duality = _duality;
+  }
+
+  CellBoundaryProperty.prototype.getAvailbleFeatureType = function(){
+    let ot = require('ObjectType');
+    let result = [""];
+
+    if(this.extend.moduleType == "navi" ){
+      result = result.concat(["ConnectionBoundary", "AnchorBoundary"]);
+    }
+
+    return result;
+  }
+
+  CellBoundaryProperty.prototype.getAvailbleModuleType = function(){
+    return ["", "navi"];
   }
 
   return CellBoundaryProperty;

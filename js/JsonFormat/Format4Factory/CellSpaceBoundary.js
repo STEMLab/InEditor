@@ -328,6 +328,20 @@ define(["./Feature", "js/JsonFormat/GeometryConverter.js", "js/Storage/Dot/DotMa
     }
   }
 
+  CellSpaceBoundary.prototype.addProperty = function(key, value){
+    if(value != undefined) this.properties[key] = value;
+
+    if(key == 'bottom'){
+      for(var c of this.geometry.coordinates)
+        c[2] += value * 1;
+    }
+  }
+
+  CellSpaceBoundary.prototype.setType = function(type) {
+    this['type'] = type;
+  }
+
+
   return CellSpaceBoundary;
 
 });

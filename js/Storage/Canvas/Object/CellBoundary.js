@@ -33,7 +33,7 @@ define([
     this.line = new Konva.Line({
           points:[],
           stroke: 'black',
-          strokeWidth: 4
+          strokeWidth: 2
     });
 
     /**

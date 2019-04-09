@@ -77,7 +77,7 @@ define([], function() {
       (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
 
       for(var key in prtDesc){
-        if(this.properties.description[key] == undefined) {} 
+        if(this.properties.description[key] == undefined) {}
         else if(this.properties.description[key] == "" && prtDesc[key] != "")
           this.properties.description[key] = prtDesc[key];
       }
@@ -170,17 +170,9 @@ define([], function() {
     }
 
     var condition;
-    if (this.type == "NavigableSpace" ||
-      this.type == "GeneralSpace" ||
-      this.type == "TransferSpace" ||
-      this.type == "TransitionSpace" ||
-      this.type == "ConnectionSpace" ||
-      this.type == "AnchorSpace")
+    if (this.type.indexOf('Space') != -1)
       condition = window.conditions.exportSimplifyCondition["CellSpace"].properties;
-    else if (this.type == "NavigableBoundary" ||
-      this.type == "TansferBoundary" ||
-      this.type == "ConnectionBoundary" ||
-      this.type == "AnchorBoundary")
+    else if (this.type.indexOf('Boundary') != -1)
       condition = window.conditions.exportSimplifyCondition["CellSpaceBoundary"].properties;
     else
       condition = window.conditions.exportSimplifyCondition[this.type].properties;

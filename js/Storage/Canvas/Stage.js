@@ -89,6 +89,12 @@ define([
       }
     });
 
+    var bgId = _id + "-map";
+    var mapContainer = document.createElement("div");
+    mapContainer.style = "position:absolute; width:inherit; height:inherit;";
+    mapContainer.id = bgId;
+    this.stage.container().children[0].appendChild(mapContainer);
+
     this.stage.add(this.backgroundLayer.getLayer());
     this.stage.add(this.cellLayer.getLayer());
     this.stage.add(this.cellBoundaryLayer.getLayer());
@@ -296,6 +302,32 @@ define([
 
     return result;
 
+  }
+
+  Stage.prototype.addMap = function(center) {
+    var _center = center;
+    var bgId = this.id + "-map";
+
+    this.map = new ol.Map({
+      target: bgId,
+      layers: [
+        new ol.layer.Tile({
+          source: new ol.source.OSM()
+        })
+      ],
+      view: new ol.View({
+        center: ol.proj.fromLonLat(_center),
+        zoom: 1142,
+        zoomFactor: 1.01
+      })
+    });
+
+    var zoomslider = new ol.control.ZoomSlider();
+    this.map.addControl(zoomslider);
+  }
+
+  Stage.prototype.getWD = function(){
+    return {width : this.stage.width(), height : this.stage.height()};
   }
 
   return Stage;

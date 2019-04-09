@@ -2,23 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define([
-  "../Storage/Properties/FloorProperty.js",
-  "../Storage/Canvas/Stage.js",
-  "../Storage/Properties/CellProperty.js",
-  "../PubSub/Subscriber.js",
-  "../Storage/Properties/CellBoundaryProperty.js",
-  "../Storage/Properties/StateProperty.js",
-  "../Storage/Properties/TransitionProperty.js"
-], function(
-  FloorProperty,
-  Stage,
-  CellProperty,
-  Subscriber,
-  CellBoundaryProperty,
-  StateProperty,
-  TransitionProperty
-) {
+define(function(require) {
   'use strict';
 
   /**
@@ -27,13 +11,13 @@ define([
    */
   function PropertyManager() {
 
-    Subscriber.apply(this, arguments);
+    require('Subscriber').apply(this, arguments);
 
     this.init();
 
   }
 
-  PropertyManager.prototype = Object.create(Subscriber.prototype);
+  PropertyManager.prototype = Object.create(require('Subscriber').prototype);
 
   /**
    * @memberof PropertyManager
@@ -69,6 +53,11 @@ define([
     // this.addCallbackFun('addcellboundariesfromgml', this.addCellBoundariesFromGML);
 
     this.addCallbackFun('addproeprtydatafromgml', this.addobjectFromGML);
+    this.addCallbackFun('addnewcode', this.addNewCode);
+    this.addCallbackFun('uploadcodefile', this.uploadCodeFile);
+    this.addCallbackFun('deletecode', this.deleteCode);
+
+    this.addCallbackFun('getmapcoor', this.getMapCoor);
 
 
   }
@@ -78,8 +67,8 @@ define([
    * @memberof PropertyManager
    */
   PropertyManager.prototype.addNewFloor = function(reqObj) {
-
-    var newFloorProperty = new FloorProperty(reqObj.floor);
+    var FLOOR = new require('Property').FLOOR;
+    var newFloorProperty = new FLOOR(reqObj.floor);
 
     // add new property
     window.storage.propertyContainer.floorProperties.push(newFloorProperty);
@@ -109,23 +98,56 @@ define([
         obj.lowerCorner = reqObj.updateContent.lowerCorner;
         obj.upperCorner = reqObj.updateContent.upperCorner;
         obj.groundHeight = reqObj.updateContent.groundHeight;
-        obj.celingHeight = reqObj.updateContent.celingHeight;
+
         obj.doorHeight = reqObj.updateContent.doorHeight;
         obj.description = reqObj.updateContent.description;
+
+        for (var ck of obj.cellKey) {
+          var c = window.storage.propertyContainer.getElementById('cell', ck);
+          if (c.height + c.bottom > reqObj.updateContent.celingHeight) c.height = reqObj.updateContent.celingHeight - c.bottom;
+        }
+
+        obj.celingHeight = reqObj.updateContent.celingHeight;
         break;
       case 'cell':
-        if (reqObj.updateContent.name == undefined) {
-          obj.naviType = reqObj.updateContent.naviType;
-          obj.navi = reqObj.updateContent.navi;
+        if (reqObj.dataClass == 'ExtensionBase') {
+          obj.extend = reqObj.updateContent;
         } else {
           obj.name = reqObj.updateContent.name;
           obj.description = reqObj.updateContent.description;
+
+          var floor = window.storage.propertyContainer.getElementById('floor', window.storage.propertyContainer.getFloorById('cell', obj.id));
+          if (reqObj.updateContent.bottom * reqObj.updateContent.height < 0) {
+            require('Popup')('warning', 'Invalide input : bottom(' + reqObj.updateContent.bottom + '), height(' + reqObj.updateContent.height + ')');
+          } else if (reqObj.updateContent.bottom + reqObj.updateContent.height <= floor.celingHeight) {
+            obj.height = reqObj.updateContent.height;
+            obj.bottom = reqObj.updateContent.bottom;
+
+            var state = window.storage.propertyContainer.getElementById('state', obj.duality);
+            if (state != null && state.height < obj.bottom)
+              state.setHeight(obj.bottom);
+          } else {
+            require('Popup')('warning', 'Invalide input : bottom(' + reqObj.updateContent.bottom + '), height(' + reqObj.updateContent.height + ')');
+          }
         }
         break;
       case 'cellBoundary':
-        obj.name = reqObj.updateContent.name;
-        obj.description = reqObj.updateContent.description;
-        obj.naviType = reqObj.updateContent.naviType;
+      if (reqObj.dataClass == 'ExtensionBase') {
+        obj.extend = reqObj.updateContent;
+      } else {
+          obj.name = reqObj.updateContent.name;
+          obj.description = reqObj.updateContent.description;
+
+          var floor = window.storage.propertyContainer.getElementById('floor', window.storage.propertyContainer.getFloorById('cellBoundary', obj.id));
+          if (reqObj.updateContent.bottom * reqObj.updateContent.height < 0) {
+            require('Popup')('warning', 'Invalide input : bottom(' + reqObj.updateContent.bottom + '), height(' + reqObj.updateContent.height + ')');
+          } else if (reqObj.updateContent.bottom + reqObj.updateContent.height <= floor.celingHeight) {
+            obj.height = reqObj.updateContent.height;
+            obj.bottom = reqObj.updateContent.bottom;
+          } else {
+            require('Popup')('warning', 'Invalide input : bottom(' + reqObj.updateContent.bottom + '), height(' + reqObj.updateContent.height + ')');
+          }
+        }
         break;
       case 'state':
         obj.name = reqObj.updateContent.name;
@@ -169,17 +191,60 @@ define([
       return;
     }
 
+    var floorProperty = window.storage.propertyContainer.getElementById('floor', reqObj.floor);
+
     // add new cellproperty object in storage.propertyContainer
+    var CellProperty = require('Property').CELL_SPACE;
     var newCellProperty = new CellProperty(reqObj.id);
+    newCellProperty.height = floorProperty.celingHeight;
+    newCellProperty.bottom = 0;
     window.storage.propertyContainer.cellProperties.push(newCellProperty);
 
+    //////////////////////////// quick code /////////////////////////////////// REMOVE!
+    if (reqObj.id.indexOf('EXTERIORDOOR') != -1)
+      newCellProperty.navi = {
+        type: "AnchorSpace",
+        class: "1020",
+        function: "1010",
+        usage: "1010"
+      }
+    else if (reqObj.id.indexOf('DOOR') != -1)
+      newCellProperty.navi = {
+        type: "ConnectionSpace",
+        class: "1000",
+        function: "1000",
+        usage: "1000"
+      }
+    else if (reqObj.id.indexOf('CORRIDOR') != -1)
+      newCellProperty.navi = {
+        type: "TransitionSpace",
+        class: "1000",
+        function: "1000",
+        usage: "1000"
+      }
+    else if (reqObj.id.indexOf('ELEVATOR') != -1)
+      newCellProperty.navi = {
+        type: "TransitionSpace",
+        class: "1010",
+        function: "1110",
+        usage: "1110"
+      }
+    else if (reqObj.id.indexOf('STAIR') != -1)
+      newCellProperty.navi = {
+        type: "TransitionSpace",
+        class: "1010",
+        function: "1120",
+        usage: "1120"
+      }
+
+
+
     // add cell key in floor property
-    window.storage.propertyContainer.getElementById('floor', reqObj.floor).cellKey.push(
-      reqObj.id
-    );
+    floorProperty.cellKey.push(reqObj.id);
 
     // add state property if there if conditions.automGenerateState is true
     if (window.conditions.automGenerateState) {
+      var StateProperty = require('Property').STATE;
       var newState = new StateProperty(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM));
       newState.setDuality(reqObj.id);
 
@@ -206,10 +271,16 @@ define([
     }
 
     // log.trace(window.storage);
+    var StateProperty = require('Property').STATE;
     var newState = new StateProperty(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM));
     if (reqObj.duality) {
       newState.setDuality(reqObj.duality);
     }
+
+    if (newState.id.indexOf('SPRINKLER') != -1 || newState.id.indexOf('ALARM') != -1 || newState.id.indexOf('DETECTOR') != -1)
+      newState.height = 20;
+    else if (newState.id.indexOf('INDOOR-HYDRANT') != -1)
+      newState.height = 10;
 
     window.storage.propertyContainer.stateProperties.push(newState);
     window.storage.propertyContainer.getElementById('floor', reqObj.floor).stateKey.push(
@@ -331,7 +402,30 @@ define([
     }
 
     // add new cellspace boundary property(=CellBoundaryProperty) in stage.propertyContainer
+    var CellBoundaryProperty = require('Property').CELL_SPACE_BOUNDARY;
     var property = new CellBoundaryProperty(reqObj.id);
+
+    var floorProperty = window.storage.propertyContainer.getElementById('floor', reqObj.floor);
+    property.height = floorProperty.doorHeight;
+    property.bottom = 0;
+
+    /////////////////////quick code////////////////////
+    if (property.id.indexOf('BIGWINDOW') != -1) {
+      property.navi.type = "ConnectionBoundary";
+      property.height = 20;
+    } else if (property.id.indexOf('WINDOW') != -1) {
+      property.navi.type = "ConnectionBoundary";
+      property.height = 10;
+      property.bottom = 8;
+    } else if (property.id.indexOf('EXTERIORDOOR') != -1) {
+      property.navi.type = "AnchorBoundary";
+    } else if (property.id.indexOf('DOOR') != -1) {
+      property.navi.type = "ConnectionBoundary";
+    } else if (property.id.indexOf('STAIR') != -1) {
+      property.navi.type = "ConnectionBoundary";
+      property.height = 20;
+    }
+
     window.storage.propertyContainer.cellBoundaryProperties.push(property);
 
     // add key in floor property
@@ -346,6 +440,7 @@ define([
         var holeObj = window.storage.canvasContainer.stages[reqObj.floor].getElementById('cell', key);
         cell = window.storage.propertyContainer.getElementById('cell', holeObj.holeOf);
       }
+
       cell.addPartialboundedBy(reqObj.id)
     }
 
@@ -380,6 +475,7 @@ define([
     if (reqObj.isEmpty != null) return;
 
     var canvasObj = window.storage.canvasContainer.stages[reqObj.floor].transitionLayer.group.getLastTransition();
+    var TransitionProperty = require('Property').TRANSITION;
     var newProperty = new TransitionProperty(reqObj.id);
     var connects = canvasObj.getConnection()
     newProperty.setConnects(connects);
@@ -431,6 +527,7 @@ define([
     if (reqObj.isEmpty != null) return;
 
     var geometryObj = window.storage.geometryContainer.getElementById('transition', reqObj.id);
+    var TransitionProperty = require('Property').TRANSITION;
     var newProperty = new TransitionProperty(reqObj.id);
     var connects = geometryObj.getConnects();
     newProperty.setConnects(connects);
@@ -564,17 +661,33 @@ define([
 
 
   PropertyManager.prototype.addobjectFromGML = function(reqObj) {
-    function copyObj(obj, type){
-      var newProperty;
+    function copyObj(obj, type) {
 
-      if(type == 'cell') newProperty = new CellProperty(obj.id);
-      else if(type == 'cellBoundary') newProperty = new CellBoundaryProperty(obj.id);
-      else if(type == 'state') newProperty = new StateProperty(obj.id);
-      else if(type == 'transition') newProperty = new TransitionProperty(obj.id);
+      var construct = require('Property');
+      if (type == 'cell') construct = construct.CELL_SPACE;
+      else if (type == 'cellBoundary') construct = construct.CELL_SPACE_BOUNDARY;
+      else if (type == 'state') construct = construct.STATE;
+      else if (type == 'transition') construct = construct.TRANSITION;
 
-      for(var key in newProperty){
-        if(obj[key] != undefined)
+      var newProperty = new construct(obj.id);
+
+      for (var key in newProperty) {
+        if (obj[key] != undefined)
           newProperty[key] = obj[key];
+      }
+
+      if (newProperty.name == undefined || newProperty.name == null || newProperty.name == "")
+        newProperty.name = obj.id;
+
+      if (newProperty.navi != undefined) {
+        if (newProperty.navi['function'] != undefined && newProperty.navi['function'] != "")
+          require('Property').CODE_LIST.getInstance().addCode([newProperty.navi.type, 'function'], newProperty.navi.function, "", true);
+        if (newProperty.navi['class'] != undefined && newProperty.navi['class'] != "")
+          require('Property').CODE_LIST.getInstance().addCode([newProperty.navi.type, 'class'], newProperty.navi.class, "", true);
+        if (newProperty.navi['usage'] != undefined && newProperty.navi['usage'] != "")
+          require('Property').CODE_LIST.getInstance().addCode([newProperty.navi.type, 'function'], newProperty.navi.usage, "", true);
+        if (newProperty.navi['obstacleType'] != undefined && newProperty.navi['obstacleType'] != "")
+          require('Property').CODE_LIST.getInstance().addCode([newProperty.navi.type], newProperty.navi.obstacleType, "", true);
       }
 
       return newProperty;
@@ -594,13 +707,14 @@ define([
 
       for (var cb of Object.values(floor.cellBoundaries)) {
         var newProperty = copyObj(cb, 'cellBoundary');
+        newProperty.bottom = newProperty.bottom - floor.floorHight;
         propertyContainer.cellBoundaryProperties.push(newProperty);
         propertyContainer.getElementById('floor', floor.id).cellBoundaryKey.push(
           cb.id
         );
       }
 
-      for(var s of Object.values(floor.states)){
+      for (var s of Object.values(floor.states)) {
         var newProperty = copyObj(s, 'state');
         propertyContainer.stateProperties.push(newProperty);
         propertyContainer.getElementById('floor', floor.id).stateKey.push(
@@ -608,7 +722,7 @@ define([
         );
       }
 
-      for(var t of Object.values(floor.transitions)){
+      for (var t of Object.values(floor.transitions)) {
         var newProperty = copyObj(t, 'transition');
         propertyContainer.transitionProperties.push(newProperty);
         propertyContainer.getElementById('floor', floor.id).transitionKey.push(
@@ -616,6 +730,91 @@ define([
         );
       }
     }
+  }
+
+  PropertyManager.prototype.addNewCode = function(reqObj) {
+    require('Property').CODE_LIST.getInstance().addCode(reqObj.path, reqObj.cn, reqObj.cd);
+  }
+
+  PropertyManager.prototype.uploadCodeFile = function(reqObj) {
+    var reader = new FileReader();
+
+    function uploadCSV() {
+      reader.onload = function(e) {
+        var src = e.target.result;
+        var codeList = require('Property').CODE_LIST.getInstance();
+
+        for (var i of src.split(/\r?\n|\r/)) {
+          var data = i.split(',');
+          codeList.addCode(data[0], data[1] != undefined ? data[1] : "");
+        }
+
+        var manager = window.broker.getManager('showcodemodal', 'UIManager');
+        manager.showCodeModal();
+        require('Popup')('success', 'uplode successed', reqObj.file.name + ' uploaded');
+      }
+
+      reader.readAsText(reqObj.file);
+    }
+
+    function uploadJson() {
+      reader.onload = function(e) {
+        var src = JSON.parse(e.target.result).CodeList;
+        var codeList = require('Property').CODE_LIST.getInstance();
+
+        for (var data of src) {
+          codeList.addCode(data.CodeNumber, data.CodeDesc != undefined ? data.CodeDesc : "");
+        }
+
+        var manager = window.broker.getManager('showcodemodal', 'UIManager');
+        manager.showCodeModal();
+        require('Popup')('success', 'uplode successed', reqObj.file.name + ' uploaded');
+      }
+
+      reader.readAsText(reqObj.file);
+    }
+
+    if (reqObj.file.type == 'application/json') uploadJson();
+    else if (reqObj.file.type == 'application/vnd.ms-excel') uploadCSV();
+  }
+
+  PropertyManager.prototype.deleteCode = function(reqObj) {
+    if (require('Property').CODE_LIST.getInstance().deleteCode(reqObj.path, reqObj.cn, reqObj.cd)) {
+      // success to delete code
+      var objects = window.storage.propertyContainer.cellProperties;
+      var target = document.getElementById('id-text').value;
+      var refresh = false;
+      var tableType = document.getElementById('property-table').dataset.type;
+
+      for (var index in objects) {
+        if (objects[index].obstacleType == reqObj.CodeNumber) {
+
+          objects[index].obstacleType = "";
+          if (objects[index].id == target) refresh = true;
+        }
+      }
+    }
+
+    var manager = window.broker.getManager('showcodemodal', 'UIManager');
+    manager.showCodeModal();
+    if (refresh) manager.setPropertyView({
+      type: tableType,
+      id: target,
+      storage: window.storage
+    });
+  }
+
+  PropertyManager.prototype.getMapCoor = function(reqObj) {
+    var map = window.storage.canvasContainer.getElementById('stage', reqObj.floor).map;
+    var extent = map.getView().calculateExtent(map.getSize());
+    var bottomLeft = ol.proj.toLonLat(ol.extent.getBottomLeft(extent));
+    var topRight = ol.proj.toLonLat(ol.extent.getTopRight(extent));
+    var center = ol.proj.toLonLat(ol.extent.getCenter(extent));
+
+    var fp = window.storage.propertyContainer.getElementById('floor', reqObj.floor);
+    fp.setMapCoor(bottomLeft, topRight);
+    alert('bottom left : ' + bottomLeft + '\ntop right : ' + topRight + '\ncenter : ' + center);
+
   }
 
   return PropertyManager;

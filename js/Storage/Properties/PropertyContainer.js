@@ -8,14 +8,17 @@ define([
   "./CellProperty.js",
   "./CellBoundaryProperty.js",
   "./StateProperty.js",
-  "./TransitionProperty.js"
+  "./TransitionProperty.js",
+  "./InterLayerConnectionProperty.js"
+
 ], function(
   ProjectProperty,
   FloorProperty,
   CellProperty,
   CellBoundaryProperty,
   StateProperty,
-  TransitionProperty
+  TransitionProperty,
+  InterLayerConnectionProperty
 ) {
   'use strict';
 
@@ -303,6 +306,7 @@ define([
     this.loadCellBoundary(values.cellBoundaryProperties);
     this.loadState(values.stateProperties);
     this.loadTransition(values.transitionProperties);
+    this.loadInterlayerConnection(values.interlayerConnections);
 
   }
 
@@ -332,7 +336,7 @@ define([
 
     for (var index in values) {
 
-      var tmp = new CellProperty();
+      var tmp = new CellProperty(values[index].id);
       tmp.load(values[index]);
       this.cellProperties.push(tmp);
 
@@ -349,7 +353,7 @@ define([
 
     for (var index in values) {
 
-      var tmp = new CellBoundaryProperty();
+      var tmp = new CellBoundaryProperty(values[index].id);
       tmp.load(values[index]);
       this.cellBoundaryProperties.push(tmp);
 
@@ -366,7 +370,7 @@ define([
 
     for (var index in values) {
 
-      var tmp = new StateProperty();
+      var tmp = new StateProperty(values[index].id);
       tmp.load(values[index]);
       this.stateProperties.push(tmp);
 
@@ -383,7 +387,7 @@ define([
 
     for (var index in values) {
 
-      var tmp = new TransitionProperty();
+      var tmp = new TransitionProperty(values[index].id);
       tmp.load(values[index]);
       this.transitionProperties.push(tmp);
 
@@ -406,6 +410,18 @@ define([
 
     return result;
 
+  }
+
+  PropertyContainer.prototype.loadInterlayerConnection = function(values){
+    this.interlayerConnections = [];
+
+    for (var index in values) {
+
+      var tmp = new InterLayerConnectionProperty(values[index].id);
+      tmp.load(values[index]);
+      this.interlayerConnections.push(tmp);
+
+    }
   }
 
 
