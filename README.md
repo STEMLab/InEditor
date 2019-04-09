@@ -33,10 +33,6 @@ A simple example to create IndoorGML document include one cellspace.
 :point_right: For more information about usage, please see the [User Guide](https://github.com/STEMLab/InEditor/blob/master/Guide/UserGuide/Index.md)
 
 ## Extention
-  1. Navigation Extension : InEditor for [Navigation Extension](http://schemas.opengis.net/indoorgml/1.0/indoorgmlnavi.xsd)
-    - [Link](https://github.com/STEMLab/InEditor-Navi.git)
-  2. Extension for Non-Navigable Space : InEditor for [Non-Navigable Space Extension](http://www.indoorgml.net/extensions/indoorgmlnonnavispace.xsd)
-    - [Link](https://github.com/STEMLab/InEditor-Non-Navi.git)
 
 ## License
 This project is licensed under the GPL Version 2 licenses. - see the [LICENSE](https://github.com/STEMLab/IndoorGML-Editor/blob/master/LICENSE) file for details
