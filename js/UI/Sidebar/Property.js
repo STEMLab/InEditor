@@ -191,7 +191,7 @@ define(function(require) {
     baseTable = this.bindBasePropsTr(baseTable, property);
     baseTable.appendChild(this.getOneTextTr('bottom', 'bottom-text', property.bottom));
     baseTable.appendChild(this.getOneTextTr('height', 'height-text', property.height));
-    baseTable.appendChild(this.getOneTextTr('storey', 'storey-text', property.storey, true));
+    baseTable.appendChild(this.getOneTextTr('storey', 'storey-text', property.storey));
     baseTable.appendChild(this.getOneDropTr('external ref', 'externalRef-text', property.externalReference));
     baseTable.appendChild(this.getOneDropTr('partial-\nbounded\nby', 'partialboundedBy-text', property.partialboundedBy));
 

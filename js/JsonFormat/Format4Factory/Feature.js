@@ -88,6 +88,19 @@ define([], function() {
     }
   }
 
+  Feature.prototype.addDesc = function(key, value){
+    if (this.properties != null &&
+      (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
+
+      if(this.properties.description[key] == undefined)
+        this.properties.description[key] = value;
+
+    } else {
+
+      log.warn("The given conditions said you don 't need to need to set description of Feature.");
+    }
+  }
+
   Feature.prototype.convertDescObj2Str = function(){
     if (this.properties != null &&
       (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {

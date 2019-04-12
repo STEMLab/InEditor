@@ -75,8 +75,8 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
     var rect = new Konva.Rect({
       x: coor.x,
       y: coor.y,
-      // width: 3,
-      // height: 3,
+      // width: 2,
+      // height: 2,
       width: 1,
       height: 1,
       fill: "white",

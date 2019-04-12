@@ -129,7 +129,7 @@ define([], function() {
     /**
      * @memberof Conditions
      */
-    this.cursorrSize = 1;
+    this.cursorrSize = 3;
 
     /**
      * @memberof Conditions

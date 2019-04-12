@@ -436,13 +436,13 @@ define([
     var transDots = manager.transAllDots(window.storage.dotFoolContainer.dotFool, window.storage.propertyContainer.getFloorObj());
 
     var spaceLayer = manager.spaceLayer4Factory(document.id, spaceLayers.id);
-    var cells = manager.cellObj4VFactory(document.id, primalspacefeatures.id, transDots);
-    var cellBoundaries = manager.cellBoundaryObj4VFactory(document.id, primalspacefeatures.id, transDots);
+    var cells = manager.cellObj4Factory(document.id, primalspacefeatures.id, transDots);
+    var cellBoundaries = manager.cellBoundaryObj4Factory(document.id, primalspacefeatures.id, transDots);
 
     var nodes = manager.nodes4Factory(document.id, spaceLayer);
     var edges = manager.edges4Factory(document.id, spaceLayer);
     var states = manager.stateObj4Factory(document.id, nodes, transDots);
-    var transitions = manager.transitionObj4VFactory(document.id, edges, transDots, cellBoundaries);
+    var transitions = manager.transitionObj4Factory(document.id, edges, transDots, cellBoundaries);
     var interlayerConnections = manager.interlayerConnectionObj4Factory(document.id, interEdges);
 
     /**************************************
@@ -793,7 +793,7 @@ define([
    * @memberof ExportManager
    * @return Array of Format4Factory.CellSpace
    */
-  ExportManager.prototype.cellObj4VFactory = function(docId, parentId, transDot) {
+  ExportManager.prototype.cellObj4Factory = function(docId, parentId, transDot) {
 
     var cells = {};
 
@@ -834,6 +834,11 @@ define([
       if (conditions.properties.partialboundedBy) cells[id].setPartialboundedBy(properties[key].partialboundedBy);
       if (conditions.properties.externalReference) cells[id].setExternalReference(properties[key].externalReference);
       if (conditions.properties.duality) cells[id].setDuality(properties[key].duality);
+
+      //////////////////////////////////////////////////////////////////////////////
+      if(properties[key].storey != "")
+        cells[id].addDesc('storey', properties[key].storey);
+     //////////////////////////////////////////////////////////////////////////////
 
 
       if (properties[key].extend.moduleType != "") {
@@ -987,7 +992,7 @@ define([
    * @memberof ExportManager
    * @return Array of Format4Factory.CellSpaceBoundary
    */
-  ExportManager.prototype.cellBoundaryObj4VFactory = function(docId, parentId, transDot) {
+  ExportManager.prototype.cellBoundaryObj4Factory = function(docId, parentId, transDot) {
     var cellBoundaries = {};
     var conditions = window.conditions.exportConditions.CellSpaceBoundary;
     var geometries = window.storage.geometryContainer.cellBoundaryGeometry;
@@ -1228,7 +1233,7 @@ define([
    * @memberof ExportManager
    * @return Array of Format4Factory.Transition
    */
-  ExportManager.prototype.transitionObj4VFactory = function(docId, edges, transDot) {
+  ExportManager.prototype.transitionObj4Factory = function(docId, edges, transDot) {
     var transitions = {};
     var result = [];
     var conditions = window.conditions.exportConditions.Transition;
@@ -1620,6 +1625,38 @@ define([
    */
   ExportManager.prototype.transAllDots = function(dotFools, floorProperties) {
 
+    var result = {};
+    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+    var pp = window.storage.propertyContainer.projectProperty;
+
+    if (pp.isRealCoor && pp.realCoorFloor != "")
+      result = manager.transAllDotsUsingTool(dotFools, floorProperties, pp);
+    else
+      result = manager.transAllDotsUsingMatrix(dotFools, floorProperties);
+
+
+    //change state height
+    var proeprtyContainer = window.storage.propertyContainer;
+    for (var key in result) {
+      if (result[key].isState()) {
+        var index = Object.values(result[key].memberOf).indexOf('state');
+        var stateId = Object.keys(result[key].memberOf)[index];
+        if (proeprtyContainer.getElementById('state', stateId) == null) {
+          //log.info(result, key, result[key])
+          delete result[key];
+        } else {
+          result[key].point.z += proeprtyContainer.getElementById('state', stateId).height * 1;
+        }
+
+      }
+    }
+
+    return result;
+
+  }
+
+  ExportManager.prototype.transAllDotsUsingMatrix = function(dotFools, floorProperties) {
+
     function copyDot(obj) {
       var copiedDot = new Dot(obj.point.x, obj.point.y);
       copiedDot.uuid = obj.uuid;
@@ -1644,23 +1681,21 @@ define([
       return copiedObject;
     }
 
-    var result = {};
+    let result = {};
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
     for (var dotFoolKey in dotFools) {
       //function(pixelHeight, pixeWidth, worldURC, worldLLC, point)
 
-      var stage = window.storage.canvasContainer.stages[floorProperties[dotFoolKey].id].stage;
-      var height = floorProperties[dotFoolKey].groundHeight * 1;
-      // var pixelLLC = [0, 0, 0];
-      // var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
-      var worldLLC = [floorProperties[dotFoolKey].lowerCorner[0] * 1, floorProperties[dotFoolKey].lowerCorner[1] * 1, 0];
-      var worldURC = [floorProperties[dotFoolKey].upperCorner[0] * 1, floorProperties[dotFoolKey].upperCorner[1] * 1, 0];
+      let stage = window.storage.canvasContainer.stages[floorProperties[dotFoolKey].id].stage;
+      let height = floorProperties[dotFoolKey].groundHeight * 1;
+      let worldLLC = [floorProperties[dotFoolKey].lowerCorner[0] * 1, floorProperties[dotFoolKey].lowerCorner[1] * 1, 0];
+      let worldURC = [floorProperties[dotFoolKey].upperCorner[0] * 1, floorProperties[dotFoolKey].upperCorner[1] * 1, 0];
 
-      for (var dotKey in dotFools[dotFoolKey].dots) {
+      for (let dotKey in dotFools[dotFoolKey].dots) {
 
-        var transDot = copyDot(dotFools[dotFoolKey].dots[dotKey]);
-        var transPoint = manager.affineTransformation(stage.getAttr('height'), stage.getAttr('width'), worldURC, worldLLC, [transDot.point.x, transDot.point.y, 0]);
+        let transDot = copyDot(dotFools[dotFoolKey].dots[dotKey]);
+        let transPoint = manager.affineTransformation(stage.getAttr('height'), stage.getAttr('width'), worldURC, worldLLC, [transDot.point.x, transDot.point.y, 0]);
         transDot.setPoint({
           x: transPoint._data[0],
           y: transPoint._data[1],
@@ -1668,32 +1703,122 @@ define([
         });
         if (transDot.point == undefined) log.info("ttt", transDot);
         result[transDot.uuid] = transDot;
-
-      }
-
-    }
-
-    //change state height
-    var proeprtyContainer = window.storage.propertyContainer;
-    for (var key in result) {
-      if (result[key].isState()) {
-        var index = Object.values(result[key].memberOf).indexOf('state');
-        var stateId = Object.keys(result[key].memberOf)[index];
-        if (proeprtyContainer.getElementById('state', stateId) == null) {
-          //log.info(result, key, result[key])
-          delete result[key];
-        } else {
-          result[key].point.z += proeprtyContainer.getElementById('state', stateId).height * 1;
-        }
-
       }
     }
 
     return result;
-
   }
 
+  ExportManager.prototype.transAllDotsUsingTool = function(dotFools, floorProperties, projectProperty) {
 
+    function array2string(arr) {
+      let str = "";
+      for (let lineI in arr) {
+        let line = arr[lineI];
+        for (let i in line) {
+          str += line[i];
+          if (i != line.length - 1) str += ", ";
+        }
+        if (lineI != arr.length - 1) str += "\r\n";
+      }
+
+      return str;
+    }
+
+    function copyDot(obj) {
+      var copiedDot = new Dot(obj.point.x, obj.point.y);
+      copiedDot.uuid = obj.uuid;
+      copiedDot.memberOf = copyObject(obj.memberOf);
+
+      return copiedDot;
+    }
+
+    function copyObject(obj) {
+      if (obj === null || typeof obj !== 'object') {
+        return obj;
+      }
+
+      var copiedObject = obj.constructor();
+
+      for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          copiedObject[key] = copyObject(obj[key]);
+        }
+      }
+
+      return copiedObject;
+    }
+
+    let constArr = [];
+    let allCoorArr = [];
+    let result = {};
+
+    let canvasCoor = window.storage.canvasContainer.stages[projectProperty.realCoorFloor].getWD();
+    let lowerCorner = floorProperties[projectProperty.realCoorFloor].lowerCorner;
+    let upperCorner = floorProperties[projectProperty.realCoorFloor].upperCorner;
+
+    constArr.push([...lowerCorner, 0, 0]);
+    constArr.push([...upperCorner, canvasCoor.width, canvasCoor.height]);
+    constArr.push([lowerCorner[0], upperCorner[1], 0, canvasCoor.height]);
+    constArr.push([upperCorner[0], lowerCorner[1], canvasCoor.width, 0]);
+
+    for (let dotFoolKey in dotFools) {
+      for (let dotKey in dotFools[dotFoolKey].dots)
+        allCoorArr.push([dotFools[dotFoolKey].dots[dotKey].point.x, dotFools[dotFoolKey].dots[dotKey].point.y]);
+    }
+
+    constArr = array2string(constArr);
+    allCoorArr = array2string(allCoorArr);
+
+    let xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status == 200) {
+
+        let strArr = xhr.response.split("\r\n");
+        strArr = strArr.slice(0, strArr.length - 1);
+
+        let coors = [];
+        for (let coorStr of strArr) {
+          coorStr = coorStr.split(",");
+          coorStr[0] = coorStr[0] * 1;
+          coorStr[1] = coorStr[1] * 1;
+          coors.push(coorStr);
+        }
+
+        let i = 0;
+
+        for (let dotFoolKey in dotFools) {
+          let height = floorProperties[dotFoolKey].groundHeight * 1;
+
+          for (let dotKey in dotFools[dotFoolKey].dots) {
+            let transDot = copyDot(dotFools[dotFoolKey].dots[dotKey]);
+            transDot.setPoint({
+              x: coors[i][0],
+              y: coors[i][1],
+              z: height
+            });
+            result[transDot.uuid] = transDot;
+            i++;
+          }
+        }
+
+        return result;
+
+      }
+    }
+
+    xhr.open("POST", "http://localhost:8080/trans-dot", false);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    let data = JSON.stringify({
+      'constArr': constArr,
+      'allCoorArr': allCoorArr
+    });
+    log.info(data);
+    xhr.send(data);
+
+    return result;
+
+  }
 
   return ExportManager;
 });

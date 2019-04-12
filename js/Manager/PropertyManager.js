@@ -115,6 +115,7 @@ define(function(require) {
         } else {
           obj.name = reqObj.updateContent.name;
           obj.description = reqObj.updateContent.description;
+          obj.storey = reqObj.updateContent.storey;
 
           var floor = window.storage.propertyContainer.getElementById('floor', window.storage.propertyContainer.getFloorById('cell', obj.id));
           if (reqObj.updateContent.bottom * reqObj.updateContent.height < 0) {
@@ -198,6 +199,7 @@ define(function(require) {
     var newCellProperty = new CellProperty(reqObj.id);
     newCellProperty.height = floorProperty.celingHeight;
     newCellProperty.bottom = 0;
+    newCellProperty.storey = reqObj.floor;
     window.storage.propertyContainer.cellProperties.push(newCellProperty);
 
     //////////////////////////// quick code /////////////////////////////////// REMOVE!
@@ -746,7 +748,16 @@ define(function(require) {
 
         for (var i of src.split(/\r?\n|\r/)) {
           var data = i.split(',');
-          codeList.addCode(data[0], data[1] != undefined ? data[1] : "");
+          if(data[0].includes("Non")){
+            codeList.addCode([data[0]], data[1] != undefined ? data[1] : "");
+          }
+          else {
+            codeList.addCode(
+              [data[0], data[1]],
+              data[2] != undefined ? data[2] : undefined,
+              data[3] != undefined ? data[3] : undefined);
+          }
+
         }
 
         var manager = window.broker.getManager('showcodemodal', 'UIManager');
@@ -813,6 +824,8 @@ define(function(require) {
 
     var fp = window.storage.propertyContainer.getElementById('floor', reqObj.floor);
     fp.setMapCoor(bottomLeft, topRight);
+    window.storage.propertyContainer.projectProperty.isRealCoor = true;
+    window.storage.propertyContainer.projectProperty.realCoorFloor = fp.id;
     alert('bottom left : ' + bottomLeft + '\ntop right : ' + topRight + '\ncenter : ' + center);
 
   }

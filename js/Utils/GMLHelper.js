@@ -104,22 +104,25 @@ define(function(require) {
 
       // NonNavigableSpaceType
       var type = cell.TYPE_NAME != undefined ? cell.TYPE_NAME.substring(cell.TYPE_NAME.indexOf('.') + 1, cell.TYPE_NAME.indexOf('Type')) : "";
+      var ExtensionBase = require('Property').EXTEND_BASE;
+      var extendBase = new ExtensionBase();
+
       if (type == 'NonNavigableSpace') {
-        cellData['navi'] = {
-          type: 'NonNavigableSpace',
-          obstacleType: cell.obstacleType.value
-        }
+        extendBase.moduleType = 'non-navi';
+        extendBase.featureType = 'NonNavigableSpace';
+        extendBase.attributes = { 'obstacleType' : cell.obstacleType.value }
       } else if(type == 'CellSpace'){
-        cellData['navi'] = {
-          type: ""
-        }
+
       } else {
-        cellData['navi'] = {
-          type: cell.TYPE_NAME != undefined ? cell.TYPE_NAME.substring(cell.TYPE_NAME.indexOf('.') + 1, cell.TYPE_NAME.indexOf('Type')) : "",
-          class: cell.class != undefined ? cell.class.value : "",
-          function: cell.function != undefined ? cell.function.value : "",
-          usage: cell.usage != undefined ? cell.usage.value : ""
+        extendBase.moduleType = 'navi';
+        extendBase.featureType = cell.TYPE_NAME != undefined ? cell.TYPE_NAME.substring(cell.TYPE_NAME.indexOf('.') + 1, cell.TYPE_NAME.indexOf('Type')) : "";
+        extendBase.attributes = {
+          'class' : cell.class != undefined ? cell.class.value : "",
+          'function' : cell.function != undefined ? cell.function.value : "",
+          'usage' : cell.usage != undefined ? cell.usage.value : ""
         }
+
+        cellData['extend'] = extendBase;
       }
 
       for (var point of parsed.points)

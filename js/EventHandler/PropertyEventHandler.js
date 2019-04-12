@@ -169,7 +169,8 @@ define(function(require) {
           'name': document.getElementById("name-text").value,
           'description': {},
           'height': document.getElementById('height-text').value * 1,
-          'bottom': document.getElementById('bottom-text').value * 1
+          'bottom': document.getElementById('bottom-text').value * 1,
+          'storey': document.getElementById('storey-text').value
         };
 
         var id = document.getElementById("id-text").value;
@@ -487,6 +488,11 @@ define(function(require) {
   }
 
   PropertyEventHandler.prototype.getMapCoor = function(broker, previousMsg, data) {
+
+    var result = {
+      result: false,
+      msg: null
+    };
 
     var Message = require('../PubSub/Message.js');
     if (broker.isPublishable('getmapcoor')) {

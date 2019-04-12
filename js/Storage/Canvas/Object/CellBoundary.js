@@ -111,8 +111,8 @@ define([
     var rect = new Konva.Rect({
       x: coor.x,
       y: coor.y,
-      width: 5,
-      height: 5,
+      width: 2,
+      height: 2,
       fill: 'white',
       stroke: 'blue',
       strokeWidth: 1

@@ -6,6 +6,8 @@ var BSON = require("bson");
 var cors = require('cors');
 var earcut = require('earcut');
 var opn = require('opn');
+var cmd     = require('node-command-line'),
+    Promise = require('bluebird');
 var app = express();
 
 
@@ -107,5 +109,40 @@ app.post('/triangulate', function(req, res){
 
   var triangles = earcut(req.body);
   res.send(triangles);
+
+});
+
+function convert() {
+  Promise.coroutine(function *() {
+    yield cmd.run('java -cp .;c:/gdal/bin/gdal/java/gdal.jar Convert ./lib/coor-converter/const.txt ./lib/coor-converter/target.txt ./lib/coor-converter/result.txt');
+  })();
+}
+
+app.post('/trans-dot', function(req, res) {
+
+  let constArr = req.body.constArr;
+  let allCoorArr = req.body.allCoorArr;
+
+  fs.writeFile('./lib/coor-converter/const.txt', constArr, function(err) {
+    if (err)  {
+      console.log(err);
+      return res.status(500).send(err);
+    }
+
+    fs.writeFile('./lib/coor-converter/target.txt', allCoorArr, function(err) {
+
+      if (err)  {
+        console.log(err);
+        return res.status(500).send(err);
+      }
+
+      convert();
+
+      fs.readFile('./lib/coor-converter/result.txt', function(err, data) {
+        if (err) return res.status(500).send(err);
+        res.send(data);
+      });
+    });
+  });
 
 });

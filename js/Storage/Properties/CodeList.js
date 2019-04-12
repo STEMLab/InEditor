@@ -469,7 +469,6 @@ define(function(require) {
           else if (List[path[0]][path[1]] == undefined) setProeprty('warning', 'Invalide Code type : ' + path[1]);
           else if (List[path[0]][path[1]][code] != undefined) setProeprty('warning', path[0] + '-' + path[1] + '-' + code + ' is already exist');
           else if (isNaN(code) || code == "") setProeprty('warning', 'Invalide Code Number : ' + code);
-          else if (desc.split('-').length >= 2) setProeprty('warning', 'Invalide Code Description');
           else {
             setProeprty('success', 'Successed to add new code', path[0] + '-' + path[1] + '\n' + code + ' : ' + desc);
             List[path[0]][path[1]][code] = desc;
