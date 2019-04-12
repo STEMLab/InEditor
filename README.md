@@ -39,6 +39,6 @@ This project supports generating IndoorGML data for core module and following ex
   3. [Storey Extension](http://www.indoorgml.net/extensions/indoorgmlstoreyextension.xsd) → will be supported
   4. [POI Extension]() → will be supported
 
-
 ## License
 This project is licensed under the MIT licenses. - see the [LICENSE](https://github.com/STEMLab/IndoorGML-Editor/blob/master/LICENSE) file for details
+=======
