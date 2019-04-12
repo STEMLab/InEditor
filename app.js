@@ -6,6 +6,8 @@ var BSON = require("bson");
 var cors = require('cors');
 var earcut = require('earcut');
 var opn = require('opn');
+var cmd     = require('node-command-line'),
+    Promise = require('bluebird');
 var app = express();
 
 
@@ -68,9 +70,13 @@ app.get('/load-project', function(req, res) {
 });
 
 app.post('/save-gml/*', function(req, res) {
+
   fs.writeFile('./output/'+ req.params[0] +'.gml', vkbeautify.xml(req.body) , function(err) {
 
-    if (err)  return res.status(500).send(err);
+    if (err)  {
+      console.log(err);
+      return res.status(500).send(err);
+    }
 
     res.send('/output/'+ req.params[0] +'.gml');
 
@@ -78,9 +84,11 @@ app.post('/save-gml/*', function(req, res) {
 });
 
 app.post('/xml-to-json', function(req,res){
-  var IndoorGML_Core_1_0_3 = require('./json/IndoorGML_Core_1_0_3.js').IndoorGML_Core_1_0_3;
+  var IndoorGML_Non_Navi_1_0_3 = require('./json/IndoorGML_Non_Navi_1_0_3.js').IndoorGML_Non_Navi_1_0_3;
+  var IndoorGML_Navi_1_0_3 = require('./json/IndoorGML_Navi_1_0_3.js').IndoorGML_Navi_1_0_3;
+  var IndoorGML_Storey = require('./json/IndoorGML_Storey.js').IndoorGML_Storey;
   var Jsonix = require('jsonix').Jsonix;
-  var context = new Jsonix.Context([IndoorGML_Core_1_0_3]);
+  var context = new Jsonix.Context([IndoorGML_Storey, IndoorGML_Non_Navi_1_0_3, IndoorGML_Navi_1_0_3]);
   var unmarshaller = context.createUnmarshaller();
 
   var resume = unmarshaller.unmarshalFile(req.body, function(result) {
@@ -101,5 +109,40 @@ app.post('/triangulate', function(req, res){
 
   var triangles = earcut(req.body);
   res.send(triangles);
+
+});
+
+function convert() {
+  Promise.coroutine(function *() {
+    yield cmd.run('java -cp .;c:/gdal/bin/gdal/java/gdal.jar Convert ./lib/coor-converter/const.txt ./lib/coor-converter/target.txt ./lib/coor-converter/result.txt');
+  })();
+}
+
+app.post('/trans-dot', function(req, res) {
+
+  let constArr = req.body.constArr;
+  let allCoorArr = req.body.allCoorArr;
+
+  fs.writeFile('./lib/coor-converter/const.txt', constArr, function(err) {
+    if (err)  {
+      console.log(err);
+      return res.status(500).send(err);
+    }
+
+    fs.writeFile('./lib/coor-converter/target.txt', allCoorArr, function(err) {
+
+      if (err)  {
+        console.log(err);
+        return res.status(500).send(err);
+      }
+
+      convert();
+
+      fs.readFile('./lib/coor-converter/result.txt', function(err, data) {
+        if (err) return res.status(500).send(err);
+        res.send(data);
+      });
+    });
+  });
 
 });

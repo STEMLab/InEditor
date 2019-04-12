@@ -30,6 +30,9 @@ define([], function() {
      */
     this.author = new String();
 
+    this.isRealCoor = false;
+    this.realCoorFloor = "";
+
     /**
      * @memberof ProjectProperty
      */

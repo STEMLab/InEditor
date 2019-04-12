@@ -75,14 +75,17 @@ define(function(require) {
     var layers = {};
 
     for (var cell of cellSpaceMember) {
-      cell = cell.cellSpace;
+      cell = cell.cellSpace.value;
 
       var cellData = parseBasicProperty(cell);
       cellData['partialboundedBy'] = [];
 
       if (cell.partialboundedBy != undefined) {
         for (var obj of cell.partialboundedBy) {
-          cellData['partialboundedBy'].push(obj.href.substring(1).split('-')[0]);
+          var pbb = obj.href.substring(1);
+          if(pbb.indexOf("REVERSE") != -1) pbb = pbb.substring(0, pbb.indexOf("-REVERSE"));
+
+          cellData['partialboundedBy'].push(pbb);
         }
       }
 
@@ -93,8 +96,33 @@ define(function(require) {
         cellData['floorHight'] = parsed.floorHight;
         cellData['celingHeight'] = parsed.celingHeight;
         cellData['holes'] = parsed.holes;
+        cellData['bottom'] = 0;
+        cellData['height'] = parsed.celingHeight;
       } else {
         // 2D
+      }
+
+      // NonNavigableSpaceType
+      var type = cell.TYPE_NAME != undefined ? cell.TYPE_NAME.substring(cell.TYPE_NAME.indexOf('.') + 1, cell.TYPE_NAME.indexOf('Type')) : "";
+      var ExtensionBase = require('Property').EXTEND_BASE;
+      var extendBase = new ExtensionBase();
+
+      if (type == 'NonNavigableSpace') {
+        extendBase.moduleType = 'non-navi';
+        extendBase.featureType = 'NonNavigableSpace';
+        extendBase.attributes = { 'obstacleType' : cell.obstacleType.value }
+      } else if(type == 'CellSpace'){
+
+      } else {
+        extendBase.moduleType = 'navi';
+        extendBase.featureType = cell.TYPE_NAME != undefined ? cell.TYPE_NAME.substring(cell.TYPE_NAME.indexOf('.') + 1, cell.TYPE_NAME.indexOf('Type')) : "";
+        extendBase.attributes = {
+          'class' : cell.class != undefined ? cell.class.value : "",
+          'function' : cell.function != undefined ? cell.function.value : "",
+          'usage' : cell.usage != undefined ? cell.usage.value : ""
+        }
+
+        cellData['extend'] = extendBase;
       }
 
       for (var point of parsed.points)
@@ -109,8 +137,54 @@ define(function(require) {
         floor: cellData.floorHight,
         celing: cellData.celingHeight
       });
+
       if (cellListByHight[key] == undefined) cellListByHight[key] = [cellData];
       else cellListByHight[key].push(cellData)
+    }
+
+    var heightKeys = Object.keys(cellListByHight);
+    for (var i = 0; i < heightKeys.length - 1; i++) {
+      var outer = JSON.parse(heightKeys[i]);
+      for (var j = i + 1; j < heightKeys.length; j++) {
+        var inner = JSON.parse(heightKeys[j]);
+        if (outer.floor <= inner.floor && outer.floor + outer.celing >= inner.floor + inner.celing) {
+          // out (  in  )
+          var diff = inner.floor - outer.floor;
+          var height = inner.celing - inner.floor;
+
+          for (var o of cellListByHight[heightKeys[j]]) {
+            o.height = height;
+            o.floorHight = outer.floor;
+            o.celingHeight = outer.celing;
+            o['bottom'] = inner.floor - outer.floor;
+            o['height'] = inner.celing - inner.floor;
+          }
+
+          cellListByHight[heightKeys[i]] = cellListByHight[heightKeys[i]].concat(cellListByHight[heightKeys[j]]);
+          delete cellListByHight[heightKeys[j]];
+          heightKeys.splice(j, 1);
+          j--;
+        } else if (outer.floor >= inner.floor && outer.floor + outer.celing <= inner.floor + inner.celing) {
+          // in (  out  )
+          var diff = outer.floor - inner.floor;
+          var height = inner.celing - inner.floor;
+
+          for (var o of cellListByHight[heightKeys[i]]) {
+            o.height = height;
+            o.floorHight = inner.floo;
+            o.celingHeight = inner.celing;
+            o['bottom'] = outer.floor - inner.floor;
+            o['height'] = outer.celing - outer.floor;
+          }
+
+          cellListByHight[heightKeys[j]] = cellListByHight[heightKeys[j]].concat(cellListByHight[heightKeys[i]]);
+          delete cellListByHight[heightKeys[i]];
+          heightKeys.splice(i, 1);
+          i--;
+          break;
+        }
+      }
+
     }
 
     return {
@@ -123,15 +197,23 @@ define(function(require) {
     var cellBoundaries = {};
     var cellBoundaryListByHigth = {};
     for (var cellBoundary of cellSpaceBoundaryMember) {
-      cellBoundary = cellBoundary.cellSpaceBoundary;
+      cellBoundary = cellBoundary.cellSpaceBoundary.value;
 
       // property
       var cbData = parseBasicProperty(cellBoundary);
-      if (cbData.id.split('-')[1] == "REVERSE") continue;
+
+      if (cbData.id.indexOf("REVERSE") != -1) continue;
       if (cbData.duality != null &&
-        cbData.duality.split('-')[1] == "REVERSE")
-        cbData.duality = cbData.duality.split('-')[0];
+          cbData.duality.indexOf("REVERSE") != -1)
+        cbData.duality = cbData.duality.substring(0, cbData.duality.indexOf("-REVERSE"));
+
       // parse navi data
+      cbData['navi'] = {
+        type: cellBoundary.TYPE_NAME != undefined ? cellBoundary.TYPE_NAME.substring(cellBoundary.TYPE_NAME.indexOf('.') + 1, cellBoundary.TYPE_NAME.indexOf('Type')) : "",
+        class: cellBoundary.class != undefined ? cellBoundary.class.value : "",
+        function: cellBoundary.function != undefined ? cellBoundary.function.value : "",
+        usage: cellBoundary.usage != undefined ? cellBoundary.usage.value : ""
+      }
 
       // geometry
       if (cellBoundary.cellSpaceBoundaryGeometry.geometry3D != undefined) {
@@ -139,9 +221,13 @@ define(function(require) {
         cbData['points'] = parsed._points;
         cbData['floorHight'] = parsed.low;
         cbData['celingHeight'] = parsed.high - parsed.low;
+        cbData['bottom'] = parsed.low;
+        cbData['height'] = parsed.high - parsed.low;
       } else {
         // 2D
       }
+
+      if (cbData['points'].length <= 1) continue;
 
       for (var point of cbData.points)
         setBBox({
@@ -392,9 +478,9 @@ define(function(require) {
         if (type == 'transition' && spaceLayers[lk].transitions[id] != undefined) return lk;
       }
 
-      for(var f in floorData){
-        if(type == 'state' && floorData[f].states[id]) return floorData[f].layer;
-        if(type == 'transition' && floorData[f].transitions[id]) return floorData[f].layer;
+      for (var f in floorData) {
+        if (type == 'state' && floorData[f].states[id]) return floorData[f].layer;
+        if (type == 'transition' && floorData[f].transitions[id]) return floorData[f].layer;
       }
 
       return 'undefined';
@@ -440,14 +526,14 @@ define(function(require) {
 
       // duality(state)
       if (c.duality != null &&
-          thisFloor.states[c.duality] == undefined &&
-          spaceLayers[layer].states[c.duality] != undefined)
+        thisFloor.states[c.duality] == undefined &&
+        spaceLayers[layer].states[c.duality] != undefined)
         setStateFloor(spaceLayers[layer].states[c.duality], thisFloor);
 
       // partialboundedBy(cellboundary)
       for (var cb of c.partialboundedBy) {
         if (thisFloor.cellBoundaries[cb] == undefined &&
-            cbm.cellBoundaries[cb] != undefined)
+          cbm.cellBoundaries[cb] != undefined)
           setCellBoundaryFloor(cbm.cellBoundaries[cb], thisFloor);
       }
 
@@ -460,8 +546,8 @@ define(function(require) {
 
       // duality(transition)
       if (cb.duality != null &&
-          thisFloor.transitions[cb.duality] == undefined &&
-          spaceLayers[thisFloor.layer].transitions[cb.duality] != undefined)
+        thisFloor.transitions[cb.duality] == undefined &&
+        spaceLayers[thisFloor.layer].transitions[cb.duality] != undefined)
         setTransitionFloor(spaceLayers[thisFloor.layer].transitions[cb.duality], thisFloor);
 
       delete cbm.cellBoundaries[cb.id];
@@ -473,15 +559,15 @@ define(function(require) {
 
       // duality(cellspace)
       if (s.duality != null &&
-          thisFloor.cells[s.duality] == undefined &&
-          cm.cells[s.duality] != undefined)
+        thisFloor.cells[s.duality] == undefined &&
+        cm.cells[s.duality] != undefined)
         setCellFloor(cm.cells[s.duality], thisFloor);
 
       // connections
       for (var t of s.connects) {
         if (thisFloor.transitions[t] == undefined &&
-            spaceLayers[thisFloor.layer].transitions[t] != undefined &&
-            spaceLayers[thisFloor.layer].transitions[t].connects[0] == s.id)
+          spaceLayers[thisFloor.layer].transitions[t] != undefined &&
+          spaceLayers[thisFloor.layer].transitions[t].connects[0] == s.id)
           setTransitionFloor(spaceLayers[thisFloor.layer].transitions[t], thisFloor);
       }
 
@@ -493,8 +579,8 @@ define(function(require) {
 
       // duality
       if (t.duality != null &&
-          thisFloor.cellBoundaries[t.duality] == undefined &&
-          cbm.cellBoundaries[t.duality] != undefined)
+        thisFloor.cellBoundaries[t.duality] == undefined &&
+        cbm.cellBoundaries[t.duality] != undefined)
         setCellBoundaryFloor(cbm.cellBoundaries[t.duality], thisFloor);
 
       // connects(state)
@@ -518,7 +604,7 @@ define(function(require) {
         floorData[thisFloor.id] = thisFloor;
       }
 
-      if(thisFloor.cells[c.id] == undefined)
+      if (thisFloor.cells[c.id] == undefined)
         setCellFloor(c, thisFloor);
 
       // thisFloor.cells[c.id] = c;
@@ -558,7 +644,7 @@ define(function(require) {
         floorData[thisFloor.id] = thisFloor;
       }
 
-      if(thisFloor.cellBoundaries[cb.id] == undefined)
+      if (thisFloor.cellBoundaries[cb.id] == undefined)
         setCellBoundaryFloor(cb, thisFloor);
       // thisFloor.cellBoundaries[cb.id] = cb;
       // if(cb.duality != null)
@@ -570,7 +656,13 @@ define(function(require) {
     for (var layer in spaceLayers) {
       for (var s of Object.values(spaceLayers[layer].states)) {
         var thisFloor = findFloorData('state', -1, s.height, [], layer);
-        if(thisFloor.states[s.id] == undefined)
+
+        if (thisFloor == null) {
+          thisFloor = floorDataFactory(s.floorHight, s.celingHeight, s.celingHeight, layer);
+          floorData[thisFloor.id] = thisFloor;
+        }
+
+        if (thisFloor.states[s.id] == undefined)
           setStateFloor(s, thisFloor);
         // s.height -= thisFloor.floorHight;
         // thisFloor.states[s.id] = s;
@@ -579,7 +671,7 @@ define(function(require) {
 
       for (var t of Object.values(spaceLayers[layer].transitions)) {
         var thisFloor = findFloorData('transition', -1, -1, t.connects, layer);
-        if(thisFloor.transitions[t.id] == undefined)
+        if (thisFloor.transitions[t.id] == undefined)
           setTransitionFloor(t, thisFloor);
         // thisFloor.transitions[t.id] = t;
         // delete spaceLayers[layer].transitions[t.id];

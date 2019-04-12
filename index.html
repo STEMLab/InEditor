@@ -53,9 +53,20 @@
   <!-- sementic ui -->
   <script src="./lib/semantic.min.js"></script>
   <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
+  <link rel="stylesheet" type="text/css" href="./css/semantic-ui-alerts.min.css">
+  <script type="text/javascript" src="./lib/semantic-ui-alerts.min.js"></script>
+
 
   <!-- layout -->
   <script src="./lib/split.min.js"></script>
+
+  <!-- table-filter -->
+  <script src="./lib/excel-bootstrap-table-filter-bundle.min.js"></script>
+  <link type="text/css" rel="stylesheet" href="./css/excel-bootstrap-table-filter-style.css" />
+
+  <!-- open layers -->
+  <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css" type="text/css">
+  <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
 
 </head>
 
@@ -88,6 +99,7 @@
             <div class="dropdown-menu">
               <a class="dropdown-item" id="setting-conditions" data-modaltype="conditions">Conditions</a>
               <a class="dropdown-item" id="setting-desc" data-modaltype="desc">Description</a>
+              <a class="dropdown-item" id="setting-code" data-modaltype="code">Code</a>
             </div>
           </li>
           <li class="nav-item dropdown">
@@ -115,6 +127,9 @@
           <li class="nav-item">
             <img src="./assets/icon/cellboundary_d.png" title="Add new CellBoundary" id="cellboundary-btn">
           </li>
+          <!-- <li class="nav-item">
+            <img src="./assets/icon/hatch_d.png" title="Add new Hatch" id="hatch-btn">
+          </li> -->
           <li class="nav-item">
             <img src="./assets/icon/state_d.png" title="Add new State" id="state-btn">
           </li>
@@ -227,6 +242,13 @@
           </div>
         </form>
       </div>
+
+      <!-- <div class="form-group">
+        <label for="factory-wall-segment-factor-container"><b>Wall Segment Factor</b></label>
+        <div class="form-group" id="factory-wall-segment-factor-container">
+          <input type="number" class="form-control" id="factory-wall-segment-factor" value="-1">
+        </div>
+      </div> -->
 
       <div class="form-group">
         <b>Propeties</b>
@@ -672,6 +694,77 @@
     <ul class="dropdown-menu" role="menu">
     </ul>
   </div>
+
+  <div class="ui longer modal" id="setting-code-modal">
+    <div class="header">
+      <i class="close icon" onClick={$('#setting-code-modal').modal('hide')}></i>
+      Code List for Navi Module
+    </div>
+
+    <div class="content" style="padding: 2rem">
+      <div class="ui grid">
+        <div class="two wide column">Add New<br />Single Code</div>
+        <div class="four wide column" style="padding-left: 0px">
+          <div class="ui selection fluid dropdown" id="setting-code-new-object-obj-type-menu">
+            <i class="dropdown icon"></i>
+            <div class="default text">Object Type</div>
+            <div class="menu">
+              <div class="item" data-value="GeneralSpace">GeneralSpace</div>
+              <div class="item" data-value="TransitionSpace">TransitionSpace</div>
+              <div class="item" data-value="ConnectionSpace">ConnectionSpace</div>
+              <div class="item" data-value="AnchorSpace">AnchorSpace</div>
+              <div class="item" data-value="ConnectionBoundary">ConnectionBoundary</div>
+              <div class="item" data-value="AnchorBoundary">AnchorBoundary</div>
+              <div class="item" data-value="NonNavigableSpace">NonNavigableSpace</div>
+            </div>
+          </div>
+        </div>
+        <div class="three wide column" style="padding-left: 0px">
+          <div class="ui selection fluid dropdown" id="setting-code-new-object-code-type-menu">
+            <i class="dropdown icon"></i>
+            <div class="default text">Code Type</div>
+            <div class="menu">
+              <div class="item" data-value="class">class</div>
+              <div class="item" data-value="function">function</div>
+            </div>
+          </div>
+        </div>
+        <div class="ui three wide column input" style="padding-left: 0px">
+          <input type="number" id="setting-code-new-object-code-number-menu" placeholder="Code Number">
+        </div>
+        <div class="ui three wide column input" style="padding-left: 0px">
+          <input type="text" id="setting-code-new-object-code-desc-menu" placeholder="Code desc">
+        </div>
+        <div class="one right floated column middle aligned">
+          <i class="plus circle icon" id="setting-code-new-object-btn"></i>
+        </div>
+      </div>
+      <div class="ui grid">
+        <div class="four wide column">Upload Code List File<br/>(.csv, .json)</div>
+        <div class="ten wide column middle aligned">
+          <div>
+            <input type="file" class="custom-file-input" id="setting-code-upload-file" accept=".csv, .json" onChange={$('#setting-code-upload-file-label').html(event.target.files[0].name);}>
+            <label class="custom-file-label" for="customFile" style="top:1rem" id="setting-code-upload-file-label"></label>
+          </div>
+        </div>
+        <div class="one right floated column middle aligned">
+          <i class="plus circle icon" id="setting-code-upload-file-btn"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="content scrolling" id="setting-code-modal-list-container">
+      <table id="code-table" class="ui table">
+        <thead id="code-table-head"></thead>
+        <tbody id="code-table-body"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script>
+    $('.ui.dropdown').dropdown();
+  </script>
 
   <script data-main="js/main" src="lib/require.js"></script>
 </body>

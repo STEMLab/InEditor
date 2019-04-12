@@ -186,6 +186,15 @@ define(["./Feature"], function(Feature) {
 
   }
 
+  CellSpace.prototype.addProperty = function(key, value){
+    if(value != undefined) this.properties[key] = value;
+
+    if(key == 'bottom'){
+      for(var s of this.geometry.coordinates)
+        for(var c of s) c[2] += value * 1;
+    }
+  }
+
 
   return CellSpace;
 

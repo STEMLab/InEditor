@@ -2,11 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define([
-  "../PubSub/Message.js"
-], function(
-  Message
-) {
+define(function(require) {
   'use strict';
 
   /**
@@ -29,8 +25,8 @@ define([
       'click': this.clickPropertRefySubmitBtn
     }
 
-    handlerBinder['property-navi-submit-btn'] = {
-      'click': this.clickNaviSubmitBtn
+    handlerBinder['extend-subimt-btn'] = {
+      'click': this.clickExtebdSubmitBtn
     }
 
     handlerBinder['setting-conditions-submit-btn'] = {
@@ -43,6 +39,22 @@ define([
 
     handlerBinder['delete-local-desc-btn'] = {
       'click': this.deleteLocalDesc
+    }
+
+    handlerBinder['setting-code-new-object-btn'] = {
+      'click': this.addNewCode
+    }
+
+    handlerBinder['setting-code-upload-file-btn'] = {
+      'click': this.uploadCodeFile
+    }
+
+    handlerBinder['code-modal-trash'] = {
+      'click': this.deleteCode
+    }
+
+    handlerBinder['get-map-coor-btn'] = {
+      'click': this.getMapCoor
     }
 
   }
@@ -60,6 +72,7 @@ define([
 
     if (broker.isPublishable('updateproperty')) {
 
+      var Message = require('../PubSub/Message.js');
       broker.publish(new Message('updateproperty', {
         "type": $('#property-table').data('type'),
         "id": document.getElementById("id-text").value,
@@ -94,6 +107,7 @@ define([
 
     if (broker.isPublishable('updaterefdata')) {
 
+      var Message = require('../PubSub/Message.js');
       broker.publish(new Message('updaterefdata', {
         "type": $('#property-table').data('type'),
         "id": document.getElementById("id-text").value,
@@ -137,9 +151,9 @@ define([
           'layer': document.getElementById("layer-text").value,
           'lowerCorner': [document.getElementById("lower-corner-x-text").value, document.getElementById("lower-corner-y-text").value],
           'upperCorner': [document.getElementById("upper-corner-x-text").value, document.getElementById("upper-corner-y-text").value],
-          'groundHeight': document.getElementById("ground-height-text").value,
-          'celingHeight': document.getElementById("celing-height-text").value,
-          'doorHeight': document.getElementById("door-height-text").value,
+          'groundHeight': document.getElementById("ground-height-text").value * 1,
+          'celingHeight': document.getElementById("celing-height-text").value * 1,
+          'doorHeight': document.getElementById("door-height-text").value * 1,
           'description': {}
         };
 
@@ -153,7 +167,10 @@ define([
       case 'cell':
         result = {
           'name': document.getElementById("name-text").value,
-          'description': {}
+          'description': {},
+          'height': document.getElementById('height-text').value * 1,
+          'bottom': document.getElementById('bottom-text').value * 1,
+          'storey': document.getElementById('storey-text').value
         };
 
         var id = document.getElementById("id-text").value;
@@ -171,8 +188,9 @@ define([
       case 'cellBoundary':
         result = {
           'name': document.getElementById("name-text").value,
-          'naviType': document.getElementById("navi-text").value,
-          'description': {}
+          'description': {},
+          'height': document.getElementById('height-text').value * 1,
+          'bottom': document.getElementById('bottom-text').value * 1
         };
 
         var id = document.getElementById("id-text").value;
@@ -230,6 +248,7 @@ define([
 
     if (broker.isPublishable('addnewglobaldesc')) {
 
+      var Message = require('../PubSub/Message.js');
       broker.publish(new Message('addnewglobaldesc', {
         data: document.getElementById('setting-desc-modal-newDesc').value
       }));
@@ -250,32 +269,77 @@ define([
     return result;
   }
 
-  PropertyEventHandler.prototype.clickNaviSubmitBtn = function(broker, previousMsg) {
+  PropertyEventHandler.prototype.clickExtebdSubmitBtn = function(broker, previousMsg) {
     var result = new Object;
 
     if (broker.isPublishable('updateproperty')) {
-      var type = document.getElementById("navi-text").value;
-      if (type == "" || type == "selected") type = "";
 
-      var data = {
-        'naviType': type,
-        'navi': {
-          'class': "",
-          'function': "",
-          'usage': ""
+      var CodeList = require('Property').CODE_LIST.getInstance();
+      let ExtensionBase = require('Property').EXTEND_BASE;
+      let data = new ExtensionBase();
+      data.moduleType = document.getElementById('module-type-text').value;
+      data.featureType = document.getElementById('feature-type-text').value;
+
+      if(data.moduleType != "" && data.featureType != ""){
+        if(data.moduleType == "navi" && document.getElementById('property-table').dataset.type == "cell"){
+          data.attributes = {
+            function: CodeList.getCodeNum([data.featureType, 'class'], document.getElementById("class-text").value),
+            class: CodeList.getCodeNum([data.featureType, 'function'], document.getElementById("function-text").value),
+            usage: CodeList.getCodeNum([data.featureType, 'function'], document.getElementById("usage-text").value)
+          }
         }
-      };
-
-      if (data.naviType != "" && data.naviType != "selected") {
-        data.navi.class = document.getElementById("class-text").value
-        data.navi.function = document.getElementById("function-text").value
-        data.navi.usage = document.getElementById("usage-text").value
+        else if(data.moduleType == "non-navi"){
+          data.attributes = {
+            obstacleType: CodeList.getCodeNum([data.featureType], document.getElementById("obstacle-type-text").value)
+          }
+        }
       }
 
+      var Message = require('../PubSub/Message.js');
       broker.publish(new Message('updateproperty', {
         "type": $('#property-table').data('type'),
         "id": document.getElementById("id-text").value,
-        "isNavi": true,
+        "dataClass": 'ExtensionBase',
+        "updateContent": data
+      }));
+
+      result = {
+        'result': true,
+        'msg': null
+      };
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to updateproperty.";
+
+    }
+
+    return result;
+  }
+
+
+  PropertyEventHandler.prototype.clickTextureSubmitBtn = function(broker, previousMsg) {
+    var result = new Object;
+
+    if (broker.isPublishable('updateproperty')) {
+
+      var data = {
+        'direction': {
+          'in' : document.getElementById('check-direction-in').children[0].checked,
+          'out' : document.getElementById('check-direction-out').children[0].checked
+        },
+        'target' : {
+          'ceiling' : document.getElementById('check-target-ceiling').children[0].checked,
+          'wall' : document.getElementById('check-target-wall').children[0].checked,
+          'floor' : document.getElementById('check-target-floor').children[0].checked
+        }
+      };
+
+      var Message = require('../PubSub/Message.js');
+      broker.publish(new Message('updateproperty', {
+        "type": $('#property-table').data('type'),
+        "id": document.getElementById("id-text").value,
+        "isTexture": true,
         "updateContent": data
       }));
 
@@ -298,6 +362,7 @@ define([
     var text = $('#add-new-local-desc-text').val();
 
     if (broker.isPublishable('addlocaldesc') && (text != "" && text != null)) {
+      var Message = require('../PubSub/Message.js');
       broker.publish(new Message('addlocaldesc', {
         "id": $('#id-text').val(),
         "type": $('#property-table').data('type'),
@@ -320,6 +385,7 @@ define([
 
   PropertyEventHandler.prototype.deleteLocalDesc = function(broker, previousMsg, data) {
     var result = new Object;
+    var Message = require('../PubSub/Message.js');
 
     if (broker.isPublishable('deletelocaldesc')) {
       broker.publish(new Message('deletelocaldesc', {
@@ -335,6 +401,113 @@ define([
     } else {
 
       result.msg = "wrong state transition : " + previousMsg + " to addlocaldesc.";
+
+    }
+
+    return result;
+  }
+
+  PropertyEventHandler.prototype.addNewCode = function(broker, previousMsg, data) {
+
+    var result = new Object;
+    var Message = require('../PubSub/Message.js');
+
+    var ot = $('#setting-code-new-object-obj-type-menu').dropdown('get value');
+    var ct = $('#setting-code-new-object-code-type-menu').dropdown('get value');
+    var cn = $('#setting-code-new-object-code-number-menu').val();
+    var cd = $('#setting-code-new-object-code-desc-menu').val();
+
+    if (broker.isPublishable('addnewcode')) {
+      if (ot == 'NonNavigableSpace') {
+        broker.publish(new Message('addnewcode', {
+          path: ['NonNavigableSpace'],
+          cn: cn,
+          cd: cd
+        }));
+
+        result = {
+          result: true,
+          msg: null
+        }
+      } else {
+        broker.publish(new Message('addnewcode', {
+          path: [ot, ct],
+          cn: cn,
+          cd: cd
+        }));
+
+        result = {
+          result: true,
+          msg: null
+        }
+      }
+    }
+
+    return result;
+  }
+
+  PropertyEventHandler.prototype.uploadCodeFile = function(broker, previousMsg, data) {
+    var file = document.getElementById('setting-code-upload-file').files[0];
+    var result = {
+      result: false,
+      msg: null
+    }
+
+    var Message = require('../PubSub/Message.js');
+    if (broker.isPublishable('uploadcodefile')) {
+      broker.publish(new Message('uploadcodefile', {
+        file: file
+      }));
+
+      result = true;
+    }
+
+    return result;
+  }
+
+  PropertyEventHandler.prototype.deleteCode = function(broker, previousMsg, data) {
+    var path = data.target.id.split('-');
+    var result = {
+      result: false,
+      msg: null
+    }
+
+    var Message = require('../PubSub/Message.js');
+
+    if (broker.isPublishable('deletecode')) {
+      broker.publish(new Message('deletecode', {
+        path: path[2] != "" ? [path[1], path[2]] : [path[1]],
+        cn: path[3],
+        cd: path[4]
+      }));
+
+      result.result = true;
+    }
+
+    return result;
+  }
+
+  PropertyEventHandler.prototype.getMapCoor = function(broker, previousMsg, data) {
+
+    var result = {
+      result: false,
+      msg: null
+    };
+
+    var Message = require('../PubSub/Message.js');
+    if (broker.isPublishable('getmapcoor')) {
+      broker.publish(new Message('getmapcoor', {
+        "floor": document.getElementById('id-text').value
+      }));
+
+      result = {
+        'result': true,
+        'msg': null
+      };
+
+    } else {
+
+      result.msg = "wrong state transition : " + previousMsg + " to getmapcoor.";
 
     }
 

@@ -75,6 +75,7 @@ define([], function() {
     treeViewContainer.init();
     $("#tree-view-floor").addClass("tree-view");
     $("#tree-view-class").addClass("tree-view");
+    $.ui.fancytree.debugLevel = 1;
 
 
     // init floor tree
@@ -388,7 +389,6 @@ define([], function() {
 
     if (propertyContainer.floorProperties.length != 0) {
 
-
       // add floors
       for (var i = 0; i < propertyContainer.floorProperties.length; i++) {
         this.addFloor(propertyContainer.floorProperties[i]);
@@ -428,6 +428,13 @@ define([], function() {
         if (id != propertyContainer.transitionProperties[i].name) {
           this.updateTitle(id, propertyContainer.transitionProperties[i].name);
         }
+      }
+
+      // add InterLayerConnection
+      var interlayerLen = propertyContainer.interlayerConnections.length;
+      for (var i = 0; i < interlayerLen; i++) {
+        var id = propertyContainer.interlayerConnections[i].id;
+        this.addInterLayerConnection(id, propertyContainer.getFloorById('interlayerConnection', id));
       }
 
     }

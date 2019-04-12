@@ -144,12 +144,9 @@ body {
   overflow-y: auto;
 }
 
-.property-container input[type=checkbox] {
-  width: 20%;
-}
-
 .property-container label {
-  width: 50%;
+  color: var(--property-tab-value-color) !important;
+  font-size: 12px !important;
 }
 
 .property-container td {
@@ -339,6 +336,11 @@ td select {
   background-color: var(--viewport-bg-color);
 }
 
+.property-dropdown{
+  font-size: 12px !important;
+}
+
+
 /* The snackbar - position it at the bottom and in the middle of the screen */
 
 #snackbar {
@@ -438,4 +440,8 @@ a.disabled {
 
 .my-radio label {
   padding-left: 1.2rem;
+}
+
+.inline .fields{
+  margin: 0px !important;
 }

@@ -23,7 +23,7 @@ define([
     Split(['#tree-view-container', '#property-container'], {
       direction: 'vertical',
       cursor: 'row-resize',
-      sizes: [60, 38]
+      sizes: [30, 67]
     });
 
     /**

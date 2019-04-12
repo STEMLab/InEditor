@@ -26,6 +26,7 @@ define([
     this.stateGeometry = [];
     this.transitionGeometry = [];
     this.holeGeometry = [];
+    this.hatchGeometry = [];
   }
 
   /**
@@ -44,6 +45,7 @@ define([
     this.stateGeometry = [];
     this.transitionGeometry = [];
     this.holeGeometry = [];
+    this.hatchGeometry = [];
   }
 
   /**

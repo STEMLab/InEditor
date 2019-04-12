@@ -212,6 +212,23 @@ define([
     // this.reqSpecList['addcellboundariesfromgml'] = new MessageSpec('single', 'inclunding', null, false);
     this.reqSpecList['addobjectfromgml'] = new MessageSpec('single', 'including', null, false);
     this.reqSpecList['addproeprtydatafromgml'] = new MessageSpec('single', 'including', null ,false);
+    this.reqSpecList['shownaviattr'] = new MessageSpec('single', 'including', null, false);
+
+    this.reqSpecList['showcodemodal'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['shownaviattr'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['showextensionattr'] = new MessageSpec('single', 'including', null, false);
+
+    this.reqSpecList['addnewcode'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['uploadcodefile'] = new MessageSpec('single', 'including', null, false);
+    this.reqSpecList['deletecode'] = new MessageSpec('single', 'including', null, false);
+
+    this.reqSpecList['addmap'] = new MessageSpec('single', 'including', null ,false);
+    this.reqSpecList['getmapcoor'] = new MessageSpec('single', 'including', null, false);
+
+    this.reqSpecList['start-addnewhatch'] = new MessageSpec('cycle', 'including', ['draw'], false);
+    this.reqSpecList['addnewhatch'] = new MessageSpec('cycle', 'including', ['draw'], false);
+    this.reqSpecList['end-addnewhatch'] = new MessageSpec('cycle', 'including', ['draw'], false);
+
   }
 
   /**

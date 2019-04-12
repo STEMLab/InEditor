@@ -4,10 +4,12 @@
 
 define([
   "./Feature",
-  "js/JsonFormat/GeometryConverter.js"
+  "js/JsonFormat/GeometryConverter.js",
+  "js/Storage/Dot/DotMath.js"
 ], function(
   Feature,
-  GeometryConverter
+  GeometryConverter,
+  DotMath
 ) {
   'user strict';
 
@@ -17,7 +19,7 @@ define([
    */
   function CellSpace(conditions) {
 
-      Feature.apply(this, arguments);
+    Feature.apply(this, arguments);
 
     this.type = "CellSpace";
     this.geometry = {
@@ -25,8 +27,6 @@ define([
       'coordinates': [],
       'properties': {
         'id': "",
-        'height': "",
-        'extrude': "",
         'type': 'geojson'
       }
     };
@@ -69,8 +69,8 @@ define([
 
     }
 
-    if(type == '3D') this.geometry.type = 'Solid';
-    else if(type == '2D') this.geometry.type = 'Surface';
+    if (type == '3D') this.geometry.type = 'Solid';
+    else if (type == '2D') this.geometry.type = 'Surface';
 
   }
 
@@ -88,7 +88,7 @@ define([
 
   }
 
-  CellSpace.prototype.getWKT = function(type){
+  CellSpace.prototype.getWKT = function(type) {
     var coor = this.geometry.coordinates[0];
     var wkt = "POLYGON ((";
 
@@ -175,7 +175,7 @@ define([
    */
   CellSpace.prototype.addHoleAsWKT = function(coor, type) {
 
-    if ( this.geometry.properties.type != 'wkt' ) log.error('error! the type of geometry of this cell is geojson :: Format4Factory.CellSpace.addHoleAsWKT');
+    if (this.geometry.properties.type != 'wkt') log.error('error! the type of geometry of this cell is geojson :: Format4Factory.CellSpace.addHoleAsWKT');
     else if (type == '2D') this.addHoleAsWKTSurface(coor);
     else if (type == '3D') this.addHoleAsWKTSolid(coor);
     else log.error('error! wrong type ' + type + ' inserted :: Format4Factory.CellSpace.addHoleAsWKT');
@@ -265,21 +265,31 @@ define([
       } else {
         var cellGeo = window.storage.geometryContainer.getElementById('cell', this.id).points;
 
-        for(var key of partialboundedBy){
-          var boundaryGeo = window.storage.geometryContainer.getElementById('cellBoundary', key).points;
+        for (var key of partialboundedBy) {
+          var obj = window.storage.geometryContainer.getElementById('cellBoundary', key);
+          if (obj == null){
+            if(key.indexOf("HATCH") != -1){
+              if(key.indexOf("UP") != -1)
+                this.properties.partialboundedBy.push(key + '-REVERSE');
+              else
+                this.properties.partialboundedBy.push(key);
+            }
+            continue;
+          }
+          var boundaryGeo = obj.points;
           var flag = false;
 
-          function isSameDot(dot1, dot2){
+          function isSameDot(dot1, dot2) {
             return (dot1.point.x == dot2.point.x && dot1.point.y == dot2.point.y);
           }
 
-          for(var i = 0 ; i < cellGeo.length - 1 && !flag; i++ ){
-            if(isSameDot(boundaryGeo[0], cellGeo[i]) && isSameDot(boundaryGeo[1], cellGeo[[i+1]]))
+          for (var i = 0; i < cellGeo.length - 1 && !flag; i++) {
+            if (isSameDot(boundaryGeo[0], cellGeo[i]) && isSameDot(boundaryGeo[1], cellGeo[[i + 1]]))
               flag = true;
           }
 
-          if(flag) this.properties.partialboundedBy.push(key);
-          else     this.properties.partialboundedBy.push(key+'-REVERSE');
+          if (flag) this.properties.partialboundedBy.push(key);
+          else this.properties.partialboundedBy.push(key + '-REVERSE');
         }
 
       }
@@ -343,7 +353,18 @@ define([
       for (var i = 0; i < len; i++) {
 
         var transDot = transDots[dots[i].uuid];
-        polygon.push([transDot.point.x, transDot.point.y, transDot.point.z]);
+        if(transDot == undefined){
+          log.info(this);
+          log.info(transDot);
+        }
+        else if(transDot.point == undefined){
+          log.info(this);
+          log.info(transDot);
+        }
+        else{
+          polygon.push([transDot.point.x, transDot.point.y, transDot.point.z]);
+        }
+
 
       }
 
@@ -397,22 +418,14 @@ define([
 
   }
 
-  /**
-   * @memberof Fromat4Factory.CellSpace
-   */
-  CellSpace.prototype.setHeight = function(height) {
-
-    this.geometry.properties.height = height;
-
-  }
 
   /**
    * @memberof Fromat4Factory.CellSpace
    */
   CellSpace.prototype.addHole = function(surfaces, type) {
 
-    if(type == '3D') this.addSolidHole(surfaces);
-    else if(type == '2D') this.addSurfaceHole(surfaces);
+    if (type == '3D') this.addSolidHole(surfaces);
+    else if (type == '2D') this.addSurfaceHole(surfaces);
     else {
       log.error('JsonFormat.Format4Factory.CellSpace.addHole :: wrong type ' + type + ' inserted.');
     }
@@ -423,8 +436,8 @@ define([
    * @memberof Fromat4Factory.CellSpace
    */
   CellSpace.prototype.addSolidHole = function(solid) {
-    for(var s of solid){
-      for(var surface of s) {
+    for (var s of solid) {
+      for (var surface of s) {
         surface[0][0].reverse();
       }
       this.geometry.coordinates.push(s);
@@ -439,17 +452,17 @@ define([
   }
 
   /**
-  * @memberof Format4Factory.CellSpace
-  */
-  CellSpace.prototype.convertCoor2WKT = function(){
+   * @memberof Format4Factory.CellSpace
+   */
+  CellSpace.prototype.convertCoor2WKT = function() {
 
-    if(this.geometry.properties.type == 'wkt'){
+    if (this.geometry.properties.type == 'wkt') {
       log.info('Format4Factory.CellSpace :: Geometry type of this object is already WKT');
-      return ;
+      return;
     }
 
     var converted;
-    if(this.geometry.type == 'Surface')
+    if (this.geometry.type == 'Surface')
       converted = new GeometryConverter('Surface').geojson2wkt(this.getCoordinates());
     else
       converted = new GeometryConverter('Solid').geojson2wkt(this.getCoordinates());
@@ -459,9 +472,57 @@ define([
   }
 
 
+  CellSpace.prototype.setType = function(type) {
+    this['type'] = type;
+  }
 
+  CellSpace.prototype.addProperty = function(key, value){
+    if(value != undefined) this.properties[key] = value;
 
+    if(key == 'bottom'){
+      var updated = JSON.parse(JSON.stringify(this.geometry.coordinates[0][0][2])) + value*1;
+      for(var s of this.geometry.coordinates)
+        for(var c of s) c[2] = updated;
+    }
+  }
 
+  CellSpace.prototype.reduceCoordinates = function(key, value){
+    var line = [ 0, 2 ];
+    var mid = 1;
+    var reduced = [], visited = [];
+    var coors = this.geometry.coordinates[0].slice(0, this.geometry.coordinates[0].length - 1);
+
+    function getDot(coor){
+      return { point : { x: coor[0], y: coor[1] } };
+    }
+
+    function getLine(d1, d2){
+      return { dot1 : d1, dot2 : d2 };
+    }
+
+    while(visited.indexOf(line[0]) == -1){
+      var v1 = getDot(coors[line[0]]);
+      var v3 = getDot(coors[line[1]]);
+      var v2 = getDot(coors[mid]);
+      if(DotMath.isLineContainDot(getLine(v1,v3), v2)){
+        line[1] = line[1] + 1 == coors.length ? 0 : line[1] + 1;
+        mid = mid + 1 == coors.length ? 0 : mid + 1;
+      } else{
+        reduced.push(mid);
+        visited.push(line[0]);
+        line[0] = mid;
+        line[1] = line[0] + 1 == coors.length ? 0 : line[0] + 1;
+        line[1] = line[1] + 1 == coors.length ? 0 : line[1] + 1;
+        mid = line[0] + 1 == coors.length ? 0 : line[0] + 1;
+      }
+    }
+
+    var reducedCoor = [];
+    for(var i of reduced)
+      reducedCoor.push(coors[i]);
+    this.geometry.coordinates[0] = reducedCoor.sort(function(a, b) { return a - b;});
+    this.geometry.coordinates[0].push(this.geometry.coordinates[0][0]);
+  }
 
   return CellSpace;
 

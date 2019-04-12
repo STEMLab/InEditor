@@ -17,7 +17,8 @@
     "../Storage/Geometries/TransitionGeometry.js",
     "../Storage/Geometries/StateGeometry.js",
     "../Storage/test.js",
-    "../Storage/Properties/InterLayerConnectionProperty.js"
+    "../Storage/Properties/InterLayerConnectionProperty.js",
+    "../Storage/Geometries/HatchGeometry.js"
   ], function(
     Cell,
     CellGeometry,
@@ -33,7 +34,8 @@
     TransitionGeometry,
     StateGeometry,
     Test,
-    InterLayerConnectionProperty
+    InterLayerConnectionProperty,
+    HatchGeometry
   ) {
     "use strict";
 
@@ -76,6 +78,10 @@
       this.addCallbackFun("start-addnewcellboundary", this.startAddNewCellBoundary, function() {}, function() {});
       this.addCallbackFun("addnewcellboundary", this.addNewCellBoundary, this.addNewCellBoundary_makeHistoryObj, this.addNewCellBoundary_undo);
       this.addCallbackFun("end-addnewcellboundary", this.endAddNewCellBoundary, this.makeSimpleHistoryObj, this.endAddNewCellBoundary_undo);
+
+      this.addCallbackFun("start-addnewhatch", this.startAddNewHatch, function() {}, function() {});
+      this.addCallbackFun("addnewhatch", this.addNewHatch, function() {}, function() {});
+      this.addCallbackFun("end-addnewhatch", this.endAddNewHatch, function() {}, function() {});
 
       this.addCallbackFun("snapping", this.snappingMousePointer);
 
@@ -941,6 +947,7 @@
           ].tmpLayer.layer.draw();
         } else {
           window.tmpObj.associationCell = save;
+          window.storage.dotFoolContainer.getDotFool()[reqObj.floor].deleteDot(dot.uuid);
           log.warn(
             "Selected point is not connected with another point which participated in the cellspaceboundary what you making."
           );
@@ -1057,7 +1064,7 @@
         var cell = window.storage.canvasContainer.stages[
           reqObj.floor
         ].getElementById("cell", key);
-        cell.insertLineIntoLine(associationCells[key][0], tmpObj.dots);
+        var reverse = cell.insertLineIntoLine(associationCells[key][0], tmpObj.dots);
 
         // update geometryContainer
         if (cell.holeOf == undefined) {
@@ -1076,13 +1083,11 @@
         ];
       obj.setCornersVisible(false);
 
-      // redraw cellBoundaryLayer
-      // window.storage.canvasContainer.stages[reqObj.floor].cellBoundaryLayer.layer.draw();
       window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
 
       //add cellBoundary data in geometry canvasContainer
       window.storage.geometryContainer.cellBoundaryGeometry.push(
-        new CellBoundaryGeometry(reqObj.id, obj.dots)
+        new CellBoundaryGeometry(reqObj.id, reverse ? obj.dots.reverse() : obj.dots)
       );
     };
 
@@ -1754,6 +1759,7 @@
      * @param {Object} reqObj floor: floor id
      */
     GeometryManager.prototype.modifyPoint = function(reqObj) {
+      if(tmpObj == null) return -1;
       tmpObj.setPoint(
         window.storage.canvasContainer.stages[
           reqObj.floor
@@ -2558,6 +2564,121 @@
       window.uiContainer.sidebar.treeview.refresh(window.storage.propertyContainer);
 
 
+    }
+
+    GeometryManager.prototype.startAddNewHatch = function(reqObj){
+      var tmpObj = new Cell("tmpObj");
+      tmpObj.type = "hatch";
+      window.tmpObj = tmpObj;
+    }
+
+    GeometryManager.prototype.addNewHatch = function(reqObj){
+      if (window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.obj == null) {
+        var selectedCell = window.broker.getManager('addnewhatch', 'GeometryManager').isCellSelected(reqObj.floor);
+        if (selectedCell.length == 0) return false;
+
+        window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.addNewObj("hatch");
+        window.tmpObj.floor = reqObj.floor;
+        window.tmpObj.setHatchOf(selectedCell[0]);
+
+        var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+        manager.setTooltipText({
+          text: ''
+        });
+        return reqObj;
+      } else {
+        // add corner
+        var point =
+          window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor
+          .coor;
+
+        var isDotExist = window.storage.dotFoolContainer
+          .getDotFool(reqObj.floor)
+          .getDotByPoint({
+            x: point.x,
+            y: point.y
+          });
+
+        var dot;
+
+        if (isDotExist == null) {
+          dot = new Dot(point.x, point.y);
+          window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(dot);
+        } else {
+          dot = isDotExist;
+        }
+
+        window.tmpObj.addCorner(dot);
+        window.tmpObj.setFillColor('#000000');
+
+        // draw group
+        window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+        // window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
+
+        // log.trace(window.storage.dotFoolContainer);
+      }
+    }
+
+    GeometryManager.prototype.endAddNewHatch = function(reqObj){
+      if (reqObj.isEmpty != null) {
+        window.tmpObj = null;
+        return;
+      }
+
+      var tmpObj = window.tmpObj;
+
+      // clear tmp obj
+      window.tmpObj = null;
+      window.storage.canvasContainer.stages[
+        reqObj.floor
+      ].tmpLayer.group.removeObj();
+
+      tmpObj.setFillColor('#111111');
+
+      for (var key in tmpObj.dots) {
+        tmpObj.dots[key].leaveObj("tmpObj");
+      }
+
+      // Twisted side validation
+      if (!window.broker
+        .getManager("end-addnewcell", "GeometryManager")
+        .validateTwistedSide(tmpObj.dots)
+      ) {
+        log.error("This object have twisted side !");
+        return false;
+      }
+
+      tmpObj.id = reqObj.id;
+      tmpObj.name = reqObj.id;
+
+      var v1 = DotMath.getVector(tmpObj.dots[0], tmpObj.dots[1]);
+      v1['z'] = 0;
+      var v2 = DotMath.getVector(tmpObj.dots[1], tmpObj.dots[2]);
+      v2['z'] = 0;
+      var crossProduct = DotMath.crossProduct(v1, v2);
+      if (crossProduct.z > 0) tmpObj.dots.reverse();
+
+      window.storage.propertyContainer.getElementById('cell', tmpObj.hatchOf).addPartialboundedBy(tmpObj.id);
+
+      // add cell to canvasContainer using tmpObj
+      window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.addHatch(
+        tmpObj
+      );
+
+      // set corner to invisible
+      var obj =
+        window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group.hatchs[
+          window.storage.canvasContainer.stages[reqObj.floor].cellLayer.group
+          .hatchs.length - 1
+        ];
+      obj.corners.visible(false);
+
+      window.storage.geometryContainer.hatchGeometry.push(
+        new HatchGeometry(reqObj.id, obj.dots, obj.hatchOf)
+      );
+
+      // redraw stage
+      window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
     }
 
     return GeometryManager;

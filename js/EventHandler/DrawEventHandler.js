@@ -37,6 +37,10 @@ define([
       'click': this.clickCellBoundaryBtn
     };
 
+    handlerBinder['hatch-btn'] = {
+      'click': this.clickHatchBtn
+    };
+
     handlerBinder['state-btn'] = {
       'click': this.clickStateBtn
     };
@@ -431,6 +435,30 @@ define([
 
         result.result = true;
         result.msg = 'addnewhole';
+
+
+      } else if (!isFirstClick && !isSameFloor) {
+
+        result.msg = "you clicked different floor!";
+
+      } else {
+
+        result.msg = "wrong state transition : " + previousMsg + " to addnewfloor.";
+
+      }
+    } else if (broker.isPublishable('addnewhatch')) {
+
+      var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
+      var isFirstClick = (window.tmpObj.floor == null);
+
+      if (isFirstClick || (!isFirstClick && isSameFloor)) {
+
+        broker.publish(new Message('addnewhatch', {
+          'floor': data.currentTarget.attrs.id
+        }));
+
+        result.result = true;
+        result.msg = 'addnewhatch';
 
 
       } else if (!isFirstClick && !isSameFloor) {
@@ -1343,6 +1371,60 @@ define([
     }
 
     return result;
+  }
+
+  DrawEventHandler.prototype.clickHatchBtn = function(broker, previous, data){
+    var result = new Result();
+
+    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
+    var isCellExist = (window.storage.propertyContainer.cellProperties.length != 0);
+
+    if (!isFloorExist) {
+      result.msg = "There is no floor ...";
+    } else if (!isCellExist) {
+      result.msg = "There is no cell ...";
+    } else if (broker.isPublishable('start-addnewhatch')) {
+
+      broker.publish(new Message('start-addnewhatch', null));
+
+      result = {
+        'result': true,
+        'msg': 'start-addnewhatch'
+      };
+
+    } else if (broker.isPublishable('end-addnewhatch')) {
+
+      if (window.tmpObj.isEmpty()) {
+
+        broker.publish(new Message('end-addnewhatch', {
+          'isEmpty': true
+        }));
+
+      } else {
+
+        var newId = null;
+        var flag = false;
+        while(!flag){
+          newId = window.conditions.pre_cellBoundary + (++window.conditions.LAST_CELLBOUNDARY_ID_NUM);
+          flag = window.storage.propertyContainer.getElementById('hatch', newId) == null ? true : false;
+        }
+
+        broker.publish(new Message('end-addnewhatch', {
+          'id': newId,
+          'floor': window.tmpObj.floor
+        }));
+
+      }
+
+      result.result = true;
+      result.msg = null;
+
+    } else {
+      result.msg = "wrong transition : " + previousMsg + " to start-addnewcellboundary, end-addnewcellboundary.";
+    }
+
+    return result;
+
   }
 
 

@@ -40,10 +40,6 @@ define([
       'change': this.floorplanUpload
     };
 
-    handlerBinder['navi-text'] = {
-      'change' : this.showNaviAttr
-    };
-
     handlerBinder['project-export'] = {
       'click': this.showModal
     };
@@ -56,15 +52,34 @@ define([
       'click': this.showModal
     }
 
+    handlerBinder['setting-code'] = {
+      'click': this.showModal
+    }
+
     handlerBinder['setting-desc'] = {
       'click': this.showModal
     }
 
+    handlerBinder['module-type-text'] = {
+      'change': this.showFeatureTypeAttr
+    };
 
+    handlerBinder['feature-type-text'] = {
+      'change': this.showExtensionAttr
+    };
 
-    // handlerBinder['stage']={
-    //   'contentContextmenu': this.callStageMenu
-    // }
+    handlerBinder['add-map-btn'] = {
+      'click': this.addMap
+    }
+
+    handlerBinder['activate-map-btn'] = {
+      'click': this.activateMap
+    }
+
+    handlerBinder['deactivate-map-btn'] = {
+      'click': this.deactivateMap
+    }
+
   }
 
 
@@ -128,7 +143,7 @@ define([
 
     if (broker.isPublishable('zoomworkspace')) {
 
-      data.preventDefault();
+      //data.preventDefault();
 
       var target = data.path[2].id;
       var oldScale = window.storage.canvasContainer.stages[target].stage.scaleX();
@@ -254,47 +269,7 @@ define([
 
   }
 
-  UIChangeEventHandler.prototype.showNaviAttr = function(broker, previousMsg, data){
-    var result = new Result;
-    var pre = data.target.dataset.pre;
-
-    if(pre == undefined && data.target.value != undefined){
-      var table = document.getElementById("property-navi-table").childNodes[0];
-
-      var classTr = document.createElement("tr");
-      classTr.innerHTML = "<td class=\"title\">class</td><td class=\"value\"><div class=\"ui transparent inverted input\"><input id=\"class-text\" type=\"text\" value=\"\"></div></td>";
-      var functionTr = document.createElement("tr");
-      functionTr.innerHTML = "<td class=\"title\">function</td><td class=\"value\"><div class=\"ui transparent inverted input\"><input id=\"function-text\" type=\"text\" value=\"\"></div></td>";
-      var usageTr = document.createElement("tr");
-      usageTr.innerHTML = "<td class=\"title\">usage</td><td class=\"value\"><div class=\"ui transparent inverted input\"><input id=\"usage-text\" type=\"text\" value=\"\"></div></td>";
-
-      table.appendChild(classTr);
-      table.appendChild(functionTr);
-      table.appendChild(usageTr);
-      document.getElementById("navi-text").dataset.pre = data.target.value;
-    }
-    else if(pre != "" && (data.target.value == "" || data.target.value == "selected")){
-
-      var table = document.getElementById("property-navi-table").childNodes[0];
-      var len = table.childNodes.length;
-      while(table.childNodes.length > 2){
-        table.removeChild(table.childNodes[1]);
-      }
-      document.getElementById("navi-text").dataset.pre = "";
-    }
-
-
-
-    log.info(document.getElementById("navi-text"));
-    result = {
-      'result': true,
-      'msg': null
-    };
-
-    return result;
-  }
-
-  UIChangeEventHandler.prototype.showModal = function(broker, previousMsg, data){
+  UIChangeEventHandler.prototype.showModal = function(broker, previousMsg, data) {
     switch (data.target.dataset.modaltype) {
       case 'export':
         $('#go-factory-modal').modal('show');
@@ -303,17 +278,21 @@ define([
         $('#go-viewer-modal').modal('show');
         break;
       case 'conditions':
-        if(window.broker.isPublishable('showconditionmodal')){
+        if (window.broker.isPublishable('showconditionmodal')) {
           broker.publish(new Message('showconditionmodal', {}));
         }
         break;
       case 'desc':
         if (broker.isPublishable('updatedesclist')) {
-          broker.publish(new Message('updatedesclist', { }));
+          broker.publish(new Message('updatedesclist', {}));
         }
 
         $('#setting-desc-modal').modal('show');
         break;
+      case 'code':
+        if (window.broker.isPublishable('showcodemodal')) {
+          broker.publish(new Message('showcodemodal', {}));
+        }
       default:
 
     }
@@ -325,6 +304,109 @@ define([
 
     return result;
   }
+
+  UIChangeEventHandler.prototype.showFeatureTypeAttr = function(broker, previousMsg, data) {
+    var result = new Result;
+    var pre = data.target.dataset.pre;
+    var selected = data.target.selectedOptions.length != 0 ?
+      data.target.selectedOptions[0].innerHTML :
+      "";
+
+    if (broker.isPublishable('shownaviattr')) {
+      broker.publish(new Message('shownaviattr', {
+        'pre': data.target.dataset.pre,
+        'selected': selected,
+        'table': document.getElementById("property-extension-table").childNodes[0]
+      }));
+
+      result = {
+        'result': true,
+        'msg': 'shownaviattr'
+      };
+
+    }
+
+    return result;
+  }
+
+  UIChangeEventHandler.prototype.showExtensionAttr = function(broker, previousMsg, data) {
+    var result = new Result;
+    var pre = data.target.dataset.pre;
+    var selected = data.target.selectedOptions.length != 0 ?
+      data.target.selectedOptions[0].innerHTML :
+      "";
+
+    if (broker.isPublishable('showextensionattr')) {
+      broker.publish(new Message('showextensionattr', {
+        'pre': data.target.dataset.pre,
+        'selected': selected,
+        'moduleType': document.getElementById("module-type-text").value,
+        'path' : [document.getElementById("feature-type-text").value],
+        'table' : document.getElementById("property-extension-table").childNodes[0]
+      }));
+
+      result = {
+        'result': true,
+        'msg': 'showextensionattr'
+      };
+
+    }
+
+    return result;
+  }
+
+  UIChangeEventHandler.prototype.addMap = function(broker, previousMsg, data) {
+    var x = document.getElementById('map-x-text').value;
+    var y = document.getElementById('map-y-text').value;
+
+    var result = {
+      'result': false,
+      'msg': null
+    };
+
+    if ((x != "" || y != "") && broker.isPublishable('addmap')) {
+      broker.publish(new Message('addmap', {
+        'floor': document.getElementById('id-text').value,
+        'coor': [x * 1, y * 1]
+      }));
+
+      result.result = true;
+    }
+
+    return result;
+  }
+
+  UIChangeEventHandler.prototype.activateMap = function(broker, previousMsg, data) {
+    var result = {
+      'result': true,
+      'msg': null
+    };
+
+    if (!window.conditions.activateMap) {
+      window.conditions.activateMap = true;
+      var id = document.getElementById('id-text').value;
+      document.getElementById(id + '-map').style.zIndex = "1";
+    }
+
+
+    return result;
+  }
+
+  UIChangeEventHandler.prototype.deactivateMap = function(broker, previousMsg, data) {
+    var result = {
+      'result': true,
+      'msg': null
+    };
+
+    if (window.conditions.activateMap) {
+      window.conditions.activateMap = false;
+      var id = document.getElementById('id-text').value;
+      document.getElementById(id + '-map').style.zIndex = "0";
+    }
+
+    return result;
+  }
+
 
 
   return UIChangeEventHandler;

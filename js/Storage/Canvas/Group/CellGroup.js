@@ -4,10 +4,12 @@
 
 define([
   "../Object/Cell.js",
-  "../Object/Hole.js"
+  "../Object/Hole.js",
+  "../Object/Hatch.js"
 ], function(
   Cell,
-  Hole
+  Hole,
+  Hatch
 ) {
   'use strict';
 
@@ -35,12 +37,22 @@ define([
     /**
      * @memberof CellGroup
      */
+    this.hatchGroup = new Konva.Group({
+      x: 0,
+      y: 0
+    })
+
+    /**
+     * @memberof CellGroup
+     */
     this.cells = []; // Cell array
 
     /**
      * @memberof CellGroup
      */
     this.holes = [];
+
+    this.hatchs = [];
 
 
   }
@@ -113,6 +125,33 @@ define([
     this.holeGroup.add(this.holes[this.holes.length - 1].getCornersObject());
 
   }
+
+    /**
+     * @memberof CellGroup
+     */
+    CellGroup.prototype.addHatch = function(obj) {
+      log.info('cell-group : addHatch ', obj);
+
+      var newHatch = new Hatch(obj.id);
+      newHatch.corners.visible(false);
+
+      if(obj.poly == undefined) newHatch.setFillColor('#FFFFFF');
+      else                      newHatch.setFillColor(obj.poly.fill());
+
+      newHatch.setHatchOf(obj.hatchOf);
+
+      if     (obj.dots != undefined && obj.points == undefined) this.copyDots(newHatch, obj.dots);
+      else if(obj.dots == undefined && obj.points != undefined) this.copyDots(newHatch, obj.points );
+
+      // add corner and poly in new cell
+      newHatch.addObjectFromDots();
+
+      this.hatchs.push(newHatch);
+
+      this.hatchGroup.add(this.hatchs[this.hatchs.length - 1].getPolyObject());
+      this.hatchGroup.add(this.hatchs[this.hatchs.length - 1].getCornersObject());
+
+    }
 
   /**
    * @memberof CellGroup
@@ -220,6 +259,14 @@ define([
   CellGroup.prototype.getHoleGroup = function() {
     return this.holeGroup;
   }
+
+  /**
+   * @memberof CellGroup
+   */
+  CellGroup.prototype.getHatchGroup = function() {
+    return this.hatchGroup;
+  }
+
 
 
   /**
@@ -329,8 +376,6 @@ define([
          break;
        }
      }
-
-
    }
 
   return CellGroup;

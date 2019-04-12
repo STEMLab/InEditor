@@ -2,15 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define([
-  "../Storage/Canvas/Stage.js",
-  "../PubSub/Subscriber.js",
-  "../UI/ContextMenu.js"
-], function(
-  Stage,
-  Subscriber,
-  ContextMenu
-) {
+define(function(require) {
   'use strict';
 
   /**
@@ -20,12 +12,12 @@ define([
    */
   function UIManager() {
 
-    Subscriber.apply(this, arguments);
+    require('../PubSub/Subscriber.js').apply(this, arguments);
 
     this.init();
   }
 
-  UIManager.prototype = Object.create(Subscriber.prototype);
+  UIManager.prototype = Object.create(require('../PubSub/Subscriber.js').prototype);
 
   /**
    * @memberof UIManager
@@ -96,10 +88,22 @@ define([
     this.addCallbackFun('addnewglobaldesc', this.addDescList);
 
     this.addCallbackFun('showconditionmodal', this.showConditionModal);
+    this.addCallbackFun('showcodemodal', this.showCodeModal);
+
     this.addCallbackFun('deletedesclist', this.deleteDescList);
     this.addCallbackFun('addlocaldesc', this.setPropertyView);
     this.addCallbackFun('deletelocaldesc', this.setPropertyView);
-    
+
+    this.addCallbackFun('shownaviattr', this.showFeatureTypeAttr);
+    this.addCallbackFun('showextensionattr', this.showExtensionAttr);
+    this.addCallbackFun('addnewcode', this.addNewCode);
+
+    this.addCallbackFun('addmap', this.addMap);
+
+    this.addCallbackFun('start-addnewhatch', this.startAddNewHatch);
+    this.addCallbackFun('end-addnewhatch', this.endAddNewHatch, this.endAddNewCell_makeHistoryObj, this.removeObj);
+
+
   }
 
   /**
@@ -126,27 +130,26 @@ define([
 
 
 
-      if(reqObj.type == 'floor'){
-        var root = window.uiContainer.workspace.workspaceLayout.root;
-        var items = [];
+    if (reqObj.type == 'floor') {
+      var root = window.uiContainer.workspace.workspaceLayout.root;
+      var items = [];
 
-        function getComponent(item){
-          if(item.isComponent == true){
-            items.push(item);
+      function getComponent(item) {
+        if (item.isComponent == true) {
+          items.push(item);
+        } else {
+          for (var next of item.contentItems) {
+            getComponent(next);
           }
-          else{
-            for(var next of item.contentItems){
-              getComponent(next);
-            }
-          }
-        }
-
-        getComponent(root);
-
-        for(var item of items){
-          if(item.config.id == reqObj.id) item.setTitle(reqObj.updateContent.name);
         }
       }
+
+      getComponent(root);
+
+      for (var item of items) {
+        if (item.config.id == reqObj.id) item.setTitle(reqObj.updateContent.name);
+      }
+    }
   }
 
   /**
@@ -433,7 +436,8 @@ define([
     // add new workspace
     window.uiContainer.workspace.addNewWorkspace(newFloorProperty.id, newFloorProperty.name);
 
-    // add new stage
+    // add require('../Storage/Canvas/Stage.js')
+    var Stage = require('../Storage/Canvas/Stage.js');
     var newStage = new Stage(
       newFloorProperty.id,
       newFloorProperty.name,
@@ -449,7 +453,7 @@ define([
 
 
     // bind right click event
-    ContextMenu.bindContextMenu(newFloorProperty.id);
+    require('../UI/ContextMenu.js').bindContextMenu(newFloorProperty.id);
 
 
     // refresh sidebar > tree-view
@@ -765,21 +769,20 @@ define([
 
   /**
    * @memberof UIManager
-   * @param reqObj object { msg }
+   * @param reqObj object { head, msg }
    */
   UIManager.prototype.showSnackBar = function(reqObj) {
 
-    // Get the snackbar DIV
-    var x = document.getElementById("snackbar");
-    x.innerHTML = reqObj.msg;
+    $.uiAlert({
+      textHead: reqObj.head,
+      text: reqObj.msg,
+      bgcolor: '#19c3aa',
+      textcolor: '#fff',
+      position: 'bottom-center', // top And bottom ||  left / center / right
+      icon: 'checkmark box',
+      time: 2
+    });
 
-    // Add the "show" class to DIV
-    x.className = "show";
-
-    // After 3 seconds, remove the show class from DIV
-    setTimeout(function() {
-      x.className = x.className.replace("show", "");
-    }, 3000);
 
   }
 
@@ -911,10 +914,6 @@ define([
 
   }
 
-  /**
-   * @memberof UIManager
-   */
-  UIManager.prototype.callContextMenu = function(reqObj) {}
 
   /**
    * @memberof UIManager
@@ -1085,6 +1084,295 @@ define([
 
     // update property tab
     window.uiContainer.sidebar.property.setPropertyTab($('#property-table').data('type'), $('#id-text').val(), window.storage);
+  }
+
+  UIManager.prototype.showCodeModal = function(reqObj) {
+    $('#setting-code-modal').modal('show');
+
+    function getTr() {
+      var tr = document.createElement('tr');
+      tr.id = arguments[1] + "-" + arguments[2] + "-" + arguments[3] + "-" + arguments[4];
+
+      for (var i = 1; i < arguments.length; i++) {
+        var td = document.createElement(arguments[0]);
+        td.innerHTML = arguments[i];
+        tr.appendChild(td);
+      }
+
+      if (arguments[0] == 'td') {
+        var td = document.createElement(arguments[0]);
+        var i = document.createElement('i');
+        i.classList.add('trash');
+        i.classList.add('icon');
+        i.id = 'delete-' + arguments[1] + "-" + arguments[2] + "-" + arguments[3] + "-" + arguments[4];
+        td.appendChild(i);
+        tr.appendChild(td);
+
+        i.addEventListener('click', function(event) {
+          window.eventHandler.callHandler('code-modal-trash', event)
+        });
+      }
+
+      return tr;
+    }
+
+    var thead = document.getElementById('code-table-head');
+    while (thead.hasChildNodes()) {
+      thead.removeChild(thead.firstChild);
+    }
+    thead.appendChild(getTr('th', 'Object Type', 'Code Type', 'Code Number', 'Code desc', ''));
+    thead.children[0].children[0].classList.add('four');
+    thead.children[0].children[0].classList.add('wide');
+    thead.children[0].children[1].classList.add('three');
+    thead.children[0].children[1].classList.add('wide');
+    thead.children[0].children[2].classList.add('three');
+    thead.children[0].children[2].classList.add('wide');
+    thead.children[0].children[3].classList.add('five');
+    thead.children[0].children[3].classList.add('wide');
+
+    var tbody = document.getElementById('code-table-body');
+    while (tbody.hasChildNodes()) {
+      tbody.removeChild(tbody.firstChild);
+    }
+
+    var list = require('CodeList').getInstance().getList();
+    for (var ot in list) {
+      if (ot == 'NonNavigableSpace') {
+        var otl = list[ot];
+        for (var cn in otl) {
+          if (document.getElementById(ot + "--" + otl[cn]) == null)
+            tbody.appendChild(getTr('td', ot, '', cn, otl[cn]));
+        }
+      } else {
+        var c = list[ot].class;
+        var f = list[ot].function;
+
+        for (var cn in c) {
+          if (document.getElementById(ot + "-class-" + cn + "-" + c[cn]) == null)
+            tbody.appendChild(getTr('td', ot, 'class', cn, c[cn]));
+        }
+
+
+        for (var cn in f)
+          if (document.getElementById(ot + "-function-" + cn + "-" + f[cn]) == null)
+            tbody.appendChild(getTr('td', ot, 'function', cn, f[cn]));
+      }
+    }
+
+
+    $('#code-table').excelTableFilter({
+      columnSelector: '.wide'
+    });
+
+
+  }
+
+  UIManager.prototype.addNewCode = function(reqObj) {
+    function getTr() {
+      var tr = document.createElement('tr');
+      tr.id = arguments[1] + "-" + arguments[2] + "-" + arguments[3] + "-" + arguments[4];
+
+      for (var i = 1; i < arguments.length; i++) {
+        var td = document.createElement(arguments[0]);
+        td.innerHTML = arguments[i];
+        tr.appendChild(td);
+      }
+
+      if (arguments[0] == 'td') {
+        var td = document.createElement(arguments[0]);
+        var i = document.createElement('i');
+        i.classList.add('trash');
+        i.classList.add('icon');
+        i.id = 'delete-' + arguments[1] + "-" + arguments[2] + "-" + arguments[3] + "-" + arguments[4];
+        td.appendChild(i);
+        tr.appendChild(td);
+
+        i.addEventListener('click', function(event) {
+          window.eventHandler.callHandler('code-modal-trash', event)
+        });
+      }
+
+      return tr;
+    }
+
+
+    var cl = require('CodeList').getInstance().getList();
+    if (reqObj.path[0] == 'NonNavigableSpace' &&
+      cl[reqObj.path[0]][reqObj.cn] == reqObj.cd &&
+      document.getElementById(reqObj.path[0] + "--" + reqObj.cn + "-" + reqObj.cd) == null) {
+      var tr = getTr('td', reqObj.path[0], '', reqObj.cn, reqObj.cd);
+      document.getElementById('code-table-body').appendChild(tr);
+    } else if (reqObj.path.length >= 2 &&
+      document.getElementById(reqObj.path[0] + "-" + reqObj.path[1] + reqObj.cn + "-" + reqObj.cd) == null) {
+      var tr = getTr('td', reqObj.path[0], reqObj.path[1], reqObj.cn, reqObj.cd);
+      document.getElementById('code-table-body').appendChild(tr);
+    }
+
+
+  }
+
+  UIManager.prototype.showNonNaviAttr = function(reqObj) {
+
+    var len = reqObj.table.childNodes.length;
+    while (reqObj.table.childNodes.length > 1) {
+      reqObj.table.removeChild(reqObj.table.childNodes[1]);
+    }
+
+    if (reqObj.selected != "") {
+      var bottomTr = document.createElement('tr');
+      bottomTr.innerHTML = window.uiContainer.sidebar.property.getBasicTr('bottom', 'bottom', property.bottom, false);
+      var heightTr = document.createElement("tr");
+      heightTr.innerHTML = window.uiContainer.sidebar.property.getBasicTr('height', 'height', property.height, false);
+
+      reqObj.table.appendChild(bottomTr);
+      reqObj.table.appendChild(heightTr);
+      document.getElementById("obstacle-text").dataset.pre = reqObj.selected;
+
+      $('.ui.dropdown').dropdown({
+        direction: 'auto',
+        duration: 100
+      });
+
+    } else {
+      document.getElementById("obstacle-text").dataset.pre = "";
+    }
+  }
+
+  UIManager.prototype.showNaviAttr = function(reqObj) {
+    log.info(reqObj);
+
+    var len = reqObj.table.childNodes.length;
+    while (reqObj.table.childNodes.length > 1) {
+      reqObj.table.removeChild(reqObj.table.childNodes[1]);
+    }
+
+    if (reqObj.selected == 'NonNavigableSpace') {
+      var obstacleTr = document.createElement('tr');
+      obstacleTr.innerHTML = window.uiContainer.sidebar.property.getCodeListTr([reqObj.selected], 'obstacle-text', 'obstacle');
+      reqObj.table.appendChild(obstacleTr);
+    } else if (reqObj.selected != "") {
+      var classTr = document.createElement('tr');
+      classTr.innerHTML = window.uiContainer.sidebar.property.getCodeListTr([reqObj.selected, 'class'], 'class-text', 'class');
+      var functionTr = document.createElement("tr");
+      functionTr.innerHTML = window.uiContainer.sidebar.property.getCodeListTr([reqObj.selected, 'function'], 'function-text', 'function');
+      var usageTr = document.createElement("tr");
+      usageTr.innerHTML = window.uiContainer.sidebar.property.getCodeListTr([reqObj.selected, 'function'], 'usage-text', 'function');
+
+      reqObj.table.appendChild(classTr);
+      reqObj.table.appendChild(functionTr);
+      reqObj.table.appendChild(usageTr);
+      document.getElementById("type-text").dataset.pre = reqObj.selected;
+    } else {
+      document.getElementById("type-text").dataset.pre = "";
+    }
+
+    $('.ui.dropdown').dropdown({
+      direction: 'down',
+      duration: 100
+    });
+
+  }
+
+  UIManager.prototype.showFeatureTypeAttr = function(reqObj){
+
+    let len = reqObj.table.childNodes.length;
+    while (reqObj.table.childNodes.length > 1) {
+      reqObj.table.removeChild(reqObj.table.childNodes[1]);
+    }
+
+    if(reqObj.selected != "" && reqObj.selected != undefined){
+      let featureTr;
+
+      if (reqObj.selected == 'navi' && document.getElementById('property-table').dataset.type == "cell") {
+        featureTr = window.uiContainer.sidebar.property.getOneDropTr(
+          'feature\ntype',
+          'feature-type-text',
+          ["","GeneralSpace", "TransitionSpace", "ConnectionSpace", "AnchorSpace"]);
+      } else if(reqObj.selected == 'navi' && document.getElementById('property-table').dataset.type == "cellBoundary"){
+        featureTr = window.uiContainer.sidebar.property.getOneDropTr(
+          'feature\ntype',
+          'feature-type-text',
+          ["", "ConnectionBoundary", "AnchorBoundary"]);
+      } else if (reqObj.selected == 'non-navi') {
+        featureTr = window.uiContainer.sidebar.property.getOneDropTr(
+          'feature\ntype',
+          'feature-type-text',
+          ["","NonNavigableSpace"]);
+      }
+
+      reqObj.table.appendChild(featureTr);
+      document.getElementById('feature-type-text').addEventListener('change', function(event) {
+        window.eventHandler.callHandler('html', event);
+      });
+    }
+    else {
+      document.getElementById("type-text").dataset.pre = "";
+    }
+
+    $('.ui.dropdown').dropdown({
+      direction: 'down',
+      duration: 100
+    });
+  }
+
+  UIManager.prototype.showExtensionAttr = function(reqObj){
+    let len = reqObj.table.childNodes.length;
+
+    while (reqObj.table.childNodes.length > 2) {
+      reqObj.table.removeChild(reqObj.table.childNodes[2]);
+    }
+
+    if(reqObj.selected != "" && reqObj.selected != undefined){
+      if(reqObj.moduleType == "navi" && document.getElementById('property-table').dataset.type == "cell"){
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'class'], 'class-text', 'class'));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'function-text', 'function'));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'usage-text', 'usage'));
+      }
+      else if(reqObj.moduleType == 'non-navi'){
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr(
+          ['NonNavigableSpace'],
+          'obstacle-type-text',
+          'obtacle'
+        ))
+      }
+    }
+    else {
+      document.getElementById("type-text").dataset.pre = "";
+    }
+
+    $('.ui.dropdown').dropdown({
+      direction: 'down',
+      duration: 100
+    });
+  }
+
+  UIManager.prototype.addMap = function(reqObj){
+    window.storage.canvasContainer.stages[reqObj.floor].addMap(reqObj.coor);
+  }
+
+  UIManager.prototype.startAddNewHatch = function(reqObj){
+    // change btn color
+    document.getElementById('hatch-btn').src = "../../assets/icon/hatch_a.png";
+
+    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    manager.setTooltipText({
+      text: 'select cell'
+    });
+  }
+
+  UIManager.prototype.endAddNewHatch = function(reqObj) {
+
+    // change transition btn color
+    document.getElementById('hatch-btn').src = "../../assets/icon/hatch_d.png";
+
+    if (reqObj.isEmpty != null) return;
+
+    // delete tooltip
+    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    manager.setTooltipText({
+      text: ''
+    });
+
   }
 
   return UIManager;

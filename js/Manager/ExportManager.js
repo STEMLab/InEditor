@@ -265,6 +265,8 @@ define([
       cellBoundaries[id].setDescription(properties[key].description);
       cellBoundaries[id].setExternalReference(properties[key].externalReference);
       cellBoundaries[id].setDuality(properties[key].duality);
+      cellBoundaries[id].addProperty('height', properties[key].height);
+      cellBoundaries[id].addProperty('bottom', properties[key].bottom);
 
     }
 
@@ -284,14 +286,14 @@ define([
         reverseObj.setGeometryId(reverseObj.geometry.properties.id + '-REVERSE');
         reverseObj.setName(reverseObj.attributes.name + '-REVERSE')
         reverseObj.reverseCoor();
-        reverseObj.setHeight(height);
+        reverseObj.addProperty('height', cellBoundaries[id].attributes.height);
         cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'] = reverseObj;
 
         var coor = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
         var coor_reverse = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].getCoordinates();
 
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setCoor([manager.extrudeCellBoundary(coor, floorProperties[floorKey].doorHeight * 1)]);
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setCoor([manager.extrudeCellBoundary(coor_reverse, floorProperties[floorKey].doorHeight * 1)]);
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setCoor([manager.extrudeCellBoundary(coor, reverseObj.attributes.height * 1)]);
+        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setCoor([manager.extrudeCellBoundary(coor_reverse, reverseObj.attributes.height * 1)]);
 
       }
     }
@@ -434,18 +436,18 @@ define([
     var transDots = manager.transAllDots(window.storage.dotFoolContainer.dotFool, window.storage.propertyContainer.getFloorObj());
 
     var spaceLayer = manager.spaceLayer4Factory(document.id, spaceLayers.id);
-    var cells = manager.cellObj4VFactory(document.id, primalspacefeatures.id, transDots);
-    var cellBoundaries = manager.cellBoundaryObj4VFactory(document.id, primalspacefeatures.id, transDots);
-
-    // tmp(190114)
-    // manager.renameCellBoundary(cells.cell, cellBoundaries);
+    var cells = manager.cellObj4Factory(document.id, primalspacefeatures.id, transDots);
+    var cellBoundaries = manager.cellBoundaryObj4Factory(document.id, primalspacefeatures.id, transDots);
 
     var nodes = manager.nodes4Factory(document.id, spaceLayer);
     var edges = manager.edges4Factory(document.id, spaceLayer);
     var states = manager.stateObj4Factory(document.id, nodes, transDots);
-    var transitions = manager.transitionObj4VFactory(document.id, edges, transDots, cellBoundaries);
+    var transitions = manager.transitionObj4Factory(document.id, edges, transDots, cellBoundaries);
     var interlayerConnections = manager.interlayerConnectionObj4Factory(document.id, interEdges);
 
+    /**************************************
+     * add non navi later
+     **************************************/
     var address = {
       'delete-document': baseURL + '/documents/' + document.id,
       'post-document': baseURL + '/documents/' + document.id,
@@ -459,6 +461,8 @@ define([
       'post-connectionspace': baseURL + '/documents/' + document.id + '/connectionspace/',
       'post-anchorspace': baseURL + '/documents/' + document.id + '/anchorspace/',
       'post-cellspaceboundary': baseURL + '/documents/' + document.id + '/cellspaceboundary/',
+      'post-connectionboundary': baseURL + '/documents/' + document.id + '/connectionboundary/',
+      'post-anchorboundary': baseURL + '/documents/' + document.id + '/anchorboundary/',
       'post-multiLayeredGraph': baseURL + '/documents/' + document.id + '/multilayeredgraph/' + multiLayeredGraph.id,
       'post-spacelayers': baseURL + '/documents/' + document.id + '/spacelayers/' + spaceLayers.id,
       'post-spacelayer': baseURL + '/documents/' + document.id + '/spacelayer/',
@@ -468,7 +472,6 @@ define([
       'post-transition': baseURL + '/documents/' + document.id + '/transition/',
       'post-interEdges': baseURL + '/documents/' + document.id + '/interedges/' + interEdges.id,
       'post-interlayerConnection': baseURL + '/documents/' + document.id + '/interlayerconnection/',
-
       'get-document': baseURL + '/documents/' + document.id
     };
 
@@ -483,7 +486,9 @@ define([
       cells.transitionSpace.length != 0 ||
       cells.connectionSpace.length != 0 ||
       cells.anchorSpace.length != 0 ||
-      cellBoundaries.length != 0) {
+      cellBoundaries.cellboundary.length != 0 ||
+      cellBoundaries.connectionboundary.length != 0 ||
+      cellBoundaries.anchorboundary.length != 0) {
 
       manager.postJson(address['post-indoorfeatures'], JSON.stringify(indoorfeatures));
       manager.postJson(address['post-primalspacefeatures'], JSON.stringify(primalspacefeatures));
@@ -510,8 +515,14 @@ define([
         manager.postJson(address['post-anchorspace'] + cells.anchorSpace[i].id, JSON.stringify(cells.anchorSpace[i]));
 
 
-      for (var i = 0; i < cellBoundaries.length; i++)
-        manager.postJson(address['post-cellspaceboundary'] + cellBoundaries[i].id, JSON.stringify(cellBoundaries[i]));
+      for (var i = 0; i < cellBoundaries.cellboundary.length; i++)
+        manager.postJson(address['post-cellspaceboundary'] + cellBoundaries.cellboundary[i].id, JSON.stringify(cellBoundaries.cellboundary[i]));
+
+      for (var i = 0; i < cellBoundaries.connectionboundary.length; i++)
+        manager.postJson(address['post-connectionboundary'] + cellBoundaries.connectionboundary[i].id, JSON.stringify(cellBoundaries.connectionboundary[i]));
+
+      for (var i = 0; i < cellBoundaries.anchorboundary.length; i++)
+        manager.postJson(address['post-anchorboundary'] + cellBoundaries.anchorboundary[i].id, JSON.stringify(cellBoundaries.anchorboundary[i]));
 
     }
 
@@ -553,12 +564,12 @@ define([
    * @memberof ExportManager
    */
   ExportManager.prototype.postJson = function(address, data) {
-    log.info('POST : ' + address, data);
+    //log.info('POST : ' + address, data);
     var xhr = new XMLHttpRequest();
 
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function(e) {
       if (xhr.status == 200) {
-        log.error('error');
+        log.error('error', e);
 
       }
     }
@@ -782,7 +793,7 @@ define([
    * @memberof ExportManager
    * @return Array of Format4Factory.CellSpace
    */
-  ExportManager.prototype.cellObj4VFactory = function(docId, parentId, transDot) {
+  ExportManager.prototype.cellObj4Factory = function(docId, parentId, transDot) {
 
     var cells = {};
 
@@ -798,22 +809,15 @@ define([
 
     var slantMap = {};
 
-    var solid = [];
-
     // copy geometry coordinates
     for (var key in geometries) {
-      var tmp;
-
-      // if (geometries[key].naviType == "")
-      tmp = new FeatureFactory4Factory('CellSpace', conditions);
-      // else
-      // tmp = new FeatureFactory4Factory('NavigableSpace', conditions);
-
+      var tmp = new FeatureFactory4Factory('CellSpace', conditions);
       tmp.setId(geometries[key].id);
       tmp.setDocId(docId);
       tmp.setParentId(parentId);
       tmp.setGeometryId("CG-" + geometries[key].id);
       tmp.pushCoordinatesFromDots(geometries[key].points, transDot);
+      tmp.reduceCoordinates();
 
       cells[geometries[key].id] = tmp;
 
@@ -831,12 +835,24 @@ define([
       if (conditions.properties.externalReference) cells[id].setExternalReference(properties[key].externalReference);
       if (conditions.properties.duality) cells[id].setDuality(properties[key].duality);
 
+      //////////////////////////////////////////////////////////////////////////////
+      if(properties[key].storey != "")
+        cells[id].addDesc('storey', properties[key].storey);
+     //////////////////////////////////////////////////////////////////////////////
 
-      if (cells[id].type == "NavigableSpace") {
-        cells[id].setType(properties[key].naviType);
-        cells[id].setClass(properties[key].navi.class);
-        cells[id].setFunction(properties[key].navi.function);
-        cells[id].setUsage(properties[key].navi.usage);
+
+      if (properties[key].extend.moduleType != "") {
+        if (properties[key].extend.featureType == 'NonNavigableSpace') {
+          cells[id].setType('NonNavigableSpace');
+          cells[id].addProperty('obstacleType', properties[key].extend.attributes.obstacleType);
+        } else {
+          cells[id].setType(properties[key].extend.featureType);
+          cells[id].addProperty('function', properties[key].extend.attributes.function);
+          cells[id].addProperty('class', properties[key].extend.attributes.class);
+          cells[id].addProperty('usage', properties[key].extend.attributes.usage);
+        }
+
+        cells[id].addProperty('height', properties[key].height);
       }
 
     }
@@ -859,7 +875,7 @@ define([
 
     }
 
-    function isCCW(coor){
+    function isCCW(coor) {
       var wkt = "POLYGON ((";
 
       for (var i = 0; i < coor.length; i++) {
@@ -885,11 +901,18 @@ define([
         var cellId = cellkeyInFloor[cellKey];
 
         var coor = cells[cellId].getCoordinates()[0];
-        if(isCCW(coor)) coor.reverse();;
+        if (isCCW(coor)) coor.reverse();
 
         if (geoType == '3D') {
-          if (slantMap[cellId] == undefined) cells[cellId].setCoor(manager.extrudeCell(coor, floorProperties[floorKey].celingHeight * 1), '3D');
-          else if (slantMap[cellId].direction == 'up')
+          if (slantMap[cellId] == undefined) {
+
+            cells[cellId].setCoor(
+              manager.extrudeCell(
+                coor,
+                cells[cellId].type != "CellSpace" ? cells[cellId].properties.height : floorProperties[floorKey].celingHeight * 1),
+              '3D'
+            );
+          } else if (slantMap[cellId].direction == 'up')
             cells[cellId].setCoor(
               manager.extrudeCellWithUpSlant(
                 coor, [
@@ -900,15 +923,15 @@ define([
               '3D'
             );
           else if (slantMap[cellId].direction == 'down')
-          cells[cellId].setCoor(
-            manager.extrudeCellWithDownSlant(
-              coor, [
-                [transDot[slantMap[cellId].line[0][0].uuid], transDot[slantMap[cellId].line[0][1].uuid]],
-                [transDot[slantMap[cellId].line[1][0].uuid], transDot[slantMap[cellId].line[1][1].uuid]]
-              ],
-              floorProperties[floorKey].celingHeight * 1),
-            '3D'
-          );
+            cells[cellId].setCoor(
+              manager.extrudeCellWithDownSlant(
+                coor, [
+                  [transDot[slantMap[cellId].line[0][0].uuid], transDot[slantMap[cellId].line[0][1].uuid]],
+                  [transDot[slantMap[cellId].line[1][0].uuid], transDot[slantMap[cellId].line[1][1].uuid]]
+                ],
+                floorProperties[floorKey].celingHeight * 1),
+              '3D'
+            );
         } else if (geoType == '2D') {
           coor.reverse();
           cells[cellId].setCoor([coor], '2D');
@@ -921,7 +944,7 @@ define([
           for (var holeKey in holeMap[cellId]) {
 
             var holeCoor = holeMap[cellId][holeKey];
-            if(isCCW(holeCoor)) holeCoor.reverse();
+            if (isCCW(holeCoor)) holeCoor.reverse();
 
             if (geoType == '3D') cells[cellId].addHole(manager.extrudeCell(holeCoor, floorProperties[floorKey].celingHeight * 1), '3D');
             else if (geoType == '2D') {
@@ -943,11 +966,13 @@ define([
       'transferSpace': [],
       'transitionSpace': [],
       'connectionSpace': [],
-      'anchorSpace': []
+      'anchorSpace': [],
+      'nonnavigablespace': [],
     };
 
     for (var key in cells) {
       cells[key].simplify();
+
       if (cells[key].type == "CellSpace") result.cell.push(cells[key]);
       else if (cells[key].type == "NavigableSpace") result.navigableSpace.push(cells[key]);
       else if (cells[key].type == "GeneralSpace") result.generalSpace.push(cells[key]);
@@ -955,9 +980,9 @@ define([
       else if (cells[key].type == "TransitionSpace") result.transitionSpace.push(cells[key]);
       else if (cells[key].type == "ConnectionSpace") result.connectionSpace.push(cells[key]);
       else if (cells[key].type == "AnchorSpace") result.anchorSpace.push(cells[key]);
+      else if (cells[key].type == "NonNavigableSpace") result.cell.push(cells[key]);
+      //else if (cells[key].type == "NonNavigableSpace") result.nonnavigablespace.push(cells[key]);
     }
-
-    log.info(result);
 
     return result;
 
@@ -967,9 +992,8 @@ define([
    * @memberof ExportManager
    * @return Array of Format4Factory.CellSpaceBoundary
    */
-  ExportManager.prototype.cellBoundaryObj4VFactory = function(docId, parentId, transDot) {
+  ExportManager.prototype.cellBoundaryObj4Factory = function(docId, parentId, transDot) {
     var cellBoundaries = {};
-    var result = [];
     var conditions = window.conditions.exportConditions.CellSpaceBoundary;
     var geometries = window.storage.geometryContainer.cellBoundaryGeometry;
     var properties = window.storage.propertyContainer.cellBoundaryProperties;
@@ -999,6 +1023,13 @@ define([
       if (conditions.properties.externalReference) cellBoundaries[id].setExternalReference(properties[key].externalReference);
       if (conditions.properties.duality) cellBoundaries[id].setDuality(properties[key].duality);
 
+      if (properties[key].extend.moduleType != "") {
+        cellBoundaries[id].setType(properties[key].extend.featureType);
+      }
+
+      cellBoundaries[id].addProperty('height', properties[key].height);
+      cellBoundaries[id].addProperty('bottom', properties[key].bottom);
+      cellBoundaries[id].addProperty('isReverserble', properties[key].isReverserble);
     }
 
     // pixel to real world coordinates
@@ -1010,40 +1041,121 @@ define([
       for (var cellBoundaryKey in cellBoundarykeyInFloor) {
 
         var surface = [];
+        var id = cellBoundarykeyInFloor[cellBoundaryKey];
+        var reverseObj = null;
 
         // make reverse
-        var reverseObj = new FeatureFactory4Factory('CellSpaceBoundary', conditions);
-        reverseObj.copy(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]]);
+        reverseObj = new FeatureFactory4Factory('CellSpaceBoundary', conditions);
+        reverseObj.copy(cellBoundaries[id]);
         reverseObj.setId(reverseObj.id + '-REVERSE');
-        reverseObj.setGeometryId(reverseObj.geometry.properties.id + '-REVERSE');
-        // reverseObj.setName(reverseObj.properties.name + '-REVERSE');
-        reverseObj.setName(reverseObj.properties.name);
+        reverseObj.setGeometryId(cellBoundaries[id].geometry.properties.id + '-REVERSE');
+        reverseObj.setName(cellBoundaries[id].properties.name + '-REVERSE');
         reverseObj.reverseCoor();
         reverseObj.reverseDuality();
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'] = reverseObj;
+        reverseObj.addProperty('height', cellBoundaries[id].properties.height);
 
-        var coor = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].getCoordinates();
-        var coor_reverse = cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].getCoordinates();
-        if (geoType == '3D') {
-          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setWKT(manager.extrudeCellBoundary(coor, floorProperties[floorKey].doorHeight * 1), '3D');
-          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setWKT(manager.extrudeCellBoundary(coor_reverse, floorProperties[floorKey].doorHeight * 1), '3D');
-        } else if (geoType == '2D') {
-          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setWKT(coor, '2D');
-          cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].setWKT(coor_reverse, '2D');
+        if (cellBoundaries[id].type != "CellSpaceBoundary") {
+          reverseObj.setType(cellBoundaries[id].type);
+          reverseObj.addProperty('function', cellBoundaries[id].properties.function);
+          reverseObj.addProperty('class', cellBoundaries[id].properties.class);
+          reverseObj.addProperty('usage', cellBoundaries[id].properties.usage);
         }
 
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].addPrtDesc(prtDesc);
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].addPrtDesc(prtDesc);
+        cellBoundaries[id + '-REVERSE'] = reverseObj;
 
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].convertDescObj2Str();
-        cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey] + '-REVERSE'].convertDescObj2Str();
+        var coor = cellBoundaries[id].getCoordinates();
+        if (geoType == '3D') {
+          var h = cellBoundaries[id].properties.height * 1;
+          cellBoundaries[id].setWKT(manager.extrudeCellBoundary(coor, h), '3D');
+        } else if (geoType == '2D') {
+          cellBoundaries[id].setWKT(coor, '2D');
+        }
 
+        cellBoundaries[id].addPrtDesc(prtDesc);
+        cellBoundaries[id].convertDescObj2Str();
+        delete cellBoundaries[id].properties.height;
+        delete cellBoundaries[id].properties.bottom;
+        delete cellBoundaries[id].properties.isReverserble;
+
+
+        var coor_reverse = cellBoundaries[id + '-REVERSE'].getCoordinates();
+        if (geoType == '3D') {
+          var h = cellBoundaries[id + '-REVERSE'].properties.height * 1;
+          cellBoundaries[id + '-REVERSE'].setWKT(manager.extrudeCellBoundary(coor_reverse, h), '3D');
+        } else if (geoType == '2D') {
+          cellBoundaries[id + '-REVERSE'].setWKT(coor_reverse, '2D');
+        }
+
+        cellBoundaries[id + '-REVERSE'].addPrtDesc(prtDesc);
+        cellBoundaries[id + '-REVERSE'].convertDescObj2Str();
+        delete cellBoundaries[id + '-REVERSE'].properties.height;
+        delete cellBoundaries[id + '-REVERSE'].properties.bottom;
+        delete cellBoundaries[id + '-REVERSE'].properties.isReverserble;
       }
     }
 
+    var result = {
+      'cellboundary': [],
+      'connectionboundary': [],
+      'anchorboundary': []
+    };
+
+    // add hatch
+    var hatchs = window.storage.geometryContainer.hatchGeometry;
+    for (var h of hatchs) {
+
+      var tmp = new FeatureFactory4Factory('CellSpaceBoundary', conditions);
+      log.info(h);
+      tmp.setId(h.id);
+      tmp.setName(h.name);
+      tmp.setDocId(docId);
+      tmp.setParentId(parentId);
+      tmp.setGeometryId("CBG-" + h.id);
+      tmp.pushCoordinatesFromDots(h.points, transDot);
+
+      tmp.setType('ConnectionBoundary');
+
+      if (h.direction == "up") {
+        for (var i in tmp.geometry.coordinates) {
+          tmp.geometry.coordinates[i][2] += 20 * 1;
+        }
+      }
+      tmp.geometry.coordinates.push(tmp.getCoordinates()[0]);
+      tmp.setWKT(tmp.getCoordinates(), '3D');
+
+      result.connectionboundary.push(tmp);
+
+
+      var tmp_ = new FeatureFactory4Factory('CellSpaceBoundary', conditions);
+      log.info(h);
+      tmp_.setId(h.id + "-REVERSE");
+      tmp_.setDocId(docId);
+      tmp_.setParentId(parentId);
+      tmp_.setGeometryId("CBG-" + h.id + "-REVERSE");
+      tmp_.pushCoordinatesFromDots(h.points.reverse(), transDot);
+
+      tmp_.setType('ConnectionBoundary');
+
+      if (h.direction == "up") {
+        for (var i in tmp_.geometry.coordinates) {
+          tmp_.geometry.coordinates[i][2] += 20 * 1;
+        }
+      }
+
+      tmp_.geometry.coordinates.push(tmp_.getCoordinates()[0]);
+      tmp_.setWKT(tmp_.getCoordinates(), '3D');
+
+      result.connectionboundary.push(tmp_);
+    }
+
+
+
     for (var key in cellBoundaries) {
       cellBoundaries[key].simplify();
-      result.push(cellBoundaries[key]);
+
+      if (cellBoundaries[key].type == "CellSpaceBoundary") result.cellboundary.push(cellBoundaries[key]);
+      else if (cellBoundaries[key].type == "ConnectionBoundary") result.connectionboundary.push(cellBoundaries[key]);
+      else if (cellBoundaries[key].type == "AnchorBoundary") result.anchorboundary.push(cellBoundaries[key]);
     }
 
     return result;
@@ -1121,7 +1233,7 @@ define([
    * @memberof ExportManager
    * @return Array of Format4Factory.Transition
    */
-  ExportManager.prototype.transitionObj4VFactory = function(docId, edges, transDot) {
+  ExportManager.prototype.transitionObj4Factory = function(docId, edges, transDot) {
     var transitions = {};
     var result = [];
     var conditions = window.conditions.exportConditions.Transition;
@@ -1372,9 +1484,9 @@ define([
       } else if (lines[0][1].point.x == down[i][0] && lines[0][1].point.y == down[i][1]) {
         flag = true;
         downToUpIndex.push(i);
-      } else if(flag){
+      } else if (flag) {
         downToUpIndex.push(i);
-      }else {
+      } else {
         downLeft = JSON.parse(JSON.stringify(down[i]));
         downRight = JSON.parse(JSON.stringify(down[i + 1]));
         upRight = JSON.parse(JSON.stringify(up[i + 1]));
@@ -1453,10 +1565,10 @@ define([
         ]);
 
         flag = false;
-      } else if(lines[1][1].point.x == down[i][0] && lines[1][1].point.y == down[i][1]){
+      } else if (lines[1][1].point.x == down[i][0] && lines[1][1].point.y == down[i][1]) {
         flag = true;
         upToDownIndex.push(i);
-      } else if(flag){
+      } else if (flag) {
         upToDownIndex.push(i);
       } else {
         downLeft = JSON.parse(JSON.stringify(down[i]));
@@ -1474,15 +1586,19 @@ define([
     for (var i = 0; i < upToDownIndex.length; i++) {
       up[upToDownIndex[i]] = down[upToDownIndex[i]];
 
-      if(upToDownIndex[i] == 0)           up[up.length-1] = up[0];
-      if(upToDownIndex[i] == up.length-1) up[0] = up[up.length-1];
+      if (upToDownIndex[i] == 0) up[up.length - 1] = up[0];
+      if (upToDownIndex[i] == up.length - 1) up[0] = up[up.length - 1];
 
     }
 
     down.reverse();
 
-    surfaces.push([[down]]);
-    surfaces.push([[up]]);
+    surfaces.push([
+      [down]
+    ]);
+    surfaces.push([
+      [up]
+    ]);
 
     return [surfaces];
   }
@@ -1495,7 +1611,7 @@ define([
     var result = JSON.parse(JSON.stringify(line));
 
     line.reverse();
-    for(var i in line) line[i][2] += dh;
+    for (var i in line) line[i][2] += dh;
 
     result = result.concat(line);
     result.push(result[0]);
@@ -1508,6 +1624,38 @@ define([
    * @memberof ExportManager
    */
   ExportManager.prototype.transAllDots = function(dotFools, floorProperties) {
+
+    var result = {};
+    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+    var pp = window.storage.propertyContainer.projectProperty;
+
+    if (pp.isRealCoor && pp.realCoorFloor != "")
+      result = manager.transAllDotsUsingTool(dotFools, floorProperties, pp);
+    else
+      result = manager.transAllDotsUsingMatrix(dotFools, floorProperties);
+
+
+    //change state height
+    var proeprtyContainer = window.storage.propertyContainer;
+    for (var key in result) {
+      if (result[key].isState()) {
+        var index = Object.values(result[key].memberOf).indexOf('state');
+        var stateId = Object.keys(result[key].memberOf)[index];
+        if (proeprtyContainer.getElementById('state', stateId) == null) {
+          //log.info(result, key, result[key])
+          delete result[key];
+        } else {
+          result[key].point.z += proeprtyContainer.getElementById('state', stateId).height * 1;
+        }
+
+      }
+    }
+
+    return result;
+
+  }
+
+  ExportManager.prototype.transAllDotsUsingMatrix = function(dotFools, floorProperties) {
 
     function copyDot(obj) {
       var copiedDot = new Dot(obj.point.x, obj.point.y);
@@ -1533,88 +1681,143 @@ define([
       return copiedObject;
     }
 
-    var result = {};
+    let result = {};
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
     for (var dotFoolKey in dotFools) {
       //function(pixelHeight, pixeWidth, worldURC, worldLLC, point)
 
-      var stage = window.storage.canvasContainer.stages[floorProperties[dotFoolKey].id].stage;
-      var height = floorProperties[dotFoolKey].groundHeight * 1;
-      // var pixelLLC = [0, 0, 0];
-      // var pixelURC = [stage.getAttr('width'), stage.getAttr('height'), 0];
-      var worldLLC = [floorProperties[dotFoolKey].lowerCorner[0] * 1, floorProperties[dotFoolKey].lowerCorner[1] * 1, 0];
-      var worldURC = [floorProperties[dotFoolKey].upperCorner[0] * 1, floorProperties[dotFoolKey].upperCorner[1] * 1, 0];
+      let stage = window.storage.canvasContainer.stages[floorProperties[dotFoolKey].id].stage;
+      let height = floorProperties[dotFoolKey].groundHeight * 1;
+      let worldLLC = [floorProperties[dotFoolKey].lowerCorner[0] * 1, floorProperties[dotFoolKey].lowerCorner[1] * 1, 0];
+      let worldURC = [floorProperties[dotFoolKey].upperCorner[0] * 1, floorProperties[dotFoolKey].upperCorner[1] * 1, 0];
 
-      for (var dotKey in dotFools[dotFoolKey].dots) {
+      for (let dotKey in dotFools[dotFoolKey].dots) {
 
-        var transDot = copyDot(dotFools[dotFoolKey].dots[dotKey]);
-        var transPoint = manager.affineTransformation(stage.getAttr('height'), stage.getAttr('width'), worldURC, worldLLC, [transDot.point.x, transDot.point.y, 0]);
+        let transDot = copyDot(dotFools[dotFoolKey].dots[dotKey]);
+        let transPoint = manager.affineTransformation(stage.getAttr('height'), stage.getAttr('width'), worldURC, worldLLC, [transDot.point.x, transDot.point.y, 0]);
         transDot.setPoint({
           x: transPoint._data[0],
           y: transPoint._data[1],
           z: height
         });
+        if (transDot.point == undefined) log.info("ttt", transDot);
         result[transDot.uuid] = transDot;
-
-      }
-
-    }
-
-    //change state height
-    var proeprtyContainer = window.storage.propertyContainer;
-    for (var key in result) {
-      if (result[key].isState()) {
-        var index = Object.values(result[key].memberOf).indexOf('state');
-        var stateId = Object.keys(result[key].memberOf)[index];
-        result[key].point.z += proeprtyContainer.getElementById('state', stateId).height * 1;
       }
     }
 
     return result;
-
   }
 
-  ExportManager.prototype.renameCellBoundary = function(cells, cellBoundaries){
-    log.info('renameCellBoundary !!' , cells, cellBoundaries);
+  ExportManager.prototype.transAllDotsUsingTool = function(dotFools, floorProperties, projectProperty) {
 
-    var cbo = {} ,co = {};
-    for(var c of cells) co[c.properties.name] = c;
-    for(var cb of cellBoundaries) cbo[cb.id] = cb;
-
-    function getReverseName(str){
-      if(str.indexOf('REVERSE') == -1) return str += '-REVERSE';
-      else return str.substr(0, str.indexOf('-REVERSE'));
-    }
-
-    function isPartOfPBB(pbb, bid){
-      if(pbb === undefined) return false;
-      for(var i of pbb) if(i === bid) return true;
-      return false;
-    }
-
-    for(var key in cbo){
-      var cb = cbo[key];
-      var cbname = cb.properties.name;
-      var cname = cbname.substring(cbname.indexOf('C'), cbname.indexOf('-') == -1 ? cbname.length : cbname.indexOf('-'));
-      var post = "", postr = "";
-
-      if(co[cname] != undefined && isPartOfPBB(co[cname].properties.partialboundedBy, cb.id)){
-        post = 'I';
-        postr = 'E';
-      }
-      else if(co[cname] != undefined && isPartOfPBB(co[cname].properties.partialboundedBy, getReverseName(cb.id))){
-        post = 'E';
-        postr = 'I';
+    function array2string(arr) {
+      let str = "";
+      for (let lineI in arr) {
+        let line = arr[lineI];
+        for (let i in line) {
+          str += line[i];
+          if (i != line.length - 1) str += ", ";
+        }
+        if (lineI != arr.length - 1) str += "\r\n";
       }
 
-      cb.properties.name += post;
-      cbo[getReverseName(cb.id)].properties.name += postr;
-      delete cbo[cb.id];
-      delete cbo[getReverseName(cb.id)];
+      return str;
     }
 
-    log.info(cells, cellBoundaries);
+    function copyDot(obj) {
+      var copiedDot = new Dot(obj.point.x, obj.point.y);
+      copiedDot.uuid = obj.uuid;
+      copiedDot.memberOf = copyObject(obj.memberOf);
+
+      return copiedDot;
+    }
+
+    function copyObject(obj) {
+      if (obj === null || typeof obj !== 'object') {
+        return obj;
+      }
+
+      var copiedObject = obj.constructor();
+
+      for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          copiedObject[key] = copyObject(obj[key]);
+        }
+      }
+
+      return copiedObject;
+    }
+
+    let constArr = [];
+    let allCoorArr = [];
+    let result = {};
+
+    let canvasCoor = window.storage.canvasContainer.stages[projectProperty.realCoorFloor].getWD();
+    let lowerCorner = floorProperties[projectProperty.realCoorFloor].lowerCorner;
+    let upperCorner = floorProperties[projectProperty.realCoorFloor].upperCorner;
+
+    constArr.push([...lowerCorner, 0, 0]);
+    constArr.push([...upperCorner, canvasCoor.width, canvasCoor.height]);
+    constArr.push([lowerCorner[0], upperCorner[1], 0, canvasCoor.height]);
+    constArr.push([upperCorner[0], lowerCorner[1], canvasCoor.width, 0]);
+
+    for (let dotFoolKey in dotFools) {
+      for (let dotKey in dotFools[dotFoolKey].dots)
+        allCoorArr.push([dotFools[dotFoolKey].dots[dotKey].point.x, dotFools[dotFoolKey].dots[dotKey].point.y]);
+    }
+
+    constArr = array2string(constArr);
+    allCoorArr = array2string(allCoorArr);
+
+    let xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status == 200) {
+
+        let strArr = xhr.response.split("\r\n");
+        strArr = strArr.slice(0, strArr.length - 1);
+
+        let coors = [];
+        for (let coorStr of strArr) {
+          coorStr = coorStr.split(",");
+          coorStr[0] = coorStr[0] * 1;
+          coorStr[1] = coorStr[1] * 1;
+          coors.push(coorStr);
+        }
+
+        let i = 0;
+
+        for (let dotFoolKey in dotFools) {
+          let height = floorProperties[dotFoolKey].groundHeight * 1;
+
+          for (let dotKey in dotFools[dotFoolKey].dots) {
+            let transDot = copyDot(dotFools[dotFoolKey].dots[dotKey]);
+            transDot.setPoint({
+              x: coors[i][0],
+              y: coors[i][1],
+              z: height
+            });
+            result[transDot.uuid] = transDot;
+            i++;
+          }
+        }
+
+        return result;
+
+      }
+    }
+
+    xhr.open("POST", "http://localhost:8080/trans-dot", false);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    let data = JSON.stringify({
+      'constArr': constArr,
+      'allCoorArr': allCoorArr
+    });
+    log.info(data);
+    xhr.send(data);
+
+    return result;
+
   }
 
   return ExportManager;

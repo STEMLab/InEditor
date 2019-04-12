@@ -167,6 +167,15 @@ define(["./Feature"], function(Feature) {
     }
   }
 
+  CellSpaceBoundary.prototype.addProperty = function(key, value){
+    if(value != undefined) this.attributes[key] = value;
+
+    if(key == 'bottom'){
+      for(var c of this.geometry.coordinates)
+        c[2] += value * 1;
+    }
+  }
+
 
   return CellSpaceBoundary;
 

@@ -2,19 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define([
-  "../PubSub/Subscriber.js",
-  "../Conditions.js",
-  "../Storage/Canvas/Stage.js",
-  "../UI/ContextMenu.js",
-  "../Utils/GMLHelper.js"
-], function(
-  Subscriber,
-  Conditions,
-  Stage,
-  ContextMenu,
-  GMLHelper
-) {
+define(function(require) {
   'use strict';
 
   /**
@@ -23,12 +11,12 @@ define([
    */
   function ProjectManager() {
 
-    Subscriber.apply(this, arguments);
+    require('Subscriber').apply(this, arguments);
 
     this.init();
   }
 
-  ProjectManager.prototype = Object.create(Subscriber.prototype);
+  ProjectManager.prototype = Object.create(require('Subscriber').prototype);
 
   ProjectManager.prototype.init = function() {
 
@@ -38,7 +26,6 @@ define([
     this.addCallbackFun('loadproject', this.loadProject);
     this.addCallbackFun('importfile', this.importFile);
     this.addCallbackFun('importgml', this.importGML);
-
     this.addCallbackFun('updateconditions', this.updateConditions);
 
   }
@@ -47,7 +34,6 @@ define([
    * @memberof ProjectManager
    */
   ProjectManager.prototype.saveProject = function() {
-
 
     // Serialize document
     var id = window.storage.propertyContainer.projectProperty.id;
@@ -70,23 +56,18 @@ define([
     }
 
     doc['conditions'] = window.conditions;
+    doc['codeList'] = require('Property').CODE_LIST.getInstance().getList();
+
+    var filename = window.conditions.savePath + '/' + window.conditions.saveName + '-' + new Date().getTime() + '.bson';
 
 
     // send json data to viewer
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status == 200) {
-
-        window.broker.getManager('setpropertyview', 'UIManager').showSnackBar({
-          msg: 'Project saved successfully (' + window.conditions.savePath + '/' + window.conditions.saveName + '.bson)'
-        });
-
+        require('Popup')('success', 'Project saved successfully', filename);
       } else if (xhr.status == 500) {
-
-        window.broker.getManager('setpropertyview', 'UIManager').showSnackBar({
-          msg: xhr.statusText + '! ' + xhr.responseText
-        });
-
+        require('Popup')('error', xhr.statusText, xhr.responseText);
       }
     }
 
@@ -94,7 +75,7 @@ define([
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(JSON.stringify({
       doc: doc,
-      path: window.conditions.savePath + '/' + window.conditions.saveName + '.bson'
+      path: filename
     }));
 
   }
@@ -113,10 +94,12 @@ define([
 
         if (xhr.readyState == 4 && xhr.status == 200) {
           var obj = JSON.parse(xhr.responseText);
-          log.info(obj);
 
           window.conditions.load(obj.conditions);
           delete obj.conditions;
+
+          require('Property').CODE_LIST.getInstance().load(obj.codeList);
+          delete obj.codeList;
 
           // manager가 load를 하도록  function move
           var loadData = obj[Object.keys(obj)[0]];
@@ -166,7 +149,7 @@ define([
 
 
     window.uiContainer.workspace.addNewWorkspace(key, newFloorProperty.name);
-
+    var Stage = require('../Storage/Canvas/Stage.js');
     window.storage.canvasContainer.stages[key] = new Stage(
       newFloorProperty.id,
       newFloorProperty.name,
@@ -186,7 +169,7 @@ define([
     var floorId = newFloorProperty.id;
 
     // bind right click event
-    ContextMenu.bindContextMenu(floorId);
+    require("../UI/ContextMenu.js").bindContextMenu(floorId);
 
   }
 
@@ -207,7 +190,7 @@ define([
           var manager = window.broker.getManager('importgml', 'ProjectManager');
           var indoor = JSON.parse(manager.xmlToJson('./output/TMP.gml'));
           // var parsed = manager.parseJson(indoor);
-          var parsed = GMLHelper.parse(indoor);
+          var parsed = require("../Utils/GMLHelper.js").parse(indoor);
           manager.makeObj(parsed);
         }
       }
@@ -267,7 +250,7 @@ define([
     data.bbox = extendBBox(data.bbox, dataSize.width, dataSize.height);
 
     var floorId;
-    for(floorId in data.floorData){
+    for (floorId in data.floorData) {
 
       window.broker.publish({
         req: 'addnewfloor',
@@ -286,9 +269,8 @@ define([
       floorProperty.doorHeight = data.floorData[floorId].doorHeight != -1 ? data.floorData[floorId].doorHeight : 15;
     }
 
-    var transResult = GMLHelper.transCoor(
-      data,
-      {
+    var transResult = require("../Utils/GMLHelper.js").transCoor(
+      data, {
         height: document.getElementById(floorId).clientHeight,
         width: document.getElementById(floorId).clientWidth
       }

@@ -123,5 +123,10 @@ define([], function() {
     return this.id;
   }
 
+  FloorProperty.prototype.setMapCoor = function(bottomLeft, topRight){
+    this.lowerCorner = bottomLeft;
+    this.upperCorner = topRight;
+  }
+
   return FloorProperty;
 });
