@@ -136,6 +136,7 @@ define([
     this.reqSpecList['cancel-addnewcellboundary'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['cancel-addnewstate'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['cancel-addnewtransition'] = new MessageSpec('single', 'including', ['draw'], false);
+    this.reqSpecList['cancel-addnewhole'] = new MessageSpec('single', 'including', ['draw'], false);
 
     this.reqSpecList['start-addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);

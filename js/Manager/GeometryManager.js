@@ -88,6 +88,7 @@
       this.addCallbackFun("cancel-addnewcell", this.cancelDrawObj);
       this.addCallbackFun("cancel-addnewcellboundary", this.cancelDrawObj);
       this.addCallbackFun("cancel-addnewtransition", this.cancelDrawObj);
+      this.addCallbackFun("cancel-addnewhole", this.cancelDrawObj);
 
       this.addCallbackFun("start-addnewstate", this.startAddNewState, function() {}, function() {});
       this.addCallbackFun("end-addnewstate", this.endAddNewState, this.makeSimpleHistoryObj, this.endAddNewTransition_undo);
