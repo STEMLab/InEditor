@@ -283,8 +283,8 @@ define(function(require) {
       if(data.moduleType != "" && data.featureType != ""){
         if(data.moduleType == "navi" && document.getElementById('property-table').dataset.type == "cell"){
           data.attributes = {
-            function: CodeList.getCodeNum([data.featureType, 'class'], document.getElementById("class-text").value),
-            class: CodeList.getCodeNum([data.featureType, 'function'], document.getElementById("function-text").value),
+            function: CodeList.getCodeNum([data.featureType, 'function'], document.getElementById("function-text").value),
+            class: CodeList.getCodeNum([data.featureType, 'class'], document.getElementById("class-text").value),
             usage: CodeList.getCodeNum([data.featureType, 'function'], document.getElementById("usage-text").value)
           }
         }

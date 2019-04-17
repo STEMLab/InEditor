@@ -85,7 +85,6 @@ define([
     } else {
 
       this.publishMsg(this.topic, _message);
-
     }
 
   }
@@ -101,9 +100,12 @@ define([
 
     for (var i = 0; i < subscriber.length; i++) {
       if(_path[_topic][i].run(_message, uuid) == false){
-        if( window.myhistory.history.back().msg == _message ){
+        if( window.myhistory.history.back() != undefined &&
+            window.myhistory.history.back().msg == _message ){
           window.myhistory.undo();
         }
+
+        break;
       }
     }
   }
@@ -134,6 +136,7 @@ define([
     this.reqSpecList['cancel-addnewcellboundary'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['cancel-addnewstate'] = new MessageSpec('single', 'including', ['draw'], false);
     this.reqSpecList['cancel-addnewtransition'] = new MessageSpec('single', 'including', ['draw'], false);
+    this.reqSpecList['cancel-addnewhole'] = new MessageSpec('single', 'including', ['draw'], false);
 
     this.reqSpecList['start-addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);
     this.reqSpecList['addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);

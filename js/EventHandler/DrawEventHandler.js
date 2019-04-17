@@ -720,6 +720,18 @@ define([
 
         }
         break;
+      case 'addnewhole':
+        if(broker.isPublishable('cancel-addnewhole')){
+
+          broker.publish(new Message('cancel-addnewhole', {
+            'floor': window.tmpObj.floor
+          }));
+
+          result.result = true;
+          result.msg = null;
+
+        }
+        break;
       default:
         result.msg = "no match function.";
     }

@@ -46,6 +46,7 @@ define(function(require) {
     this.addCallbackFun('cancel-addnewcell', this.cancelAddNewCell);
     this.addCallbackFun('cancel-addnewcellboundary', this.cancelAddNewCellBoundary);
     this.addCallbackFun('cancel-addnewtransition', this.cancelAddNewTransition);
+    this.addCallbackFun('cancel-addnewhole', this.endAddNewHole);
 
     this.addCallbackFun('start-addnewcellboundary', this.startAddNewCellBoundary);
     this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.endAddNewCellBoundary_makeHistoryObj, this.removeObj);
@@ -718,6 +719,20 @@ define(function(require) {
    * @memberof UIManager
    */
   UIManager.prototype.cancelAddNewTransition = function(reqObj) {
+
+    document.getElementById('transition-btn').src = "../../assets/icon/transition_d.png";
+
+    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    manager.setTooltipText({
+      text: ''
+    });
+
+  }
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.cancelAddNewHole = function(reqObj) {
 
     document.getElementById('transition-btn').src = "../../assets/icon/transition_d.png";
 

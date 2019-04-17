@@ -88,6 +88,7 @@
       this.addCallbackFun("cancel-addnewcell", this.cancelDrawObj);
       this.addCallbackFun("cancel-addnewcellboundary", this.cancelDrawObj);
       this.addCallbackFun("cancel-addnewtransition", this.cancelDrawObj);
+      this.addCallbackFun("cancel-addnewhole", this.cancelDrawObj);
 
       this.addCallbackFun("start-addnewstate", this.startAddNewState, function() {}, function() {});
       this.addCallbackFun("end-addnewstate", this.endAddNewState, this.makeSimpleHistoryObj, this.endAddNewTransition_undo);
@@ -190,6 +191,14 @@
 
       window.tmpObj.addCorner(dot);
 
+
+      var manager = window.broker.getManager("end-addnewcell", "GeometryManager");
+      // if(manager.isSelfIntersecting(reqObj)){
+      //   window.storage.dotFoolContainer
+      //     .getDotFool(reqObj.floor)
+      //     .deleteDotFromObj(dot.uuid, "tmpObj");
+      // }
+
       // draw group
       window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
       // window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
@@ -236,26 +245,37 @@
       }
 
       var tmpObj = window.tmpObj;
+      var manager = window.broker.getManager("end-addnewcell", "GeometryManager");
+      if(manager.isSelfIntersecting(tmpObj)){
+        window.broker.publish({
+          req : 'cancel-addnewcell',
+          reqObj : { 'floor': reqObj.floor }
+        });
+        return false;
+
+      }
+
+      if(tmpObj.dots.length < 3){
+        window.broker.publish({
+          req : 'cancel-addnewcell',
+          reqObj : { 'floor': reqObj.floor }
+        });
+        return false;
+      }
+
 
       // clear tmp obj
       window.tmpObj = null;
       window.storage.canvasContainer.stages[
         reqObj.floor
       ].tmpLayer.group.removeObj();
-      // window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
       for (var key in tmpObj.dots) {
         tmpObj.dots[key].leaveObj("tmpObj");
       }
 
-      // Twisted side validation
-      if (!window.broker
-        .getManager("end-addnewcell", "GeometryManager")
-        .validateTwistedSide(tmpObj.dots)
-      ) {
-        log.error("This object have twisted side !");
+      if(tmpObj.dots.length < 3)
         return false;
-      }
 
       tmpObj.id = reqObj.id;
       tmpObj.name = reqObj.id;
@@ -671,7 +691,7 @@
       // Twisted side validation
       if (!window.broker
         .getManager("end-addnewcell", "GeometryManager")
-        .validateTwistedSide(tmpObj.dots)
+        .isSelfIntersecting(tmpObj.dots)
       ) {
         log.error("This object have twisted side !");
         return false;
@@ -715,8 +735,20 @@
      * @param {Array} Array of dots. Assume that you create a face by connecting the lines in sequence to the array.
      * @return {Boolean}
      */
-    GeometryManager.prototype.validateTwistedSide = function(dots) {
-      return true;
+    GeometryManager.prototype.isSelfIntersecting = function(tmpObj) {
+      var wkt = tmpObj.getWKT();
+      var reader = new jsts.io.WKTReader();
+      var cell = reader.read(wkt);
+
+      var validator = new jsts.operation.IsSimpleOp(cell._shell);
+      if (validator.isSimpleLinearGeometry(cell._shell))
+        return false;
+
+      var graph = new jsts.geomgraph.GeometryGraph(0, cell._shell);
+      var cat = new jsts.operation.valid.ConsistentAreaTester(graph);
+      var r = cat.isNodeConsistentArea();
+
+      return !r;
     };
 
     /**
@@ -737,6 +769,8 @@
         ].tmpLayer.group.removeObj();
         window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
       }
+
+      window.conditions.LAST_CELL_ID_NUM--;
 
       // clear tmp obj
       window.tmpObj = null;
@@ -2066,7 +2100,7 @@
         dots.push(dot);
       }
 
-      // if(!manager.validateTwistedSide(dots)){
+      // if(!manager.isSelfIntersecting(dots)){
       //   log.error("This object have twisted side !");
       //   return false;
       // }
@@ -2640,12 +2674,12 @@
       }
 
       // Twisted side validation
-      if (!window.broker
+      if (window.broker
         .getManager("end-addnewcell", "GeometryManager")
-        .validateTwistedSide(tmpObj.dots)
+        .isSelfIntersecting(tmpObj)
       ) {
         log.error("This object have twisted side !");
-        return false;
+        return -1;
       }
 
       tmpObj.id = reqObj.id;
