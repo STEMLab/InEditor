@@ -32,6 +32,26 @@ define(function(require) {
       CONTAINER: 'property__container'
     },
 
+    PSPROPERTY_TYPE : {
+      PUBLIC_SAFETY_DOOR: 'property__ps_door',
+      PUBLIC_SAFETY_WINDOW: 'property__ps_window',
+      PUBLIC_SAFETY_HATCH: 'property__ps_hatch',
+      PUBLIC_SAFETY_ROOM: 'property__ps_room',
+      PUBLIC_SAFETY_ELEVATOR: 'property__ps_elevator',
+      PUBLIC_SAFETY_STAIR: 'property__ps_stair',
+      PUBLIC_SAFETY_ALARM: 'property__ps_alarm',
+      PUBLIC_SAFETY_TRANSFORMER: 'property__ps_transformer',
+      PUBLIC_SAFETY_DETECTOR: 'property__ps_detector',
+      PUBLIC_SAFETY_FIREPUMP: 'property__ps_firepump',
+      PUBLIC_SAFETY_SHUTOFF: 'property__ps_shutoff',
+      PUBLIC_SAFETY_MEDICAL: 'property__ps_medical',
+      PUBLIC_SAFETY_GENERATOR: 'property__ps_generator',
+      PUBLIC_SAFETY_SPRINKLER: 'property__ps_sprinkler',
+      PUBLIC_SAFETY_SAFETYKEYBOX: 'property__ps_safetykeybox',
+      PUBLIC_SAFETY_MANUAL: 'property__ps_manual',
+      PUBLIC_SAFETY_ESCALATOR: 'property__ps_escalator'
+    },
+
     CANVAS_TYPE : {
       CELL_SPACE: 'canvas__cellSpace',
       CELL_SPACE_BOUNDARY: 'canvas__cellSpaceBoundary',
