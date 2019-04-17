@@ -463,6 +463,7 @@ define([
       'post-cellspaceboundary': baseURL + '/documents/' + document.id + '/cellspaceboundary/',
       'post-connectionboundary': baseURL + '/documents/' + document.id + '/connectionboundary/',
       'post-anchorboundary': baseURL + '/documents/' + document.id + '/anchorboundary/',
+      'post-nonnavigablespace': baseURL + '/documents/' + document.id + '/nonnavigablespace/',
       'post-multiLayeredGraph': baseURL + '/documents/' + document.id + '/multilayeredgraph/' + multiLayeredGraph.id,
       'post-spacelayers': baseURL + '/documents/' + document.id + '/spacelayers/' + spaceLayers.id,
       'post-spacelayer': baseURL + '/documents/' + document.id + '/spacelayer/',
@@ -486,6 +487,7 @@ define([
       cells.transitionSpace.length != 0 ||
       cells.connectionSpace.length != 0 ||
       cells.anchorSpace.length != 0 ||
+      cells.nonnavigableSpace.length != 0 ||
       cellBoundaries.cellboundary.length != 0 ||
       cellBoundaries.connectionboundary.length != 0 ||
       cellBoundaries.anchorboundary.length != 0) {
@@ -514,6 +516,8 @@ define([
       for (var i = 0; i < cells.anchorSpace.length; i++)
         manager.postJson(address['post-anchorspace'] + cells.anchorSpace[i].id, JSON.stringify(cells.anchorSpace[i]));
 
+      for (var i = 0; i < cells.nonnavigableSpace.length; i++)
+        manager.postJson(address['post-nonnavigablespace'] + cells.nonnavigableSpace[i].id, JSON.stringify(cells.nonnavigableSpace[i]));
 
       for (var i = 0; i < cellBoundaries.cellboundary.length; i++)
         manager.postJson(address['post-cellspaceboundary'] + cellBoundaries.cellboundary[i].id, JSON.stringify(cellBoundaries.cellboundary[i]));
@@ -564,7 +568,7 @@ define([
    * @memberof ExportManager
    */
   ExportManager.prototype.postJson = function(address, data) {
-    //log.info('POST : ' + address, data);
+    log.info('POST : ' + address, data);
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function(e) {
@@ -967,7 +971,7 @@ define([
       'transitionSpace': [],
       'connectionSpace': [],
       'anchorSpace': [],
-      'nonnavigablespace': [],
+      'nonnavigableSpace': [],
     };
 
     for (var key in cells) {
@@ -980,8 +984,8 @@ define([
       else if (cells[key].type == "TransitionSpace") result.transitionSpace.push(cells[key]);
       else if (cells[key].type == "ConnectionSpace") result.connectionSpace.push(cells[key]);
       else if (cells[key].type == "AnchorSpace") result.anchorSpace.push(cells[key]);
-      else if (cells[key].type == "NonNavigableSpace") result.cell.push(cells[key]);
-      //else if (cells[key].type == "NonNavigableSpace") result.nonnavigablespace.push(cells[key]);
+      else if (cells[key].type == "NonNavigableSpace") result.nonnavigableSpace.push(cells[key]);
+      //else if (cells[key].type == "NonNavigableSpace") result.cell.push(cells[key]);
     }
 
     return result;

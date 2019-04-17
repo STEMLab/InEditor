@@ -98,8 +98,11 @@ define(function(require) {
           window.conditions.load(obj.conditions);
           delete obj.conditions;
 
-          require('Property').CODE_LIST.getInstance().load(obj.codeList);
-          delete obj.codeList;
+          if(obj.codeList != undefined){
+            require('Property').CODE_LIST.getInstance().load(obj.codeList);
+            delete obj.codeList;
+          }
+
 
           // manager가 load를 하도록  function move
           var loadData = obj[Object.keys(obj)[0]];
