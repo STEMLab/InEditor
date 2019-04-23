@@ -12,10 +12,10 @@ define(function(require) {
     this.extend.moduleType = 'navi';
     this.extend.featureType = 'ConnectionBoundary';
     this.extend.attributes = {
-        'fireEscape': '',
+        'fireEscape': '', // true, false
         'lockType': '',
         'material': '',
-        'openable': '',
+        'openable': '', // boolean
         'sizeHeight': '',
         'sizeWidth': '',
         'windowHandling': ''
@@ -23,6 +23,10 @@ define(function(require) {
   }
 
   PSWindow.prototype = Object.create(require('Property').CELL_SPACE_BOUNDARY.prototype);
+
+  PSWindow.prototype.getDoorHandlingEnum = function(){
+    return ['Left', 'Right'];
+  }
 
   return PSWindow;
 });

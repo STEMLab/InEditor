@@ -12,13 +12,13 @@ define(function(require) {
     this.extend.moduleType = 'navi';
     this.extend.featureType = 'ConnectionBoundary';
     this.extend.attributes = {
-        'fireEscape': '',
-        'hatchLocation': '',
-        'lockType': '',
-        'material': '',
-        'openable': '',
-        'sizeLength': '',
-        'sizeWidth': ''
+        'fireEscape': '', // true, false
+        'hatchLocation': '', // string
+        'lockType': '',  // string
+        'material': '',  // string
+        'openable': '',  // true, false
+        'sizeLength': '',  //float
+        'sizeWidth': '' //float
     };
   }
 

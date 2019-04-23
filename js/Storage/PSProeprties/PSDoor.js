@@ -14,7 +14,7 @@ define(function(require) {
     this.extend.attributes = {
         'doorHandling': '', // Left, Right
         'doorSwing': '', // Outswing, Inswing, INWARDS, OUTWARDS, SLIDE
-        'fireEscape': '',
+        'fireEscape': '', // true, false
         'lockType': '',
         'material': '',
         'sizeHeight': '',
@@ -23,6 +23,14 @@ define(function(require) {
   }
 
   PSDoor.prototype = Object.create(require('Property').CELL_SPACE_BOUNDARY.prototype);
+
+  PSDoor.prototype.getDoorHandlingEnum = function(){
+    return ['Left', 'Right'];
+  }
+
+  PSDoor.prototype.getDoorSwingEnum = function(){
+    return ['Outswing', 'Inswing', 'INWARDS', 'OUTWARDS', 'SLIDE'];
+  }
 
   return PSDoor;
 });
