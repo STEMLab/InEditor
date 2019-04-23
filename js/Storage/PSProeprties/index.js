@@ -10,7 +10,8 @@ define(function(require) {
     'PUBLIC_SAFETY_ROOM': require('./PSRoom.js'),
     'PUBLIC_SAFETY_ELEVATOR': require('./PSElevator.js'),
     'PUBLIC_SAFETY_STAIR': require('./PSStair.js'),
-    'PUBLIC_SAFETY_INSTALLATION': require('./PSINstallation.js')
+    'PUBLIC_SAFETY_INSTALLATION': require('./PSINstallation.js'),
+    'UTIL': require('./util.js')
   }
   return PSProperties;
 });

@@ -282,8 +282,9 @@ define(function(require) {
 
       if (data.moduleType != "" && data.featureType != "") {
         if (data.moduleType == "navi" && document.getElementById('property-table').dataset.type == "cell") {
-          let tt = data.featrueType;
+          let tt = data.featureType;
           if (data.featureType == 'PublicSafetyRoom') tt = 'GeneralSpace';
+          else if (data.featureType == 'PublicSafetyElevator' || data.featureType == 'PublicSafetyStair') tt = 'TransitionSpace';
 
           data.attributes = {
             function: CodeList.getCodeNum([tt, 'function'], document.getElementById("function-text").value),

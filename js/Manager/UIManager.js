@@ -1342,9 +1342,21 @@ define(function(require) {
       else if (reqObj.selected == 'PublicSafetyElevator' || reqObj.selected == 'PublicSafetyStair') reqObj.path[0] = 'TransitionSpace';
 
       if (reqObj.moduleType == "navi" && document.getElementById('property-table').dataset.type == "cell") {
-        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'class'], 'class-text', 'class'));
-        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'function-text', 'function'));
-        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'usage-text', 'usage'));
+        if(reqObj.selected == 'PublicSafetyElevator'){
+          reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'class'], 'class-text', 'class', '1010'));
+          reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'function-text', 'function', '1110'));
+          reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'usage-text', 'usage', '1110'));
+        }
+        else if(reqObj.selected == 'PublicSafetyStair'){
+          reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'class'], 'class-text', 'class', '1010'));
+          reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'function-text', 'function', '1120'));
+          reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'usage-text', 'usage', '1120'));
+        }
+        else {
+          reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'class'], 'class-text', 'class'));
+          reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'function-text', 'function'));
+          reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'usage-text', 'usage'));
+        }
       } else if (reqObj.moduleType == 'non-navi') {
         reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr(
           ['NonNavigableSpace'],

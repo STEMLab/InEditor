@@ -111,30 +111,40 @@ define(function(require) {
         break;
       case 'cell':
         if (reqObj.dataClass == 'ExtensionBase') {
-          if(reqObj.updateContent.featureType.indexOf('PublicSafety') != -1){
-             // "PublicSafetyRoom", "PublicSafetyElevator", "PublicSafetyStair"
-             // "PublicSafetyDoor", "PublicSafetyWindow", "PublicSafetyHatch"
+          if (reqObj.updateContent.featureType.indexOf('PublicSafety') != -1) {
+            // "PublicSafetyRoom", "PublicSafetyElevator", "PublicSafetyStair"
+            // "PublicSafetyDoor", "PublicSafetyWindow", "PublicSafetyHatch"
 
             let pstype = require('ObjectType').PSPROPERTY_TYPE;
             let psindex = require('PSProperty');
+            let newPropertyConstuctor;
+
             switch (reqObj.updateContent.featureType) {
               case 'PublicSafetyRoom':
-                if(obj.featrueType != pstype.PUBLIC_SAFETY_ROOM){
-                  let PSRoom = psindex.PUBLIC_SAFETY_ROOM;
-                  let psroom = new PSRoom(obj.id);
-                  psroom.copy(obj);
-
-                  psroom.extend.attributes = reqObj.updateContent.attributes;
-                  window.storage.propertyContainer.replaceProperty(obj, psroom);
-                }
-                else
-                  obj.extend.attributes = reqObj.updateContent.attributes;
+                if (obj.featrueType != pstype.PUBLIC_SAFETY_ROOM) newPropertyConstuctor = psindex.PUBLIC_SAFETY_ROOM;
+                else obj.extend.attributes = reqObj.updateContent.attributes;
+                break;
+              case 'PublicSafetyElevator':
+                if (obj.featrueType != pstype.PUBLIC_SAFETY_ELEVATOR) newPropertyConstuctor = psindex.PUBLIC_SAFETY_ELEVATOR;
+                else obj.extend.attributes = reqObj.updateContent.attributes;
+                break;
+              case 'PublicSafetyStair':
+                if (obj.featrueType != pstype.PUBLIC_SAFETY_STAIR) newPropertyConstuctor = psindex.PUBLIC_SAFETY_STAIR;
+                else obj.extend.attributes = reqObj.updateContent.attributes;
                 break;
               default:
 
             }
-          }
-          else {
+
+            if (newPropertyConstuctor != undefined) {
+              let newproperty = new newPropertyConstuctor(obj.id);
+              newproperty.copy(obj);
+              newproperty.extend.attributes = reqObj.updateContent.attributes;
+              window.storage.propertyContainer.replaceProperty(obj, newproperty);
+            }
+
+
+          } else {
             obj.extend = reqObj.updateContent;
           }
         } else {
@@ -158,9 +168,9 @@ define(function(require) {
         }
         break;
       case 'cellBoundary':
-      if (reqObj.dataClass == 'ExtensionBase') {
-        obj.extend = reqObj.updateContent;
-      } else {
+        if (reqObj.dataClass == 'ExtensionBase') {
+          obj.extend = reqObj.updateContent;
+        } else {
           obj.name = reqObj.updateContent.name;
           obj.description = reqObj.updateContent.description;
 
@@ -773,10 +783,9 @@ define(function(require) {
 
         for (var i of src.split(/\r?\n|\r/)) {
           var data = i.split(',');
-          if(data[0].includes("Non")){
+          if (data[0].includes("Non")) {
             codeList.addCode([data[0]], data[1] != undefined ? data[1] : "");
-          }
-          else {
+          } else {
             codeList.addCode(
               [data[0], data[1]],
               data[2] != undefined ? data[2] : undefined,

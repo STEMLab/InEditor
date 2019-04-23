@@ -12,13 +12,18 @@ define(function(require) {
     this.extend.moduleType = 'navi';
     this.extend.featureType = 'TransitionSpace';
     this.extend.attributes = {
-      'function': '',
-      'class': '',
-      'usage': ''
+      'function': '1120',
+      'class': '1010',
+      'usage': '1120'
     };
   }
 
   PSStair.prototype = Object.create(require('Property').CELL_SPACE.prototype);
+
+  PSStair.prototype.copy = function(cell){
+    require('PSProperty').UTIL.copyCell(cell, this);
+  }
+
 
   return PSStair;
 });

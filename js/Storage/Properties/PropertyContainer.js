@@ -413,8 +413,13 @@ define(function(require) {
 
   PropertyContainer.prototype.replaceProperty = function(a, b){
     let type = require('ObjectType');
-    if(a.featrueType == type.PROPERTY_TYPE.CELL_SPACE && b.featrueType == type.PSPROPERTY_TYPE.PUBLIC_SAFETY_ROOM
-      && a.id == b.id){
+
+    function isPSCell(btype){
+      let pstype = require('ObjectType').PSPROPERTY_TYPE;
+      return btype == pstype.PUBLIC_SAFETY_ROOM || btype == pstype.PUBLIC_SAFETY_ELEVATOR || btype == pstype.PUBLIC_SAFETY_STAIR;
+    }
+
+    if(a.featrueType == type.PROPERTY_TYPE.CELL_SPACE && isPSCell(b.featrueType) && a.id == b.id){
 
       let index = -1;
       for (let i = 0; i < this.cellProperties.length && index == -1; i++) {

@@ -12,13 +12,17 @@ define(function(require) {
     this.extend.moduleType = 'navi';
     this.extend.featureType = 'TransitionSpace';
     this.extend.attributes = {
-      'function': '',
-      'class': '',
-      'usage': ''
+      'function': '1110',
+      'class': '1010',
+      'usage': '1110'
     };
   }
 
   PSElevator.prototype = Object.create(require('Property').CELL_SPACE.prototype);
+
+  PSElevator.prototype.copy = function(cell){
+    require('PSProperty').UTIL.copyCell(cell, this);
+  }
 
   return PSElevator;
 });
