@@ -8,7 +8,7 @@ define(function(require) {
   function PSRoom(_id) {
 
     require('Property').CELL_SPACE.apply(this, arguments);
-    this.featrueType = require('ObjectType').PSPROPERTY_TYPE.PUBLIC_SAFETY_ROOM;
+    this.featureType = require('ObjectType').PSPROPERTY_TYPE.PUBLIC_SAFETY_ROOM;
     this.extend.moduleType = 'navi';
     this.extend.featureType = 'GeneralSpace';
     this.extend.attributes = {

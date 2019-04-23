@@ -8,7 +8,7 @@ define(function(require) {
   function PSWindow(_id) {
 
     require('Property').CELL_SPACE_BOUNDARY.apply(this, arguments);
-    this.featrueType = require('ObjectType').PSPROPERTY_TYPE.PUBLIC_SAFETY_WINDOW;
+    this.featureType = require('ObjectType').PSPROPERTY_TYPE.PUBLIC_SAFETY_WINDOW;
     this.extend.moduleType = 'navi';
     this.extend.featureType = 'ConnectionBoundary';
     this.extend.attributes = {
@@ -26,6 +26,10 @@ define(function(require) {
 
   PSWindow.prototype.getDoorHandlingEnum = function(){
     return ['Left', 'Right'];
+  }
+
+  PSWindow.prototype.copy = function(cb){
+    require('PSProperty').UTIL.copyBoundary(cb, this);
   }
 
   return PSWindow;

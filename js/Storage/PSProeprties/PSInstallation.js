@@ -8,7 +8,7 @@ define(function(require) {
   function PSInstallation(_id) {
 
     require('Property').STATE.apply(this, arguments);
-    this.featrueType = "";
+    this.featureType = "";
     this.extend.attributes = {
       'legend': ''
     };

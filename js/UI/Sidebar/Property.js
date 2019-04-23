@@ -204,6 +204,7 @@ define(function(require) {
     eventBindList.push(['add-new-local-desc-btn', 'click', 'html']);
 
     // extend
+    let pstype = require('ObjectType').PSPROPERTY_TYPE;
     let extendTable = document.createElement('table');
     extendTable.setAttribute('data-type', type);
     extendTable.id = 'property-extension-table';
@@ -211,13 +212,18 @@ define(function(require) {
     extendTable.appendChild(this.getOneDropTr('module\ntype', 'module-type-text', property.getAvailbleModuleType(), property.extend.moduleType));
     eventBindList.push(['module-type-text', 'change', 'html']);
 
-    if(property.extend.moduleType != ""){
+    if (property.extend.moduleType != "") {
+      let val = property.extend.featureType;
+      if (val == pstype.PUBLIC_SAFETY_ROOM) val = 'PublicSafetyRoom';
+      else if (val == pstype.PUBLIC_SAFETY_ELEVATOR) val = 'PublicSafetyElevator';
+      else if (val == pstype.PUBLIC_SAFETY_STAIR) val = 'PublicSafetyStair';
+
       extendTable.appendChild(this.getOneDropTr('feature\ntype', 'feature-type-text', property.getAvailbleFeatureType(), property.extend.featureType));
       eventBindList.push(['feature-type-text', 'change', 'html']);
     }
 
-    if(property.extend.featureType  != ""){
-      if(property.extend.featureType.includes('Non')){
+    if (property.extend.featureType != "") {
+      if (property.extend.featureType.includes('Non')) {
         // non navi
         extendTable.appendChild(
           this.getOneCodeListTr(
@@ -227,11 +233,18 @@ define(function(require) {
             property.extend.attributes.obstacleType == "" ? undefined : property.extend.attributes.obstacleType
           )
         );
-      }
-      else{
+      } else {
         extendTable.appendChild(this.getOneCodeListTr([property.extend.featureType, 'class'], 'class-text', 'class', property.extend.attributes.class));
         extendTable.appendChild(this.getOneCodeListTr([property.extend.featureType, 'function'], 'function-text', 'function', property.extend.attributes.function));
         extendTable.appendChild(this.getOneCodeListTr([property.extend.featureType, 'function'], 'usage-text', 'usage', property.extend.attributes.usage));
+
+
+        switch (property.featureType) {
+          case pstype.PUBLIC_SAFETY_ROOM:
+            extendTable.appendChild(this.getOneDropTr('room\ntype', 'roomtype-text', ['', 'Medical', 'Security'], property.extend.attributes.psRoomType));
+            break;
+          default:
+        }
       }
     }
 
@@ -264,7 +277,7 @@ define(function(require) {
       });
     }
 
-    for(let e of eventBindList) bindEvent(...e);
+    for (let e of eventBindList) bindEvent(...e);
 
     $('.ui.dropdown').dropdown({
       direction: 'downward',
@@ -309,9 +322,11 @@ define(function(require) {
     propertiesDiv.appendChild(propsBtn);
 
     eventBindList.push(['property-subimt-btn', 'click', 'html']);
-    eventBindList.push(['add-new-local-desc-btn', 'click', 'html']);baseTable.appendChild(this.getOneDropTr('external ref', 'externalRef-text', property.externalReference));
+    eventBindList.push(['add-new-local-desc-btn', 'click', 'html']);
+    baseTable.appendChild(this.getOneDropTr('external ref', 'externalRef-text', property.externalReference));
 
     // extend
+    let pstype = require('ObjectType').PSPROPERTY_TYPE;
     let extendTable = document.createElement('table');
     extendTable.setAttribute('data-type', type);
     extendTable.id = 'property-extension-table';
@@ -319,10 +334,73 @@ define(function(require) {
     extendTable.appendChild(this.getOneDropTr('module\ntype', 'module-type-text', property.getAvailbleModuleType(), property.extend.moduleType));
     eventBindList.push(['module-type-text', 'change', 'html']);
 
-    if(property.extend.moduleType != ""){
-      extendTable.appendChild(this.getOneDropTr('feature\ntype', 'feature-type-text', property.getAvailbleFeatureType(), property.extend.featureType));
+    if (property.extend.moduleType != "") {
+      let val = property.featureType;
+      if (val == pstype.PUBLIC_SAFETY_DOOR) val = 'PublicSafetyDoor';
+      else if (val == pstype.PUBLIC_SAFETY_WINDOW) val = 'PublicSafetyWindow';
+      else if (val == pstype.PUBLIC_SAFETY_HATCH) val = 'PublicSafetyHatch';
+
+      extendTable.appendChild(this.getOneDropTr('feature\ntype', 'feature-type-text', property.getAvailbleFeatureType(), val));
       eventBindList.push(['feature-type-text', 'change', 'html']);
     }
+
+    if (property.extend.featureType != "") {
+      let input;
+      switch (property.featureType) {
+        case pstype.PUBLIC_SAFETY_DOOR:
+          extendTable.appendChild(this.getOneDropTr('door\nhandling', 'doorhandling-text', property.getDoorHandlingEnum(), property.extend.attributes.doorHandling));
+          extendTable.appendChild(this.getOneDropTr('door\nswing', 'doorswing-text', property.getDoorSwingEnum(), property.extend.attributes.doorSwing));
+          extendTable.appendChild(this.getToggleTrElement('fireescape-text', 'fire<br>escape', property.extend.attributes.fireEscape));
+          extendTable.appendChild(this.getOneTextTr('lock\ntype', 'locktype-text', property.extend.attributes.lockType));
+          extendTable.appendChild(this.getOneTextTr('material', 'material-text', property.extend.attributes.material));
+          extendTable.appendChild(this.getOneTextTr('size\nheight', 'sizeheight-text', property.extend.attributes.sizeHeight));
+          input = extendTable.children[extendTable.children.length - 1].children[1].children[0].children[0];
+          input.type = 'number';
+          input.step = '0.1';
+
+          extendTable.appendChild(this.getOneTextTr('size\nwidth', 'sizewidth-text', property.extend.attributes.sizeWidth));
+          input = extendTable.children[extendTable.children.length - 1].children[1].children[0].children[0];
+          input.type = 'number';
+          input.step = '0.1';
+
+          break;
+        case pstype.PUBLIC_SAFETY_WINDOW:
+          extendTable.appendChild(this.getToggleTrElement('fireescape-text', 'fire\nescape', property.extend.attributes.fireEscape));
+          extendTable.appendChild(this.getOneTextTr('lock\ntype', 'locktype-text', property.extend.attributes.lockType));
+          extendTable.appendChild(this.getOneTextTr('material', 'material-text', property.extend.attributes.material));
+          extendTable.appendChild(this.getToggleTrElement('openable-text', 'openable', property.extend.attributes.openable));
+          extendTable.appendChild(this.getOneTextTr('size\nheight', 'sizeheight-text', property.extend.attributes.sizeHeight));
+          input = extendTable.children[extendTable.children.length - 1].children[1].children[0].children[0];
+          input.type = 'number';
+          input.step = '0.1';
+
+          extendTable.appendChild(this.getOneTextTr('size\nwidth', 'sizewidth-text', property.extend.attributes.sizeWidth));
+          input = extendTable.children[extendTable.children.length - 1].children[1].children[0].children[0];
+          input.type = 'number';
+          input.step = '0.1';
+
+          extendTable.appendChild(this.getDropDownTrByElement('windowhandling-text', 'window<br>handling', ['', 'Left', 'Right'], 'Select window handling type'));
+          break;
+        case pstype.PUBLIC_SAFETY_HATCH:
+          extendTable.appendChild(this.getToggleTrElement('fireescape-text', 'fire<br>escape', property.extend.attributes.fireEscape));
+          extendTable.appendChild(this.getOneTextTr('hatch<br>location', 'hatchlocation-text', property.extend.attributes.hatchLocation));
+          extendTable.appendChild(this.getOneTextTr('lock<br>type', 'locktype-text', property.extend.attributes.lockTyp));
+          extendTable.appendChild(this.getOneTextTr('material', 'material-text', property.extend.attributes.material));
+          extendTable.appendChild(this.getToggleTrElement('openable-text', 'openable', property.extend.attributes.openable));
+          extendTable.appendChild(this.getOneTextTr('size<br>height', 'sizeheight-text', property.extend.attributes.sizeHeight));
+          input = extendTable.children[extendTable.children.length - 1].children[1].children[0].children[0];
+          input.type = 'number';
+          input.step = '0.1';
+
+          extendTable.appendChild(this.getOneTextTr('size<br>width', 'sizewidth-text', property.extend.attributes.sizeWidth));
+          input = extendTable.children[extendTable.children.length - 1].children[1].children[0].children[0];
+          input.type = 'number';
+          input.step = '0.1';
+          break;
+        default:
+      }
+    }
+
 
     let extBtn = this.getSubmitBtn('extend-subimt-btn');
     eventBindList.push(['extend-subimt-btn', 'click', 'html']);
@@ -352,7 +430,7 @@ define(function(require) {
       });
     }
 
-    for(let e of eventBindList) bindEvent(...e);
+    for (let e of eventBindList) bindEvent(...e);
 
     $('.ui.dropdown').dropdown({
       direction: 'downward',
@@ -838,13 +916,13 @@ define(function(require) {
     select.classList.add('dropdown');
     select.id = id;
 
-    for(let type of itemData){
+    for (let type of itemData) {
       let o = document.createElement('option');
       o.value = type;
       o.classList.add('property-dropdown');
       o.innerHTML = type;
 
-      if(itemData.indexOf(type) == 0) {
+      if (itemData.indexOf(type) == 0) {
         o.setAttribute('disabled', '');
         o.setAttribute('selected', '');
         o.setAttribute('hidden', '');
@@ -898,7 +976,7 @@ define(function(require) {
     let input = document.createElement('input');
     input.id = id;
     input.setAttribute('value', value);
-    if(disable) input.disabled = true;
+    if (disable) input.disabled = true;
 
     inputDiv.appendChild(input);
     valueTd.appendChild(inputDiv);
@@ -908,7 +986,7 @@ define(function(require) {
     return tr;
   }
 
-  Property.prototype.getDescTr = function(desc){
+  Property.prototype.getDescTr = function(desc) {
     let num = Object.keys(desc).length;
     let tr = document.createElement('tr');
     let td = document.createElement('td');
@@ -921,7 +999,7 @@ define(function(require) {
     let innerTable = document.createElement('table');
     innerTable.style.cssText = 'width:100%;';
 
-    for(let key in desc){
+    for (let key in desc) {
       let innerTr = document.createElement('tr');
       let innerKey = document.createElement('td');
       innerKey.innerHTML = key;
@@ -981,7 +1059,7 @@ define(function(require) {
     return tr;
   }
 
-  Property.prototype.getOneDropTr = function(title, id, values, pre){
+  Property.prototype.getOneDropTr = function(title, id, values, pre) {
     let tr = document.createElement('tr');
     let titleTd = document.createElement('td');
     titleTd.classList.add('title');
@@ -992,24 +1070,24 @@ define(function(require) {
     select.classList.add('ui', 'fluid', 'selection', 'dropdown');
     select.id = id;
 
-    for(let key in values){
+    for (let key in values) {
       let option = document.createElement('option');
       option.setAttribute('value', values[key]);
       option.appendChild(document.createTextNode(values[key]));
 
-      if(key == 0) option.setAttribute('selected', '');
+      if (key == 0) option.setAttribute('selected', '');
       else option.classList.add('property-dropdown');
 
       select.appendChild(option);
     }
 
-    if(pre != undefined && select.value != pre){
-      var selected = Array.from(select.children).filter(function(v){
+    if (pre != undefined && select.value != pre) {
+      var selected = Array.from(select.children).filter(function(v) {
         return v.selected;
       });
-      selected[0].removeAttribute('selected');
+      if (selected.length > 0) selected[0].removeAttribute('selected');
 
-      var target =  Array.from(select.children).filter(function(v){
+      var target = Array.from(select.children).filter(function(v) {
         return v.value == pre;
       });
       target[0].setAttribute('selected', '');
@@ -1030,7 +1108,7 @@ define(function(require) {
     return table;
   }
 
-  Property.prototype.getSubmitBtn = function(id){
+  Property.prototype.getSubmitBtn = function(id) {
     let btn = document.createElement('div');
     btn.classList.add('ui', 'inverted', 'basic', 'olive', 'bottom', 'attached', 'button');
     btn.id = id;
@@ -1039,7 +1117,7 @@ define(function(require) {
     return btn;
   }
 
-  Property.prototype.getOneCodeListTr = function(path, id, title, pre){
+  Property.prototype.getOneCodeListTr = function(path, id, title, pre) {
     let cl = require('Property').CODE_LIST.getInstance().getList()[path[0]];
     let items = path.length >= 2 ? cl[path[1]] : cl;
 
@@ -1057,7 +1135,7 @@ define(function(require) {
     input.setAttribute('type', 'hidden');
     input.id = id;
 
-    if(pre != undefined) input.setAttribute('value', items[pre]);
+    if (pre != undefined) input.setAttribute('value', items[pre]);
     valueDiv.appendChild(input);
 
     let i = document.createElement('i');
@@ -1066,11 +1144,10 @@ define(function(require) {
 
     let selectCodeDiv = document.createElement('div');
     selectCodeDiv.classList.add('text');
-    if(pre == undefined){
+    if (pre == undefined) {
       selectCodeDiv.classList.add('default');
       selectCodeDiv.appendChild(document.createTextNode('Select code'));
-    }
-    else {
+    } else {
       let pre = document.createElement('i');
       pre.classList.add('ui', 'label', 'circular', 'property-dropdown');
       pre.appendChild(document.createTextNode(pre));
@@ -1082,7 +1159,7 @@ define(function(require) {
     let menuDiv = document.createElement('div');
     menuDiv.classList.add('down', 'menu');
 
-    for(let key in items){
+    for (let key in items) {
       let item = document.createElement('div');
       item.classList.add('item', 'property-dropdown');
       item.setAttribute('data-value', items[key]);
@@ -1104,7 +1181,7 @@ define(function(require) {
     return tr;
   }
 
-  Property.prototype.getToggleTrElement = function(id, title){
+  Property.prototype.getToggleTrElement = function(id, title, pre) {
     let tr = document.createElement('tr');
 
     let titleTd = document.createElement('td');
@@ -1120,13 +1197,14 @@ define(function(require) {
     let input = document.createElement('input');
     input.setAttribute('type', 'checkbox');
     input.id = id;
-    input.onclick = function(e){
-      if(e.target.checked) e.path[1].children[1].innerHTML = 'true';
+    input.onclick = function(e) {
+      if (e.target.checked) e.path[1].children[1].innerHTML = 'true';
       else e.path[1].children[1].innerHTML = 'false';
     }
+    if (pre != undefined) input.setAttribute('checked', pre);
 
     let label = document.createElement('label');
-    label.innerHTML = 'false';
+    label.innerHTML = pre != undefined ? pre : 'false';
     label.style = "color:var(--property-tab-value-color)!important;";
 
     inputDiv.appendChild(input);

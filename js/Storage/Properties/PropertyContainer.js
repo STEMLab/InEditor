@@ -414,12 +414,25 @@ define(function(require) {
   PropertyContainer.prototype.replaceProperty = function(a, b){
     let type = require('ObjectType');
 
+    function isCell(atype){
+      return atype == require('ObjectType').PROPERTY_TYPE.CELL_SPACE;
+    }
+
     function isPSCell(btype){
       let pstype = require('ObjectType').PSPROPERTY_TYPE;
       return btype == pstype.PUBLIC_SAFETY_ROOM || btype == pstype.PUBLIC_SAFETY_ELEVATOR || btype == pstype.PUBLIC_SAFETY_STAIR;
     }
 
-    if(a.featrueType == type.PROPERTY_TYPE.CELL_SPACE && isPSCell(b.featrueType) && a.id == b.id){
+    function isCellBoundary(atype){
+      return atype == require('ObjectType').PROPERTY_TYPE.CELL_SPACE_BOUNDARY;
+    }
+
+    function isPSBoundary(btype){
+      let pstype = require('ObjectType').PSPROPERTY_TYPE;
+      return btype == pstype.PUBLIC_SAFETY_DOOR || btype == pstype.PUBLIC_SAFETY_WINDOW || btype == pstype.PUBLIC_SAFETY_HATCH;
+    }
+
+    if((isCell(a.featureType) || isPSCell(a.featureType)) && isPSCell(b.featureType) && a.id == b.id){
 
       let index = -1;
       for (let i = 0; i < this.cellProperties.length && index == -1; i++) {
@@ -427,6 +440,15 @@ define(function(require) {
       }
 
       if(index > -1) this.cellProperties.splice(index, 1, b);
+    }
+    else if((isCellBoundary(a.featureType) || isPSBoundary(a.featureType)) && isPSBoundary(b.featureType) && a.id == b.id){
+
+      let index = -1;
+      for (let i = 0; i < this.cellBoundaryProperties.length && index == -1; i++) {
+        if (this.cellBoundaryProperties[i].id == a.id) index = i;
+      }
+
+      if(index > -1) this.cellBoundaryProperties.splice(index, 1, b);
     }
   }
 

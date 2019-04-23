@@ -8,7 +8,7 @@ define(function(require) {
   function PSHatch(_id) {
 
     require('Property').CELL_SPACE_BOUNDARY.apply(this, arguments);
-    this.featrueType = require('ObjectType').PSPROPERTY_TYPE.PUBLIC_SAFETY_HATCH;
+    this.featureType = require('ObjectType').PSPROPERTY_TYPE.PUBLIC_SAFETY_HATCH;
     this.extend.moduleType = 'navi';
     this.extend.featureType = 'ConnectionBoundary';
     this.extend.attributes = {
@@ -23,6 +23,10 @@ define(function(require) {
   }
 
   PSHatch.prototype = Object.create(require('Property').CELL_SPACE_BOUNDARY.prototype);
+
+  PSHatch.prototype.copy = function(cb){
+    require('PSProperty').UTIL.copyBoundary(cb, this);
+  }
 
   return PSHatch;
 });

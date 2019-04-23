@@ -8,7 +8,7 @@ define(function(require) {
   function PSStair(_id) {
 
     require('Property').CELL_SPACE.apply(this, arguments);
-    this.featrueType = require('ObjectType').PSPROPERTY_TYPE.PUBLIC_SAFETY_STAIR;
+    this.featureType = require('ObjectType').PSPROPERTY_TYPE.PUBLIC_SAFETY_STAIR;
     this.extend.moduleType = 'navi';
     this.extend.featureType = 'TransitionSpace';
     this.extend.attributes = {

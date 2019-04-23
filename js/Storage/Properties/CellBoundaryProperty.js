@@ -2,7 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
- define(function(require) {
+define(function(require) {
   'use strict';
 
   /**
@@ -11,7 +11,7 @@
   function CellBoundaryProperty(id) {
 
     require('./PropertyBase.js').apply(this, arguments);
-    this.featrueType = require('ObjectType').PROPERTY_TYPE.CELL_SPACE_BOUNDARY;
+    this.featureType = require('ObjectType').PROPERTY_TYPE.CELL_SPACE_BOUNDARY;
 
     let EB = require('./ExtensionBase.js');
     this.extend = new EB();
@@ -23,8 +23,8 @@
 
     this.storey = "";
 
-     this.bottom = 0; // floor ~ bottom
-     this.height = 0; // bottom ~ top
+    this.bottom = 0; // floor ~ bottom
+    this.height = 0; // bottom ~ top
   }
 
   /**
@@ -33,29 +33,29 @@
   CellBoundaryProperty.prototype.load = function(values) {
 
     var keys = Object.keys(values);
-    for(var key of keys){
-      if(this[key] != undefined) this[key] = values[key];
+    for (var key of keys) {
+      if (this[key] != undefined) this[key] = values[key];
     }
 
 
   }
 
-  CellBoundaryProperty.prototype.setDuality = function(_duality){
+  CellBoundaryProperty.prototype.setDuality = function(_duality) {
     this.duality = _duality;
   }
 
-  CellBoundaryProperty.prototype.getAvailbleFeatureType = function(){
+  CellBoundaryProperty.prototype.getAvailbleFeatureType = function() {
     let ot = require('ObjectType');
     let result = [""];
 
-    if(this.extend.moduleType == "navi" ){
-      result = result.concat(["ConnectionBoundary", "AnchorBoundary"]);
+    if (this.extend.moduleType == "navi") {
+      result = result.concat(["ConnectionBoundary", "AnchorBoundary", "PublicSafetyDoor", "PublicSafetyWindow", "PublicSafetyHatch"]);
     }
 
     return result;
   }
 
-  CellBoundaryProperty.prototype.getAvailbleModuleType = function(){
+  CellBoundaryProperty.prototype.getAvailbleModuleType = function() {
     return ["", "navi"];
   }
 

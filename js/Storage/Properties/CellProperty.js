@@ -8,7 +8,7 @@ define(function(require) {
   function CellProperty(_id) {
 
     require('./PropertyBase.js').apply(this, arguments);
-    this.featrueType = require('ObjectType').PROPERTY_TYPE.CELL_SPACE;
+    this.featureType = require('ObjectType').PROPERTY_TYPE.CELL_SPACE;
 
     let EB = require('./ExtensionBase.js');
     this.extend = new EB();
@@ -58,7 +58,7 @@ define(function(require) {
     let result = [""];
 
     if(this.extend.moduleType == "navi" ){
-      result = result.concat(["GeneralSpace", "TransitionSpace", "ConnectionSpace", "AnchorSpace"]);
+      result = result.concat(["GeneralSpace", "TransitionSpace", "ConnectionSpace", "AnchorSpace", "PublicSafetyRoom", "PublicSafetyElevator", "PublicSafetyStair"]);
     }
     else if(this.extend.moduleType == "non-navi"){
       result.push("NonNavigableSpace");

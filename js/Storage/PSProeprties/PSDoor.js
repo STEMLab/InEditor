@@ -8,7 +8,7 @@ define(function(require) {
   function PSDoor(_id) {
 
     require('Property').CELL_SPACE_BOUNDARY.apply(this, arguments);
-    this.featrueType = require('ObjectType').PSPROPERTY_TYPE.PUBLIC_SAFETY_DOOR;
+    this.featureType = require('ObjectType').PSPROPERTY_TYPE.PUBLIC_SAFETY_DOOR;
     this.extend.moduleType = 'navi';
     this.extend.featureType = 'ConnectionBoundary';
     this.extend.attributes = {
@@ -25,11 +25,15 @@ define(function(require) {
   PSDoor.prototype = Object.create(require('Property').CELL_SPACE_BOUNDARY.prototype);
 
   PSDoor.prototype.getDoorHandlingEnum = function(){
-    return ['Left', 'Right'];
+    return ['', 'Left', 'Right'];
   }
 
   PSDoor.prototype.getDoorSwingEnum = function(){
-    return ['Outswing', 'Inswing', 'INWARDS', 'OUTWARDS', 'SLIDE'];
+    return ['', 'Outswing', 'Inswing', 'INWARDS', 'OUTWARDS', 'SLIDE'];
+  }
+
+  PSDoor.prototype.copy = function(cb){
+    require('PSProperty').UTIL.copyBoundary(cb, this);
   }
 
   return PSDoor;

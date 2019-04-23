@@ -306,15 +306,15 @@ define(function(require) {
           data.attributes['fireEscape'] = document.getElementById('fireescape-text').checked;
           data.attributes['lockType'] = document.getElementById('locktype-text').value;
           data.attributes['material'] = document.getElementById('material-text').value;
-          data.attributes['sizeHeight'] = document.getElementById('sizeheight-text').value;
-          data.attributes['sizeWidth'] = document.getElementById('sizewidth-text').value;
+          data.attributes['sizeHeight'] = document.getElementById('sizeheight-text').value*1;
+          data.attributes['sizeWidth'] = document.getElementById('sizewidth-text').value*1;
         } else if (data.featureType == 'PublicSafetyWindow') {
           data.attributes['fireEscape'] = document.getElementById('fireescape-text').checked;
           data.attributes['lockType'] = document.getElementById('locktype-text').value;
           data.attributes['material'] = document.getElementById('material-text').value;
           data.attributes['openable'] = document.getElementById('openable-text').checked;
-          data.attributes['sizeHeight'] = document.getElementById('sizeheight-text').value;
-          data.attributes['sizeWidth'] = document.getElementById('sizewidth-text').value;
+          data.attributes['sizeHeight'] = document.getElementById('sizeheight-text').value*1;
+          data.attributes['sizeWidth'] = document.getElementById('sizewidth-text').value*1;
           data.attributes['windowHandling'] = document.getElementById('windowhandling-text').value;
         } else if (data.featureType == 'PublicSafetyHatch') {
           data.attributes['fireEscape'] = document.getElementById('fireescape-text').checked;
@@ -322,8 +322,8 @@ define(function(require) {
           data.attributes['lockType'] = document.getElementById('locktype-text').value;
           data.attributes['material'] = document.getElementById('material-text').value;
           data.attributes['openable'] = document.getElementById('openable-text').checked;
-          data.attributes['sizeHeight'] = document.getElementById('sizeheight-text').value;
-          data.attributes['sizeWidth'] = document.getElementById('sizewidth-text').value;
+          data.attributes['sizeHeight'] = document.getElementById('sizeheight-text').value*1;
+          data.attributes['sizeWidth'] = document.getElementById('sizewidth-text').value*1;
         }
 
       }

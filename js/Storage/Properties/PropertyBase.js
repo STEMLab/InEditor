@@ -21,7 +21,7 @@ define(function(require) {
 
     this.storey = [];
 
-    this.featrueType = "";
+    this.featureType = "";
 
   }
 

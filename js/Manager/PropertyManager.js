@@ -112,24 +112,21 @@ define(function(require) {
       case 'cell':
         if (reqObj.dataClass == 'ExtensionBase') {
           if (reqObj.updateContent.featureType.indexOf('PublicSafety') != -1) {
-            // "PublicSafetyRoom", "PublicSafetyElevator", "PublicSafetyStair"
-            // "PublicSafetyDoor", "PublicSafetyWindow", "PublicSafetyHatch"
-
             let pstype = require('ObjectType').PSPROPERTY_TYPE;
             let psindex = require('PSProperty');
             let newPropertyConstuctor;
 
             switch (reqObj.updateContent.featureType) {
               case 'PublicSafetyRoom':
-                if (obj.featrueType != pstype.PUBLIC_SAFETY_ROOM) newPropertyConstuctor = psindex.PUBLIC_SAFETY_ROOM;
+                if (obj.featureType != pstype.PUBLIC_SAFETY_ROOM) newPropertyConstuctor = psindex.PUBLIC_SAFETY_ROOM;
                 else obj.extend.attributes = reqObj.updateContent.attributes;
                 break;
               case 'PublicSafetyElevator':
-                if (obj.featrueType != pstype.PUBLIC_SAFETY_ELEVATOR) newPropertyConstuctor = psindex.PUBLIC_SAFETY_ELEVATOR;
+                if (obj.featureType != pstype.PUBLIC_SAFETY_ELEVATOR) newPropertyConstuctor = psindex.PUBLIC_SAFETY_ELEVATOR;
                 else obj.extend.attributes = reqObj.updateContent.attributes;
                 break;
               case 'PublicSafetyStair':
-                if (obj.featrueType != pstype.PUBLIC_SAFETY_STAIR) newPropertyConstuctor = psindex.PUBLIC_SAFETY_STAIR;
+                if (obj.featureType != pstype.PUBLIC_SAFETY_STAIR) newPropertyConstuctor = psindex.PUBLIC_SAFETY_STAIR;
                 else obj.extend.attributes = reqObj.updateContent.attributes;
                 break;
               default:
@@ -166,10 +163,42 @@ define(function(require) {
             require('Popup')('warning', 'Invalide input : bottom(' + reqObj.updateContent.bottom + '), height(' + reqObj.updateContent.height + ')');
           }
         }
+
+
         break;
       case 'cellBoundary':
         if (reqObj.dataClass == 'ExtensionBase') {
-          obj.extend = reqObj.updateContent;
+          if (reqObj.updateContent.featureType.indexOf('PublicSafety') != -1) {
+            let pstype = require('ObjectType').PSPROPERTY_TYPE;
+            let psindex = require('PSProperty');
+            let newPropertyConstuctor;
+
+            switch (reqObj.updateContent.featureType) {
+              case 'PublicSafetyDoor':
+                if (obj.featureType != pstype.PUBLIC_SAFETY_DOOR) newPropertyConstuctor = psindex.PUBLIC_SAFETY_DOOR;
+                else obj.extend.attributes = reqObj.updateContent.attributes;
+                break;
+              case 'PublicSafetyWindow':
+                if (obj.featureType != pstype.PUBLIC_SAFETY_WINDOW) newPropertyConstuctor = psindex.PUBLIC_SAFETY_WINDOW;
+                else obj.extend.attributes = reqObj.updateContent.attributes;
+                break;
+              case 'PublicSafetyHatch':
+                if (obj.featureType != pstype.PUBLIC_SAFETY_HATCH) newPropertyConstuctor = psindex.PUBLIC_SAFETY_HATCH;
+                else obj.extend.attributes = reqObj.updateContent.attributes;
+                break;
+              default:
+
+            }
+
+            if (newPropertyConstuctor != undefined) {
+              let newproperty = new newPropertyConstuctor(obj.id);
+              newproperty.copy(obj);
+              newproperty.extend.attributes = reqObj.updateContent.attributes;
+              window.storage.propertyContainer.replaceProperty(obj, newproperty);
+            }
+
+          } else
+            obj.extend = reqObj.updateContent;
         } else {
           obj.name = reqObj.updateContent.name;
           obj.description = reqObj.updateContent.description;
@@ -184,6 +213,8 @@ define(function(require) {
             require('Popup')('warning', 'Invalide input : bottom(' + reqObj.updateContent.bottom + '), height(' + reqObj.updateContent.height + ')');
           }
         }
+
+
         break;
       case 'state':
         obj.name = reqObj.updateContent.name;
