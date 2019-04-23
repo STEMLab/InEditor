@@ -689,9 +689,9 @@
       }
 
       // Twisted side validation
-      if (!window.broker
+      if (window.broker
         .getManager("end-addnewcell", "GeometryManager")
-        .isSelfIntersecting(tmpObj.dots)
+        .isSelfIntersecting(tmpObj)
       ) {
         log.error("This object have twisted side !");
         return false;
