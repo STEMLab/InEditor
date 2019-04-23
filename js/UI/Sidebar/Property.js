@@ -518,7 +518,7 @@ define(function(require) {
           title: 'properties',
           isClosable: false,
           componentState: {
-            id: 'propertiesProper'
+            id: 'properties'
           }
         }]
       }]
@@ -594,7 +594,7 @@ define(function(require) {
           title: 'properties',
           isClosable: false,
           componentState: {
-            id: 'propertiesProper'
+            id: 'properties'
           }
         }]
       }]
@@ -627,7 +627,7 @@ define(function(require) {
           title: 'properties',
           isClosable: false,
           componentState: {
-            id: 'propertiesProper'
+            id: 'properties'
           }
         }]
       }]
@@ -731,7 +731,7 @@ define(function(require) {
           title: 'properties',
           isClosable: false,
           componentState: {
-            id: 'propertiesProper'
+            id: 'properties'
           }
         }]
       }]
@@ -820,6 +820,45 @@ define(function(require) {
     return str;
   }
 
+  Property.prototype.getDropDownTrByElement = function(id, title, itemData, placeHolder) {
+
+    let tr = document.createElement('tr');
+
+    let tdTitle = document.createElement('td');
+    tdTitle.classList.add('title');
+    tdTitle.innerHTML = title;
+
+    let tdValue = document.createElement('td');
+    tdValue.classList.add('value');
+
+    let select = document.createElement('select');
+    select.classList.add('ui');
+    select.classList.add('fluid');
+    select.classList.add('selection');
+    select.classList.add('dropdown');
+    select.id = id;
+
+    for(let type of itemData){
+      let o = document.createElement('option');
+      o.value = type;
+      o.classList.add('property-dropdown');
+      o.innerHTML = type;
+
+      if(itemData.indexOf(type) == 0) {
+        o.setAttribute('disabled', '');
+        o.setAttribute('selected', '');
+        o.setAttribute('hidden', '');
+        o.innerHTML = placeHolder;
+      }
+      select.appendChild(o);
+    }
+
+    tdValue.appendChild(select);
+    tr.appendChild(tdTitle);
+    tr.appendChild(tdValue);
+
+    return tr;
+  }
 
   Property.prototype.getCodeListTr = function(path, id, title, pre) {
     var cl = require('Property').CODE_LIST.getInstance().getList()[path[0]];
@@ -1064,6 +1103,42 @@ define(function(require) {
     tr.appendChild(valueTd);
     return tr;
   }
+
+  Property.prototype.getToggleTrElement = function(id, title){
+    let tr = document.createElement('tr');
+
+    let titleTd = document.createElement('td');
+    titleTd.classList.add('title');
+    titleTd.innerHTML = title;
+
+    let valueTd = document.createElement('td');
+    valueTd.classList.add('value');
+
+    let inputDiv = document.createElement('div');
+    inputDiv.classList.add('ui', 'inverted', 'toggle', 'checkbox');
+
+    let input = document.createElement('input');
+    input.setAttribute('type', 'checkbox');
+    input.id = id;
+    input.onclick = function(e){
+      if(e.target.checked) e.path[1].children[1].innerHTML = 'true';
+      else e.path[1].children[1].innerHTML = 'false';
+    }
+
+    let label = document.createElement('label');
+    label.innerHTML = 'false';
+    label.style = "color:var(--property-tab-value-color)!important;";
+
+    inputDiv.appendChild(input);
+    inputDiv.appendChild(label);
+    valueTd.appendChild(inputDiv);
+    tr.appendChild(titleTd);
+    tr.appendChild(valueTd);
+
+    return tr;
+  }
+
+
 
   return Property;
 });

@@ -1288,39 +1288,38 @@ define(function(require) {
 
   }
 
-  UIManager.prototype.showFeatureTypeAttr = function(reqObj){
+  UIManager.prototype.showFeatureTypeAttr = function(reqObj) {
 
     let len = reqObj.table.childNodes.length;
     while (reqObj.table.childNodes.length > 1) {
       reqObj.table.removeChild(reqObj.table.childNodes[1]);
     }
 
-    if(reqObj.selected != "" && reqObj.selected != undefined){
+    if (reqObj.selected != "" && reqObj.selected != undefined) {
       let featureTr;
 
       if (reqObj.selected == 'navi' && document.getElementById('property-table').dataset.type == "cell") {
         featureTr = window.uiContainer.sidebar.property.getOneDropTr(
           'feature\ntype',
           'feature-type-text',
-          ["","GeneralSpace", "TransitionSpace", "ConnectionSpace", "AnchorSpace"]);
-      } else if(reqObj.selected == 'navi' && document.getElementById('property-table').dataset.type == "cellBoundary"){
+          ["", "GeneralSpace", "TransitionSpace", "ConnectionSpace", "AnchorSpace", "PublicSafetyRoom", "PublicSafetyElevator", "PublicSafetyStair"]);
+      } else if (reqObj.selected == 'navi' && document.getElementById('property-table').dataset.type == "cellBoundary") {
         featureTr = window.uiContainer.sidebar.property.getOneDropTr(
           'feature\ntype',
           'feature-type-text',
-          ["", "ConnectionBoundary", "AnchorBoundary"]);
+          ["", "ConnectionBoundary", "AnchorBoundary", "PublicSafetyDoor", "PublicSafetyWindow", "PublicSafetyHatch"]);
       } else if (reqObj.selected == 'non-navi') {
         featureTr = window.uiContainer.sidebar.property.getOneDropTr(
           'feature\ntype',
           'feature-type-text',
-          ["","NonNavigableSpace"]);
+          ["", "NonNavigableSpace"]);
       }
 
       reqObj.table.appendChild(featureTr);
       document.getElementById('feature-type-text').addEventListener('change', function(event) {
         window.eventHandler.callHandler('html', event);
       });
-    }
-    else {
+    } else {
       document.getElementById("type-text").dataset.pre = "";
     }
 
@@ -1330,28 +1329,82 @@ define(function(require) {
     });
   }
 
-  UIManager.prototype.showExtensionAttr = function(reqObj){
+  UIManager.prototype.showExtensionAttr = function(reqObj) {
     let len = reqObj.table.childNodes.length;
 
     while (reqObj.table.childNodes.length > 2) {
       reqObj.table.removeChild(reqObj.table.childNodes[2]);
     }
 
-    if(reqObj.selected != "" && reqObj.selected != undefined){
-      if(reqObj.moduleType == "navi" && document.getElementById('property-table').dataset.type == "cell"){
+    if (reqObj.selected != "" && reqObj.selected != undefined) {
+
+      if (reqObj.selected == 'PublicSafetyRoom') reqObj.path[0] = 'GeneralSpace';
+      else if (reqObj.selected == 'PublicSafetyElevator' || reqObj.selected == 'PublicSafetyStair') reqObj.path[0] = 'TransitionSpace';
+
+      if (reqObj.moduleType == "navi" && document.getElementById('property-table').dataset.type == "cell") {
         reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'class'], 'class-text', 'class'));
         reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'function-text', 'function'));
         reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'usage-text', 'usage'));
-      }
-      else if(reqObj.moduleType == 'non-navi'){
+      } else if (reqObj.moduleType == 'non-navi') {
         reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr(
           ['NonNavigableSpace'],
           'obstacle-type-text',
           'obtacle'
         ))
       }
-    }
-    else {
+
+      if (reqObj.selected == 'PublicSafetyRoom')
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getDropDownTrByElement('roomtype-text', 'room<br>type', ['', 'Medical', 'Security'], 'Select room type'));
+      else if(reqObj.selected == 'PublicSafetyDoor'){
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getDropDownTrByElement('doorhandling-text', 'door<br>handling', ['', 'Left', 'Right'], 'Select door handling type'));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getDropDownTrByElement('doorswing-text', 'door<br>swing', ['', 'Outswing', 'Inswing', 'INWARDS', 'OUTWARDS', 'SLIDE'], 'Select door swing type'));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getToggleTrElement('fireescape-text', 'fire<br>escape'));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('lock<br>type', 'locktype-text', ''));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('material', 'material-text', ''));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('size<br>height', 'sizeheight-text', ''));
+        let input = reqObj.table.children[reqObj.table.children.length-1].children[1].children[0].children[0];
+        input.type =  'number';
+        input.step = '0.1';
+
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('size<br>width', 'sizewidth-text', ''));
+        input = reqObj.table.children[reqObj.table.children.length-1].children[1].children[0].children[0];
+        input.type =  'number';
+        input.step = '0.1';
+      }
+      else if(reqObj.selected == 'PublicSafetyWindow'){
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getToggleTrElement('fireescape-text', 'fire<br>escape'));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('lock<br>type', 'locktype-text', ''));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('material', 'material-text', ''));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getToggleTrElement('openable-text', 'openable'));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('size<br>height', 'sizeheight-text', ''));
+        let input = reqObj.table.children[reqObj.table.children.length-1].children[1].children[0].children[0];
+        input.type =  'number';
+        input.step = '0.1';
+
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('size<br>width', 'sizewidth-text', ''));
+        input = reqObj.table.children[reqObj.table.children.length-1].children[1].children[0].children[0];
+        input.type =  'number';
+        input.step = '0.1';
+
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getDropDownTrByElement('windowhandling-text', 'window<br>handling', ['', 'Left', 'Right'], 'Select window handling type'));
+      }
+      else if(reqObj.selected == 'PublicSafetyHatch'){
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getToggleTrElement('fireescape-text', 'fire<br>escape'));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('hatch<br>location', 'hatchlocation-text', ''));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('lock<br>type', 'locktype-text', ''));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('material', 'material-text', ''));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getToggleTrElement('openable-text', 'openable'));
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('size<br>height', 'sizeheight-text', ''));
+        let input = reqObj.table.children[reqObj.table.children.length-1].children[1].children[0].children[0];
+        input.type =  'number';
+        input.step = '0.1';
+
+        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneTextTr('size<br>width', 'sizewidth-text', ''));
+        input = reqObj.table.children[reqObj.table.children.length-1].children[1].children[0].children[0];
+        input.type =  'number';
+        input.step = '0.1';
+      }
+    } else {
       document.getElementById("type-text").dataset.pre = "";
     }
 
@@ -1361,11 +1414,11 @@ define(function(require) {
     });
   }
 
-  UIManager.prototype.addMap = function(reqObj){
+  UIManager.prototype.addMap = function(reqObj) {
     window.storage.canvasContainer.stages[reqObj.floor].addMap(reqObj.coor);
   }
 
-  UIManager.prototype.startAddNewHatch = function(reqObj){
+  UIManager.prototype.startAddNewHatch = function(reqObj) {
     // change btn color
     document.getElementById('hatch-btn').src = "../../assets/icon/hatch_a.png";
 
