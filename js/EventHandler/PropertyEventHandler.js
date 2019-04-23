@@ -280,19 +280,51 @@ define(function(require) {
       data.moduleType = document.getElementById('module-type-text').value;
       data.featureType = document.getElementById('feature-type-text').value;
 
-      if(data.moduleType != "" && data.featureType != ""){
-        if(data.moduleType == "navi" && document.getElementById('property-table').dataset.type == "cell"){
+      if (data.moduleType != "" && data.featureType != "") {
+        if (data.moduleType == "navi" && document.getElementById('property-table').dataset.type == "cell") {
+          let tt = data.featrueType;
+          if (data.featureType == 'PublicSafetyRoom') tt = 'GeneralSpace';
+
           data.attributes = {
-            function: CodeList.getCodeNum([data.featureType, 'function'], document.getElementById("function-text").value),
-            class: CodeList.getCodeNum([data.featureType, 'class'], document.getElementById("class-text").value),
-            usage: CodeList.getCodeNum([data.featureType, 'function'], document.getElementById("usage-text").value)
+            function: CodeList.getCodeNum([tt, 'function'], document.getElementById("function-text").value),
+            class: CodeList.getCodeNum([tt, 'class'], document.getElementById("class-text").value),
+            usage: CodeList.getCodeNum([tt, 'function'], document.getElementById("usage-text").value)
           }
-        }
-        else if(data.moduleType == "non-navi"){
+
+        } else if (data.moduleType == "non-navi") {
           data.attributes = {
             obstacleType: CodeList.getCodeNum([data.featureType], document.getElementById("obstacle-type-text").value)
           }
         }
+
+        if (data.featureType == 'PublicSafetyRoom') {
+          data.attributes['psRoomType'] = document.getElementById('roomtype-text').value;
+        } else if (data.featureType == 'PublicSafetyDoor') {
+          data.attributes['doorHandling'] = document.getElementById('doorhandling-text').value;
+          data.attributes['doorSwing'] = document.getElementById('doorswing-text').value;
+          data.attributes['fireEscape'] = document.getElementById('fireescape-text').checked;
+          data.attributes['lockType'] = document.getElementById('locktype-text').value;
+          data.attributes['material'] = document.getElementById('material-text').value;
+          data.attributes['sizeHeight'] = document.getElementById('sizeheight-text').value;
+          data.attributes['sizeWidth'] = document.getElementById('sizewidth-text').value;
+        } else if (data.featureType == 'PublicSafetyWindow') {
+          data.attributes['fireEscape'] = document.getElementById('fireescape-text').checked;
+          data.attributes['lockType'] = document.getElementById('locktype-text').value;
+          data.attributes['material'] = document.getElementById('material-text').value;
+          data.attributes['openable'] = document.getElementById('openable-text').checked;
+          data.attributes['sizeHeight'] = document.getElementById('sizeheight-text').value;
+          data.attributes['sizeWidth'] = document.getElementById('sizewidth-text').value;
+          data.attributes['windowHandling'] = document.getElementById('windowhandling-text').value;
+        } else if (data.featureType == 'PublicSafetyHatch') {
+          data.attributes['fireEscape'] = document.getElementById('fireescape-text').checked;
+          data.attributes['hatchLocation'] = document.getElementById('hatchlocation-text').value;
+          data.attributes['lockType'] = document.getElementById('locktype-text').value;
+          data.attributes['material'] = document.getElementById('material-text').value;
+          data.attributes['openable'] = document.getElementById('openable-text').checked;
+          data.attributes['sizeHeight'] = document.getElementById('sizeheight-text').value;
+          data.attributes['sizeWidth'] = document.getElementById('sizewidth-text').value;
+        }
+
       }
 
       var Message = require('../PubSub/Message.js');
@@ -325,13 +357,13 @@ define(function(require) {
 
       var data = {
         'direction': {
-          'in' : document.getElementById('check-direction-in').children[0].checked,
-          'out' : document.getElementById('check-direction-out').children[0].checked
+          'in': document.getElementById('check-direction-in').children[0].checked,
+          'out': document.getElementById('check-direction-out').children[0].checked
         },
-        'target' : {
-          'ceiling' : document.getElementById('check-target-ceiling').children[0].checked,
-          'wall' : document.getElementById('check-target-wall').children[0].checked,
-          'floor' : document.getElementById('check-target-floor').children[0].checked
+        'target': {
+          'ceiling': document.getElementById('check-target-ceiling').children[0].checked,
+          'wall': document.getElementById('check-target-wall').children[0].checked,
+          'floor': document.getElementById('check-target-floor').children[0].checked
         }
       };
 

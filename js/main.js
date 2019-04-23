@@ -10,7 +10,8 @@ require.config({
       'Subscriber' : 'js/PubSub/Subscriber.js',
       'Popup' : 'js/UI/Popup.js',
       'CodeList' : 'js/Storage/Properties/CodeList.js',
-      'ObjectType': 'js/GlobalConst.js'
+      'ObjectType': 'js/GlobalConst.js',
+      'PSProperty' : 'js/Storage/PSProeprties/index.js'
     }
   }
 });

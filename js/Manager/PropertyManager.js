@@ -111,7 +111,32 @@ define(function(require) {
         break;
       case 'cell':
         if (reqObj.dataClass == 'ExtensionBase') {
-          obj.extend = reqObj.updateContent;
+          if(reqObj.updateContent.featureType.indexOf('PublicSafety') != -1){
+             // "PublicSafetyRoom", "PublicSafetyElevator", "PublicSafetyStair"
+             // "PublicSafetyDoor", "PublicSafetyWindow", "PublicSafetyHatch"
+
+            let pstype = require('ObjectType').PSPROPERTY_TYPE;
+            let psindex = require('PSProperty');
+            switch (reqObj.updateContent.featureType) {
+              case 'PublicSafetyRoom':
+                if(obj.featrueType != pstype.PUBLIC_SAFETY_ROOM){
+                  let PSRoom = psindex.PUBLIC_SAFETY_ROOM;
+                  let psroom = new PSRoom(obj.id);
+                  psroom.copy(obj);
+
+                  psroom.extend.attributes = reqObj.updateContent.attributes;
+                  window.storage.propertyContainer.replaceProperty(obj, psroom);
+                }
+                else
+                  obj.extend.attributes = reqObj.updateContent.attributes;
+                break;
+              default:
+
+            }
+          }
+          else {
+            obj.extend = reqObj.updateContent;
+          }
         } else {
           obj.name = reqObj.updateContent.name;
           obj.description = reqObj.updateContent.description;

@@ -2,24 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define([
-  "./ProjectProperty.js",
-  "./FloorProperty.js",
-  "./CellProperty.js",
-  "./CellBoundaryProperty.js",
-  "./StateProperty.js",
-  "./TransitionProperty.js",
-  "./InterLayerConnectionProperty.js"
-
-], function(
-  ProjectProperty,
-  FloorProperty,
-  CellProperty,
-  CellBoundaryProperty,
-  StateProperty,
-  TransitionProperty,
-  InterLayerConnectionProperty
-) {
+define(function(require) {
   'use strict';
 
   /**
@@ -55,7 +38,8 @@ define([
     /**
      * @memberof PropertyContainer
      */
-    this.projectProperty = new ProjectProperty();
+    let prj = require('Property').PROJECT;
+    this.projectProperty = new prj();
 
     this.interlayerConnections = [];
   }
@@ -66,7 +50,9 @@ define([
     this.cellBoundaryProperties = [];
     this.stateProperties = [];
     this.transitionProperties = [];
-    this.projectProperty = new ProjectProperty();
+
+    let prj = require('Property').PROJECT;
+    this.projectProperty = new prj();
     this.interlayerConnections = [];
   }
 
@@ -314,7 +300,7 @@ define([
    * @memberof PropertyContainer
    */
   PropertyContainer.prototype.loadFloors = function(values) {
-
+    let FloorProperty = require('Property').FLOOR;
     this.floorProperties = [];
 
     for (var index in values) {
@@ -331,7 +317,7 @@ define([
    * @memberof PropertyContainer
    */
   PropertyContainer.prototype.loadCells = function(values) {
-
+    let CellProperty = require('Property').CELL_SPACE;
     this.cellProperties = [];
 
     for (var index in values) {
@@ -348,7 +334,7 @@ define([
    * @memberof PropertyContainer
    */
   PropertyContainer.prototype.loadCellBoundary = function(values) {
-
+    let CellBoundaryProperty = require('Property').CELL_SPACE_BOUNDARY;
     this.cellBoundaryProperties = [];
 
     for (var index in values) {
@@ -365,7 +351,7 @@ define([
    * @memberof PropertyContainer
    */
   PropertyContainer.prototype.loadState = function(values) {
-
+    let StateProperty = require('Property').STATE;
     this.stateProperties = [];
 
     for (var index in values) {
@@ -382,7 +368,7 @@ define([
    * @memberof PropertyContainer
    */
   PropertyContainer.prototype.loadTransition = function(values) {
-
+    let TransitionProperty = require('Property').TRANSITION;
     this.transitionProperties = [];
 
     for (var index in values) {
@@ -413,6 +399,7 @@ define([
   }
 
   PropertyContainer.prototype.loadInterlayerConnection = function(values){
+    let InterLayerConnectionProperty = require('Property').INTERLAYER_CONNECTION;
     this.interlayerConnections = [];
 
     for (var index in values) {
@@ -421,6 +408,20 @@ define([
       tmp.load(values[index]);
       this.interlayerConnections.push(tmp);
 
+    }
+  }
+
+  PropertyContainer.prototype.replaceProperty = function(a, b){
+    let type = require('ObjectType');
+    if(a.featrueType == type.PROPERTY_TYPE.CELL_SPACE && b.featrueType == type.PSPROPERTY_TYPE.PUBLIC_SAFETY_ROOM
+      && a.id == b.id){
+
+      let index = -1;
+      for (let i = 0; i < this.cellProperties.length && index == -1; i++) {
+        if (this.cellProperties[i].id == a.id) index = i;
+      }
+
+      if(index > -1) this.cellProperties.splice(index, 1, b);
     }
   }
 
