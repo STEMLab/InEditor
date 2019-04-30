@@ -315,6 +315,7 @@ define(function(require) {
     baseTable.appendChild(this.getOneTextTr('bottom', 'bottom-text', property.bottom));
     baseTable.appendChild(this.getOneTextTr('height', 'height-text', property.height));
     baseTable.appendChild(this.getOneTextTr('storey', 'storey-text', property.storey, true));
+    baseTable.appendChild(this.getOneDropTr('external ref', 'externalRef-text', property.externalReference));
 
     let propsBtn = this.getSubmitBtn('property-subimt-btn');
     let propertiesDiv = document.createElement('div');
@@ -323,7 +324,7 @@ define(function(require) {
 
     eventBindList.push(['property-subimt-btn', 'click', 'html']);
     eventBindList.push(['add-new-local-desc-btn', 'click', 'html']);
-    baseTable.appendChild(this.getOneDropTr('external ref', 'externalRef-text', property.externalReference));
+
 
     // extend
     let pstype = require('ObjectType').PSPROPERTY_TYPE;
@@ -591,44 +592,104 @@ define(function(require) {
       content: [{
         type: 'stack',
         content: [{
-          type: 'component',
-          componentName: 'property-component',
-          title: 'properties',
-          isClosable: false,
-          componentState: {
-            id: 'properties'
+            type: 'component',
+            componentName: 'property-component',
+            title: 'properties',
+            isClosable: false,
+            componentState: {
+              id: 'properties'
+            }
+          },
+          {
+            type: 'component',
+            componentName: 'property-component',
+            title: 'extension',
+            isClosable: false,
+            componentState: {
+              id: 'extension'
+            }
           }
-        }]
+        ]
       }]
     };
 
-    this.setStateyView(config, storage.propertyContainer.getElementById('state', id), 'state');
+    this.setStateView(config, storage.propertyContainer.getElementById('state', id), 'state');
 
   }
 
   /**
    * @memberof Property
    */
-  Property.prototype.setStateyView = function(config, property, type) {
-
-    // id, name, desc, duality, connects[]
+  Property.prototype.setStateView = function(config, property, type) {
 
     $('#property-container').empty();
+    let eventBindList = [];
 
-    var propertyLayout = new GoldenLayout(config, $('#protperty-container'));
+    var propertyLayout = new GoldenLayout(config, $('#property-container'));
 
-    var propertiesDiv = "<table id=\"property-table\" data-type=\"state\" class=\"property-table ui compact table inverted \">";
-    propertiesDiv += this.getBasicTr('id', 'id', property.id, true);
-    propertiesDiv += this.getBasicTr('name', 'name', property.name, false);
-    propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != "" ? property.duality : 'none', true);
-    propertiesDiv += this.getBasicTr('height', 'height', property.height, false);
-    propertiesDiv += this.getDropDownTr('connects-text', 'connects', property.connects);
-    propertiesDiv += this.getDescString(property.description);
-    propertiesDiv += "</table>";
+    // core
+    let baseTable = document.createElement('table');
+    baseTable.setAttribute('data-type', type);
+    baseTable.id = 'property-table';
+    baseTable.classList.add('property-table', 'ui', 'compact', 'table', 'inverted');
+    baseTable = this.bindBasePropsTr(baseTable, property);
+    baseTable.appendChild(this.getOneTextTr('height', 'height-text', property.height));
+    baseTable.appendChild(this.getOneDropTr('connects', 'connects-text', property.connects));
 
-    propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
+    let propsBtn = this.getSubmitBtn('property-subimt-btn');
+    let propertiesDiv = document.createElement('div');
+    propertiesDiv.appendChild(baseTable);
+    propertiesDiv.appendChild(propsBtn);
 
-    this.setView(config, propertiesDiv);
+
+
+    // extend
+    let pstype = require('ObjectType').PSPROPERTY_TYPE;
+    let extendTable = document.createElement('table');
+    extendTable.setAttribute('data-type', type);
+    extendTable.id = 'property-extension-table';
+    extendTable.classList.add('property-table', 'ui', 'compact', 'table', 'inverted');
+    extendTable.appendChild(this.getOneDropTr('module\ntype', 'module-type-text', property.getAvailbleModuleType(), property.extend.moduleType));
+    eventBindList.push(['module-type-text', 'change', 'html']);
+
+    if (property.extend.moduleType != "") {
+      let val = property.featureType;
+      if (val == pstype.PUBLIC_SAFETY_ALARM) val = 'PublicSafetyAlarm';
+      else if (val == pstype.PUBLIC_SAFETY_TRANSFORMER) val = 'PublicSafetyTransformer';
+      else if (val == pstype.PUBLIC_SAFETY_DETECTOR) val = 'PublicSafetyDetector';
+      else if (val == pstype.PUBLIC_SAFETY_FIREPUMP) val = 'PublicSafetyFirePump';
+      else if (val == pstype.PUBLIC_SAFETY_SHUTOFF) val = 'PublicSafetyShutoff';
+      else if (val == pstype.PUBLIC_SAFETY_MEDICAL) val = 'PublicSafetyMedical';
+      else if (val == pstype.PUBLIC_SAFETY_GENERATOR) val = 'PublicSafetyGenerator';
+      else if (val == pstype.PUBLIC_SAFETY_SPRINKLER) val = 'PublicSafetySprinkler';
+      else if (val == pstype.PUBLIC_SAFETY_SAFETYKEYBOX) val = 'PublicSafetyKeyBox';
+      else if (val == pstype.PUBLIC_SAFETY_MANUAL) val = 'PublicSafetyManual';
+      else if (val == pstype.PUBLIC_SAFETY_ESCALATOR) val = 'PublicSafetyEscalator';
+
+      extendTable.appendChild(this.getOneDropTr('feature\ntype', 'feature-type-text', property.getAvailbleFeatureType(), val));
+      eventBindList.push(['feature-type-text', 'change', 'html']);
+    }
+
+    let extBtn = this.getSubmitBtn('extend-subimt-btn');
+    eventBindList.push(['extend-subimt-btn', 'click', 'html']);
+
+    let extendDiv = document.createElement('div');
+    extendDiv.appendChild(extendTable);
+    extendDiv.appendChild(extBtn);
+
+
+    var divs = {
+      "properties": propertiesDiv.outerHTML,
+      "extension": extendDiv.outerHTML
+    };
+
+    propertyLayout.registerComponent('property-component', function(container, state) {
+
+      container.getElement().html("<div id=\"property-" + state.id + "\">" + divs[state.id] + "</div>");
+
+    });
+
+    propertyLayout.init();
 
     // event binding
     function bindEvent(id, action, type) {
@@ -637,8 +698,12 @@ define(function(require) {
       });
     }
 
-    bindEvent('property-subimt-btn', 'click', 'html');
-    bindEvent('add-new-local-desc-btn', 'click', 'html');
+    for (let e of eventBindList) bindEvent(...e);
+
+    $('.ui.dropdown').dropdown({
+      direction: 'downward',
+      duration: 100
+    });
 
     var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
     for (var obj of deleteLocalDescIcons)

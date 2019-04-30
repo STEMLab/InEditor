@@ -1313,6 +1313,11 @@ define(function(require) {
           'feature\ntype',
           'feature-type-text',
           ["", "NonNavigableSpace"]);
+      } else if(reqObj.selected == 'PSExtension' &&  document.getElementById('property-table').dataset.type == "state") {
+        featureTr = window.uiContainer.sidebar.property.getOneDropTr(
+          'feature\ntype',
+          'feature-type-text',
+          ["", "PublicSafetyAlarm", "PublicSafetyTransformer", "PublicSafetyDetector", "PublicSafetyFirePump", "PublicSafetyShutoff", "PublicSafetyMedical", "PublicSafetyGenerator", "PublicSafetySprinkler", "PublicSafetyKeyBox", "PublicSafetyManual", "PublicSafetyEscalator"]);
       }
 
       reqObj.table.appendChild(featureTr);
@@ -1336,7 +1341,7 @@ define(function(require) {
       reqObj.table.removeChild(reqObj.table.childNodes[2]);
     }
 
-    if (reqObj.selected != "" && reqObj.selected != undefined) {
+    if (reqObj.selected != "" && reqObj.selected != undefined ) {
 
       if (reqObj.selected == 'PublicSafetyRoom') reqObj.path[0] = 'GeneralSpace';
       else if (reqObj.selected == 'PublicSafetyElevator' || reqObj.selected == 'PublicSafetyStair') reqObj.path[0] = 'TransitionSpace';
@@ -1416,8 +1421,8 @@ define(function(require) {
         input.type =  'number';
         input.step = '0.1';
       }
-    } else {
-      document.getElementById("type-text").dataset.pre = "";
+    }  else {
+      //document.getElementById("type-text").dataset.pre = "";
     }
 
     $('.ui.dropdown').dropdown({

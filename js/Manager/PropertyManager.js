@@ -217,9 +217,67 @@ define(function(require) {
 
         break;
       case 'state':
-        obj.name = reqObj.updateContent.name;
-        obj.description = reqObj.updateContent.description;
-        obj.height = reqObj.updateContent.height;
+        if (reqObj.dataClass == "ExtensionBase") {
+          if (reqObj.updateContent.featureType.indexOf('PublicSafety') != -1 && reqObj.updateContent.featureType != undefined) {
+            let pstype = require('ObjectType').PSPROPERTY_TYPE;
+            let psindex = require('PSProperty');
+            let newPropertyConstuctor;
+            let _dic = {
+              PublicSafetyAlarm: pstype.PUBLIC_SAFETY_ALARM,
+              PublicSafetyTransformer: pstype.PUBLIC_SAFETY_TRANSFORMER,
+              PublicSafetyDetector: pstype.PUBLIC_SAFETY_DETECTOR,
+              PublicSafetyFirePump: pstype.PUBLIC_SAFETY_FIREPUMP,
+              PublicSafetyShutoff: pstype.PUBLIC_SAFETY_SHUTOFF,
+              PublicSafetyMedical: pstype.PUBLIC_SAFETY_MEDICAL,
+              PublicSafetyGenerator: pstype.PUBLIC_SAFETY_GENERATOR,
+              PublicSafetySprinkler: pstype.PUBLIC_SAFETY_SPRINKLER,
+              PublicSafetyKeyBox: pstype.PUBLIC_SAFETY_SAFETYKEYBOX,
+              PublicSafetyManual: pstype.PUBLIC_SAFETY_MANUAL,
+              PublicSafetyEscalator: pstype.PUBLIC_SAFETY_ESCALATOR
+            }
+
+            let dic = {
+              PublicSafetyAlarm: 'PUBLIC_SAFETY_ALARM',
+              PublicSafetyTransformer: 'PUBLIC_SAFETY_TRANSFORMER',
+              PublicSafetyDetector: 'PUBLIC_SAFETY_DETECTOR',
+              PublicSafetyFirePump: 'PUBLIC_SAFETY_FIREPUMP',
+              PublicSafetyShutoff: 'PUBLIC_SAFETY_SHUTOFF',
+              PublicSafetyMedical: 'PUBLIC_SAFETY_MEDICAL',
+              PublicSafetyGenerator: 'PUBLIC_SAFETY_GENERATOR',
+              PublicSafetySprinkler: 'PUBLIC_SAFETY_SPRINKLER',
+              PublicSafetyKeyBox: 'PUBLIC_SAFETY_SAFETYKEYBOX',
+              PublicSafetyManual: 'PUBLIC_SAFETY_MANUAL',
+              PublicSafetyEscalator: 'PUBLIC_SAFETY_ESCALATOR'
+            }
+
+
+            if(obj.featureType != pstype[dic[reqObj.updateContent.featureType]])
+              newPropertyConstuctor = psindex['PUBLIC_SAFETY_INSTALLATION'];
+
+
+            if (newPropertyConstuctor != undefined) {
+              let newproperty = new newPropertyConstuctor(obj.id);
+              newproperty.copy(obj);
+              newproperty.extend.attributes = reqObj.updateContent.attributes;
+              newproperty.setType(dic[reqObj.updateContent.featureType]);
+              window.storage.propertyContainer.replaceProperty(obj, newproperty);
+            }
+
+          }
+
+
+
+
+
+
+
+
+
+        } else {
+          obj.name = reqObj.updateContent.name;
+          obj.description = reqObj.updateContent.description;
+          obj.height = reqObj.updateContent.height;
+        }
         break;
       case 'transition':
         obj.name = reqObj.updateContent.name;

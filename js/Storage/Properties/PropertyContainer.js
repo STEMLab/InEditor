@@ -44,7 +44,7 @@ define(function(require) {
     this.interlayerConnections = [];
   }
 
-  PropertyContainer.prototype.clear = function(){
+  PropertyContainer.prototype.clear = function() {
     this.floorProperties = [];
     this.cellProperties = [];
     this.cellBoundaryProperties = [];
@@ -398,7 +398,7 @@ define(function(require) {
 
   }
 
-  PropertyContainer.prototype.loadInterlayerConnection = function(values){
+  PropertyContainer.prototype.loadInterlayerConnection = function(values) {
     let InterLayerConnectionProperty = require('Property').INTERLAYER_CONNECTION;
     this.interlayerConnections = [];
 
@@ -411,44 +411,63 @@ define(function(require) {
     }
   }
 
-  PropertyContainer.prototype.replaceProperty = function(a, b){
+  PropertyContainer.prototype.replaceProperty = function(a, b) {
     let type = require('ObjectType');
 
-    function isCell(atype){
+    function isCell(atype) {
       return atype == require('ObjectType').PROPERTY_TYPE.CELL_SPACE;
     }
 
-    function isPSCell(btype){
+    function isPSCell(btype) {
       let pstype = require('ObjectType').PSPROPERTY_TYPE;
       return btype == pstype.PUBLIC_SAFETY_ROOM || btype == pstype.PUBLIC_SAFETY_ELEVATOR || btype == pstype.PUBLIC_SAFETY_STAIR;
     }
 
-    function isCellBoundary(atype){
+    function isCellBoundary(atype) {
       return atype == require('ObjectType').PROPERTY_TYPE.CELL_SPACE_BOUNDARY;
     }
 
-    function isPSBoundary(btype){
+    function isPSBoundary(btype) {
       let pstype = require('ObjectType').PSPROPERTY_TYPE;
       return btype == pstype.PUBLIC_SAFETY_DOOR || btype == pstype.PUBLIC_SAFETY_WINDOW || btype == pstype.PUBLIC_SAFETY_HATCH;
     }
 
-    if((isCell(a.featureType) || isPSCell(a.featureType)) && isPSCell(b.featureType) && a.id == b.id){
+    function isState(atype) {
+      return atype == require('ObjectType').PROPERTY_TYPE.STATE;
+    }
+
+    function isPSInstallation(btype) {
+      let pstype = require('ObjectType').PSPROPERTY_TYPE;
+      return btype == pstype.PUBLIC_SAFETY_ALARM || btype == pstype.PUBLIC_SAFETY_TRANSFORMER || btype == pstype.PUBLIC_SAFETY_DETECTOR ||
+             btype == pstype.PUBLIC_SAFETY_FIREPUMP || btype == pstype.PUBLIC_SAFETY_SHUTOFF || btype == pstype.PUBLIC_SAFETY_MEDICAL ||
+             btype == pstype.PUBLIC_SAFETY_GENERATOR || btype == pstype.PUBLIC_SAFETY_SPRINKLER || btype == pstype.PUBLIC_SAFETY_SAFETYKEYBOX ||
+             btype == pstype.PUBLIC_SAFETY_MANUAL || btype == pstype.PUBLIC_SAFETY_ESCALATOR;
+    }
+
+    if ((isCell(a.featureType) || isPSCell(a.featureType)) && isPSCell(b.featureType) && a.id == b.id) {
 
       let index = -1;
       for (let i = 0; i < this.cellProperties.length && index == -1; i++) {
         if (this.cellProperties[i].id == a.id) index = i;
       }
 
-      if(index > -1) this.cellProperties.splice(index, 1, b);
-    }
-    else if((isCellBoundary(a.featureType) || isPSBoundary(a.featureType)) && isPSBoundary(b.featureType) && a.id == b.id){
+      if (index > -1) this.cellProperties.splice(index, 1, b);
+    } else if ((isCellBoundary(a.featureType) || isPSBoundary(a.featureType)) && isPSBoundary(b.featureType) && a.id == b.id) {
 
       let index = -1;
       for (let i = 0; i < this.cellBoundaryProperties.length && index == -1; i++) {
         if (this.cellBoundaryProperties[i].id == a.id) index = i;
       }
 
-      if(index > -1) this.cellBoundaryProperties.splice(index, 1, b);
+      if (index > -1) this.cellBoundaryProperties.splice(index, 1, b);
+    } else if ((isState(a.featureType) || isPSInstallation(a.featureType)) && isPSInstallation(b.featureType) && a.id == b.id) {
+
+      let index = -1;
+      for (let i = 0; i < this.stateProperties.length && index == -1; i++) {
+        if (this.stateProperties[i].id == a.id) index = i;
+      }
+
+      if (index > -1) this.stateProperties.splice(index, 1, b);
     }
   }
 

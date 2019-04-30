@@ -296,6 +296,8 @@ define(function(require) {
           data.attributes = {
             obstacleType: CodeList.getCodeNum([data.featureType], document.getElementById("obstacle-type-text").value)
           }
+        } else if (data.moduleType == "PSExtension"){
+          //
         }
 
         if (data.featureType == 'PublicSafetyRoom') {

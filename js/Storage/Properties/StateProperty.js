@@ -2,7 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define([], function() {
+define(function(require) {
   'use strict';
 
   /**
@@ -10,30 +10,11 @@ define([], function() {
    */
   function StateProperty(id) {
 
-    /**
-     * @memberof StateProperty
-     */
-    this.id = id;
+    require('./PropertyBase.js').apply(this, arguments);
+    this.featureType = require('ObjectType').PROPERTY_TYPE.STATE;
 
-    /**
-     * @memberof StateProperty
-     */
-    this.name = id;
-
-    /**
-     * @memberof StateProperty
-     */
-     this.description = {};
-     var list = window.conditions.descList;
-     for(var l of list){
-       this.description[l] = "";
-     }
-
-
-    /**
-     * @memberof StateProperty
-     */
-    this.duality = ""; // CellSpace
+    let EB = require('./ExtensionBase.js');
+    this.extend = new EB();
 
     /**
      * @memberof StateProperty
@@ -90,6 +71,10 @@ define([], function() {
   */
   StateProperty.prototype.setHeight = function(height){
     this.height = height;
+  }
+
+  StateProperty.prototype.getAvailbleModuleType = function() {
+    return ["", "PSExtension"];
   }
 
   return StateProperty;

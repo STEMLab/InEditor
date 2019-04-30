@@ -19,41 +19,47 @@ define(function(require) {
   PSInstallation.prototype.setType = function(type) {
 
     var list = require('ObjectType').PSPROPERTY_TYPE;
-    if(Object.key(list).indexof(type) == -1) return;
-    else this.featureType = type;
+    if(Object.keys(list).indexOf(type) == -1) return;
+    else {
+      this.featureType = list[type];
+      this.extend.moduleType = 'PSExtension';
+      let str = type.substring(14).toLowerCase();
+      str = str[0].toUpperCase() + str.substring(1);
+      this.extend.featureType = 'PublicSafety' + str;
+    }
 
     switch (type) {
-      case PUBLIC_SAFETY_ALARM:
+      case 'PUBLIC_SAFETY_ALARM':
         this.extend.attributes.legend = 'AlarmAndDetectors';
         break;
-      case PUBLIC_SAFETY_TRANSFORMER:
+      case 'PUBLIC_SAFETY_TRANSFORMER':
         this.extend.attributes.legend = 'Preplan';
         break;
-      case PUBLIC_SAFETY_DETECTOR:
+      case 'PUBLIC_SAFETY_DETECTOR':
         this.extend.attributes.legend = 'AlarmAndDetectors';
         break;
-      case PUBLIC_SAFETY_FIREPUMP:
+      case 'PUBLIC_SAFETY_FIREPUMP':
         this.extend.attributes.legend = 'FireSuppression';
         break;
-      case PUBLIC_SAFETY_SHUTOFF:
+      case 'PUBLIC_SAFETY_SHUTOFF':
         this.extend.attributes.legend = 'FeatureShutoff';
         break;
-      case PUBLIC_SAFETY_MEDICAL:
+      case 'PUBLIC_SAFETY_MEDICAL':
         this.extend.attributes.legend = 'Preplan';
         break;
-      case PUBLIC_SAFETY_GENERATOR:
+      case 'PUBLIC_SAFETY_GENERATOR':
         this.extend.attributes.legend = 'Preplan';
         break;
-      case PUBLIC_SAFETY_SPRINKLER:
+      case 'PUBLIC_SAFETY_SPRINKLER':
         this.extend.attributes.legend = 'FireSuppression';
         break;
-      case PUBLIC_SAFETY_SAFETYKEYBOX:
+      case 'PUBLIC_SAFETY_SAFETYKEYBOX':
         this.extend.attributes.legend = 'KeyOrKnowBox';
         break;
-      case PUBLIC_SAFETY_MANUAL:
+      case 'PUBLIC_SAFETY_MANUAL':
         this.extend.attributes.legend = 'Preplan';
         break;
-      case PUBLIC_SAFETY_ESCALATOR:
+      case 'PUBLIC_SAFETY_ESCALATOR':
         this.extend.attributes.legend = 'VerticalAccessFeature';
         break;
       default:
@@ -63,5 +69,12 @@ define(function(require) {
   PSInstallation.prototype.getInstallationType = function(){
     return ['PUBLIC_SAFETY_ALARM', 'PUBLIC_SAFETY_TRANSFORMER', 'PUBLIC_SAFETY_DETECTOR', 'PUBLIC_SAFETY_FIREPUMP', 'PUBLIC_SAFETY_SHUTOFF', 'PUBLIC_SAFETY_MEDICAL', 'PUBLIC_SAFETY_GENERATOR', 'PUBLIC_SAFETY_SPRINKLER', 'PUBLIC_SAFETY_SAFETYKEYBOX', 'PUBLIC_SAFETY_MANUAL', 'PUBLIC_SAFETY_ESCALATOR'];
   }
+
+  PSInstallation.prototype.copy = function(state){
+    require('PSProperty').UTIL.copyState(state, this);
+  }
+
+
+
   return PSInstallation;
 });
