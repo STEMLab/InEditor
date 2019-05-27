@@ -6,7 +6,7 @@ IndoorGML-Editor is an open source Javascript program that provides tools for si
 
 ## Getting Started
 1. You need to install modules. Please follow step. `npm install`
-2. Start server by executing `npm start` and launch a web browser and open the editor `http://127.0.0.1:8080`
+2. Start server by executing `npm start` and launch a web browser and open the editor `http://127.0.0.1:5757`
 <img width="700px" src="assets/readme/01_start.PNG" style="margin:10px"></img>
 3. In order to create IndoorGML documents, you must install [InFactory](https://github.com/STEMLab/InFactory) that a restful server and library to create OGC IndoorGML
    * Prerequisites
@@ -38,7 +38,7 @@ The project on master branch supports generating IndoorGML data for core module 
   2. [Non-Navigable Space Extension](http://www.indoorgml.net/extensions/indoorgmlnonnavispace.xsd)
   3. [Storey Extension](http://www.indoorgml.net/extensions/indoorgmlstoreyextension.xsd) → will be supported
   4. [POI Extension]() → will be supported
-  
+
 The editor for other extensions will be created in an additional branch.
 
 ## License

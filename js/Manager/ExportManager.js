@@ -625,13 +625,13 @@
               $('#go-factory-download').modal('show');
 
               // download gml
-              window.document.getElementById('gml-down-link').href = 'http://127.0.0.1:8080/' + getXhr.responseText;
+              window.document.getElementById('gml-down-link').href = 'http://127.0.0.1:5757/' + getXhr.responseText;
 
             }
 
           }
 
-          getXhr.open("POST", "http://localhost:8080/save-gml/" + documentId, false);
+          getXhr.open("POST", "http://localhost:5757/save-gml/" + documentId, false);
           getXhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
           // save gml
           log.info(xhr.responseXML);
@@ -1091,7 +1091,7 @@
 
         if (properties[key].extend.moduleType != "") {
           cellBoundaries[id].setType(properties[key].extend.featureType);
-          
+
         }
 
         cellBoundaries[id].addProperty('height', properties[key].height);
@@ -1874,7 +1874,7 @@
         }
       }
 
-      xhr.open("POST", "http://localhost:8080/trans-dot", false);
+      xhr.open("POST", "http://localhost:5757/trans-dot", false);
       xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
       let data = JSON.stringify({
         'constArr': constArr,

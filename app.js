@@ -19,10 +19,10 @@ app.use(bodyParser.raw({
   limit: '1gb' }));
 app.use(bodyParser.text({limit: '1gb'}));
 
-var server = app.listen(8080, function() {
+var server = app.listen(5757, function() {
 
-  console.log('IndoorGML-Editor App listening on port 8080...');
-  opn('http://127.0.0.1:8080/', {app: 'chrome'});
+  console.log('IndoorGML-Editor App listening on port 5757...');
+  opn('http://127.0.0.1:5757/', {app: 'chrome'});
 
 });
 

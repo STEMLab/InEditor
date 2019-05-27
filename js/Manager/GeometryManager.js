@@ -411,7 +411,7 @@
           }
         };
 
-        xhr.open("POST", "http://127.0.0.1:8080/triangulate", false);
+        xhr.open("POST", "http://127.0.0.1:5757/triangulate", false);
         xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhr.send(JSON.stringify(data));
       } else {

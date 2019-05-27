@@ -71,7 +71,7 @@ define(function(require) {
       }
     }
 
-    xhr.open("POST", "http://127.0.0.1:8080/save-project", true);
+    xhr.open("POST", "http://127.0.0.1:5757/save-project", true);
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.send(JSON.stringify({
       doc: doc,
@@ -141,7 +141,7 @@ define(function(require) {
 
       }
 
-      xhr.open("POST", "http://127.0.0.1:8080/convert-bson-to-json", true);
+      xhr.open("POST", "http://127.0.0.1:5757/convert-bson-to-json", true);
       xhr.send(reader.result);
 
     }
@@ -198,7 +198,7 @@ define(function(require) {
         }
       }
 
-      xhr.open("POST", "http://localhost:8080/save-gml/TMP", false);
+      xhr.open("POST", "http://localhost:5757/save-gml/TMP", false);
       xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
       xhr.send(reader.result);
     }
@@ -217,7 +217,7 @@ define(function(require) {
       }
     }
 
-    xhr.open("POST", "http://localhost:8080/xml-to-json", false);
+    xhr.open("POST", "http://localhost:5757/xml-to-json", false);
     xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
     xhr.send(path);
 
