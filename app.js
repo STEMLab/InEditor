@@ -24,6 +24,10 @@ var server = app.listen(5757, function() {
   console.log('IndoorGML-Editor App listening on port 5757...');
   opn('http://127.0.0.1:5757/', {app: 'chrome'});
 
+  Promise.coroutine(function *() {
+    yield cmd.run('javac .\\lib\\coor-converter\\Convert.java -classpath .\\lib\\coor-converter\\gdal.jar');
+  })();
+
 });
 
 
@@ -112,9 +116,17 @@ app.post('/triangulate', function(req, res){
 
 });
 
-function convert() {
+function convert(res) {
+  console.log('----------------------- convert coordinates -----------------------\n');
+
   Promise.coroutine(function *() {
-    yield cmd.run('java -cp .;c:/gdal/bin/gdal/java/gdal.jar Convert ./lib/coor-converter/const.txt ./lib/coor-converter/target.txt ./lib/coor-converter/result.txt');
+    yield cmd.run('java -cp ./lib/coor-converter;./lib/coor-converter/gdal.jar Convert ./lib/coor-converter/const.txt ./lib/coor-converter/target.txt ./lib/coor-converter/result.txt');
+
+    console.log('--------------------------------------------------------------------\n\n');
+    fs.readFile('./lib/coor-converter/result.txt', function(err, data) {
+      if (err) return res.status(500).send(err);
+      res.send(data);
+    });
   })();
 }
 
@@ -136,13 +148,50 @@ app.post('/trans-dot', function(req, res) {
         return res.status(500).send(err);
       }
 
-      convert();
+      convert(res);
 
-      fs.readFile('./lib/coor-converter/result.txt', function(err, data) {
-        if (err) return res.status(500).send(err);
-        res.send(data);
-      });
     });
   });
 
 });
+
+
+app.post('/validation', function(req, res) {
+
+  let cityJSON = req.body.cityJSON;
+
+  fs.writeFile('./output/tmpJSON.json', vkbeautify.json(JSON.stringify(cityJSON)), function(err) {
+    if (err)  {
+      console.log(err);
+      return res.status(500).send(err);
+    }
+
+    validate('.\\output\\tmpJSON.json', res);
+
+  });
+
+});
+
+function validate(path, res) {
+  Promise.coroutine(function *() {
+    console.log('---------------------------- validation ----------------------------\n');
+    yield cmd.run('.\\lib\\val3dity-2.1.0-windows-x64\\val3dity-2.1.0\\val3dity ' + path + ' --report_json .\\output\\repo');
+
+
+    fs.readFile('./output/repo.json', function(err, data) {
+
+      if (err)  {
+        console.log(err);
+        return res.status(500).send(err);
+      }
+
+      data = JSON.parse(data);
+      if(data.invalid_features == 0 && data.invalid_primitives == 0) res.send(true);
+      else res.status(500).send(data.invalid_primitives + " errors founded.\nFull validation report saved to \".\output\repo.json\"" );
+
+    });
+
+
+    console.log('--------------------------------------------------------------------\n\n');
+  })();
+}
