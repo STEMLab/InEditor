@@ -80,6 +80,10 @@ define([
       'click': this.deactivateMap
     }
 
+    handlerBinder['remove-floorplan-btn'] = {
+      'click': this.removeFloorplan
+    }
+
   }
 
 
@@ -402,6 +406,19 @@ define([
       window.conditions.activateMap = false;
       var id = document.getElementById('id-text').value;
       document.getElementById(id + '-map').style.zIndex = "0";
+    }
+
+    return result;
+  }
+
+  UIChangeEventHandler.prototype.removeFloorplan = function(broker, previousMsg, data){
+    var result = { result: true, msg: null }
+    if (broker.isPublishable('removefloorplan')) {
+      broker.publish(new Message('removefloorplan', {
+        floor: document.getElementById('id-text').value
+      }));
+
+      result.msg = 'removefloorplan';
     }
 
     return result;

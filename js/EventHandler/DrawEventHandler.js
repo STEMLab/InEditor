@@ -579,7 +579,7 @@ define([
         }
 
         broker.publish(new Message('end-addnewtransition', {
-          floor: data.currentTarget.attrs.id,
+          floor: window.tmpObj.floor,
           id: newId
         }));
 
@@ -879,7 +879,7 @@ define([
         }
 
         broker.publish(new Message('end-addnewtransition', {
-          floor: data.currentTarget.attrs.id,
+          floor: window.tmpObj.floor,
           id: newId
         }));
 

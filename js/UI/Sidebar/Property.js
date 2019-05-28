@@ -94,6 +94,10 @@ define(function(require) {
     canvasDiv += "<button class=\"ui icon button\" style=\"width:20%;\">";
     canvasDiv += "<i id=\"copyfloor-btn\" class=\"inverted grey check icon\"></i></button>";
 
+    canvasDiv += "<tr><td class=\"title\">Remove<br>floor plan</td>";
+    canvasDiv += "<td class=\"value\"><button class=\"ui icon button\">";
+    canvasDiv += "<i id=\"remove-floorplan-btn\" class=\"inverted grey check icon\" style=\"width: max-content;\"></i></button></td></tr>";
+
     canvasDiv += "<tr><td class=\"title\" >Add<br>Map</td>";
     canvasDiv += "<td><table>" + this.getBasicTr('map-x', 'x', '129.08242187295514', false);
     canvasDiv += this.getBasicTr('map-y', 'y', '35.234839296124264', false) + "</table></td>";
@@ -164,6 +168,7 @@ define(function(require) {
     bindEvent('get-map-coor-btn', 'click', 'html');
     bindEvent('activate-map-btn', 'click', 'html');
     bindEvent('deactivate-map-btn', 'click', 'html');
+    bindEvent('remove-floorplan-btn', 'click', 'html');
 
     var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
     for (var obj of deleteLocalDescIcons)

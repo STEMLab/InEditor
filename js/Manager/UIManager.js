@@ -104,6 +104,8 @@ define(function(require) {
     this.addCallbackFun('start-addnewhatch', this.startAddNewHatch);
     this.addCallbackFun('end-addnewhatch', this.endAddNewHatch, this.endAddNewCell_makeHistoryObj, this.removeObj);
 
+    this.addCallbackFun('removefloorplan', this.removeFLoorplan);
+
 
   }
 
@@ -1388,6 +1390,13 @@ define(function(require) {
       text: ''
     });
 
+  }
+
+  UIManager.prototype.removeFLoorplan = function(reqObj){
+    let stage = window.storage.canvasContainer.stages[reqObj.floor].stage;
+    window.storage.canvasContainer.stages[reqObj.floor].backgroundLayer.setGrid(stage.width(), stage.height());
+    window.storage.canvasContainer.stages[reqObj.floor].backgroundLayer.floorplanDataURL = [];
+    stage.draw();
   }
 
   return UIManager;

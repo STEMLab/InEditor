@@ -232,6 +232,7 @@ define([
     this.reqSpecList['addnewhatch'] = new MessageSpec('cycle', 'including', ['draw'], false);
     this.reqSpecList['end-addnewhatch'] = new MessageSpec('cycle', 'including', ['draw'], false);
 
+    this.reqSpecList['removefloorplan'] = new MessageSpec('single', 'including', null, false);
   }
 
   /**
