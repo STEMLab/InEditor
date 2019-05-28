@@ -287,6 +287,39 @@ define([], function() {
                     - (line2.dot2.point.x-line2.dot1.point.x)*(line1.dot2.point.y-line1.dot1.point.y);
       var numerator = 0;
 
+    },
+
+    isCCWByDots : function(dots){
+      let wkt = "POLYGON ((";
+
+      for(let dot of dots){
+        wkt += dot.point.x + " " + dot.point.y + " 0, ";
+      }
+
+      wkt += dots[0].point.x + " " + dots[0].point.y + " 0))";
+      log.info(wkt);
+
+      var reader = new jsts.io.WKTReader();
+      var c = reader.read(wkt);
+
+      return jsts.algorithm.Orientation.isCCW(c.getCoordinates());
+    },
+
+    isCCWByArr : function(arr){
+      var wkt = "POLYGON ((";
+
+      for (var i = 0; i < arr.length; i++) {
+        wkt += arr[i][0] + " " + arr[i][1] + " " + arr[i][2];
+
+        if (i != arr.length - 1) wkt += ",";
+      }
+
+      wkt += arr[0][0] + " " + arr[0][1] + " " + arr[0][2] + "))";
+
+      var reader = new jsts.io.WKTReader();
+      var c = reader.read(wkt);
+
+      return jsts.algorithm.Orientation.isCCW(c.getCoordinates());
     }
 
 

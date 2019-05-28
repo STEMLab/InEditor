@@ -468,25 +468,6 @@ define([
       'post-connectionboundary': baseURL + '/documents/' + document.id + '/connectionboundary/',
       'post-anchorboundary': baseURL + '/documents/' + document.id + '/anchorboundary/',
       'post-nonnavigablespace': baseURL + '/documents/' + document.id + '/nonnavigablespace/',
-
-      'post-psdoor': baseURL + '/documents/' + document.id + '/psdoor/',
-      'post-pswindow': baseURL + '/documents/' + document.id + '/pswindow/',
-      'post-pshatch': baseURL + '/documents/' + document.id + '/pshatch/',
-      'post-psroom': baseURL + '/documents/' + document.id + '/psroom/',
-      'post-pselevator': baseURL + '/documents/' + document.id + '/pselevator/',
-      'post-psstair': baseURL + '/documents/' + document.id + '/psstair/',
-      'post-psalarm': baseURL + '/documents/' + document.id + '/psalarm/',
-      'post-pstransformer': baseURL + '/documents/' + document.id + '/pstransformer/',
-      'post-psdetector': baseURL + '/documents/' + document.id + '/psdetector/',
-      'post-psfirepump': baseURL + '/documents/' + document.id + '/psfirepump/',
-      'post-psshutoff': baseURL + '/documents/' + document.id + '/psshutoff/',
-      'post-psmedical': baseURL + '/documents/' + document.id + '/psmedical/',
-      'post-psgenerator': baseURL + '/documents/' + document.id + '/psgenerator/',
-      'post-pssprinkler': baseURL + '/documents/' + document.id + '/pssprinkler/',
-      'post-pssafetykeybox': baseURL + '/documents/' + document.id + '/pssafetykeybox/',
-      'post-psmanual': baseURL + '/documents/' + document.id + '/psmanual/',
-      'post-psescalator': baseURL + '/documents/' + document.id + '/psescalator/',
-
       'post-multiLayeredGraph': baseURL + '/documents/' + document.id + '/multilayeredgraph/' + multiLayeredGraph.id,
       'post-spacelayers': baseURL + '/documents/' + document.id + '/spacelayers/' + spaceLayers.id,
       'post-spacelayer': baseURL + '/documents/' + document.id + '/spacelayer/',
@@ -967,23 +948,6 @@ define([
 
     }
 
-    function isCCW(coor) {
-      var wkt = "POLYGON ((";
-
-      for (var i = 0; i < coor.length; i++) {
-        wkt += coor[i][0] + " " + coor[i][1] + " " + coor[i][2];
-
-        if (i != coor.length - 1) wkt += ",";
-      }
-
-      wkt += coor[0][0] + " " + coor[0][1] + " " + coor[0][2] + "))";
-
-      var reader = new jsts.io.WKTReader();
-      var c = reader.read(wkt);
-
-      return jsts.algorithm.Orientation.isCCW(c.getCoordinates());
-    }
-
     // pixel to real world coordinates
     for (var floorKey in floorProperties) {
       var cellkeyInFloor = floorProperties[floorKey].cellKey;
@@ -993,11 +957,9 @@ define([
         var cellId = cellkeyInFloor[cellKey];
 
         var coor = cells[cellId].getCoordinates()[0];
-        if (!isCCW(coor)) coor.reverse();
+        if (!DotMath.isCCWByArr(coor)) coor.reverse();
         // 이해를 위해 extrude cell  func를 수정하는 것이 좋을 듯 하다.
 
-        // test code
-        //coor.reverse();
 
         if (geoType == '3D') {
           if (slantMap[cellId] == undefined) {
@@ -1040,10 +1002,8 @@ define([
           for (var holeKey in holeMap[cellId]) {
 
             var holeCoor = holeMap[cellId][holeKey];
-            if (!isCCW(holeCoor)) holeCoor.reverse();
+            if (!DotMath.isCCWByArr(holeCoor)) holeCoor.reverse();
             // add hole func에서 solid를 뒤집어서 push 하고 있다.
-            // test
-            //holeCoor.reverse();
 
             if (geoType == '3D') cells[cellId].addHole(manager.extrudeCell(holeCoor, floorProperties[floorKey].celingHeight * 1 - 0.2), '3D');
             else if (geoType == '2D') {
@@ -1055,7 +1015,6 @@ define([
         function addVertices(solid) {
           for (var surfaceIndex in solid[0]) {
 
-            //var polygon = solid[0][surfaceIndex][0][0].reverse();
             var polygon = solid[0][surfaceIndex][0][0];
             var polygon_ = [];
 
