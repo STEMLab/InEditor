@@ -53,12 +53,36 @@ define(function(require) {
 
     var floorData = getFloorData(cm, cbm, spaceLayers);
 
+    let interLayerConnectionMember = mlg.interEdges[0].interLayerConnectionMember;
+
     return {
       docId: docId,
       bbox: bbox,
-      floorData: floorData
+      floorData: floorData,
+      interLayerConnection: parseInterEdges(interLayerConnectionMember)
     };
 
+  }
+
+  function parseInterEdges(interLayerConnectionMember){
+    let interEdges = [];
+    for(let inter of interLayerConnectionMember){
+      interEdges.push({
+        id: inter.interLayerConnection.id,
+        typeOfTopoExpression: inter.interLayerConnection.typeOfTopoExpression,
+        interConnects: [
+          inter.interLayerConnection.interConnects[0].href.substring(1),
+          inter.interLayerConnection.interConnects[1].href.substring(1)
+        ],
+        connectedLayer: [
+          inter.interLayerConnection.connectedLayers[0].href.substring(1),
+          inter.interLayerConnection.connectedLayers[1].href.substring(1)
+        ],
+        comment: inter.interLayerConnection.comment != undefined ?
+                  inter.interLayerConnection.comment : ""
+      })
+    }
+    return interEdges;
   }
 
   function setBBox(coor) {
@@ -583,14 +607,6 @@ define(function(require) {
         cbm.cellBoundaries[t.duality] != undefined)
         setCellBoundaryFloor(cbm.cellBoundaries[t.duality], thisFloor);
 
-      // connects(state)
-      // for (var i = 0; i < 2; i++) {
-      //   var sid = t.connects[i];
-      //   if (sid != undefined &&
-      //       sid != null && thisFloor.states[sid] == undefined &&
-      //       spaceLayers[thisFloor.layer].states[sid] != undefined)
-      //     setStateFloor(spaceLayers[thisFloor.layer].states[sid], thisFloor);
-      // }
 
       delete spaceLayers[thisFloor.layer].transitions[t.id];
     }
@@ -606,33 +622,6 @@ define(function(require) {
 
       if (thisFloor.cells[c.id] == undefined)
         setCellFloor(c, thisFloor);
-
-      // thisFloor.cells[c.id] = c;
-      //
-      // if(c.duality != null){
-      //   thisFloor.states[c.duality] = spaceLayers[layer].states[c.duality];
-      //   thisFloor.states[c.duality].height -= thisFloor.floorHight;
-      //   delete spaceLayers[layer].states[c.duality];
-      // }
-      //
-      // delete cm.cells[c.id];
-      //
-      //
-      // if(c.partialboundedBy.length != 0){
-      //   for(var cb of c.partialboundedBy) {
-      //     if(thisFloor.cellBoundaries[cb] == undefined){
-      //       thisFloor.cellBoundaries[cb] = cbm.cellBoundaries[cb];
-      //       thisFloor.doorHeight = cbm.cellBoundaries[cb].celingHeight; // door height
-      //       delete cbm.cellBoundaries[cb];
-      //
-      //       if(thisFloor.cellBoundaries[cb].duality != null){
-      //         var tid = thisFloor.cellBoundaries[cb].duality;
-      //         thisFloor.transitions[tid] = spaceLayers[layer].transitions[tid];
-      //         delete spaceLayers[layer].transitions[tid];
-      //       }
-      //     }
-      //   }
-      // }
     }
 
     for (var cb of Object.values(cbm.cellBoundaries)) {
@@ -646,11 +635,6 @@ define(function(require) {
 
       if (thisFloor.cellBoundaries[cb.id] == undefined)
         setCellBoundaryFloor(cb, thisFloor);
-      // thisFloor.cellBoundaries[cb.id] = cb;
-      // if(cb.duality != null)
-      //   thisFloor.transitions[cb.duality] = spaceLayers[layer].transitions[cb.duality];
-      // delete spaceLayers[layer].transitions[cb.duality];
-      // delete cbm.cellBoundaries[cb.id];
     }
 
     for (var layer in spaceLayers) {
@@ -658,23 +642,18 @@ define(function(require) {
         var thisFloor = findFloorData('state', -1, s.height, [], layer);
 
         if (thisFloor == null) {
-          thisFloor = floorDataFactory(s.floorHight, s.celingHeight, s.celingHeight, layer);
+          thisFloor = floorDataFactory(s.height, s.height, s.height, layer);
           floorData[thisFloor.id] = thisFloor;
         }
 
         if (thisFloor.states[s.id] == undefined)
           setStateFloor(s, thisFloor);
-        // s.height -= thisFloor.floorHight;
-        // thisFloor.states[s.id] = s;
-        // delete spaceLayers[layer].states[s.id];
       }
 
       for (var t of Object.values(spaceLayers[layer].transitions)) {
         var thisFloor = findFloorData('transition', -1, -1, t.connects, layer);
         if (thisFloor.transitions[t.id] == undefined)
           setTransitionFloor(t, thisFloor);
-        // thisFloor.transitions[t.id] = t;
-        // delete spaceLayers[layer].transitions[t.id];
       }
     }
 

@@ -757,7 +757,7 @@ define(function(require) {
     propertiesDiv += this.getBasicTr('connectedLayer', 'connected\nLayer', "\"" + property.getConnectedLayerString() + "\"", true);
     propertiesDiv += this.getDropDownTr('topoExpression-text', 'Topo\nExpression', [property.typeOfTopoExpression, 'CONTAINS', 'OVERLAPS', 'EQUALS', 'WITHIN', 'CROSSES', 'INTERSECTS']);
 
-    propertiesDiv += this.getDescString(property.commnet);
+    propertiesDiv += this.getDescString(property.comment);
     propertiesDiv += "</table>";
     propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
 

@@ -162,7 +162,7 @@ define(function(require) {
         break;
       case 'interlayerConnection':
         obj.typeOfTopoExpression = reqObj.updateContent.typeOfTopoExpression;
-        obj.commnet = reqObj.updateContent.commnet;
+        obj.comment = reqObj.updateContent.comment;
         break;
       default:
         console.log("PropertyManager >>> wrong reqObj.type(" + reqObj.type + ")");
@@ -411,23 +411,6 @@ define(function(require) {
     property.height = floorProperty.doorHeight;
     property.bottom = 0;
 
-    /////////////////////quick code////////////////////
-    if (property.id.indexOf('BIGWINDOW') != -1) {
-      property.navi.type = "ConnectionBoundary";
-      property.height = 20;
-    } else if (property.id.indexOf('WINDOW') != -1) {
-      property.navi.type = "ConnectionBoundary";
-      property.height = 10;
-      property.bottom = 8;
-    } else if (property.id.indexOf('EXTERIORDOOR') != -1) {
-      property.navi.type = "AnchorBoundary";
-    } else if (property.id.indexOf('DOOR') != -1) {
-      property.navi.type = "ConnectionBoundary";
-    } else if (property.id.indexOf('STAIR') != -1) {
-      property.navi.type = "ConnectionBoundary";
-      property.height = 20;
-    }
-
     window.storage.propertyContainer.cellBoundaryProperties.push(property);
 
     // add key in floor property
@@ -670,6 +653,7 @@ define(function(require) {
       else if (type == 'cellBoundary') construct = construct.CELL_SPACE_BOUNDARY;
       else if (type == 'state') construct = construct.STATE;
       else if (type == 'transition') construct = construct.TRANSITION;
+      else if (type == 'interlayerconnection') construct = construct.INTERLAYER_CONNECTION;
 
       var newProperty = new construct(obj.id);
 
@@ -697,7 +681,7 @@ define(function(require) {
 
     var propertyContainer = window.storage.propertyContainer;
 
-    for (var floor of Object.values(reqObj)) {
+    for (var floor of Object.values(reqObj[0])) {
 
       for (var c of Object.values(floor.cells)) {
         var newProperty = copyObj(c, 'cell');
@@ -731,6 +715,11 @@ define(function(require) {
           t.id
         );
       }
+    }
+
+    for(var inter of reqObj[1]){
+      var newProperty = copyObj(inter, 'interlayerconnection');
+      propertyContainer.interlayerConnections.push(newProperty);
     }
   }
 

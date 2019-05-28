@@ -24,7 +24,7 @@ define([], function() {
      * @memberof InterLayerConnectionProperty
      * @desc This attribute can contain an additional description for the InterLayerConnection.
      */
-    this.commnet = "";
+    this.comment = "";
 
     /**
      * @memberof InterLayerConnectionProperty

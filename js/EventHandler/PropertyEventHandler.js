@@ -231,7 +231,7 @@ define(function(require) {
       case 'interlayerConnection':
         result = {
           'typeOfTopoExpression': document.getElementById("topoExpression-text").options[document.getElementById("topoExpression-text").selectedIndex].value,
-          'commnet': document.getElementById("commnet-text").value,
+          'comment': document.getElementById("comment-text").value,
         };
         break;
       default:

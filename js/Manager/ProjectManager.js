@@ -293,7 +293,7 @@ define(function(require) {
 
     window.broker.publish({
       req: 'addproeprtydatafromgml',
-      reqObj: transResult.data.floorData
+      reqObj: [transResult.data.floorData, data.interLayerConnection]
     });
 
     window.broker.publish({
