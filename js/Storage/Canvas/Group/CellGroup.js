@@ -363,9 +363,9 @@ define([
        if(this.cells[i].id == id){
 
          if(floor != undefined){
-           var dotFool = window.storage.dotFoolContainer.getDotFool(floor);
+           var dotPool = window.storage.dotPoolContainer.getDotPool(floor);
            for(var j in this.cells[i].dots){
-             dotFool.deleteDotFromObj(this.cells[i].dots[j].uuid, this.cells[i].id);
+             dotPool.deleteDotFromObj(this.cells[i].dots[j].uuid, this.cells[i].id);
            }
          } else {
            log.warn('CellGroup.delete:: there is no floor data for cell, you need to free dots of', id, 'manually.');

@@ -56,8 +56,8 @@ define([
        if(this.states[i].id == id){
 
          if(floor != undefined){
-           var dotFool = window.storage.dotFoolContainer.getDotFool(floor);
-           dotFool.deleteDotFromObj(this.states[i].dot.uuid, this.states[i].id);
+           var dotPool = window.storage.dotPoolContainer.getDotPool(floor);
+           dotPool.deleteDotFromObj(this.states[i].dot.uuid, this.states[i].id);
          } else {
            log.warn('StateGroup.delete:: there is no floor data for state, you need to free dots of', id, 'manually.');
          }

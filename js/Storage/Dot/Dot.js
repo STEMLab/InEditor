@@ -59,7 +59,7 @@ define([], function() {
 
       // disconnect in data
       delete this.connects[uuid];
-      delete window.dotFoolContainer.getDotById(uuid).connects[this.uuid];
+      delete window.dotPoolContainer.getDotById(uuid).connects[this.uuid];
 
       // disconnect in canvas
       // 만약 cell에 celll boundary가 추가 되었을 경우, cell의 값을 어떻게 변화 시켜 주어야 하는가?
@@ -69,7 +69,7 @@ define([], function() {
       if (this.isConnected(uuid)) {
         if (this.connects[uuid].length == 1) {
           delete this.connects[uuid];
-          delete window.dotFoolContainer.getDotById(uuid).connects[this.uuid];
+          delete window.dotPoolContainer.getDotById(uuid).connects[this.uuid];
         } else {
           for (var key in this.connects[uuid]) {
             if (this.connects[uuid][key].obj == object) {
@@ -78,10 +78,10 @@ define([], function() {
             }
           }
 
-          var target = window.dotFoolContainer.getDotById(uuid);
+          var target = window.dotPoolContainer.getDotById(uuid);
           for (var key in target.connects[this.uuid]) {
             if (target.connects[this.uuid][key].obj == object) {
-              window.dotFoolContainer.getDotById(uuid).connects[this.uuid].splice(key, 1);
+              window.dotPoolContainer.getDotById(uuid).connects[this.uuid].splice(key, 1);
             }
           }
 

@@ -123,7 +123,7 @@ define([
    */
   CanvasContainer.prototype.addObjFromGeometries = function(geometryContainer) {
 
-    log.info(window.storage.dotFoolContainer);
+    log.info(window.storage.dotPoolContainer);
 
     // add cell
     var cells = geometryContainer.cellGeometry;

@@ -6,12 +6,12 @@ define([
   "./Geometries/GeometryContainer.js",
   "./Properties/PropertyContainer.js",
   "./Canvas/CanvasContainer.js",
-  "./Dot/DotFoolContainer.js"
+  "./Dot/DotPoolContainer.js"
 ],function(
   GeometryContainer,
   PropertyContainer,
   CanvasContainer,
-  DotFoolContainer
+  DotPoolContainer
 ) {
   'use strict';
 
@@ -40,9 +40,9 @@ define([
 
     /**
     * @memberof Storage
-    * @see DotFoolContainer
+    * @see DotPoolContainer
     */
-    this.dotFoolContainer = new DotFoolContainer();
+    this.dotPoolContainer = new DotPoolContainer();
 
   }
 
@@ -54,7 +54,7 @@ define([
     this.geometryContainer.clear();
     this.propertyContainer.clear();
     this.canvasContainer.clear();
-    this.dotFoolContainer.clear();
+    this.dotPoolContainer.clear();
   }
 
   return Storage;

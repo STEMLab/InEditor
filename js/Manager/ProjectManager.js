@@ -41,7 +41,7 @@ define(function(require) {
     doc[id] = {
       'geometryContainer': window.storage.geometryContainer,
       'propertyContainer': window.storage.propertyContainer,
-      'dotFoolContainer': window.storage.dotFoolContainer,
+      'dotPoolContainer': window.storage.dotPoolContainer,
       'canvasContainer': {}
     };
 
@@ -107,8 +107,8 @@ define(function(require) {
           // manager가 load를 하도록  function move
           var loadData = obj[Object.keys(obj)[0]];
           window.storage.propertyContainer.load(loadData.propertyContainer);
-          window.storage.dotFoolContainer.load(loadData.dotFoolContainer);
-          window.storage.geometryContainer.load(loadData.geometryContainer, window.storage.dotFoolContainer);
+          window.storage.dotPoolContainer.load(loadData.dotPoolContainer);
+          window.storage.geometryContainer.load(loadData.geometryContainer, window.storage.dotPoolContainer);
 
           window.storage.canvasContainer.clearCanvas();
 

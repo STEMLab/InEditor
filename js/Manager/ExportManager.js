@@ -51,7 +51,7 @@ define([
     $('#go-viewer-modal').modal('hide');
 
     var manager = window.broker.getManager('exporttoviewer', 'ExportManager');
-    var transDots = manager.transAllDots(window.storage.dotFoolContainer.dotFool, window.storage.propertyContainer.getFloorObj());
+    var transDots = manager.transAllDots(window.storage.dotPoolContainer.dotPool, window.storage.propertyContainer.getFloorObj());
 
     var cellsResult = manager.cellObj4Viewer(manager, transDots);
     var bbox = cellsResult.bbox;
@@ -437,7 +437,7 @@ define([
 
     var baseURL = reqObj.baseURL;
 
-    var transDots = manager.transAllDots(window.storage.dotFoolContainer.dotFool, window.storage.propertyContainer.getFloorObj());
+    var transDots = manager.transAllDots(window.storage.dotPoolContainer.dotPool, window.storage.propertyContainer.getFloorObj());
 
     var spaceLayer = manager.spaceLayer4Factory(document.id, spaceLayers.id);
     var cells = manager.cellObj4Factory(document.id, primalspacefeatures.id, transDots);
@@ -1745,16 +1745,16 @@ define([
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.transAllDots = function(dotFools, floorProperties) {
+  ExportManager.prototype.transAllDots = function(dotPools, floorProperties) {
 
     var result = {};
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
     var pp = window.storage.propertyContainer.projectProperty;
 
     if (pp.isRealCoor && pp.realCoorFloor != "")
-      result = manager.transAllDotsUsingTool(dotFools, floorProperties, pp);
+      result = manager.transAllDotsUsingTool(dotPools, floorProperties, pp);
     else
-      result = manager.transAllDotsUsingMatrix(dotFools, floorProperties);
+      result = manager.transAllDotsUsingMatrix(dotPools, floorProperties);
 
 
     //change state height
@@ -1777,7 +1777,7 @@ define([
 
   }
 
-  ExportManager.prototype.transAllDotsUsingMatrix = function(dotFools, floorProperties) {
+  ExportManager.prototype.transAllDotsUsingMatrix = function(dotPools, floorProperties) {
 
     function copyDot(obj) {
       var copiedDot = new Dot(obj.point.x, obj.point.y);
@@ -1806,17 +1806,17 @@ define([
     let result = {};
     var manager = window.broker.getManager('exporttofactory', 'ExportManager');
 
-    for (var dotFoolKey in dotFools) {
+    for (var dotPoolKey in dotPools) {
       //function(pixelHeight, pixeWidth, worldURC, worldLLC, point)
 
-      let stage = window.storage.canvasContainer.stages[floorProperties[dotFoolKey].id].stage;
-      let height = floorProperties[dotFoolKey].groundHeight * 1;
-      let worldLLC = [floorProperties[dotFoolKey].lowerCorner[0] * 1, floorProperties[dotFoolKey].lowerCorner[1] * 1, 0];
-      let worldURC = [floorProperties[dotFoolKey].upperCorner[0] * 1, floorProperties[dotFoolKey].upperCorner[1] * 1, 0];
+      let stage = window.storage.canvasContainer.stages[floorProperties[dotPoolKey].id].stage;
+      let height = floorProperties[dotPoolKey].groundHeight * 1;
+      let worldLLC = [floorProperties[dotPoolKey].lowerCorner[0] * 1, floorProperties[dotPoolKey].lowerCorner[1] * 1, 0];
+      let worldURC = [floorProperties[dotPoolKey].upperCorner[0] * 1, floorProperties[dotPoolKey].upperCorner[1] * 1, 0];
 
-      for (let dotKey in dotFools[dotFoolKey].dots) {
+      for (let dotKey in dotPools[dotPoolKey].dots) {
 
-        let transDot = copyDot(dotFools[dotFoolKey].dots[dotKey]);
+        let transDot = copyDot(dotPools[dotPoolKey].dots[dotKey]);
         let transPoint = manager.affineTransformation(stage.getAttr('height'), stage.getAttr('width'), worldURC, worldLLC, [transDot.point.x, transDot.point.y, 0]);
         transDot.setPoint({
           x: transPoint._data[0],
@@ -1831,7 +1831,7 @@ define([
     return result;
   }
 
-  ExportManager.prototype.transAllDotsUsingTool = function(dotFools, floorProperties, projectProperty) {
+  ExportManager.prototype.transAllDotsUsingTool = function(dotPools, floorProperties, projectProperty) {
 
     function array2string(arr) {
       let str = "";
@@ -1884,9 +1884,9 @@ define([
     constArr.push([lowerCorner[0], upperCorner[1], 0, canvasCoor.height]);
     constArr.push([upperCorner[0], lowerCorner[1], canvasCoor.width, 0]);
 
-    for (let dotFoolKey in dotFools) {
-      for (let dotKey in dotFools[dotFoolKey].dots)
-        allCoorArr.push([dotFools[dotFoolKey].dots[dotKey].point.x, dotFools[dotFoolKey].dots[dotKey].point.y]);
+    for (let dotPoolKey in dotPools) {
+      for (let dotKey in dotPools[dotPoolKey].dots)
+        allCoorArr.push([dotPools[dotPoolKey].dots[dotKey].point.x, dotPools[dotPoolKey].dots[dotKey].point.y]);
     }
 
     constArr = array2string(constArr);
@@ -1909,11 +1909,11 @@ define([
 
         let i = 0;
 
-        for (let dotFoolKey in dotFools) {
-          let height = floorProperties[dotFoolKey].groundHeight * 1;
+        for (let dotPoolKey in dotPools) {
+          let height = floorProperties[dotPoolKey].groundHeight * 1;
 
-          for (let dotKey in dotFools[dotFoolKey].dots) {
-            let transDot = copyDot(dotFools[dotFoolKey].dots[dotKey]);
+          for (let dotKey in dotPools[dotPoolKey].dots) {
+            let transDot = copyDot(dotPools[dotPoolKey].dots[dotKey]);
             transDot.setPoint({
               x: coors[i][0],
               y: coors[i][1],

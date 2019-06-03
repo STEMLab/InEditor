@@ -147,7 +147,7 @@
      * @memberof GeometryManager
      */
     GeometryManager.prototype.addNewFloor = function(reqObj) {
-      window.storage.dotFoolContainer.addNewDotFool(reqObj.floor);
+      window.storage.dotPoolContainer.addNewDotPool(reqObj.floor);
     };
 
     /**
@@ -173,8 +173,8 @@
       var point =
         window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor.coor;
 
-      var isDotExist = window.storage.dotFoolContainer
-        .getDotFool(reqObj.floor)
+      var isDotExist = window.storage.dotPoolContainer
+        .getDotPool(reqObj.floor)
         .getDotByPoint({
           x: point.x,
           y: point.y
@@ -184,7 +184,7 @@
 
       if (isDotExist == null) {
         dot = new Dot(point.x, point.y);
-        window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(dot);
+        window.storage.dotPoolContainer.getDotPool(reqObj.floor).push(dot);
       } else {
         dot = isDotExist;
       }
@@ -194,8 +194,8 @@
 
       var manager = window.broker.getManager("end-addnewcell", "GeometryManager");
       // if(manager.isSelfIntersecting(reqObj)){
-      //   window.storage.dotFoolContainer
-      //     .getDotFool(reqObj.floor)
+      //   window.storage.dotPoolContainer
+      //     .getDotPool(reqObj.floor)
       //     .deleteDotFromObj(dot.uuid, "tmpObj");
       // }
 
@@ -203,7 +203,7 @@
       window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
       // window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
 
-      // log.trace(window.storage.dotFoolContainer);
+      // log.trace(window.storage.dotPoolContainer);
     };
 
     /**
@@ -227,8 +227,8 @@
       tmpObj.deleteLastCorner();
       tmpObj.deleteLastPolyLine();
 
-      window.storage.dotFoolContainer
-        .getDotFool(undoObj.floor)
+      window.storage.dotPoolContainer
+        .getDotPool(undoObj.floor)
         .deleteDotFromObj(undoObj.uuid, tmpObj.id);
       window.storage.canvasContainer.stages[undoObj.floor].tmpLayer.layer.draw();
     };
@@ -345,7 +345,7 @@
           floor
         ].stateLayer.group.makeNewStateAndAdd(stateId, centroidDot);
 
-        window.storage.dotFoolContainer.getDotFool(floor).push(centroidDot);
+        window.storage.dotPoolContainer.getDotPool(floor).push(centroidDot);
 
         window.storage.geometryContainer.stateGeometry.push(
           new StateGeometry(stateId, centroidDot)
@@ -478,8 +478,8 @@
           window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor
           .coor;
 
-        var isDotExist = window.storage.dotFoolContainer
-          .getDotFool(reqObj.floor)
+        var isDotExist = window.storage.dotPoolContainer
+          .getDotPool(reqObj.floor)
           .getDotByPoint({
             x: point.x,
             y: point.y
@@ -489,7 +489,7 @@
 
         if (isDotExist == null) {
           dot = new Dot(point.x, point.y);
-          window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(dot);
+          window.storage.dotPoolContainer.getDotPool(reqObj.floor).push(dot);
         } else {
           dot = isDotExist;
         }
@@ -501,7 +501,7 @@
         window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
         // window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
 
-        // log.trace(window.storage.dotFoolContainer);
+        // log.trace(window.storage.dotPoolContainer);
       }
 
 
@@ -550,7 +550,7 @@
       else if (type == 'cellBoundary') objects = window.storage.canvasContainer.stages[floor].cellBoundaryLayer.group.getObjects();
       else if (type == 'transition') objects = window.storage.canvasContainer.stages[floor].transitionLayer.group.getObjects();
       else if (type == 'state') {
-        var isDotExist = window.storage.dotFoolContainer.getDotFool(floor).getDotByPoint({
+        var isDotExist = window.storage.dotPoolContainer.getDotPool(floor).getDotByPoint({
           x: pointCoor.x,
           y: pointCoor.y
         });
@@ -598,7 +598,7 @@
       var reader = new jsts.io.WKTReader();
 
       var point = window.storage.canvasContainer.stages[floor].tmpLayer.group.cursor.coor;
-      var isDotExist = window.storage.dotFoolContainer.getDotFool(floor).getDotByPoint({
+      var isDotExist = window.storage.dotPoolContainer.getDotPool(floor).getDotByPoint({
         x: point.x,
         y: point.y
       });
@@ -754,8 +754,8 @@
     GeometryManager.prototype.cancelDrawObj = function(reqObj) {
       if (reqObj.floor != undefined) {
         for (var key in window.tmpObj.dots) {
-          window.storage.dotFoolContainer
-            .getDotFool(reqObj.floor)
+          window.storage.dotPoolContainer
+            .getDotPool(reqObj.floor)
             .deleteDotFromObj(window.tmpObj.dots[key].uuid, "tmpObj");
         }
 
@@ -900,8 +900,8 @@
         window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor
         .coor;
 
-      var isDotExist = window.storage.dotFoolContainer
-        .getDotFool(reqObj.floor)
+      var isDotExist = window.storage.dotPoolContainer
+        .getDotPool(reqObj.floor)
         .getDotByPoint({
           x: point.x,
           y: point.y
@@ -911,7 +911,7 @@
 
       if (isDotExist == null) {
         dot = new Dot(point.x, point.y);
-        window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(dot);
+        window.storage.dotPoolContainer.getDotPool(reqObj.floor).push(dot);
       } else {
         dot = isDotExist;
       }
@@ -976,7 +976,7 @@
           ].tmpLayer.layer.draw();
         } else {
           window.tmpObj.associationCell = save;
-          window.storage.dotFoolContainer.getDotFool()[reqObj.floor].deleteDot(dot.uuid);
+          window.storage.dotPoolContainer.getDotPool()[reqObj.floor].deleteDot(dot.uuid);
           log.warn(
             "Selected point is not connected with another point which participated in the cellspaceboundary what you making."
           );
@@ -1008,8 +1008,8 @@
       tmpObj.removeDot(undoObj.uuid);
       tmpObj.associationCell = undoObj.cells;
 
-      window.storage.dotFoolContainer
-        .getDotFool(undoObj.floor)
+      window.storage.dotPoolContainer
+        .getDotPool(undoObj.floor)
         .deleteDotFromObj(undoObj.uuid, tmpObj.id);
       window.storage.canvasContainer.stages[undoObj.floor].tmpLayer.layer.draw();
     };
@@ -1139,8 +1139,8 @@
 
           // free dot from object
           for (var dotkey in cellboundaries[key].dots) {
-            window.storage.dotFoolContainer
-              .getDotFool(reqObj.floor)
+            window.storage.dotPoolContainer
+              .getDotPool(reqObj.floor)
               .deleteDotFromObj(
                 cellboundaries[key].dots[dotkey].uuid,
                 cellboundaries[key].id
@@ -1189,8 +1189,8 @@
 
       var isDotExist = null;
       if (window.myhistory.getPreviousMsg() == 'modifypoint') {
-        isDotExist = window.storage.dotFoolContainer
-          .getDotFool(reqObj.floor)
+        isDotExist = window.storage.dotPoolContainer
+          .getDotPool(reqObj.floor)
           .getDotByPointaAllowDuplication({
             x: point.x,
             y: point.y
@@ -1204,8 +1204,8 @@
         }
 
       } else {
-        isDotExist = window.storage.dotFoolContainer
-          .getDotFool(reqObj.floor)
+        isDotExist = window.storage.dotPoolContainer
+          .getDotPool(reqObj.floor)
           .getDotByPoint({
             x: point.x,
             y: point.y
@@ -1224,7 +1224,7 @@
       if (isDotExist == null) {
         var manager = window.broker.getManager("snapping", "GeometryManager");
         var dots = Object.values(
-          window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDots()
+          window.storage.dotPoolContainer.getDotPool(reqObj.floor).getDots()
         );
         var connections = window.storage.canvasContainer.stages[
           reqObj.floor
@@ -1383,8 +1383,8 @@
         window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor
         .coor;
 
-      var isDotExist = window.storage.dotFoolContainer
-        .getDotFool(reqObj.floor)
+      var isDotExist = window.storage.dotPoolContainer
+        .getDotPool(reqObj.floor)
         .getDotByPoint({
           x: point.x,
           y: point.y
@@ -1433,7 +1433,7 @@
             })
           ) {
             var newDot = new Dot(point.x, point.y);
-            window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(newDot);
+            window.storage.dotPoolContainer.getDotPool(reqObj.floor).push(newDot);
             window.tmpObj.insertDot(1, newDot);
 
             // segmentation cellboundary
@@ -1493,11 +1493,11 @@
         });
       }
 
-      var dotFool = window.storage.dotFoolContainer.getDotFool(undoObj.floor);
+      var dotPool = window.storage.dotPoolContainer.getDotPool(undoObj.floor);
 
       // remove state data from obj and free dot
-      window.tmpObj.removeState(dotFool.getDotById(undoObj.uuid));
-      dotFool.deleteDotFromObj(undoObj.uuid, "tmpObj");
+      window.tmpObj.removeState(dotPool.getDotById(undoObj.uuid));
+      dotPool.deleteDotFromObj(undoObj.uuid, "tmpObj");
 
       window.storage.canvasContainer.stages[undoObj.floor].tmpLayer.layer.draw();
     };
@@ -1511,11 +1511,11 @@
 
       // free dot from object
       var dots = canvasObj.getDots();
-      // var dotFool = window.storage.dotFoolContainer.getDotFool(reqObj.floor);
+      // var dotPool = window.storage.dotPoolContainer.getDotPool(reqObj.floor);
       for (var dotKey in dots) {
         var floorId = window.storage.propertyContainer.getFloorById(Object.values(dots[dotKey].memberOf)[0], Object.keys(dots[dotKey].memberOf)[0]);
-        var dotFool = window.storage.dotFoolContainer.getDotFool(floorId);
-        dotFool.deleteDotFromObj(dots[dotKey].uuid, reqObj.id);
+        var dotPool = window.storage.dotPoolContainer.getDotPool(floorId);
+        dotPool.deleteDotFromObj(dots[dotKey].uuid, reqObj.id);
 
         // if dots[dotKey] is part of cell boundary
         var memberOf = dots[dotKey].getMemberOf();
@@ -1525,7 +1525,7 @@
               reqObj.floor
             ].getElementById("cellboundary", memKey);
             if (boundryObj.isRemovableDot(dots[dotKey])) {
-              dotFool.deleteDotFromObj(dots[dotKey].uuid, boundryObj.id);
+              dotPool.deleteDotFromObj(dots[dotKey].uuid, boundryObj.id);
             }
           }
         }
@@ -1634,8 +1634,8 @@
         window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor
         .coor;
 
-      var isDotExist = window.storage.dotFoolContainer
-        .getDotFool(reqObj.floor)
+      var isDotExist = window.storage.dotPoolContainer
+        .getDotPool(reqObj.floor)
         .getDotByPoint({
           x: point.x,
           y: point.y
@@ -1736,7 +1736,7 @@
         reqObj.floor
       ].tmpLayer.group.getCursor().coor;
       var newDot = new Dot(point.x, point.y);
-      window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(newDot);
+      window.storage.dotPoolContainer.getDotPool(reqObj.floor).push(newDot);
 
       // find thd objects containg the line
       var array1 = Object.keys(reqObj.line.dot1.memberOf);
@@ -1815,7 +1815,7 @@
       var updateException = [];
 
       // if dot exist
-      var isDotExist = window.storage.dotFoolContainer.dotFool[
+      var isDotExist = window.storage.dotPoolContainer.dotPool[
         reqObj.floor
       ].getDotByPointaAllowDuplication(movedDot.point);
 
@@ -1834,7 +1834,7 @@
         }
 
         if (Object.keys(movedDot.memberOf).length == 0)
-          window.storage.dotFoolContainer.dotFool[reqObj.floor].deleteDot(movedDot.uuid);
+          window.storage.dotPoolContainer.dotPool[reqObj.floor].deleteDot(movedDot.uuid);
         movedDot = isDotExist[0];
 
       }
@@ -2020,7 +2020,7 @@
 
       // console.log('trance ::', canvasCenter.x - (boundingBox.min.x + width / 2), canvasCenter.y - (boundingBox.min.y + height / 2));
 
-      var allDots = window.storage.dotFoolContainer.dotFool[
+      var allDots = window.storage.dotPoolContainer.dotPool[
         reqObj.floor[0]
       ].getDots();
 
@@ -2076,14 +2076,14 @@
       // canvas container
       var dots = [];
       for (var i = 0; i < coordinates.length - 1; i++) {
-        var dotFool = window.storage.dotFoolContainer.getDotFool(floor);
-        var dot = dotFool.getDotByPoint({
+        var dotPool = window.storage.dotPoolContainer.getDotPool(floor);
+        var dot = dotPool.getDotByPoint({
           x: coordinates[i][0],
           y: coordinates[i][1]
         });
         if (dot == null) {
           dot = new Dot(coordinates[i][0], coordinates[i][1]);
-          dotFool.push(dot);
+          dotPool.push(dot);
         }
 
         var coor = dot.getCoor();
@@ -2321,7 +2321,7 @@
 
       var point = window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor.coor;
 
-      var isDotExist = window.storage.dotFoolContainer.getDotFool(reqObj.floor).getDotByPoint({
+      var isDotExist = window.storage.dotPoolContainer.getDotPool(reqObj.floor).getDotByPoint({
         x: point.x,
         y: point.y
       });
@@ -2330,7 +2330,7 @@
 
       if (isDotExist == null) {
         dot = new Dot(point.x, point.y);
-        window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(dot);
+        window.storage.dotPoolContainer.getDotPool(reqObj.floor).push(dot);
       } else {
         dot = isDotExist;
       }
@@ -2399,7 +2399,7 @@
 
     GeometryManager.prototype.addCellsFromGML = function(reqObj) {
 
-      var dotFool = window.storage.dotFoolContainer.getDotFool(reqObj.floor);
+      var dotPool = window.storage.dotPoolContainer.getDotPool(reqObj.floor);
 
       // add cellspace
       for (var cell of reqObj.data) {
@@ -2408,14 +2408,14 @@
 
         var dots = [];
         for (var point of cell.points) {
-          var dot = dotFool.getDotByPoint({
+          var dot = dotPool.getDotByPoint({
             x: point[0],
             y: point[1]
           });
 
           if (dot == null) {
             dot = new Dot(point[0], point[1]);
-            dotFool.push(dot);
+            dotPool.push(dot);
           }
 
           dot.participateObj(reqObj.id, 'cell');
@@ -2437,7 +2437,7 @@
 
     GeometryManager.prototype.addCellBoundariesFromGML = function(reqObj) {
 
-      var dotFool = window.storage.dotFoolContainer.getDotFool(reqObj.floor);
+      var dotPool = window.storage.dotPoolContainer.getDotPool(reqObj.floor);
 
       for (var cb of reqObj.data) {
 
@@ -2445,14 +2445,14 @@
 
         var dots = [];
         for (var point of cb.points) {
-          var dot = dotFool.getDotByPoint({
+          var dot = dotPool.getDotByPoint({
             x: point[0],
             y: point[1]
           });
 
           if (dot == null) {
             dot = new Dot(point[0], point[1]);
-            dotFool.push(dot);
+            dotPool.push(dot);
           }
 
           dots.push(dot);
@@ -2483,15 +2483,15 @@
         else return true;
       }
 
-      function makeDot(point, dotFool) {
-        var dot = dotFool.getDotByPoint({
+      function makeDot(point, dotPool) {
+        var dot = dotPool.getDotByPoint({
           x: point[0],
           y: point[1]
         });
 
         if (dot == null) {
           dot = new Dot(point[0], point[1]);
-          dotFool.push(dot);
+          dotPool.push(dot);
         }
 
         return dot;
@@ -2499,7 +2499,7 @@
 
 
       for (var floor of Object.values(reqObj)) {
-        var dotFool = window.storage.dotFoolContainer.getDotFool(floor.id);
+        var dotPool = window.storage.dotPoolContainer.getDotPool(floor.id);
 
         // cellspace
         for (var c of Object.values(floor.cells)) {
@@ -2507,7 +2507,7 @@
           // push dots
           var dots = [];
           for (var point of c.points) {
-            var dot = makeDot(point, dotFool);
+            var dot = makeDot(point, dotPool);
             dots.push(dot);
             dot.participateObj(c.id, 'cell');
           }
@@ -2518,7 +2518,7 @@
             for (var i in c.holes) {
               var hdots = [];
               for (var point of c.holes[i]) {
-                var dot = makeDot(point, dotFool);
+                var dot = makeDot(point, dotPool);
                 hdots.push(dot);
               }
 
@@ -2554,7 +2554,7 @@
         for (var cb of Object.values(floor.cellBoundaries)) {
           var dots = [];
           for (var point of cb.points) {
-            var dot = makeDot(point, dotFool);
+            var dot = makeDot(point, dotPool);
             dots.push(dot);
             dot.participateObj(cb.id, 'cellBoundary');
           }
@@ -2566,7 +2566,7 @@
 
         // state
         for(var s of Object.values(floor.states)){
-          var dot = makeDot(s.point, dotFool);
+          var dot = makeDot(s.point, dotPool);
           dot.participateObj(s.id, 'state');
 
           window.storage.geometryContainer.stateGeometry.push(
@@ -2578,7 +2578,7 @@
         for(var t of Object.values(floor.transitions)){
           var dots = [];
           for (var point of t.points) {
-            var dot = makeDot(point, dotFool);
+            var dot = makeDot(point, dotPool);
             dots.push(dot);
             dot.participateObj(t.id, 'transition');
           }
@@ -2621,8 +2621,8 @@
           window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor
           .coor;
 
-        var isDotExist = window.storage.dotFoolContainer
-          .getDotFool(reqObj.floor)
+        var isDotExist = window.storage.dotPoolContainer
+          .getDotPool(reqObj.floor)
           .getDotByPoint({
             x: point.x,
             y: point.y
@@ -2632,7 +2632,7 @@
 
         if (isDotExist == null) {
           dot = new Dot(point.x, point.y);
-          window.storage.dotFoolContainer.getDotFool(reqObj.floor).push(dot);
+          window.storage.dotPoolContainer.getDotPool(reqObj.floor).push(dot);
         } else {
           dot = isDotExist;
         }
@@ -2644,7 +2644,7 @@
         window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
         // window.storage.canvasContainer.stages[reqObj.floor].stage.draw();
 
-        // log.trace(window.storage.dotFoolContainer);
+        // log.trace(window.storage.dotPoolContainer);
       }
     }
 

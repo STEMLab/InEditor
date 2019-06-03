@@ -130,7 +130,7 @@ define([
 
       broker.publish(new Message('start-modifypoint',{
         floor: floor,
-        point: window.storage.dotFoolContainer.getDotFool(floor).getDotByPoint(cursor.coor)
+        point: window.storage.dotPoolContainer.getDotPool(floor).getDotByPoint(cursor.coor)
       }));
 
       result.result = true;
@@ -1066,7 +1066,17 @@ define([
 
     } else if(broker.isPublishable('end-addnewtransition')){
 
-      broker.publish(new Message('start-addnewtransition', null));
+      var newId = null;
+      var flag = false;
+      while(!flag){
+        newId = window.conditions.pre_transition + (++window.conditions.LAST_TRANSITION_ID_NUM);
+        flag = window.storage.propertyContainer.getElementById('transition', newId) == null ? true : false;
+      }
+
+      broker.publish(new Message('end-addnewtransition', {
+        floor: window.tmpObj.floor,
+        id: newId
+      }));
 
       result.result = true;
       result.msg = null;

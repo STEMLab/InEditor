@@ -10,27 +10,27 @@ define([
   'use strict';
 
   /**
-   * @class DotFool
+   * @class DotPool
    */
-  function DotFool(floor) {
+  function DotPool(floor) {
 
     /**
-     * @memberof DotFool
+     * @memberof DotPool
      */
     this.dots = {};
 
     /**
-     * @memberof DotFool
+     * @memberof DotPool
      */
     this.floor = floor;
 
   }
 
   /**
-   * @memberof DotFool
+   * @memberof DotPool
    * @param Dot dot
    */
-  DotFool.prototype.push = function(dot) {
+  DotPool.prototype.push = function(dot) {
     if (this.dots[dot.uuid] != null) {
 
       this.dots[dot.uuid].participateObj(dot.partOf[0]);
@@ -46,19 +46,19 @@ define([
 
 
   /**
-   * @memberof DotFool
+   * @memberof DotPool
    */
-  DotFool.prototype.getDotById = function(id) {
+  DotPool.prototype.getDotById = function(id) {
 
     return this.dots[id];
 
   }
 
   /**
-   * @memberof DotFool
+   * @memberof DotPool
    * @param {Object} point { x, y }
    */
-  DotFool.prototype.getDotByPoint = function(point, type) {
+  DotPool.prototype.getDotByPoint = function(point, type) {
     var value = Object.values(this.dots);
     var coordinateThreshold = window.conditions.realCoordinateThreshold;
 
@@ -80,10 +80,10 @@ define([
   }
 
   /**
-   * @memberof DotFool
+   * @memberof DotPool
    * @param {Object} point { x, y }
    */
-  DotFool.prototype.getDotByPointaAllowDuplication = function(point) {
+  DotPool.prototype.getDotByPointaAllowDuplication = function(point) {
     var value = Object.values(this.dots);
     var coordinateThreshold = window.conditions.realCoordinateThreshold;
 
@@ -100,7 +100,7 @@ define([
     else return filtered;
   }
 
-  DotFool.prototype.combineDuplicatedDots = function(dot1, dot2){
+  DotPool.prototype.combineDuplicatedDots = function(dot1, dot2){
 
     var coordinateThreshold = window.conditions.realCoordinateThreshold;
 
@@ -134,10 +134,10 @@ define([
   }
 
   /**
-   * @memberof DotFool
+   * @memberof DotPool
    * @return true : successed to delete dot<br>false : fail to delete dot
    */
-  DotFool.prototype.deleteDot = function(uuid) {
+  DotPool.prototype.deleteDot = function(uuid) {
 
     if (this.dots[uuid] == null) return false;
 
@@ -146,15 +146,15 @@ define([
      */
     delete this.dots[uuid];
 
-    // log.trace(window.storage.dotFoolContainer);
+    // log.trace(window.storage.dotPoolContainer);
     return true;
 
   }
 
   /**
-   * @memberof DotFool
+   * @memberof DotPool
    */
-  DotFool.prototype.deleteDotFromObj = function(dotUuid, objId) {
+  DotPool.prototype.deleteDotFromObj = function(dotUuid, objId) {
 
     var dot = this.getDotById(dotUuid);
 
@@ -168,10 +168,10 @@ define([
   }
 
   /**
-   * @memberof DotFool
+   * @memberof DotPool
    * @deprecated
    */
-  DotFool.prototype.connectTwoDot = function(uuid1, uuid2, relation, obj) {
+  DotPool.prototype.connectTwoDot = function(uuid1, uuid2, relation, obj) {
 
     var connection1 = this.getDotById(uuid1).isConnected(uuid2, obj);
     var connection2 = this.getDotById(uuid2).isConnected(uuid1, obj);
@@ -187,10 +187,10 @@ define([
   }
 
   /**
-   * @memberof DotFool
+   * @memberof DotPool
    * @return {Boolean}
    */
-  DotFool.prototype.isConnected = function(uuid1, uuid2) {
+  DotPool.prototype.isConnected = function(uuid1, uuid2) {
 
     var dot1 = this.getDotById(uuid1);
     var dot2 = this.getDotById(uuid2);
@@ -249,17 +249,17 @@ define([
   }
 
   /**
-   * @memberof DotFool
+   * @memberof DotPool
    * @return {Object}
    */
-  DotFool.prototype.getDots = function() {
+  DotPool.prototype.getDots = function() {
     return this.dots;
   }
 
   /**
-   * @memberof DotFool
+   * @memberof DotPool
    */
-  DotFool.prototype.load = function(values) {
+  DotPool.prototype.load = function(values) {
 
     this.floor = values.floor;
     this.dots = {};
@@ -272,5 +272,5 @@ define([
 
   }
 
-  return DotFool;
+  return DotPool;
 });
