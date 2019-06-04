@@ -129,12 +129,12 @@ define(function(require) {
   UIManager.prototype.updateProperty = function(reqObj) {
 
     if (reqObj.updateContent.name != undefined)
-      window.uiContainer.sidebar.treeview.updateTitle(reqObj.id, reqObj.updateContent.name);
+      require('UI').getInstance().treeView.updateTitle(reqObj.id, reqObj.updateContent.name);
 
 
 
     if (reqObj.type == 'floor') {
-      var root = window.uiContainer.workspace.workspaceLayout.root;
+      var root = require('UI').getInstance().workspace.workspaceLayout.root;
       var items = [];
 
       function getComponent(item) {
@@ -161,7 +161,7 @@ define(function(require) {
    */
   UIManager.prototype.setPropertyView = function(reqObj) {
 
-    window.uiContainer.sidebar.property.setPropertyTab(reqObj.type, reqObj.id, window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab(reqObj.type, reqObj.id, require('Storage').getInstance());
 
   }
 
@@ -171,23 +171,24 @@ define(function(require) {
    * @param {Message.reqObj} reqObj id :floor id<br>newScale<br>newPos
    */
   UIManager.prototype.zoomWorkspace = function(reqObj) {
+    var canvasContainer = require('Storage').getInstance().getCanvasContainer();
 
-    window.storage.canvasContainer.stages[reqObj.id].stage.position(reqObj.newPos);
+    canvasContainer.stages[reqObj.id].stage.position(reqObj.newPos);
 
-    window.storage.canvasContainer.stages[reqObj.id].stage.scale({
+    canvasContainer.stages[reqObj.id].stage.scale({
       x: reqObj.newScale,
       y: reqObj.newScale
     });
 
-    window.storage.canvasContainer.stages[reqObj.id].tmpLayer.group.cursor.cursor.scale({
+    canvasContainer.stages[reqObj.id].tmpLayer.group.cursor.cursor.scale({
       x: 1 / reqObj.newScale,
       y: 1 / reqObj.newScale
     });
 
-    window.storage.canvasContainer.stages[reqObj.id].stage.batchDraw();
+    canvasContainer.stages[reqObj.id].stage.batchDraw();
 
-    window.conditions.realSnappingThreshold = window.conditions.snappingThreshold / reqObj.newScale;
-    window.conditions.realCoordinateThreshold = window.conditions.coordinateThreshold / reqObj.newScale;
+    require('Conditions').getInstance().realSnappingThreshold = require('Conditions').getInstance().snappingThreshold / reqObj.newScale;
+    require('Conditions').getInstance().realCoordinateThreshold = require('Conditions').getInstance().coordinateThreshold / reqObj.newScale;
 
   }
 
@@ -203,7 +204,8 @@ define(function(require) {
       var src = e.target.result;
 
       /// set background
-      var backgroundLayer = window.storage.canvasContainer.stages[reqObj.id].backgroundLayer;
+      var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+      var backgroundLayer = canvasContainer.stages[reqObj.id].backgroundLayer;
       var layer = backgroundLayer.layer;
 
       // clear layer before add new floorplan
@@ -256,8 +258,8 @@ define(function(require) {
           }
         }
 
-        window.storage.canvasContainer.stages[reqObj.id].stage.width(imageSize.width);
-        window.storage.canvasContainer.stages[reqObj.id].stage.height(imageSize.height);
+        canvasContainer.stages[reqObj.id].stage.width(imageSize.width);
+        canvasContainer.stages[reqObj.id].stage.height(imageSize.height);
 
         var floorplan = new Konva.Image({
           x: 0,
@@ -291,7 +293,7 @@ define(function(require) {
    */
   UIManager.prototype.addFloorPlan_makeHistoryObj = function(reqObj, uuid, manager) {
 
-    var backgroundLayer = window.storage.canvasContainer.stages[reqObj.id].backgroundLayer;
+    var backgroundLayer = require('Storage').getInstance().getCanvasContainer().stages[reqObj.id].backgroundLayer;
 
     return {
       'floor': reqObj.id,
@@ -307,7 +309,7 @@ define(function(require) {
    */
   UIManager.prototype.addFloorPlan_undo = function(undoObj) {
 
-    var backgroundLayer = window.storage.canvasContainer.stages[undoObj.floor].backgroundLayer;
+    var backgroundLayer = require('Storage').getInstance().getCanvasContainer().stages[undoObj.floor].backgroundLayer;
 
     if (undoObj.dataURL == null) {
 
@@ -340,9 +342,9 @@ define(function(require) {
   UIManager.prototype.startAddNewCell = function(reqObj) {
 
     // change floor btn color
-    document.getElementById('cell-btn').src = "../../assets/icon/cell_a.png";
+    document.getElementById('btn__cellSpace').src = "../../assets/icon/cell_a.png";
 
-    // window.broker.getManager('start-addnewcell', 'UIManager').setTooltipText({text: 'Add corner for cell by clicking canvas \(^0^)/'});
+    // require('Broker').getInstance().getManager('start-addnewcell', 'UIManager').setTooltipText({text: 'Add corner for cell by clicking canvas \(^0^)/'});
 
   }
 
@@ -364,23 +366,25 @@ define(function(require) {
   UIManager.prototype.endAddNewCell = function(reqObj) {
 
     // change cell btn color
-    document.getElementById('cell-btn').src = "../../assets/icon/cell_d.png";
+    document.getElementById('btn__cellSpace').src = "../../assets/icon/cell_d.png";
 
     if (reqObj.isEmpty != null) {
       return;
     }
 
     // set sidebar > property
-    window.uiContainer.sidebar.property.setPropertyTab('cell', reqObj.id, window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab('cell', reqObj.id, require('Storage').getInstance());
 
     // refresh tree view
-    window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
+    require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'CELL_SPACE', reqObj.floor);
 
-    if (window.conditions.automGenerateState)
-      window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM), reqObj.floor);
+    if (require('Conditions').getInstance().automGenerateState){
+      var id = require('Conditions').getInstance().pre_state + (require('Conditions').getInstance().LAST_STATE_ID_NUM);
+      require('UI').getInstance().treeView.addNode(id, id, 'STATE', reqObj.floor);
+    }
 
     // set tooltip
-    window.broker.getManager('start-addnewcell', 'UIManager').setTooltipText({
+    require('Broker').getInstance().getManager('start-addnewcell', 'UIManager').setTooltipText({
       floor: reqObj.floor,
       text: ''
     });
@@ -407,8 +411,8 @@ define(function(require) {
   UIManager.prototype.removeObj = function(undoObj) {
 
     // remove tree view content
-    window.uiContainer.sidebar.treeview.reomveNode(undoObj.id);
-    window.uiContainer.sidebar.property.clear();
+    require('UI').getInstance().treeView.removeNode(undoObj.id);
+    require('UI').getInstance().propertyTab.clear();
 
   }
 
@@ -434,10 +438,10 @@ define(function(require) {
    */
   UIManager.prototype.addNewFloor = function(reqObj) {
 
-    var newFloorProperty = window.storage.propertyContainer.getElementById('floor', reqObj.floor);
+    var newFloorProperty = require('Storage').getInstance().getPropertyContainer().getElementById('floor', reqObj.floor);
 
     // add new workspace
-    window.uiContainer.workspace.addNewWorkspace(newFloorProperty.id, newFloorProperty.name);
+    require('UI').getInstance().workspace.addNewWorkspace(newFloorProperty.id, newFloorProperty.name);
 
     // add require('../Storage/Canvas/Stage.js')
     var Stage = require('../Storage/Canvas/Stage.js');
@@ -449,21 +453,21 @@ define(function(require) {
       document.getElementById(newFloorProperty.id).clientHeight
     );
 
-    window.storage.canvasContainer.stages[newFloorProperty.id] = newStage;
+    require('Storage').getInstance().getCanvasContainer().stages[newFloorProperty.id] = newStage;
 
     // bind stage click event
-    window.eventHandler.canvasObjectEventBind('stage', newStage.stage);
+    require('EventHandler').getInstance().canvasObjectEventBind('stage', newStage.stage);
 
 
     // bind right click event
-    require('../UI/ContextMenu.js').bindContextMenu(newFloorProperty.id);
+    require("@UI/ContextMenu.js").bindContextMenu(newFloorProperty.id);
 
 
     // refresh sidebar > tree-view
-    window.uiContainer.sidebar.treeview.addFloor(newFloorProperty);
+    require('UI').getInstance().treeView.addFloor(newFloorProperty);
 
     // refresh sidebar > property-view
-    window.uiContainer.sidebar.property.setPropertyTab('floor', newFloorProperty.id, window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab('floor', newFloorProperty.id, require('Storage').getInstance());
 
   }
 
@@ -481,7 +485,7 @@ define(function(require) {
    */
   UIManager.prototype.activateWorkspace = function(reqObj) {
 
-    window.uiContainer.workspace.activateWorkspace(reqObj.id);
+    require('UI').getInstance().workspace.activateWorkspace(reqObj.id);
 
   }
 
@@ -492,7 +496,7 @@ define(function(require) {
    */
   UIManager.prototype.cancelAddNewCell = function(reqObj) {
 
-    document.getElementById('cell-btn').src = "../../assets/icon/cell_d.png";
+    document.getElementById('btn__cellSpace').src = "../../assets/icon/cell_d.png";
 
   }
 
@@ -504,7 +508,7 @@ define(function(require) {
   UIManager.prototype.startAddNewCellBoundary = function(reqObj) {
 
     // change floor btn color
-    document.getElementById('cellboundary-btn').src = "../../assets/icon/cellboundary_a.png";
+    document.getElementById('btn__cellSpaceBoundary').src = "../../assets/icon/cellboundary_a.png";
 
   }
 
@@ -516,15 +520,15 @@ define(function(require) {
   UIManager.prototype.endAddNewCellBoundary = function(reqObj) {
 
     // change cellboundary_btw color
-    document.getElementById('cellboundary-btn').src = "../../assets/icon/cellboundary_d.png";
+    document.getElementById('btn__cellSpaceBoundary').src = "../../assets/icon/cellboundary_d.png";
 
     if (reqObj.isEmpty != null) return;
 
     // set sidebar > propertyContainer
-    window.uiContainer.sidebar.property.setPropertyTab('cellBoundary', reqObj.id, window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab('cellBoundary', reqObj.id, require('Storage').getInstance());
 
     // refresh tree view
-    window.uiContainer.sidebar.treeview.addCellBoundary(reqObj.id, reqObj.floor);
+    require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'CELL_SPACE_BOUNDARY', reqObj.floor);
   }
 
   /**
@@ -533,7 +537,7 @@ define(function(require) {
    */
   UIManager.prototype.cancelAddNewCellBoundary = function(reqObj) {
 
-    document.getElementById('cellboundary-btn').src = "../../assets/icon/cellboundary_d.png";
+    document.getElementById('btn__cellSpaceBoundary').src = "../../assets/icon/cellboundary_d.png";
 
   }
 
@@ -555,7 +559,7 @@ define(function(require) {
    */
   UIManager.prototype.moveTooltip = function(reqObj) {
 
-    window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.moveTooltip(reqObj.point.x + 8, reqObj.point.y);
+    require('Storage').getInstance().getCanvasContainer().stages[reqObj.floor].tmpLayer.group.moveTooltip(reqObj.point.x + 8, reqObj.point.y);
 
   }
 
@@ -566,7 +570,7 @@ define(function(require) {
   UIManager.prototype.setTooltipText = function(reqObj) {
 
     if (reqObj.floor == undefined) {
-      var stages = window.storage.canvasContainer.stages;
+      var stages = require('Storage').getInstance().getCanvasContainer().stages;
       for (var key in stages) {
 
         if (reqObj.text == '') {
@@ -582,15 +586,16 @@ define(function(require) {
       }
     } else {
 
+      var canvasContainer = require('Storage').getInstance().getCanvasContainer();
       if (reqObj.text == '') {
-        window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.setTooltipText(reqObj.text);
-        window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.hideTooltip();
+        canvasContainer.stages[reqObj.floor].tmpLayer.group.setTooltipText(reqObj.text);
+        canvasContainer.stages[reqObj.floor].tmpLayer.group.hideTooltip();
       } else {
-        window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.setTooltipText(reqObj.text);
-        window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.group.showTooltip();
+        canvasContainer.stages[reqObj.floor].tmpLayer.group.setTooltipText(reqObj.text);
+        canvasContainer.stages[reqObj.floor].tmpLayer.group.showTooltip();
       }
 
-      window.storage.canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+      canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
 
     }
   }
@@ -602,9 +607,9 @@ define(function(require) {
   UIManager.prototype.startAddNewHole = function() {
 
     // change cell btn color
-    document.getElementById('hole-btn').src = "../../assets/icon/hole_a.png";
+    document.getElementById('btn__hole').src = "../../assets/icon/hole_a.png";
 
-    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
     manager.setTooltipText({
       text: 'select cell'
     });
@@ -618,12 +623,12 @@ define(function(require) {
   UIManager.prototype.endAddNewHole = function(reqObj) {
 
     // change transition btn color
-    document.getElementById('hole-btn').src = "../../assets/icon/hole_d.png";
+    document.getElementById('btn__hole').src = "../../assets/icon/hole_d.png";
 
     if (reqObj.isEmpty != null) return;
 
     // delete tooltip
-    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
     manager.setTooltipText({
       text: ''
     });
@@ -636,9 +641,9 @@ define(function(require) {
   UIManager.prototype.startAddNewTransition = function() {
 
     // change cell btn color
-    document.getElementById('transition-btn').src = "../../assets/icon/transition_a.png";
+    document.getElementById('btn__transition').src = "../../assets/icon/transition_a.png";
 
-    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
     manager.setTooltipText({
       text: 'select state'
     });
@@ -653,18 +658,18 @@ define(function(require) {
   UIManager.prototype.endAddNewTransition = function(reqObj) {
 
     // change transition btn color
-    document.getElementById('transition-btn').src = "../../assets/icon/transition_d.png";
+    document.getElementById('btn__transition').src = "../../assets/icon/transition_d.png";
 
     if (reqObj.isEmpty != null) return;
 
     // set sidebar > propertyContainer
-    window.uiContainer.sidebar.property.setPropertyTab('transition', reqObj.id, window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab('transition', reqObj.id, require('Storage').getInstance());
 
     // refresh tree view
-    window.uiContainer.sidebar.treeview.addTransition(reqObj.id, reqObj.floor);
+    require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'TRANSITION', reqObj.floor);
 
     // delete tooltip
-    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
     manager.setTooltipText({
       text: ''
     });
@@ -677,9 +682,9 @@ define(function(require) {
   UIManager.prototype.startAddNewState = function() {
 
     // change state btn color
-    document.getElementById('state-btn').src = "../../assets/icon/state_a.png";
+    document.getElementById('btn__state').src = "../../assets/icon/state_a.png";
 
-    // var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    // var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
     // manager.setTooltipText({
     //   text: 'select cell'
     // });
@@ -694,15 +699,15 @@ define(function(require) {
   UIManager.prototype.endAddNewState = function(reqObj) {
 
     // change state btn color
-    document.getElementById('state-btn').src = "../../assets/icon/state_d.png";
+    document.getElementById('btn__state').src = "../../assets/icon/state_d.png";
 
     if (reqObj.isEmpty != null) return;
 
     // set sidebar > propertyContainer
-    window.uiContainer.sidebar.property.setPropertyTab('state', reqObj.id, window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab('state', reqObj.id, require('Storage').getInstance());
 
     // refresh tree view
-    window.uiContainer.sidebar.treeview.addState(reqObj.id, reqObj.floor);
+    require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'STATE', reqObj.floor);
 
   }
 
@@ -722,9 +727,9 @@ define(function(require) {
    */
   UIManager.prototype.cancelAddNewTransition = function(reqObj) {
 
-    document.getElementById('transition-btn').src = "../../assets/icon/transition_d.png";
+    document.getElementById('btn__transition').src = "../../assets/icon/transition_d.png";
 
-    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
     manager.setTooltipText({
       text: ''
     });
@@ -736,9 +741,9 @@ define(function(require) {
    */
   UIManager.prototype.cancelAddNewHole = function(reqObj) {
 
-    document.getElementById('transition-btn').src = "../../assets/icon/transition_d.png";
+    document.getElementById('btn__transition').src = "../../assets/icon/transition_d.png";
 
-    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
     manager.setTooltipText({
       text: ''
     });
@@ -751,9 +756,9 @@ define(function(require) {
   UIManager.prototype.startAddNewStair = function() {
 
     // change cell btn color
-    document.getElementById('stair-btn').src = "../../assets/icon/stair_a.png";
+    document.getElementById('btn__stair').src = "../../assets/icon/stair_a.png";
 
-    var manager = window.broker.getManager('start-addnewstair', 'UIManager');
+    var manager = require('Broker').getInstance().getManager('start-addnewstair', 'UIManager');
     manager.setTooltipText({
       text: 'select state'
     });
@@ -766,18 +771,18 @@ define(function(require) {
   UIManager.prototype.endAddNewStair = function(reqObj) {
 
     // change cell btn color
-    document.getElementById('stair-btn').src = "../../assets/icon/stair_d.png";
+    document.getElementById('btn__stair').src = "../../assets/icon/stair_d.png";
 
     if (reqObj.isEmpty != null) return;
 
     // set sidebar > propertyContainer
-    window.uiContainer.sidebar.property.setPropertyTab('transition', reqObj.id, window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab('transition', reqObj.id, require('Storage').getInstance());
 
     // refresh tree view
-    window.uiContainer.sidebar.treeview.addTransition(reqObj.id, reqObj.floor);
+    require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'TRANSITION', reqObj.floor);
 
     // delete tooltip
-    var manager = window.broker.getManager('end-addnewstair', 'UIManager');
+    var manager = require('Broker').getInstance().getManager('end-addnewstair', 'UIManager');
     manager.setTooltipText({
       text: ''
     });
@@ -810,7 +815,7 @@ define(function(require) {
   UIManager.prototype.startAddNewSlantDown = function(reqObj) {
 
     // change floor btn color
-    document.getElementById('slant-down-btn').src = "../../assets/icon/slant_down_a.png";
+    document.getElementById('btn__slant_down').src = "../../assets/icon/slant_down_a.png";
   }
 
 
@@ -821,23 +826,25 @@ define(function(require) {
   UIManager.prototype.endAddNewSlantDown = function(reqObj) {
 
     // change cell btn color
-    document.getElementById('slant-down-btn').src = "../../assets/icon/slant_down_d.png";
+    document.getElementById('btn__slant_down').src = "../../assets/icon/slant_down_d.png";
 
     if (reqObj.isEmpty != null) {
       return;
     }
 
     // set sidebar > property
-    window.uiContainer.sidebar.property.setPropertyTab('cell', reqObj.id, window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab('cell', reqObj.id, require('Storage').getInstance());
 
     // refresh tree view
-    window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
+    require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'CELL_SPACE', reqObj.floor);
 
-    if (window.conditions.automGenerateState)
-      window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM), reqObj.floor);
+    if (require('Conditions').getInstance().automGenerateState){
+      var id = require('Conditions').getInstance().pre_state + (require('Conditions').getInstance().LAST_STATE_ID_NUM);
+      require('UI').getInstance().treeView.addNode(id, id, 'STATE', reqObj.floor);
+    }
 
     // set tooltip
-    window.broker.getManager('start-addnewslantdown', 'UIManager').setTooltipText({
+    require('Broker').getInstance().getManager('start-addnewslantdown', 'UIManager').setTooltipText({
       floor: reqObj.floor,
       text: ''
     });
@@ -852,7 +859,7 @@ define(function(require) {
   UIManager.prototype.startAddNewSlantUp = function(reqObj) {
 
     // change floor btn color
-    document.getElementById('slant-up-btn').src = "../../assets/icon/slant_up_a.png";
+    document.getElementById('btn__slant_up').src = "../../assets/icon/slant_up_a.png";
   }
 
   /**
@@ -862,23 +869,25 @@ define(function(require) {
   UIManager.prototype.endAddNewSlantUp = function(reqObj) {
 
     // change cell btn color
-    document.getElementById('slant-up-btn').src = "../../assets/icon/slant_up_d.png";
+    document.getElementById('btn__slant_up').src = "../../assets/icon/slant_up_d.png";
 
     if (reqObj.isEmpty != null) {
       return;
     }
 
     // set sidebar > property
-    window.uiContainer.sidebar.property.setPropertyTab('cell', reqObj.id, window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab('cell', reqObj.id, require('Storage').getInstance());
 
     // refresh tree view
-    window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
+    require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'CELL_SPACE', reqObj.floor);
 
-    if (window.conditions.automGenerateState)
-      window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM), reqObj.floor);
+    if (require('Conditions').getInstance().automGenerateState){
+      var id = require('Conditions').getInstance().pre_state + (require('Conditions').getInstance().LAST_STATE_ID_NUM);
+      require('UI').getInstance().treeView.addNode(id, id, 'STATE', reqObj.floor);
+    }
 
     // set tooltip
-    window.broker.getManager('start-addnewslantdown', 'UIManager').setTooltipText({
+    require('Broker').getInstance().getManager('start-addnewslantdown', 'UIManager').setTooltipText({
       floor: reqObj.floor,
       text: ''
     });
@@ -893,7 +902,7 @@ define(function(require) {
   UIManager.prototype.startAddNewSlantUpDown = function(reqObj) {
 
     // change floor btn color
-    document.getElementById('slant-up-down-btn').src = "../../assets/icon/slant_up_down_a.png";
+    document.getElementById('btn__slant_up_down').src = "../../assets/icon/slant_up_down_a.png";
   }
 
 
@@ -904,27 +913,32 @@ define(function(require) {
   UIManager.prototype.endAddNewSlantUpDown = function(reqObj) {
 
     // change cell btn color
-    document.getElementById('slant-up-down-btn').src = "../../assets/icon/slant_up_down_d.png";
+    document.getElementById('btn__slant_up_down').src = "../../assets/icon/slant_up_down_d.png";
 
     if (reqObj.isEmpty != null) {
       return;
     }
 
     // set sidebar > property
-    window.uiContainer.sidebar.property.setPropertyTab('cell', reqObj.id, window.storage);
-    window.uiContainer.sidebar.property.setPropertyTab('cell', window.conditions.pre_cell + (window.conditions.LAST_CELL_ID_NUM), window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab('cell', reqObj.id, require('Storage').getInstance());
+    require('UI').getInstance().propertyTab.setPropertyTab('cell', require('Conditions').getInstance().pre_cell + (require('Conditions').getInstance().LAST_CELL_ID_NUM), require('Storage').getInstance());
 
     // refresh tree view
-    window.uiContainer.sidebar.treeview.addCell(reqObj.id, reqObj.floor);
-    window.uiContainer.sidebar.treeview.addCell(window.conditions.pre_cell + (window.conditions.LAST_CELL_ID_NUM), reqObj.floor);
+    require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'CELL_SPACE', reqObj.floor);
 
-    if (window.conditions.automGenerateState) {
-      window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM - 1), reqObj.floor);
-      window.uiContainer.sidebar.treeview.addState(window.conditions.pre_state + (window.conditions.LAST_STATE_ID_NUM), reqObj.floor);
+    var nextId = require('Conditions').getInstance().pre_cell + (require('Conditions').getInstance().LAST_CELL_ID_NUM);
+    require('UI').getInstance().treeView.addNode(nextId, nextId, 'CELL_SPACE', reqObj.floor);
+
+    if (require('Conditions').getInstance().automGenerateState) {
+      var stateId1 = require('Conditions').getInstance().pre_state + (require('Conditions').getInstance().LAST_STATE_ID_NUM - 1);
+      var stateId2 = require('Conditions').getInstance().pre_state + (require('Conditions').getInstance().LAST_STATE_ID_NUM);
+
+      require('UI').getInstance().treeView.addNode(stateId1, stateId1, 'State', reqObj.floor);
+      require('UI').getInstance().treeView.addNode(stateId2, stateId2, 'State', reqObj.floor);
     }
 
     // set tooltip
-    window.broker.getManager('start-addnewslantdown', 'UIManager').setTooltipText({
+    require('Broker').getInstance().getManager('start-addnewslantdown', 'UIManager').setTooltipText({
       floor: reqObj.floor,
       text: ''
     });
@@ -938,10 +952,11 @@ define(function(require) {
    */
   UIManager.prototype.copyFloor = function(reqObj) {
 
-    var copyCanvas = window.storage.canvasContainer.stages[reqObj.targetFloor];
+    var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+    var copyCanvas = canvasContainer.stages[reqObj.targetFloor];
 
     // set size
-    var stage = window.storage.canvasContainer.stages[reqObj.floor].stage;
+    var stage = canvasContainer.stages[reqObj.floor].stage;
     var width = copyCanvas.stage.width();
     var height = copyCanvas.stage.height()
 
@@ -950,7 +965,7 @@ define(function(require) {
 
 
 
-    var backgroundLayer = window.storage.canvasContainer.stages[reqObj.floor].backgroundLayer;
+    var backgroundLayer = canvasContainer.stages[reqObj.floor].backgroundLayer;
     backgroundLayer.layer.destroyChildren();
 
     // copy floor plan
@@ -981,6 +996,53 @@ define(function(require) {
 
     backgroundLayer.layer.draw();
 
+
+    ////////////////// test code  //////////////////
+    ////////////////// copy state //////////////////
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+    let targetStates = propertyContainer.getElementById('floor', reqObj.targetFloor).stateKey;
+    let canvasConstructure = require('../Storage/Canvas/Object/State.js');
+    let geometryConstructure = require('../Storage/Geometries/StateGeometry.js');
+    let propertyConstructure = require('Property').STATE;
+    let dotConstructure = require('../Storage/Dot/Dot.js');
+    let interConstructure = require('Property').INTERLAYER_CONNECTION;
+
+    let dotPool = require('Storage').getInstance().getDotPoolContainer().getDotPool(reqObj.floor);
+    let stateGroup = canvasContainer.stages[reqObj.floor].stateLayer.group;
+    var peopertyContainer = propertyContainer.getElementById('floor', reqObj.floor);
+    let layers = [propertyContainer.getElementById('floor', reqObj.targetFloor).layer,
+                  propertyContainer.getElementById('floor', reqObj.floor).layer]
+
+    let geometryContainer = require('Storage').getInstance().getGeometryContainer();
+    for(let state of targetStates){
+      let newId = require('Conditions').getInstance().pre_state + ++require('Conditions').getInstance().LAST_STATE_ID_NUM;
+      let targetGeo = geometryContainer.getElementById('state', state);
+
+      // canvas
+      let newDot = new dotConstructure(targetGeo.point.point.x, targetGeo.point.point.y);
+      dotPool.push(newDot);
+      stateGroup.makeNewStateAndAdd(newId, newDot);
+
+      // geometry
+      geometryContainer.stateGeometry.push(new geometryConstructure(newId, newDot));
+
+      // prpoerty
+      let newStateProperty = new propertyConstructure(newId);
+      propertyContainer.stateProperties.push(newStateProperty);
+      peopertyContainer.stateKey.push(newId);
+
+      // interlayer connection
+      let newInterId = require('Conditions').getInstance().pre_inter + ++require('Conditions').getInstance().LAST_INTER_ID_NUM;
+      let newInter = new interConstructure(newInterId);
+      newInter.interConnects = [state, newId];
+      newInter.connectedLayer = [...layers];
+      propertyContainer.interlayerConnections.push(newInter);
+
+      require('UI').getInstance().treeView.addNode(newId, newId, 'State', reqObj.floor);
+      require('UI').getInstance().treeView.addNode(newInterId, newInterId, 'INTERLAYER_CONNECTION', reqObj.floor);
+    }
+
+    canvasContainer.stages[reqObj.floor].stateLayer.layer.draw();
   }
 
 
@@ -989,9 +1051,9 @@ define(function(require) {
    */
   UIManager.prototype.startAddNewInterConnetction = function(reqObj) {
 
-    document.getElementById('interlayerconnection-btn').src = "../../assets/icon/inter_a.png";
+    document.getElementById('btn__interlayerconnection').src = "../../assets/icon/inter_a.png";
 
-    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
     manager.setTooltipText({
       text: ''
     });
@@ -1004,13 +1066,13 @@ define(function(require) {
   UIManager.prototype.endAddNewInterConnetction = function(reqObj) {
 
     // change cellboundary_btw color
-    document.getElementById('interlayerconnection-btn').src = "../../assets/icon/inter_d.png";
+    document.getElementById('btn__interlayerconnection').src = "../../assets/icon/inter_d.png";
 
     // set sidebar > propertyContainer
-    window.uiContainer.sidebar.property.setPropertyTab('interlayerConnection', reqObj.id, window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab('interlayerConnection', reqObj.id, require('Storage').getInstance());
 
     // refresh tree view
-    window.uiContainer.sidebar.treeview.addInterLayerConnection(reqObj.id);
+    require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'INTERLAYER_CONNECTION', reqObj.floor);
 
   }
 
@@ -1018,7 +1080,7 @@ define(function(require) {
     var container = document.getElementById('setting-desc-modal-list-container');
     $("#setting-desc-modal-list-container").empty();
 
-    var manager = window.broker.getManager(
+    var manager = require('Broker').getInstance().getManager(
       "deletedesclist",
       "PropertyManager"
     );
@@ -1054,14 +1116,14 @@ define(function(require) {
       return item;
     }
 
-    var descs = window.conditions.descList;
+    var descs = require('Conditions').getInstance().descList;
     for (var desc of descs) {
       var i = item(desc);
       container.appendChild(i);
 
       document.getElementById(desc).addEventListener('click', function(event) {
-        if (window.broker.isPublishable('deletedesclist'))
-          window.broker.publish({
+        if (require('Broker').getInstance().isPublishable('deletedesclist'))
+          require('Broker').getInstance().publish({
             req: 'deletedesclist',
             reqObj: event.currentTarget.id
           });
@@ -1072,7 +1134,7 @@ define(function(require) {
   UIManager.prototype.showConditionModal = function() {
 
     $('#setting-conditions-modal').modal('show');
-    var conditions = window.conditions;
+    var conditions = require('Conditions').getInstance();
     $('#setting-conditions-pre-cell').val(conditions.pre_cell);
     $('#setting-conditions-pre-cellBoundary').val(conditions.pre_cellBoundary);
     $('#setting-conditions-pre-state').val(conditions.pre_state);
@@ -1090,17 +1152,17 @@ define(function(require) {
   UIManager.prototype.addDescList = function(reqObj) {
 
     // update modal ui
-    window.broker.getManager("updatedesclist", "UIManager").updateDescList();
+    require('Broker').getInstance().getManager("updatedesclist", "UIManager").updateDescList();
 
     // update property tab
-    window.uiContainer.sidebar.property.setPropertyTab($('#property-table').data('type'), $('#id-text').val(), window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab($('#property-table').data('type'), $('#id-text').val(), require('Storage').getInstance());
   }
 
   UIManager.prototype.deleteDescList = function(reqObj) {
-    window.broker.getManager("updatedesclist", "UIManager").updateDescList();
+    require('Broker').getInstance().getManager("updatedesclist", "UIManager").updateDescList();
 
     // update property tab
-    window.uiContainer.sidebar.property.setPropertyTab($('#property-table').data('type'), $('#id-text').val(), window.storage);
+    require('UI').getInstance().propertyTab.setPropertyTab($('#property-table').data('type'), $('#id-text').val(), require('Storage').getInstance());
   }
 
   UIManager.prototype.showCodeModal = function(reqObj) {
@@ -1126,7 +1188,7 @@ define(function(require) {
         tr.appendChild(td);
 
         i.addEventListener('click', function(event) {
-          window.eventHandler.callHandler('code-modal-trash', event)
+          require('EventHandler').getInstance().callHandler('code-modal-trash', event)
         });
       }
 
@@ -1205,7 +1267,7 @@ define(function(require) {
         tr.appendChild(td);
 
         i.addEventListener('click', function(event) {
-          window.eventHandler.callHandler('code-modal-trash', event)
+          require('EventHandler').getInstance().callHandler('code-modal-trash', event)
         });
       }
 
@@ -1237,9 +1299,9 @@ define(function(require) {
 
     if (reqObj.selected != "") {
       var bottomTr = document.createElement('tr');
-      bottomTr.innerHTML = window.uiContainer.sidebar.property.getBasicTr('bottom', 'bottom', property.bottom, false);
+      bottomTr.innerHTML = require('UI').getInstance().propertyTab.getBasicTr('bottom', 'bottom', property.bottom, false);
       var heightTr = document.createElement("tr");
-      heightTr.innerHTML = window.uiContainer.sidebar.property.getBasicTr('height', 'height', property.height, false);
+      heightTr.innerHTML = require('UI').getInstance().propertyTab.getBasicTr('height', 'height', property.height, false);
 
       reqObj.table.appendChild(bottomTr);
       reqObj.table.appendChild(heightTr);
@@ -1265,15 +1327,15 @@ define(function(require) {
 
     if (reqObj.selected == 'NonNavigableSpace') {
       var obstacleTr = document.createElement('tr');
-      obstacleTr.innerHTML = window.uiContainer.sidebar.property.getCodeListTr([reqObj.selected], 'obstacle-text', 'obstacle');
+      obstacleTr.innerHTML = require('UI').getInstance().propertyTab.getCodeListTr([reqObj.selected], 'obstacle-text', 'obstacle');
       reqObj.table.appendChild(obstacleTr);
     } else if (reqObj.selected != "") {
       var classTr = document.createElement('tr');
-      classTr.innerHTML = window.uiContainer.sidebar.property.getCodeListTr([reqObj.selected, 'class'], 'class-text', 'class');
+      classTr.innerHTML = require('UI').getInstance().propertyTab.getCodeListTr([reqObj.selected, 'class'], 'class-text', 'class');
       var functionTr = document.createElement("tr");
-      functionTr.innerHTML = window.uiContainer.sidebar.property.getCodeListTr([reqObj.selected, 'function'], 'function-text', 'function');
+      functionTr.innerHTML = require('UI').getInstance().propertyTab.getCodeListTr([reqObj.selected, 'function'], 'function-text', 'function');
       var usageTr = document.createElement("tr");
-      usageTr.innerHTML = window.uiContainer.sidebar.property.getCodeListTr([reqObj.selected, 'function'], 'usage-text', 'function');
+      usageTr.innerHTML = require('UI').getInstance().propertyTab.getCodeListTr([reqObj.selected, 'function'], 'usage-text', 'function');
 
       reqObj.table.appendChild(classTr);
       reqObj.table.appendChild(functionTr);
@@ -1301,17 +1363,17 @@ define(function(require) {
       let featureTr;
 
       if (reqObj.selected == 'navi' && document.getElementById('property-table').dataset.type == "cell") {
-        featureTr = window.uiContainer.sidebar.property.getOneDropTr(
+        featureTr = require('UI').getInstance().propertyTab.getOneDropTr(
           'feature\ntype',
           'feature-type-text',
           ["","GeneralSpace", "TransitionSpace", "ConnectionSpace", "AnchorSpace"]);
       } else if(reqObj.selected == 'navi' && document.getElementById('property-table').dataset.type == "cellBoundary"){
-        featureTr = window.uiContainer.sidebar.property.getOneDropTr(
+        featureTr = require('UI').getInstance().propertyTab.getOneDropTr(
           'feature\ntype',
           'feature-type-text',
           ["", "ConnectionBoundary", "AnchorBoundary"]);
       } else if (reqObj.selected == 'non-navi') {
-        featureTr = window.uiContainer.sidebar.property.getOneDropTr(
+        featureTr = require('UI').getInstance().propertyTab.getOneDropTr(
           'feature\ntype',
           'feature-type-text',
           ["","NonNavigableSpace"]);
@@ -1319,7 +1381,7 @@ define(function(require) {
 
       reqObj.table.appendChild(featureTr);
       document.getElementById('feature-type-text').addEventListener('change', function(event) {
-        window.eventHandler.callHandler('html', event);
+        require('EventHandler').getInstance().callHandler('html', event);
       });
     }
     else {
@@ -1341,12 +1403,12 @@ define(function(require) {
 
     if(reqObj.selected != "" && reqObj.selected != undefined){
       if(reqObj.moduleType == "navi" && document.getElementById('property-table').dataset.type == "cell"){
-        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'class'], 'class-text', 'class'));
-        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'function-text', 'function'));
-        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr([...reqObj.path, 'function'], 'usage-text', 'usage'));
+        reqObj.table.appendChild(require('UI').getInstance().propertyTab.getOneCodeListTr([...reqObj.path, 'class'], 'class-text', 'class'));
+        reqObj.table.appendChild(require('UI').getInstance().propertyTab.getOneCodeListTr([...reqObj.path, 'function'], 'function-text', 'function'));
+        reqObj.table.appendChild(require('UI').getInstance().propertyTab.getOneCodeListTr([...reqObj.path, 'function'], 'usage-text', 'usage'));
       }
       else if(reqObj.moduleType == 'non-navi'){
-        reqObj.table.appendChild(window.uiContainer.sidebar.property.getOneCodeListTr(
+        reqObj.table.appendChild(require('UI').getInstance().sidebar.property.getOneCodeListTr(
           ['NonNavigableSpace'],
           'obstacle-type-text',
           'obtacle'
@@ -1364,14 +1426,14 @@ define(function(require) {
   }
 
   UIManager.prototype.addMap = function(reqObj){
-    window.storage.canvasContainer.stages[reqObj.floor].addMap(reqObj.coor);
+    require('Storage').getInstance().getCanvasContainer().stages[reqObj.floor].addMap(reqObj.coor);
   }
 
   UIManager.prototype.startAddNewHatch = function(reqObj){
     // change btn color
-    document.getElementById('hatch-btn').src = "../../assets/icon/hatch_a.png";
+    document.getElementById('btn__hatch').src = "../../assets/icon/hatch_a.png";
 
-    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
     manager.setTooltipText({
       text: 'select cell'
     });
@@ -1380,12 +1442,12 @@ define(function(require) {
   UIManager.prototype.endAddNewHatch = function(reqObj) {
 
     // change transition btn color
-    document.getElementById('hatch-btn').src = "../../assets/icon/hatch_d.png";
+    document.getElementById('btn__hatch').src = "../../assets/icon/hatch_d.png";
 
     if (reqObj.isEmpty != null) return;
 
     // delete tooltip
-    var manager = window.broker.getManager('start-addnewtransition', 'UIManager');
+    var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
     manager.setTooltipText({
       text: ''
     });
@@ -1393,9 +1455,10 @@ define(function(require) {
   }
 
   UIManager.prototype.removeFLoorplan = function(reqObj){
-    let stage = window.storage.canvasContainer.stages[reqObj.floor].stage;
-    window.storage.canvasContainer.stages[reqObj.floor].backgroundLayer.setGrid(stage.width(), stage.height());
-    window.storage.canvasContainer.stages[reqObj.floor].backgroundLayer.floorplanDataURL = [];
+    var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+    let stage = canvasContainer.stages[reqObj.floor].stage;
+    canvasContainer.stages[reqObj.floor].backgroundLayer.setGrid(stage.width(), stage.height());
+    canvasContainer.stages[reqObj.floor].backgroundLayer.floorplanDataURL = [];
     stage.draw();
   }
 

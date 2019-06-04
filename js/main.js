@@ -7,61 +7,46 @@ require.config({
   map: {
     "*": {
       'Property' : 'js/Storage/Properties/index.js',
+      'CanvasObject' : 'js/Storage/Canvas/Object/index.js',
+      'Geometry' : 'js/Storage/Geometries/index.js',
       'Subscriber' : 'js/PubSub/Subscriber.js',
       'Popup' : 'js/UI/Popup.js',
       'CodeList' : 'js/Storage/Properties/CodeList.js',
-      'ObjectType': 'js/GlobalConst.js'
+      'ObjectType': 'js/GlobalConst.js',
+      'Storage' : 'js/Storage/Storage.js',
+      'Message' : 'js/PubSub/Message.js',
+      'FeatureFactory4Factory' : 'js/JsonFormat/FeatureFactory4Factory.js',
+      'FeatureFactory4Viewer' : 'js/JsonFormat/FeatureFactory4Viewer.js',
+      'Dot' : 'js/Storage/Dot/Dot.js',
+      'DotMath' : 'js/Storage/Dot/DotMath.js',
+      'History' :'js/History/History.js',
+      'EventHandlers': 'js/EventHandler/index.js',
+      'EventHandler': 'js/EventHandler/EventHandler.js',
+      'Broker': 'js/PubSub/Broker.js',
+      '@UI' : 'js/UI',
+      'UI' : 'js/UI/UI.js',
+      'Conditions': 'js/Conditions.js'
     }
   }
 });
 
 
-require([
-  "./js/UI/UIContainer.js",
-  "./js/Storage/Storage.js",
-  "./js/EventHandler/EventHandler.js",
-  "./js/PubSub/Broker.js",
-  "./js/Conditions.js",
-  "./js/History/History.js",
-  "./js/Storage/test.js"
-], function(
-  UIContainer,
-  Storage,
-  EventHandler,
-  Broker,
-  Conditions,
-  History,
-  Test
-) {
+define(function(require) {
   'use strict';
 
   log.enableAll();
 
-  var conditions = new Conditions();
-  window.conditions = conditions;
+  var conditions = require('Conditions').getInstance();
 
-  var uiContainer = new UIContainer();
-  window.uiContainer = uiContainer;
+  var ui = require('UI').getInstance();
+  ui.propertyTab.setPropertyTab('project', null, require('Storage').getInstance());
 
-  var storage = new Storage();
-  window.storage = storage;
+  var storage = require('Storage').getInstance();
 
-  var broker = new Broker(storage);
-  window.broker = broker;
+  var broker = require('Broker').getInstance();
 
-  uiContainer.sidebar.treeview.init();
-  uiContainer.sidebar.property.setPropertyTab("project", null, storage);
+  var eventHandler = require('EventHandler').getInstance();
 
-  var eventHandler = new EventHandler(broker);
-  window.eventHandler = eventHandler;
-
-  var myhistory = new History();
-  window.myhistory = myhistory;
-
-  log.info(window.storage);
-
-  var singletonTest = Test.getInstance();
-  singletonTest.echo('hi');
-  log.info(singletonTest);
+  var myhistory = require('History').getInstance();
 
 });

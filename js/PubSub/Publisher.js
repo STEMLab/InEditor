@@ -22,16 +22,7 @@ define([], function() {
   */
   Publisher.prototype.publish = function(_message) {
 
-    if (this.broker != null) {
-
-      this.broker.publish(_message);
-
-    } else {
-
-      window.broker.publish(_message);
-
-    }
-
+    require('Broker').getInstance().publish(_message);
 
   }
 

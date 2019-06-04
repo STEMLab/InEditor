@@ -60,7 +60,7 @@ define([
    */
   DotPool.prototype.getDotByPoint = function(point, type) {
     var value = Object.values(this.dots);
-    var coordinateThreshold = window.conditions.realCoordinateThreshold;
+    var coordinateThreshold = require('Conditions').getInstance().realCoordinateThreshold;
 
     // If value exist in boundry, return true.
     // If you want to adjust the recognition sensitivity, modify conditions.coordinateThreshold.
@@ -85,7 +85,7 @@ define([
    */
   DotPool.prototype.getDotByPointaAllowDuplication = function(point) {
     var value = Object.values(this.dots);
-    var coordinateThreshold = window.conditions.realCoordinateThreshold;
+    var coordinateThreshold = require('Conditions').getInstance().realCoordinateThreshold;
 
     // If value exist in boundry, return true.
     // If you want to adjust the recognition sensitivity, modify conditions.coordinateThreshold.
@@ -102,7 +102,7 @@ define([
 
   DotPool.prototype.combineDuplicatedDots = function(dot1, dot2){
 
-    var coordinateThreshold = window.conditions.realCoordinateThreshold;
+    var coordinateThreshold = require('Conditions').getInstance().realCoordinateThreshold;
 
     function isSameDot(dot1, dot2) {
       var d = Math.sqrt(Math.pow(Math.abs(dot1.point.x - dot2.point.x), 2) + Math.pow(Math.abs(dot1.point.y - dot2.point.y), 2));
@@ -117,7 +117,6 @@ define([
       var keys = Object.keys(dot2.memberOf);
 
       // for( var i in keys ){
-      //   window.storage.canvasContainer.
       // }
 
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +145,6 @@ define([
      */
     delete this.dots[uuid];
 
-    // log.trace(window.storage.dotPoolContainer);
     return true;
 
   }
@@ -205,19 +203,20 @@ define([
       }
     }
 
+    var canvasContainer = require('Storage').getInstance().getCanvasContainer();
     for (var key in commonObj) {
       var type = dot1.memberOf[result[key]];
       var obj;
 
       switch (type) {
         case 'cell':
-          obj = window.storage.canvasContainer.getElementById('cell', commonObj[key]);
+          obj = canvasContainer.getElementById('cell', commonObj[key]);
           break;
         case 'cellBoundary':
-          obj = window.storage.canvasContainer.getElementById('cellBoundary', commonObj[key]);
+          obj = canvasContainer.getElementById('cellBoundary', commonObj[key]);
           break;
         case 'transition':
-          obj = window.storage.canvasContainer.getElementById('transition', commonObj[key]);
+          obj = canvasContainer.getElementById('transition', commonObj[key]);
           break;
         case 'state':
           log.error("Two different dot present on state ! Something wrong.. ");

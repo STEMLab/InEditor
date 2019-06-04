@@ -2,15 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define([
-  "./Result.js",
-  "../PubSub/Message.js"
-], function(
-  Result,
-  Message
-) {
-  'use strict';
-
+define(function(require) {
   /**
    * @class ExportEventHandler
    */
@@ -32,7 +24,7 @@ define([
 
   ExportEventHandler.prototype.exportToViewer = function(broker, previousMsg) {
 
-    var result = new Result();
+    var result = require('./Result.js');
     var address = document.getElementById("viewer-baseURL").value+ ":" + document.getElementById("viewer-portNum").value + "/" +document.getElementById("viewer-params").value;
     var reg = /https?:\/\/(\w*:\w*@)?[-\w.]+(:\d+)?(\/([\w/_.]*(\?\S+)?)?)?/.exec(address);
 
@@ -40,7 +32,7 @@ define([
     if(reg[0] == address){
 
       if (broker.isPublishable('exporttoviewer')) {
-        broker.publish(new Message('exporttoviewer', {
+        broker.publish(require('Message')('exporttoviewer', {
           'address': address
         }));
         result.result = true;
@@ -59,10 +51,10 @@ define([
 
   ExportEventHandler.prototype.exportToFactory = function(broker, previousMsg) {
 
-    var result = new Result();
+    var result = require('./Result.js');
 
     if (broker.isPublishable('exporttofactory')) {
-      broker.publish(new Message('exporttofactory', {
+      broker.publish(require('Message')('exporttofactory', {
         baseURL: window.document.getElementById('factory-baseURL').value + ":" + window.document.getElementById('factory-portNum').value
       }));
       result.result = true;

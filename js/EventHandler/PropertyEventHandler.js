@@ -65,10 +65,7 @@ define(function(require) {
    */
   PropertyEventHandler.prototype.clickPropertySubmitBtn = function(broker, previousMsg) {
 
-    var result = {
-      'result': false,
-      'msg': null
-    };
+    var result = require('./Result.js');
 
     if (broker.isPublishable('updateproperty')) {
 
@@ -76,13 +73,10 @@ define(function(require) {
       broker.publish(new Message('updateproperty', {
         "type": $('#property-table').data('type'),
         "id": document.getElementById("id-text").value,
-        "updateContent": window.eventHandler.handlers['propertyEventHandler'].getUpdateContent($('#property-table').data('type'))
+        "updateContent": require('EventHandler').getInstance().getHandlers()['propertyEventHandler'].getUpdateContent($('#property-table').data('type'))
       }));
 
-      result = {
-        'result': true,
-        'msg': null
-      };
+      result.result = true;
 
     } else {
 
@@ -100,10 +94,7 @@ define(function(require) {
    */
   PropertyEventHandler.prototype.clickPropertRefySubmitBtn = function(broker, previousMsg) {
 
-    var result = {
-      'result': false,
-      'msg': null
-    };
+    var result = require('./Result.js');
 
     if (broker.isPublishable('updaterefdata')) {
 
@@ -111,13 +102,10 @@ define(function(require) {
       broker.publish(new Message('updaterefdata', {
         "type": $('#property-table').data('type'),
         "id": document.getElementById("id-text").value,
-        "updateContent": window.eventHandler.handlers['propertyEventHandler'].getUpdateContent('ref')
+        "updateContent": require('EventHandler').getInstance().getHandlers()['propertyEventHandler'].getUpdateContent('ref')
       }));
 
-      result = {
-        'result': true,
-        'msg': null
-      };
+      result.result = true;
 
     } else {
 
@@ -135,6 +123,7 @@ define(function(require) {
    */
   PropertyEventHandler.prototype.getUpdateContent = function(type) {
     var result = new Object;
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
     switch (type) {
       case 'project':
@@ -158,7 +147,7 @@ define(function(require) {
         };
 
         var id = document.getElementById("id-text").value;
-        var descList = window.storage.propertyContainer.getElementById('floor', id).description;
+        var descList = propertyContainer.getElementById('floor', id).description;
         for (var key in descList) {
           result.description[key] = document.getElementById("desc-text-" + key).value;
         }
@@ -174,7 +163,7 @@ define(function(require) {
         };
 
         var id = document.getElementById("id-text").value;
-        var descList = window.storage.propertyContainer.getElementById('cell', id).description;
+        var descList = propertyContainer.getElementById('cell', id).description;
         for (var key in descList) {
           result.description[key] = document.getElementById("desc-text-" + key).value;
         }
@@ -194,7 +183,7 @@ define(function(require) {
         };
 
         var id = document.getElementById("id-text").value;
-        var descList = window.storage.propertyContainer.getElementById('cellBoundary', id).description;
+        var descList = propertyContainer.getElementById('cellBoundary', id).description;
         for (var key in descList) {
           result.description[key] = document.getElementById("desc-text-" + key).value;
         }
@@ -208,7 +197,7 @@ define(function(require) {
         };
 
         var id = document.getElementById("id-text").value;
-        var descList = window.storage.propertyContainer.getElementById('state', id).description;
+        var descList = propertyContainer.getElementById('state', id).description;
         for (var key in descList) {
           result.description[key] = document.getElementById("desc-text-" + key).value;
         }
@@ -222,7 +211,7 @@ define(function(require) {
         };
 
         var id = document.getElementById("id-text").value;
-        var descList = window.storage.propertyContainer.getElementById('transition', id).description;
+        var descList = propertyContainer.getElementById('transition', id).description;
         for (var key in descList) {
           result.description[key] = document.getElementById("desc-text-" + key).value;
         }
@@ -241,10 +230,7 @@ define(function(require) {
   }
 
   PropertyEventHandler.prototype.addDescList = function(broker, previousMsg) {
-    var result = {
-      'result': false,
-      'msg': null
-    };
+    var result = require('./Result.js');
 
     if (broker.isPublishable('addnewglobaldesc')) {
 
@@ -255,10 +241,7 @@ define(function(require) {
 
       document.getElementById('setting-desc-modal-newDesc').value = "";
 
-      result = {
-        'result': true,
-        'msg': null
-      };
+      result.result = true;
 
     } else {
 
@@ -270,7 +253,7 @@ define(function(require) {
   }
 
   PropertyEventHandler.prototype.clickExtebdSubmitBtn = function(broker, previousMsg) {
-    var result = new Object;
+    var result = require('./Result.js');
 
     if (broker.isPublishable('updateproperty')) {
 
@@ -303,10 +286,7 @@ define(function(require) {
         "updateContent": data
       }));
 
-      result = {
-        'result': true,
-        'msg': null
-      };
+      result.result = true;
 
     } else {
 
@@ -319,7 +299,7 @@ define(function(require) {
 
 
   PropertyEventHandler.prototype.clickTextureSubmitBtn = function(broker, previousMsg) {
-    var result = new Object;
+    var result = require('./Result.js');
 
     if (broker.isPublishable('updateproperty')) {
 
@@ -343,10 +323,7 @@ define(function(require) {
         "updateContent": data
       }));
 
-      result = {
-        'result': true,
-        'msg': null
-      };
+      result.result = true;
 
     } else {
 
@@ -358,7 +335,7 @@ define(function(require) {
   }
 
   PropertyEventHandler.prototype.addLocalDesc = function(broker) {
-    var result = new Object;
+    var result = require('./Result.js');
     var text = $('#add-new-local-desc-text').val();
 
     if (broker.isPublishable('addlocaldesc') && (text != "" && text != null)) {
@@ -369,10 +346,7 @@ define(function(require) {
         "desc": text
       }));
 
-      result = {
-        'result': true,
-        'msg': null
-      };
+      result.result = true;
 
     } else {
 
@@ -384,7 +358,7 @@ define(function(require) {
   }
 
   PropertyEventHandler.prototype.deleteLocalDesc = function(broker, previousMsg, data) {
-    var result = new Object;
+    var result = require('./Result.js');
     var Message = require('../PubSub/Message.js');
 
     if (broker.isPublishable('deletelocaldesc')) {
@@ -409,7 +383,7 @@ define(function(require) {
 
   PropertyEventHandler.prototype.addNewCode = function(broker, previousMsg, data) {
 
-    var result = new Object;
+    var result = require('./Result.js');
     var Message = require('../PubSub/Message.js');
 
     var ot = $('#setting-code-new-object-obj-type-menu').dropdown('get value');
@@ -425,10 +399,7 @@ define(function(require) {
           cd: cd
         }));
 
-        result = {
-          result: true,
-          msg: null
-        }
+        result.result = true;
       } else {
         broker.publish(new Message('addnewcode', {
           path: [ot, ct],
@@ -436,10 +407,7 @@ define(function(require) {
           cd: cd
         }));
 
-        result = {
-          result: true,
-          msg: null
-        }
+        result.result = true;
       }
     }
 
@@ -448,10 +416,7 @@ define(function(require) {
 
   PropertyEventHandler.prototype.uploadCodeFile = function(broker, previousMsg, data) {
     var file = document.getElementById('setting-code-upload-file').files[0];
-    var result = {
-      result: false,
-      msg: null
-    }
+    var result = require('./Result.js');
 
     var Message = require('../PubSub/Message.js');
     if (broker.isPublishable('uploadcodefile')) {
@@ -459,7 +424,7 @@ define(function(require) {
         file: file
       }));
 
-      result = true;
+      result.result = true;
     }
 
     return result;
@@ -467,10 +432,7 @@ define(function(require) {
 
   PropertyEventHandler.prototype.deleteCode = function(broker, previousMsg, data) {
     var path = data.target.id.split('-');
-    var result = {
-      result: false,
-      msg: null
-    }
+    var result = require('./Result.js');
 
     var Message = require('../PubSub/Message.js');
 
@@ -489,10 +451,7 @@ define(function(require) {
 
   PropertyEventHandler.prototype.getMapCoor = function(broker, previousMsg, data) {
 
-    var result = {
-      result: false,
-      msg: null
-    };
+    var result = require('./Result.js');
 
     var Message = require('../PubSub/Message.js');
     if (broker.isPublishable('getmapcoor')) {
@@ -500,10 +459,7 @@ define(function(require) {
         "floor": document.getElementById('id-text').value
       }));
 
-      result = {
-        'result': true,
-        'msg': null
-      };
+      result.result = true;
 
     } else {
 

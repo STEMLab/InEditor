@@ -23,7 +23,7 @@ define([], function() {
     /**
      * @memberof FloorProperty
      */
-    this.level = window.conditions.LAST_FLOOR_ID_NUM;
+    this.level = require('Conditions').getInstance().LAST_FLOOR_ID_NUM;
 
     /**
      * @memberof FloorProperty
@@ -58,7 +58,7 @@ define([], function() {
      * @memberof FloorProperty
      */
      this.description = {};
-     var list = window.conditions.descList;
+     var list = require('Conditions').getInstance().descList;
      for(var l of list){
        this.description[l] = "";
      }

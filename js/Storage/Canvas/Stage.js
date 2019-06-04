@@ -85,7 +85,7 @@ define([
       scaleX: 1,
       scaleY: 1,
       dragBoundFunc: function(pos) {
-        return window.storage.canvasContainer.stages[_id].zoomFun(_id, pos);
+        return require('Storage').getInstance().getCanvasContainer().stages[_id].zoomFun(_id, pos);
       }
     });
 
@@ -112,15 +112,15 @@ define([
    */
   Stage.prototype.calculateHeight = function(_width) {
 
-    return _width * (window.conditions.aspectRatio.y / window.conditions.aspectRatio.x);
+    return _width * (require('Conditions').getInstance().aspectRatio.y / require('Conditions').getInstance().aspectRatio.x);
 
   }
 
   Stage.prototype.calculateWH = function(_width, _height) {
 
-    var calH = _width * (window.conditions.aspectRatio.y / window.conditions.aspectRatio.x);
+    var calH = _width * (require('Conditions').getInstance().aspectRatio.y / require('Conditions').getInstance().aspectRatio.x);
     if( calH < _height ) return { width : _width, height : calH };
-    else return { width :  _height * (window.conditions.aspectRatio.x / window.conditions.aspectRatio.y), height : _height };
+    else return { width :  _height * (require('Conditions').getInstance().aspectRatio.x / require('Conditions').getInstance().aspectRatio.y), height : _height };
 
   }
 
@@ -133,15 +133,17 @@ define([
    */
   Stage.prototype.zoomFun = function(_id, pos) {
 
-    if(window.storage.canvasContainer.stages[_id].stage.attrs.scaleX <= 1){
+    if(require('Storage').getInstance().getCanvasContainer().stages[_id].stage.attrs.scaleX <= 1){
       return {x: 0, y: 0};
     }
+
+    var canvasContainer = require('Storage').getInstance().getCanvasContainer();
 
     var divWidth = document.getElementById(_id).children[0].clientWidth;
     var divHeight = document.getElementById(_id).children[0].clientHeight;
 
-    var stageWidth = window.storage.canvasContainer.stages[_id].stage.attrs.width * window.storage.canvasContainer.stages[_id].stage.attrs.scaleX;
-    var stageHeight = window.storage.canvasContainer.stages[_id].stage.attrs.height * window.storage.canvasContainer.stages[_id].stage.attrs.scaleY;
+    var stageWidth = canvasContainer.stages[_id].stage.attrs.width * canvasContainer.stages[_id].stage.attrs.scaleX;
+    var stageHeight = canvasContainer.stages[_id].stage.attrs.height * canvasContainer.stages[_id].stage.attrs.scaleY;
 
     var up = divHeight - stageHeight;
     var down = 0;
@@ -174,7 +176,7 @@ define([
     if (this.stage == null) {
       stage = this.stage;
     } else {
-      stage = window.storage.canvasContainer.stages[floor].stage;
+      stage = require('Storage').getInstance().getCanvasContainer().stages[floor].stage;
     }
 
     var x = stage.getAbsolutePosition();

@@ -25,7 +25,7 @@ var server = app.listen(5757, function() {
   opn('http://127.0.0.1:5757/', {app: 'chrome'});
 
   Promise.coroutine(function *() {
-    yield cmd.run('javac .\\lib\\coor-converter\\Convert.java -classpath .\\lib\\coor-converter\\gdal.jar');
+    yield cmd.run('javac ./lib/coor-converter/Convert.java -classpath ./lib/coor-converter/gdal.jar');
   })();
 
 });

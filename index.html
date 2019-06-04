@@ -16,7 +16,7 @@
 
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="./css/bootstrap.min.css">
-  <link rel="stylesheet" href="./css/IndoorGML-Editor.css">
+  <link rel="stylesheet" href="./css/IndoorGML-dark.css" id="InEditor-Theme">
 
   <!-- Fancytree CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -35,8 +35,6 @@
 
   <!-- Golden Layout -->
   <script type="text/javascript" src="./lib/goldenlayout.min.js"></script>
-  <link type="text/css" rel="stylesheet" href="./css/goldenlayout-base.css" />
-  <link type="text/css" rel="stylesheet" href="./css/goldenlayout-dark-theme.css" />
 
   <!-- konvajs -->
   <script src="./lib/konva.js"></script>
@@ -71,115 +69,8 @@
 </head>
 
 <body>
-  <header>
-    <nav class="navbar navbar-expand navbar-dark fixed-top menubar ">
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">PROJECT</a>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" id="project-new" onClick="window.location.reload()">New</a>
-              <a class="dropdown-item" id="project-load">Load</a><input type="file" id="project-load-file" accept=".bson" class="d-none" />
-              <a class="dropdown-item" id="project-save">Save</a>
-              <a class="dropdown-item" id="project-saveas" data-toggle="modal" data-target="#project-save-as-modal">Save As...</a>
-              <hr>
-              <!-- <a class="dropdown-item disabled" id="project-import" data-toggle="modal" data-target="#project-import-modal">Import</a> -->
-              <a class="dropdown-item" id="project-import">Import(.gml)</a><input type="file" id="project-import-file" accept=".gml" class="d-none" />
-              <a class="dropdown-item" id="project-export" data-modaltype="export">Export(.gml)</a>
-            </div>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">EDIT</a>
-            <div class="dropdown-menu">
-              <a class="dropdown-item disabled" id="edit-merge-cells" data-toggle="modal" data-target="#edit-merge-cells-modal">Merge Cells</a>
-            </div>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SETTING</a>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" id="setting-conditions" data-modaltype="conditions">Conditions</a>
-              <a class="dropdown-item" id="setting-desc" data-modaltype="desc">Description</a>
-              <a class="dropdown-item" id="setting-code" data-modaltype="code">Code</a>
-            </div>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">HELP</a>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" id="setting-" href="https://github.com/STEMLab/InEditor" target="_blank">GitHub</a>
-              <a class="dropdown-item" id="setting-" href="https://youtu.be/eW2Tpq2Yk_c" target="_blank">Demo video</a>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </nav>
-    <nav class="navbar navbar-expand navbar-dark staic-top toolbar">
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <img src="./assets/icon/floor_d.png" title="Add new Floor" id="floor-btn">
-          </li>
-          <li class="nav-item">
-            <img src="./assets/icon/cell_d.png" title="Add new Cell" id="cell-btn">
-          </li>
-          <li class="nav-item">
-            <img src="./assets/icon/hole_d.png" title="Add hole in cell" id="hole-btn">
-          </li>
-          <li class="nav-item">
-            <img src="./assets/icon/cellboundary_d.png" title="Add new CellBoundary" id="cellboundary-btn">
-          </li>
-          <!-- <li class="nav-item">
-            <img src="./assets/icon/hatch_d.png" title="Add new Hatch" id="hatch-btn">
-          </li> -->
-          <li class="nav-item">
-            <img src="./assets/icon/state_d.png" title="Add new State" id="state-btn">
-          </li>
-          <li class="nav-item">
-            <img src="./assets/icon/transition_d.png" title="Add new Transition" id="transition-btn">
-          </li>
-          <li class="nav-item">
-            <img src="./assets/icon/inter_d.png" title="Add new InterLayerConnection" id="interlayerconnection-btn">
-          </li>
-          <li class="nav-item">
-            <img src="./assets/icon/stair_d.png" title="Add new Stair" id="stair-btn">
-          </li>
-          <li class="nav-item">
-            <img src="./assets/icon/slant_down_d.png" title="Add new Cell with slant" id="slant-down-btn">
-          </li>
-          <li class="nav-item">
-            <img src="./assets/icon/slant_up_d.png" title="Add new Cell with slant" id="slant-up-btn">
-          </li>
-          <li class="nav-item">
-            <img src="./assets/icon/slant_up_down_d.png" title="Add new two Cell with slant" id="slant-up-down-btn">
-          </li>
-        </ul>
-        <ul class="navbar-nav my-2 my-lg-0">
-          <li class="nav-item">
-            <img src="./assets/icon/go_viewer.png" title="go viewer" id="viewer-btn" data-modaltype="viewer">
-          </li>
-        </ul>
-      </div>
-    </nav>
-  </header>
-
-
-
-  <div class="container-fluid">
-    <div class="split-col-container">
-      <div class="split split-col" id="sidebar">
-        <div class="split-row-container">
-          <div class="split split-row tree-view-container" id="tree-view-container"></div>
-          <div class="split split-row property-container" id="property-container"></div>
-        </div>
-      </div>
-
-
-      <div role="main" class="split split-col" id="workspace">
-        <div id="workspace-layout-container"></div>
-        <div id="snackbar"></div>
-      </div>
-    </div>
-
-  </div>
+  <header id="header"></header>
+  <div class="container-fluid"  id="content-body"></div>
 
 
   <div class="ui modal small" id="go-viewer-modal">

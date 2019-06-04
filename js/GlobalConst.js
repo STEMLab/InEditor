@@ -11,6 +11,7 @@ define(function(require) {
     TRANSITION : 'transition',
     HOLE : 'hole',
     POINT: 'point',
+    INTERLAYER_CONNECTION: 'interlayerConnection',
 
     GEOMETRY_TYPE : {
       CELL_SPACE: 'geometry__cellSpace',

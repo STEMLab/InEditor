@@ -12,7 +12,7 @@ define(function(require) {
     this.name = _id;
 
     this.description = {};
-    var list = window.conditions.descList;
+    var list = require('Conditions').getInstance().descList;
     for (var l of list) {
       this.description[l] = "";
     }
@@ -26,7 +26,7 @@ define(function(require) {
   }
 
   PropertyBase.prototype.setId = function(_id){
-    let floors = window.storage.propertyContainer.floorProperties;
+    let floors = require('Storage').getInstance().getPropertyContainer().floorProperties;
     for(let floor of floors){
       if(floor.keys.indexOf(_id) != -1){
         require('Popup')('error', 'Invalid input', _id + ' is already exist')

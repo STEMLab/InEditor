@@ -12,7 +12,7 @@ define([], function() {
     /**
      * @memberof Dot
      */
-    this.uuid = window.conditions.guid();
+    this.uuid = require('Conditions').getInstance().guid();
 
     /**
      * @memberof Dot

@@ -1,373 +1,367 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
+define(function(require) {
 
-define([
-  "./BrokerConnector.js",
-  "./MessageSpec.js",
-  "../History/History.js"
-], function(
-  BrokerConnector,
-  MessageSpec,
-  History
-) {
-  'use strict';
-
-  /**
-   * @desc Broker for pub-sub model. The difference from typical Broker is that this maintains message which just published before. The resason for this is descried in {@link Message}.
-   * @class Broker
-   */
-  function Broker(storage) {
+  let singleton = (function() {
 
     /**
-     * @desc This table stores subscribers who are subscribing to each topic.<br>Key is `message.req` and value is a subscriber object array.
-     * @memberof Broker
+     * @class Broker
      */
-    this.topic = [];
+    function Broker() {
 
-    /**
-     * @desc Save previous runned message for controll request cycle.<br>For example, if 'start-test' runned before next message must be 'test' or 'end-test'.
-     * @memberof Broker
-     */
-    // this.previousMsg = null;
+      /**
+       * @desc This table stores subscribers who are subscribing to each topic.<br>Key is `message.req` and value is a subscriber object array.
+       * @memberof Broker
+       */
+      let _topic = [];
 
-    /**
-     * @memberof Broker
-     */
-    this.brokerConnector = new BrokerConnector(this, storage);
+      /**
+       * @memberof Broker
+       */
+      let _brokerConnector;
 
-    /**
-     * @memberof Broker
-     */
-    this.reqSpecList = {};
+      /**
+       * @memberof Broker
+       */
+      let _reqSpecList = {};
 
-
-    this.addReqs();
-
-  }
-
-  /**
-   * @memberof Broker
-   */
-  Broker.prototype.subscribe = function(_topic, _obj) {
-
-    if (this.topic == null) {
-      window.broker.addTopic(window.broker.topic, _topic, _obj);
-    } else {
-      this.addTopic(this.topic, _topic, _obj);
-    }
-
-  }
-
-  /**
-   * @memberof Broker
-   */
-  Broker.prototype.addTopic = function(_path, _topic, _obj) {
-
-    if (_path[_topic] == null) {
-      _path[_topic] = new Array();
-      _path[_topic].push(_obj);
-    } else _path[_topic].push(_obj);
-
-  }
-
-  /**
-   * @memberof Broker
-   */
-  Broker.prototype.publish = function(_message) {
-
-    // log.info(_message.req + " published");
-
-    if (this.topic == null) {
-
-      window.broker.publishMsg(window.broker.topic, _message);
-
-    } else {
-
-      this.publishMsg(this.topic, _message);
-    }
-
-  }
-
-  /**
-   * @memberof Broker
-   */
-  Broker.prototype.publishMsg = function(_path, _message) {
-
-    var _topic = _message.req;
-    var subscriber = _path[_topic];
-    var uuid = window.conditions.guid();
-
-    for (var i = 0; i < subscriber.length; i++) {
-      if(_path[_topic][i].run(_message, uuid) == false){
-        if( window.myhistory.history.back() != undefined &&
-            window.myhistory.history.back().msg == _message ){
-          window.myhistory.undo();
-        }
-
-        break;
+      this.init = function(){
+        _brokerConnector = new (require('./BrokerConnector.js'))(this);
+        this.addReqs();
       }
-    }
-  }
 
-  /**
-   * @memberof Broker
-   */
-  Broker.prototype.addReqs = function() {
+      this.getTopic = function(){
+        return _topic;
+      }
 
-    this.reqSpecList['addnewfloor'] = new MessageSpec('single', 'including', null, true);
-    this.reqSpecList['updateproperty'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['setpropertyview'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['zoomworkspace'] = new MessageSpec('single', 'including', ['draw', 'modify'], false);
-    this.reqSpecList['addfloorplan'] = new MessageSpec('single', 'including', null, true);
+      this.getBrokerConnector = function(){
+        return _brokerConnector;
+      }
 
-    this.reqSpecList['start-addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['end-addnewcell'] = new MessageSpec('cycle', 'including', ['draw'], true);
+      this.getReqSpecList = function(){
+        return _reqSpecList;
+      }
 
-    this.reqSpecList['start-addnewhole'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['addnewhole'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['end-addnewhole'] = new MessageSpec('cycle', 'including', ['draw'], true);
+      /**
+       * @memberof Broker
+       */
+      this.subscribe = function(targetTopic, obj) {
+        this.addTopic(_topic, targetTopic, obj);
+      }
 
-    this.reqSpecList['updaterefdata'] = new MessageSpec('single', 'including', null,false);
-    this.reqSpecList['activateworkspace'] = new MessageSpec('single', 'excluding', ['draw'], false);
+      /**
+       * @memberof Broker
+       */
+      this.addTopic = function(path, targetTopic, obj) {
 
-    this.reqSpecList['cancel-addnewcell'] = new MessageSpec('single', 'including', ['draw'], false);
-    this.reqSpecList['cancel-addnewcellboundary'] = new MessageSpec('single', 'including', ['draw'], false);
-    this.reqSpecList['cancel-addnewstate'] = new MessageSpec('single', 'including', ['draw'], false);
-    this.reqSpecList['cancel-addnewtransition'] = new MessageSpec('single', 'including', ['draw'], false);
-    this.reqSpecList['cancel-addnewhole'] = new MessageSpec('single', 'including', ['draw'], false);
+        if (path[targetTopic] == null) {
+          path[targetTopic] = new Array();
+          path[targetTopic].push(obj);
+        } else path[targetTopic].push(obj);
 
-    this.reqSpecList['start-addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['end-addnewcellboundary'] = new MessageSpec('cycle', 'including', ['draw'], true);
+      }
 
-    this.reqSpecList['start-addnewstate'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['addnewstate'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['end-addnewstate'] = new MessageSpec('cycle', 'including', ['draw'], true);
+      /**
+       * @memberof Broker
+       */
+      this.publish = function(message) {
+        this.publishMsg(_topic, message);
+      }
 
-    this.reqSpecList['start-addnewtransition'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['addnewtransition'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['end-addnewtransition'] = new MessageSpec('cycle', 'including', ['draw'], true);
+      /**
+       * @memberof Broker
+       */
+      this.publishMsg = function(path, message) {
 
-    this.reqSpecList['start-addnewstair'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['addnewstair'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['end-addnewstair'] = new MessageSpec('cycle', 'including', ['draw'], true);
+        var _topic = message.req;
+        var subscriber = path[_topic];
+        var uuid = require('Conditions').getInstance().guid();
 
-    this.reqSpecList['start-addnewslantdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['addnewslantdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['end-addnewslantdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
+        for (var i = 0; i < subscriber.length; i++) {
+          if(path[_topic][i].run(message, uuid) == false){
+            if( require('History').getInstance().history.back() != undefined &&
+                require('History').getInstance().history.back().msg == message ){
+              require('History').getInstance().undo();
+            }
 
-    this.reqSpecList['start-addnewslantup'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['addnewslantup'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['end-addnewslantup'] = new MessageSpec('cycle', 'including', ['draw'], true);
+            break;
+          }
+        }
+      }
 
-    this.reqSpecList['start-addnewslantupdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['addnewslantupdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['end-addnewslantupdown'] = new MessageSpec('cycle', 'including', ['draw'], true);
+      /**
+       * @memberof Broker
+       */
+      this.addReqs = function() {
 
-    this.reqSpecList['start-addnewinterlayerconnetction'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['addnewinterlayerconnetction'] = new MessageSpec('cycle', 'including', ['draw'], true);
-    this.reqSpecList['end-addnewinterlayerconnetction'] = new MessageSpec('cycle', 'including', ['draw'], true);
+        _reqSpecList['addnewfloor'] = require('./MessageSpec.js')('single', 'including', null, true);
+        _reqSpecList['updateproperty'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['setpropertyview'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['zoomworkspace'] = require('./MessageSpec.js')('single', 'including', ['draw', 'modify'], false);
+        _reqSpecList['addfloorplan'] = require('./MessageSpec.js')('single', 'including', null, true);
 
-    this.reqSpecList['exporttoviewer'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['exporttofactory'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['showfactoryexportmodal'] = new MessageSpec('single', 'including', null, false);
+        _reqSpecList['start-addnewcell'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['addnewcell'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['end-addnewcell'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
 
-    this.reqSpecList['snapping'] = new MessageSpec('single', 'including', ['draw'], false);
-    this.reqSpecList['movetooltip'] = new MessageSpec('single', 'including', ['draw'], false);
+        _reqSpecList['start-addnewhole'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['addnewhole'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['end-addnewhole'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
 
-    this.reqSpecList['saveproject'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['loadproject'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['importfile'] = new MessageSpec('single', 'including', null, false);
+        _reqSpecList['updaterefdata'] = require('./MessageSpec.js')('single', 'including', null,false);
+        _reqSpecList['activateworkspace'] = require('./MessageSpec.js')('single', 'excluding', ['draw'], false);
 
-    this.reqSpecList['modifyline'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['start-modifypoint'] = new MessageSpec('cycle', 'including', ['modify'], false);
-    this.reqSpecList['modifypoint'] = new MessageSpec('cycle', 'including', ['modify'], false);
-    this.reqSpecList['end-modifypoint'] = new MessageSpec('cycle', 'including', ['modify'], false);
+        _reqSpecList['cancel-addnewcell'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
+        _reqSpecList['cancel-addnewcellboundary'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
+        _reqSpecList['cancel-addnewstate'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
+        _reqSpecList['cancel-addnewtransition'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
+        _reqSpecList['cancel-addnewhole'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
 
-    this.reqSpecList['deletecell'] = new MessageSpec('single', 'including', null, true);
-    this.reqSpecList['deletecellboundary'] = new MessageSpec('single', 'including', null, true);
-    this.reqSpecList['deletetransition'] = new MessageSpec('single', 'including', null, true);
-    this.reqSpecList['deletestate'] = new MessageSpec('single', 'including', null, true);
-    this.reqSpecList['deletefloor'] = new MessageSpec('single', 'including', null, true);
+        _reqSpecList['start-addnewcellboundary'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['addnewcellboundary'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['end-addnewcellboundary'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
 
-    this.reqSpecList['makecellselectmenu'] = new MessageSpec('single', 'including', ['draw'], false);
+        _reqSpecList['start-addnewstate'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['addnewstate'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['end-addnewstate'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
 
-    this.reqSpecList['rotateslant'] = new MessageSpec('single', 'including', null, false);
+        _reqSpecList['start-addnewtransition'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['addnewtransition'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['end-addnewtransition'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
 
-    this.reqSpecList['copyfloor'] = new MessageSpec('single', 'including', null, false);
+        _reqSpecList['start-addnewstair'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['addnewstair'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['end-addnewstair'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
 
-    this.reqSpecList['updatedesclist'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['adddesclist'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['deletedesclist'] = new MessageSpec('single', 'including', null, false);
+        _reqSpecList['start-addnewslantdown'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['addnewslantdown'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['end-addnewslantdown'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
 
-    this.reqSpecList['importgml'] = new MessageSpec('single', 'including', null, false);
+        _reqSpecList['start-addnewslantup'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['addnewslantup'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['end-addnewslantup'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
 
-    this.reqSpecList['showconditionmodal'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['updateconditions'] = new MessageSpec('single', 'including', null, false);
+        _reqSpecList['start-addnewslantupdown'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['addnewslantupdown'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['end-addnewslantupdown'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
 
-    this.reqSpecList['addnewglobaldesc'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['addlocaldesc'] = new MessageSpec('single', 'inclunding', null, false);
-    this.reqSpecList['deletelocaldesc'] = new MessageSpec('single', 'inclunding', null, false);
+        _reqSpecList['start-addnewinterlayerconnetction'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['addnewinterlayerconnetction'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
+        _reqSpecList['end-addnewinterlayerconnetction'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
 
-    // this.reqSpecList['addcellsfromgml'] = new MessageSpec('single', 'including', null, false);
-    // this.reqSpecList['addcellboundariesfromgml'] = new MessageSpec('single', 'inclunding', null, false);
-    this.reqSpecList['addobjectfromgml'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['addproeprtydatafromgml'] = new MessageSpec('single', 'including', null ,false);
-    this.reqSpecList['shownaviattr'] = new MessageSpec('single', 'including', null, false);
+        _reqSpecList['exporttoviewer'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['exporttofactory'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['showfactoryexportmodal'] = require('./MessageSpec.js')('single', 'including', null, false);
 
-    this.reqSpecList['showcodemodal'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['shownaviattr'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['showextensionattr'] = new MessageSpec('single', 'including', null, false);
+        _reqSpecList['snapping'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
+        _reqSpecList['movetooltip'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
 
-    this.reqSpecList['addnewcode'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['uploadcodefile'] = new MessageSpec('single', 'including', null, false);
-    this.reqSpecList['deletecode'] = new MessageSpec('single', 'including', null, false);
+        _reqSpecList['saveproject'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['loadproject'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['importfile'] = require('./MessageSpec.js')('single', 'including', null, false);
 
-    this.reqSpecList['addmap'] = new MessageSpec('single', 'including', null ,false);
-    this.reqSpecList['getmapcoor'] = new MessageSpec('single', 'including', null, false);
+        _reqSpecList['modifyline'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['start-modifypoint'] = require('./MessageSpec.js')('cycle', 'including', ['modify'], false);
+        _reqSpecList['modifypoint'] = require('./MessageSpec.js')('cycle', 'including', ['modify'], false);
+        _reqSpecList['end-modifypoint'] = require('./MessageSpec.js')('cycle', 'including', ['modify'], false);
 
-    this.reqSpecList['start-addnewhatch'] = new MessageSpec('cycle', 'including', ['draw'], false);
-    this.reqSpecList['addnewhatch'] = new MessageSpec('cycle', 'including', ['draw'], false);
-    this.reqSpecList['end-addnewhatch'] = new MessageSpec('cycle', 'including', ['draw'], false);
+        _reqSpecList['deletecell'] = require('./MessageSpec.js')('single', 'including', null, true);
+        _reqSpecList['deletecellboundary'] = require('./MessageSpec.js')('single', 'including', null, true);
+        _reqSpecList['deletetransition'] = require('./MessageSpec.js')('single', 'including', null, true);
+        _reqSpecList['deletestate'] = require('./MessageSpec.js')('single', 'including', null, true);
+        _reqSpecList['deletefloor'] = require('./MessageSpec.js')('single', 'including', null, true);
 
-    this.reqSpecList['removefloorplan'] = new MessageSpec('single', 'including', null, false);
-  }
+        _reqSpecList['makecellselectmenu'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
 
-  /**
-   * Check `req` can pubilsh or not.
-   * @memberof Broker
-   * @return {Boolean} result
-   */
-  Broker.prototype.isPublishable = function(req) {
+        _reqSpecList['rotateslant'] = require('./MessageSpec.js')('single', 'including', null, false);
 
-    var previousMsg = window.myhistory.getPreviousMsg();
+        _reqSpecList['copyfloor'] = require('./MessageSpec.js')('single', 'including', null, false);
 
-    var spec = this.reqSpecList[req];
-    var previousSpec = this.reqSpecList[previousMsg];
-    var result = false;
+        _reqSpecList['updatedesclist'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['adddesclist'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['deletedesclist'] = require('./MessageSpec.js')('single', 'including', null, false);
 
-    if (this.reqSpecList[req] == null) {
+        _reqSpecList['importgml'] = require('./MessageSpec.js')('single', 'including', null, false);
 
-      log.warn("no math reqSpecList with " + req);
-      result = false;
+        _reqSpecList['showconditionmodal'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['updateconditions'] = require('./MessageSpec.js')('single', 'including', null, false);
 
-    } else if (previousSpec != null && previousSpec.cycle == 'single') {
+        _reqSpecList['addnewglobaldesc'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['addlocaldesc'] = require('./MessageSpec.js')('single', 'inclunding', null, false);
+        _reqSpecList['deletelocaldesc'] = require('./MessageSpec.js')('single', 'inclunding', null, false);
 
-      // If ths cycle of previous published message is `single`, can publish any message.
-      // Actually, single type cycle message didn't save in Broker.previousMsg and Broker.previousMsg setted null.
-      // So, this branch shouldn't cover.
-      // If you call this line in your code, check event handler that publish previousMsg.
-      result = true;
+        // _reqSpecList['addcellsfromgml'] = require('./MessageSpec.js')('single', 'including', null, false);
+        // _reqSpecList['addcellboundariesfromgml'] = require('./MessageSpec.js')('single', 'inclunding', null, false);
+        _reqSpecList['addobjectfromgml'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['addproeprtydatafromgml'] = require('./MessageSpec.js')('single', 'including', null ,false);
+        _reqSpecList['shownaviattr'] = require('./MessageSpec.js')('single', 'including', null, false);
 
-    } else if (spec.cycle == 'single') {
+        _reqSpecList['showcodemodal'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['shownaviattr'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['showextensionattr'] = require('./MessageSpec.js')('single', 'including', null, false);
 
-      if (previousMsg == null) {
+        _reqSpecList['addnewcode'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['uploadcodefile'] = require('./MessageSpec.js')('single', 'including', null, false);
+        _reqSpecList['deletecode'] = require('./MessageSpec.js')('single', 'including', null, false);
 
-        // If there is no message which published before, can publish any message.
-        result = true;
+        _reqSpecList['addmap'] = require('./MessageSpec.js')('single', 'including', null ,false);
+        _reqSpecList['getmapcoor'] = require('./MessageSpec.js')('single', 'including', null, false);
 
-      } else if (previousSpec.cycle == 'cycle') {
+        _reqSpecList['start-addnewhatch'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], false);
+        _reqSpecList['addnewhatch'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], false);
+        _reqSpecList['end-addnewhatch'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], false);
 
-        // If the cycle of previous published message is `cycle` and the cycle of req is 'single',
-        if (spec.including == 'including' && spec.codes != null && spec.codes.indexOf(previousSpec.codes[0]) != -1) {
+        _reqSpecList['removefloorplan'] = require('./MessageSpec.js')('single', 'including', null, false);
+      }
 
-          // If the including value of req is `including` and codes of spec includes code of previousMsg, can publish req.
+      /**
+       * Check `req` can pubilsh or not.
+       * @memberof Broker
+       * @return {Boolean} result
+       */
+      this.isPublishable = function(req) {
+
+        var previousMsg = require('History').getInstance().getPreviousMsg();
+
+        var spec = _reqSpecList[req];
+        var previousSpec = _reqSpecList[previousMsg];
+        var result = false;
+
+        if (_reqSpecList[req] == null) {
+
+          log.warn("no math reqSpecList with " + req);
+          result = false;
+
+        } else if (previousSpec != null && previousSpec.cycle == 'single') {
+
+          // If ths cycle of previous published message is `single`, can publish any message.
+          // Actually, single type cycle message didn't save in Broker.previousMsg and Broker.previousMsg setted null.
+          // So, this branch shouldn't cover.
+          // If you call this line in your code, check event handler that publish previousMsg.
           result = true;
 
-        } else if (spec.including == 'excluding' && spec.codes.indexOf(previousSpec.codes[0]) == -1) {
+        } else if (spec.cycle == 'single') {
 
-          // If the including value of req is `excluding` and codes of spec not includes code of previousMsg, can publish req.
-          result = true;
+          if (previousMsg == null) {
+
+            // If there is no message which published before, can publish any message.
+            result = true;
+
+          } else if (previousSpec.cycle == 'cycle') {
+
+            // If the cycle of previous published message is `cycle` and the cycle of req is 'single',
+            if (spec.including == 'including' && spec.codes != null && spec.codes.indexOf(previousSpec.codes[0]) != -1) {
+
+              // If the including value of req is `including` and codes of spec includes code of previousMsg, can publish req.
+              result = true;
+
+            } else if (spec.including == 'excluding' && spec.codes.indexOf(previousSpec.codes[0]) == -1) {
+
+              // If the including value of req is `excluding` and codes of spec not includes code of previousMsg, can publish req.
+              result = true;
+
+            }
+          } else {
+
+            // cancel-smt
+            var splitPreReq = previousMsg.split("-");
+            if(splitPreReq[0] == 'cancel') result = true;
+
+          }
+
+        } else if (spec.cycle == 'cycle') {
+
+          // If the cycle of previous published message is `cycle` and the cycle of req is 'cycle',
+          // only the message which included in same cycle can publish.
+          var splitReq = req.split("-");
+          var splitPreReq = null;
+
+          if(previousMsg != null) splitPreReq = previousMsg.split("-");
+
+          if (previousMsg == null && splitReq[0] == 'start') {
+
+            result = true;
+
+          } else if (previousMsg != null && previousSpec.cycle == 'cycle') {
+
+            if (splitPreReq.length == 2 && splitReq.length == 2) {
+
+              // start-somemsg -> end-somemsg
+              if (splitReq[0] == 'start' && splitPreReq[0] == 'end' && splitPreReq[1] == splitReq[1]) {
+
+                result = true;
+
+              }
+
+            } else if (splitPreReq.length == 2 && splitReq.length == 1) {
+
+              // start-somemsg -> somemsg
+              if (splitPreReq[0] == 'start' && splitPreReq[1] == splitReq[0]) {
+
+                result = true;
+
+              }
+
+            } else if (splitPreReq.length == 1 && splitReq.length == 1) {
+
+              // somemsg -> somemsg
+              if (splitPreReq[0] == splitReq[0]) {
+
+                result = true;
+
+              }
+
+            } else if (splitPreReq.length == 1 && splitReq.length == 2) {
+
+              // somemsg -> end-somemsg
+              if (splitReq[0] == 'end' && splitPreReq[0] == splitReq[1] ) {
+
+                result = true;
+
+              }
+
+            }
+
+          }
 
         }
-      } else {
 
-        // cancel-smt
-        var splitPreReq = previousMsg.split("-");
-        if(splitPreReq[0] == 'cancel') result = true;
+        return result;
 
       }
 
-    } else if (spec.cycle == 'cycle') {
+      /**
+      * @memberof Broker
+      */
+      this.getManager = function(msg, managerName){
+        var managers = _topic[msg];
 
-      // If the cycle of previous published message is `cycle` and the cycle of req is 'cycle',
-      // only the message which included in same cycle can publish.
-      var splitReq = req.split("-");
-      var splitPreReq = null;
-
-      if(previousMsg != null) splitPreReq = previousMsg.split("-");
-
-      if (previousMsg == null && splitReq[0] == 'start') {
-
-        result = true;
-
-      } else if (previousMsg != null && previousSpec.cycle == 'cycle') {
-
-        if (splitPreReq.length == 2 && splitReq.length == 2) {
-
-          // start-somemsg -> end-somemsg
-          if (splitReq[0] == 'start' && splitPreReq[0] == 'end' && splitPreReq[1] == splitReq[1]) {
-
-            result = true;
-
-          }
-
-        } else if (splitPreReq.length == 2 && splitReq.length == 1) {
-
-          // start-somemsg -> somemsg
-          if (splitPreReq[0] == 'start' && splitPreReq[1] == splitReq[0]) {
-
-            result = true;
-
-          }
-
-        } else if (splitPreReq.length == 1 && splitReq.length == 1) {
-
-          // somemsg -> somemsg
-          if (splitPreReq[0] == splitReq[0]) {
-
-            result = true;
-
-          }
-
-        } else if (splitPreReq.length == 1 && splitReq.length == 2) {
-
-          // somemsg -> end-somemsg
-          if (splitReq[0] == 'end' && splitPreReq[0] == splitReq[1] ) {
-
-            result = true;
-
-          }
-
+        for(var key in managers){
+          if(managers[key].name == managerName)
+            return managers[key];
         }
 
+        return null;
       }
 
     }
 
 
 
+    let INSTANCE;
 
-    return result;
+    return {
+      getInstance: function(args) {
+        if (INSTANCE === undefined) {
+          INSTANCE = new Broker(args);
+          INSTANCE.init();
+        }
+        return INSTANCE;
+      }
+    };
 
-  }
+  })();
 
-  /**
-  * @memberof Broker
-  */
-  Broker.prototype.getManager = function(msg, managerName){
-    var managers = this.topic[msg];
-
-    for(var key in managers){
-      if(managers[key].name == managerName)
-        return managers[key];
-    }
-
-    return null;
-  }
-
-  return Broker;
-
+  return singleton;
 });

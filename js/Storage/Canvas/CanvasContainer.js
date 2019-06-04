@@ -31,8 +31,9 @@ define([
   CanvasContainer.prototype.getElementById = function(_type, _id) {
 
     var stageID = null;
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
-    var len = window.storage.propertyContainer.floorProperties.length;
+    var len = propertyContainer.floorProperties.length;
     var result = null;
 
     if (_type == 'stage') {
@@ -42,40 +43,40 @@ define([
     // find stage id
     for (var i = 0; i < len && stageID == null; i++) {
 
-      var clen = window.storage.propertyContainer.floorProperties[i].cellKey.length;
-      var blen = window.storage.propertyContainer.floorProperties[i].cellBoundaryKey.length;
-      var slen = window.storage.propertyContainer.floorProperties[i].stateKey.length;
-      var tlen = window.storage.propertyContainer.floorProperties[i].transitionKey.length;
+      var clen = propertyContainer.floorProperties[i].cellKey.length;
+      var blen = propertyContainer.floorProperties[i].cellBoundaryKey.length;
+      var slen = propertyContainer.floorProperties[i].stateKey.length;
+      var tlen = propertyContainer.floorProperties[i].transitionKey.length;
 
       switch (_type) {
         case 'cell':
           for (var j = 0; j < clen && stageID == null; j++) {
-            if (window.storage.propertyContainer.floorProperties[i].cellKey[j] == _id) {
-              stageID = window.storage.propertyContainer.floorProperties[i].id;
+            if (propertyContainer.floorProperties[i].cellKey[j] == _id) {
+              stageID = propertyContainer.floorProperties[i].id;
               break;
             }
           }
           break;
         case 'cellBoundary':
           for (var j = 0; j < blen && stageID == null; j++) {
-            if (window.storage.propertyContainer.floorProperties[i].cellBoundaryKey[j] == _id) {
-              stageID = window.storage.propertyContainer.floorProperties[i].id;
+            if (propertyContainer.floorProperties[i].cellBoundaryKey[j] == _id) {
+              stageID = propertyContainer.floorProperties[i].id;
               break;
             }
           }
           break;
         case 'state':
           for (var j = 0; j < slen && stageID == null; j++) {
-            if (window.storage.propertyContainer.floorProperties[i].stateKey[j] == _id) {
-              stageID = window.storage.propertyContainer.floorProperties[i].id;
+            if (propertyContainer.floorProperties[i].stateKey[j] == _id) {
+              stageID = propertyContainer.floorProperties[i].id;
               break;
             }
           }
           break;
         case 'transition':
           for (var j = 0; j < tlen && stageID == null; j++) {
-            if (window.storage.propertyContainer.floorProperties[i].transitionKey[j] == _id) {
-              stageID = window.storage.propertyContainer.floorProperties[i].id;
+            if (propertyContainer.floorProperties[i].transitionKey[j] == _id) {
+              stageID = propertyContainer.floorProperties[i].id;
               break;
             }
           }
@@ -85,7 +86,7 @@ define([
       }
     }
 
-    return window.storage.canvasContainer.stages[stageID].getElementById(_type, _id);
+    return require('Storage').getInstance().getCanvasContainer().stages[stageID].getElementById(_type, _id);
 
   }
 
@@ -122,13 +123,13 @@ define([
    * @memberof CanvasContainer
    */
   CanvasContainer.prototype.addObjFromGeometries = function(geometryContainer) {
-
-    log.info(window.storage.dotPoolContainer);
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+    var geometryContainer = require('Storage').getInstance().getGeometryContainer();
 
     // add cell
     var cells = geometryContainer.cellGeometry;
     for (var index in cells) {
-      var floor = window.storage.propertyContainer.getFloorById('cell', cells[index].id);
+      var floor = propertyContainer.getFloorById('cell', cells[index].id);
       this.stages[floor].cellLayer.group.simpleAdd({
         id: cells[index].id,
         dots: cells[index].points,
@@ -139,7 +140,7 @@ define([
     // add cellBou==ndary
     var cellBoundary = geometryContainer.cellBoundaryGeometry;
     for (var index in cellBoundary) {
-      var floor = window.storage.propertyContainer.getFloorById('cellBoundary', cellBoundary[index].id);
+      var floor = propertyContainer.getFloorById('cellBoundary', cellBoundary[index].id);
       this.stages[floor].cellBoundaryLayer.group.simpleAdd({
         id: cellBoundary[index].id,
         dots: cellBoundary[index].points
@@ -149,7 +150,7 @@ define([
     // add state
     var state = geometryContainer.stateGeometry;
     for(var index in state){
-      var floor = window.storage.propertyContainer.getFloorById('state', state[index].id);
+      var floor = propertyContainer.getFloorById('state', state[index].id);
       this.stages[floor].stateLayer.group.simpleAdd({
         id: state[index].id,
         dot: state[index].point
@@ -159,7 +160,7 @@ define([
     // add transition
     var transition = geometryContainer.transitionGeometry;
     for(var index in transition){
-      var floor = window.storage.propertyContainer.getFloorById('transition', transition[index].id);
+      var floor = propertyContainer.getFloorById('transition', transition[index].id);
       this.stages[floor].transitionLayer.group.simpleAdd({
         id: transition[index].id,
         points: transition[index].points
@@ -169,7 +170,7 @@ define([
     // add hole
     var hole = geometryContainer.holeGeometry;
     for(var index in hole){
-      var floor = window.storage.propertyContainer.getFloorById('cell', hole[index].holeOf);
+      var floor = propertyContainer.getFloorById('cell', hole[index].holeOf);
       this.stages[floor].cellLayer.group.addHole(hole[index]);
     }
 

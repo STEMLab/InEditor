@@ -359,11 +359,13 @@ define([
    * @memberof CellGroup
    */
    CellGroup.prototype.delete = function(id, floor){
+     var dotPoolContainer = require('Storage').getInstance().getDotPoolContainer();
+
      for(var i in this.cells){
        if(this.cells[i].id == id){
 
          if(floor != undefined){
-           var dotPool = window.storage.dotPoolContainer.getDotPool(floor);
+           var dotPool = dotPoolContainer.getDotPool(floor);
            for(var j in this.cells[i].dots){
              dotPool.deleteDotFromObj(this.cells[i].dots[j].uuid, this.cells[i].id);
            }

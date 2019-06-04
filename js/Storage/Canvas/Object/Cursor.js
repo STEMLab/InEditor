@@ -6,8 +6,8 @@ define([], function() {
     this.coor = coor;
 
     this.cursor = new Konva.Circle({
-      radius: window.conditions.cursorrSize,
-      fill: window.conditions.cursorColor,
+      radius: require('Conditions').getInstance().cursorrSize,
+      fill: require('Conditions').getInstance().cursorColor,
       x: this.coor.x,
       y: this.coor.y
     });

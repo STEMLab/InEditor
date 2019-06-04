@@ -80,7 +80,7 @@ define([
     var path;
     var result = null;
 
-    if (this.projectProperty == null) path = window.storage.propertyContainer;
+    if (this.projectProperty == null) path = require('Storage').getInstance().getPropertyContainer();
     else path = this;
 
     switch (_type) {
@@ -131,9 +131,12 @@ define([
    * @returns {String} floor id or null
    */
   PropertyContainer.prototype.getFloorById = function(_type, _id) {
+    if(_type === 'CELL_SPACE') _type = 'cell';
+    else if(_type === 'CELL_SPACE_BOUNDARY') _type = 'cellBoundary';
+    else if(_type === 'STATE') _type = 'state';
+    else if(_type === 'TRANSITION') _type = 'transition';
 
     for (var key in this.floorProperties) {
-
       switch (_type) {
         case 'cell':
           if (this.floorProperties[key].cellKey.indexOf(_id) != -1) return this.floorProperties[key].id;
@@ -165,8 +168,8 @@ define([
     var result = new Object;
 
     if (this.floorProperties == null) {
-      result.title = window.storage.projectProperty.name;
-      result.key = window.storage.projectProperty.id;
+      result.title = require('Storage').getInstance().getPropertyContainer().projectProperty.name;
+      result.key = require('Storage').getInstance().getPropertyContainer().projectProperty.id;
       result.type = "project";
       result.folder = true;
       result.children = new Array();
@@ -182,7 +185,7 @@ define([
 
     var path;
 
-    if (this.floorProperties == null) path = window.storage.propertyContainer.floorProperties;
+    if (this.floorProperties == null) path = require('Storage').getInstance().getPropertyContainer().floorProperties;
     else path = this.floorProperties;
 
     for (var i = 0; i < path.length; i++) {
@@ -229,7 +232,7 @@ define([
 
       if (path[i].cellKey.length != 0) {
         for (var j = 0; j < path[i].cellKey.length; j++) {
-          var property = this.addnewinterlayerconnetctionById('cell', path[i].cellKey[j]);
+          var property = this.getElementById('cell', path[i].cellKey[j]);
           var cellObj = {
             title: (property.name == '' ? property.id : property.name),
             key: property.id,
@@ -243,7 +246,7 @@ define([
 
       if (path[i].cellBoundaryKey.length != 0) {
         for (var j = 0; j < path[i].cellBoundaryKey.length; j++) {
-          var property = this.addnewByinterlayerconnetctionById('cellBoundary', path[i].cellBoundaryKey[j]);
+          var property = this.getElementById('cellBoundary', path[i].cellBoundaryKey[j]);
           var cellBoundaryObj = {
             title: (property.name == '' ? property.id : property.name),
             key: property.id,

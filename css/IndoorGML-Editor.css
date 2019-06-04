@@ -1,12 +1,6 @@
+@import url("goldenlayout-base.css");
+
 :root {
-  --menubar-bg-color: black;
-  --toolbar-bg-color: black;
-  --sidebar-bg-color: black;
-  --treeview-bg-color: #222222;
-  --workspace-bg-color: black;
-  --viewport-bg-color: #eaeaea;
-  --property-tab-title-color: #eaeaea;
-  --property-tab-value-color: #d0d0d0;
   --sidebar-width: 17rem;
   --property-container-width: 16.5rem;
   --property-container-title-width: 3rem;
@@ -31,17 +25,12 @@ html {
   height: 100%;
 }
 
-/* body {
-  padding-top: 1.8rem;
-  font-size: 12px;
-  height: 100%;
-} */
 
 body {
   padding-top: 1.8rem !important;
   font-size: 12px !important;
   height: 100% !important;
-  background: black !important;
+  background: var(--body-bg-color) !important;
 }
 
 .navbar {
@@ -81,6 +70,10 @@ body {
   height: -webkit-fill-available;
 }
 
+.lm_header {
+  background-color: var(--content-background);
+}
+
 .tree-view-container {
   background: var(--treeview-bg-color);
   /* min-height: 2.0rem; */
@@ -99,7 +92,7 @@ body {
 .tree-view-container ul {
   list-style: none;
   padding-left: 0.8rem;
-  color: #e5e5e5;
+  color: var(--font-color);
 }
 
 .tree-view-container .lm_content {
@@ -144,6 +137,10 @@ body {
   overflow-y: auto;
 }
 
+.property-container .lm_content table{
+  border: transparent;
+}
+
 .property-container label {
   color: var(--property-tab-value-color) !important;
   font-size: 12px !important;
@@ -182,7 +179,7 @@ td select {
   text-align: center;
 }
 
-.property-table .inner-tag {
+.property-table .inner-tag {value
   font-weight: bold;
   text-align: center;
 }
@@ -198,13 +195,8 @@ td select {
 
 .property-table .value {
   text-align: left;
-  width: 70%;
+  width: 95%;
   vertical-align: middle !important;
-}
-
-.property-table .value input {
-  color: var(--property-tab-value-color) !important;
-  font-weight: lighter;
 }
 
 .property-table .button {
@@ -218,8 +210,10 @@ td select {
   margin-bottom: .2rem !important;
 }
 
-.property-table .input {
+.property-table .value-input {
   width: 100%;
+  font-weight: lighter !important;
+  color: var(--property-tab-value-color) !important;
 }
 
 /* custom scrollbar */
@@ -266,7 +260,7 @@ td select {
 }
 
 .gutter {
-  background-color: var(--workspace-bg-color);
+  background-color: var(--content-background);
   background-repeat: no-repeat;
   background-position: 50%;
 }
@@ -285,7 +279,7 @@ td select {
   top: 3.8rem;
   bottom: 0;
   width: inherit;
-  background-color: var(--workspace-bg-color);
+  background-color: var(--content-background);
 }
 
 .gutter.gutter-horizontal {
@@ -304,7 +298,7 @@ td select {
   padding-top: 0.7rem;
   padding-bottom: 0.7rem;
   padding-right: 0.8rem;
-  background-color: var(--workspace-bg-color);
+  background-color: var(--content-background);
 }
 
 #workspace-layout-container {
@@ -316,8 +310,8 @@ td select {
 }
 
 #workspace-layout-container .lm_items {
-  background-color: #222222;
-  /* width: 100% !important; */
+  background-color: var(--workspace-bg-color);
+  border: 1px solid var(--workspace-border-color);
 }
 
 #workspace-layout-container .lm_item_container {
@@ -334,6 +328,7 @@ td select {
   height: inherit;
   overflow: hidden;
   background-color: var(--viewport-bg-color);
+  border: 1px solid var(--workspace-bg-color);
 }
 
 .property-dropdown{

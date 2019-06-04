@@ -35,10 +35,10 @@ define([
 
   Subscriber.prototype.run = function(_message, uuid) {
 
-    var r = this.callbackFunctions[_message.req].run(_message.reqObj, window.storage) ;
+    var r = this.callbackFunctions[_message.req].run(_message.reqObj, require('Storage').getInstance()) ;
     if( r != false && this.callbackFunctions[_message.req].undo != undefined ){
 
-      window.myhistory.push(
+      require('History').getInstance().push(
         uuid,
         this.name,
         _message.req, this.callbackFunctions[_message.req].createHistoryObjData(_message.reqObj, uuid, this.name),

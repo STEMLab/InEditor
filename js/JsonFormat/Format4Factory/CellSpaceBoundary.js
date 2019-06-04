@@ -279,12 +279,12 @@ define(["./Feature", "js/JsonFormat/GeometryConverter.js", "js/Storage/Dot/DotMa
   CellSpaceBoundary.prototype.setDuality = function(duality) {
 
     if (this.properties != null &&
-      (this.properties.duality != null || window.conditions.exportConditions[this.type].properties.duality)) {
+      (this.properties.duality != null || require('Conditions').getInstance().exportConditions[this.type].properties.duality)) {
 
       if (duality == null || duality == "") delete this.properties['duality'];
       else {
 
-        var transitionGeo = window.storage.geometryContainer.getElementById('transition', duality);
+        var transitionGeo = require('Storage').getInstance().getGeometryContainer().getElementById('transition', duality);
         var startPoint = transitionGeo.points[0];
         var endPoint;
 

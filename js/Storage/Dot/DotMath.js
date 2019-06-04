@@ -143,7 +143,7 @@ define([], function() {
       }
 
       if (minimum_d == null) {
-        minimum_d = window.conditions.coordinateThreshold;
+        minimum_d = require('Conditions').getInstance().coordinateThreshold;
       }
 
       for (var i = 0; connections.length > i; i++) {

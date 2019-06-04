@@ -8,7 +8,7 @@ define([], function() {
   /**
   * @class State
   */
-  function State(id, _x, _y) {
+  function State(id, _x, _y) { // 방식 이상, id, dot를 받던지해야함
     this.id = id;
 
     this.circle = new Konva.Circle({

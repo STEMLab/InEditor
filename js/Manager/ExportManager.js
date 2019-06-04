@@ -2,23 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define([
-  "../PubSub/Subscriber.js",
-  "../JsonFormat/FeatureFactory4Factory.js",
-  "../JsonFormat/FeatureFactory4Viewer.js",
-  "../Storage/Dot/Dot.js",
-  "../Storage/Dot/DotMath.js",
-  "Property",
-  "Popup"
-], function(
-  Subscriber,
-  FeatureFactory4Factory,
-  FeatureFactory4Viewer,
-  Dot,
-  DotMath,
-  Property,
-  Popup
-) {
+define(function(require) {
   'use strict';
 
   /**
@@ -27,13 +11,12 @@ define([
    */
   function ExportManager() {
 
-    Subscriber.apply(this, arguments);
+    require('Subscriber').apply(this, arguments);
 
     this.init();
   }
 
-  ExportManager.prototype = Object.create(Subscriber.prototype);
-
+  ExportManager.prototype = Object.create(require('Subscriber').prototype);
   ExportManager.prototype.init = function() {
 
     this.name = 'ExportManager';
@@ -50,8 +33,8 @@ define([
 
     $('#go-viewer-modal').modal('hide');
 
-    var manager = window.broker.getManager('exporttoviewer', 'ExportManager');
-    var transDots = manager.transAllDots(window.storage.dotPoolContainer.dotPool, window.storage.propertyContainer.getFloorObj());
+    var manager = require('Broker').getInstance().getManager('exporttoviewer', 'ExportManager');
+    var transDots = manager.transAllDots(require('Storage').getInstance().getDotPoolContainer().dotPool, require('Storage').getInstance().getPropertyContainer().getFloorObj());
 
     var cellsResult = manager.cellObj4Viewer(manager, transDots);
     var bbox = cellsResult.bbox;
@@ -121,12 +104,12 @@ define([
       return bbox;
     }
 
-    var geometries = window.storage.geometryContainer.cellGeometry;
-    var properties = window.storage.propertyContainer.cellProperties;
-    var floorProperties = window.storage.propertyContainer.floorProperties;
-    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+    var geometries = require('Storage').getInstance().getGeometryContainer().cellGeometry;
+    var properties = require('Storage').getInstance().getPropertyContainer().cellProperties;
+    var floorProperties = require('Storage').getInstance().getPropertyContainer().floorProperties;
+    var manager = require('Broker').getInstance().getManager('exporttofactory', 'ExportManager');
 
-    var holeGeometries = window.storage.geometryContainer.holeGeometry;
+    var holeGeometries = require('Storage').getInstance().getGeometryContainer().holeGeometry;
     var holeMap = {};
 
     var slantMap = {};
@@ -134,7 +117,7 @@ define([
     // copy geometry coordinates
     for (var key in geometries) {
 
-      var tmp = new FeatureFactory4Viewer('CellSpace');
+      var tmp = require('FeatureFactory4Viewer')('CellSpace');
       tmp.setGeometryId("CG-" + geometries[key].id);
       tmp.pushCoordinatesFromDots(geometries[key].points, transDot);
       cells[geometries[key].id] = tmp;
@@ -247,14 +230,14 @@ define([
 
     var cellBoundaries = {};
 
-    var geometries = window.storage.geometryContainer.cellBoundaryGeometry;
-    var properties = window.storage.propertyContainer.cellBoundaryProperties;
-    var floorProperties = window.storage.propertyContainer.floorProperties;
+    var geometries = require('Storage').getInstance().getGeometryContainer().cellBoundaryGeometry;
+    var properties = require('Storage').getInstance().getPropertyContainer().cellBoundaryProperties;
+    var floorProperties = require('Storage').getInstance().getPropertyContainer().floorProperties;
 
     // copy geometry coordinates
     for (var key in geometries) {
 
-      var tmp = new FeatureFactory4Viewer('CellSpaceBoundary');
+      var tmp = require('FeatureFactory4Viewer')('CellSpaceBoundary');
       tmp.setGeometryId("CBG-" + geometries[key].id);
       tmp.pushCoordinatesFromDots(geometries[key].points, transDot);
       cellBoundaries[geometries[key].id] = tmp;
@@ -284,7 +267,7 @@ define([
         cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]].setHeight(height);
 
         // make reverse
-        var reverseObj = new FeatureFactory4Viewer('CellSpaceBoundary', conditions);
+        var reverseObj = require('FeatureFactory4Viewer')('CellSpaceBoundary', conditions);
         reverseObj.copy(cellBoundaries[cellBoundarykeyInFloor[cellBoundaryKey]]);
         reverseObj.setId(reverseObj.id + '-REVERSE');
         reverseObj.setGeometryId(reverseObj.geometry.properties.id + '-REVERSE');
@@ -317,16 +300,16 @@ define([
 
     var states = {};
     var result = [];
-    var conditions = window.conditions.exportConditions.State;
-    var geometries = window.storage.geometryContainer.stateGeometry;
-    var properties = window.storage.propertyContainer.stateProperties;
-    var floorProperties = window.storage.propertyContainer.floorProperties;
-    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+    var conditions = require('Conditions').getInstance().exportConditions.State;
+    var geometries = require('Storage').getInstance().getGeometryContainer().stateGeometry;
+    var properties = require('Storage').getInstance().getPropertyContainer().stateProperties;
+    var floorProperties = require('Storage').getInstance().getPropertyContainer().floorProperties;
+    var manager = require('Broker').getInstance().getManager('exporttofactory', 'ExportManager');
 
     // copy geometry coordinates
     for (var key in geometries) {
 
-      var tmp = new FeatureFactory4Viewer('State', conditions);
+      var tmp = require('FeatureFactory4Viewer')('State', conditions);
       tmp.setGeometryId("SG-" + geometries[key].id);
       tmp.pushCoordinatesFromDots(transDot[geometries[key].point.uuid]);
       states[geometries[key].id] = tmp;
@@ -355,16 +338,16 @@ define([
 
     var transitions = {};
     var result = [];
-    var conditions = window.conditions.exportConditions.Transition;
-    var geometries = window.storage.geometryContainer.transitionGeometry;
-    var properties = window.storage.propertyContainer.transitionProperties;
-    var floorProperties = window.storage.propertyContainer.floorProperties;
-    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+    var conditions = require('Conditions').getInstance().exportConditions.Transition;
+    var geometries = require('Storage').getInstance().getGeometryContainer().transitionGeometry;
+    var properties = require('Storage').getInstance().getPropertyContainer().transitionProperties;
+    var floorProperties = require('Storage').getInstance().getPropertyContainer().floorProperties;
+    var manager = require('Broker').getInstance().getManager('exporttofactory', 'ExportManager');
 
     // copy geometry coordinates
     for (var key in geometries) {
 
-      var tmp = new FeatureFactory4Viewer('Transition', conditions);
+      var tmp = require('FeatureFactory4Viewer')('Transition', conditions);
       tmp.setId(geometries[key].id);
       tmp.setGeometryId("TG-" + geometries[key].id);
       tmp.setConnects(geometries[key].connects);
@@ -395,7 +378,7 @@ define([
    */
   ExportManager.prototype.exportToFactory = function(reqObj) {
 
-    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+    var manager = require('Broker').getInstance().getManager('exporttofactory', 'ExportManager');
     manager.getExportConditionFromModal();
     $('#go-factory-modal').modal('hide');
     $('#go-factory-loading').modal('show');
@@ -403,41 +386,41 @@ define([
     var result = {};
 
     var document = {
-      "id": window.storage.propertyContainer.projectProperty.id
+      "id": require('Storage').getInstance().getPropertyContainer().projectProperty.id
     };
 
     var indoorfeatures = {
       "docId": document.id,
-      "id": window.conditions.guid()
+      "id": require('Conditions').getInstance().guid()
     };
 
     var primalspacefeatures = {
       "docId": document.id,
       "parentId": indoorfeatures.id,
-      "id": window.conditions.guid()
+      "id": require('Conditions').getInstance().guid()
     };
 
     var multiLayeredGraph = {
       "docId": document.id,
       "parentId": indoorfeatures.id,
-      "id": window.conditions.guid()
+      "id": require('Conditions').getInstance().guid()
     };
 
     var spaceLayers = {
       "docId": document.id,
       "parentId": multiLayeredGraph.id,
-      "id": window.conditions.guid()
+      "id": require('Conditions').getInstance().guid()
     }
 
     var interEdges = {
       "docId": document.id,
       "parentId": multiLayeredGraph.id,
-      "id": window.conditions.guid()
+      "id": require('Conditions').getInstance().guid()
     }
 
     var baseURL = reqObj.baseURL;
 
-    var transDots = manager.transAllDots(window.storage.dotPoolContainer.dotPool, window.storage.propertyContainer.getFloorObj());
+    var transDots = manager.transAllDots(require('Storage').getInstance().getDotPoolContainer().dotPool, require('Storage').getInstance().getPropertyContainer().getFloorObj());
 
     var spaceLayer = manager.spaceLayer4Factory(document.id, spaceLayers.id);
     var cells = manager.cellObj4Factory(document.id, primalspacefeatures.id, transDots);
@@ -679,7 +662,7 @@ define([
    */
   ExportManager.prototype.getExportConditionFromModal = function() {
 
-    var exportConditions = window.conditions.exportConditions;
+    var exportConditions = require('Conditions').getInstance().exportConditions;
 
     // cell
     if ($('#factory-geometry-type-2D').prop("checked")) exportConditions.CellSpace.geometry.extrude = false;
@@ -763,7 +746,7 @@ define([
    */
   ExportManager.prototype.spaceLayer4Factory = function(docId, parentId) {
 
-    var floors = window.storage.propertyContainer.floorProperties;
+    var floors = require('Storage').getInstance().getPropertyContainer().floorProperties;
     var spaceLayers = [];
 
     for (var floorKey in floors) {
@@ -794,7 +777,7 @@ define([
       nodes.push({
         "docId": docId,
         "parentId": spaceLayers[i].id,
-        "id": window.conditions.guid()
+        "id": require('Conditions').getInstance().guid()
       });
 
     }
@@ -815,7 +798,7 @@ define([
       edges.push({
         "docId": docId,
         "parentId": spaceLayers[i].id,
-        "id": window.conditions.guid()
+        "id": require('Conditions').getInstance().guid()
       });
 
     }
@@ -833,12 +816,12 @@ define([
 
     var cells = {};
 
-    var conditions = window.conditions.exportConditions.CellSpace;
-    var geometries = window.storage.geometryContainer.cellGeometry;
-    var properties = window.storage.propertyContainer.cellProperties;
-    var floorProperties = window.storage.propertyContainer.floorProperties;
-    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
-    var geoType = window.conditions.exportConditions.Geometry;
+    var conditions = require('Conditions').getInstance().exportConditions.CellSpace;
+    var geometries = require('Storage').getInstance().getGeometryContainer().cellGeometry;
+    var properties = require('Storage').getInstance().getPropertyContainer().cellProperties;
+    var floorProperties = require('Storage').getInstance().getPropertyContainer().floorProperties;
+    var manager = require('Broker').getInstance().getManager('exporttofactory', 'ExportManager');
+    var geoType = require('Conditions').getInstance().exportConditions.Geometry;
     var codeList = {};
 
     var cityJSON = {
@@ -848,14 +831,14 @@ define([
       vertices: []
     };
 
-    var holeGeometries = window.storage.geometryContainer.holeGeometry;
+    var holeGeometries = require('Storage').getInstance().getGeometryContainer().holeGeometry;
     var holeMap = {};
 
     var slantMap = {};
 
     // copy geometry coordinates
     for (var key in geometries) {
-      var tmp = new FeatureFactory4Factory('CellSpace', conditions);
+      var tmp = require('FeatureFactory4Factory')('CellSpace', conditions);
       tmp.setId(geometries[key].id);
       tmp.setDocId(docId);
       tmp.setParentId(parentId);
@@ -869,7 +852,7 @@ define([
 
     }
 
-    var cl = Property.CODE_LIST.getInstance();
+    var cl = require('Property').CODE_LIST.getInstance();
 
     // copy attributes
     for (var key in properties) {
@@ -957,7 +940,7 @@ define([
         var cellId = cellkeyInFloor[cellKey];
 
         var coor = cells[cellId].getCoordinates()[0];
-        if (!DotMath.isCCWByArr(coor)) coor.reverse();
+        if (!require('DotMath').isCCWByArr(coor)) coor.reverse();
         // 이해를 위해 extrude cell  func를 수정하는 것이 좋을 듯 하다.
 
 
@@ -1002,7 +985,7 @@ define([
           for (var holeKey in holeMap[cellId]) {
 
             var holeCoor = holeMap[cellId][holeKey];
-            if (!DotMath.isCCWByArr(holeCoor)) holeCoor.reverse();
+            if (!require('DotMath').isCCWByArr(holeCoor)) holeCoor.reverse();
             // add hole func에서 solid를 뒤집어서 push 하고 있다.
 
             if (geoType == '3D') cells[cellId].addHole(manager.extrudeCell(holeCoor, floorProperties[floorKey].celingHeight * 1 - 0.2), '3D');
@@ -1065,9 +1048,9 @@ define([
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status == 200) {
-        Popup("success", "Geometry validation successed!")
+        require('Popup')("success", "Geometry validation successed!")
       } else if (xhr.readyState === 4 && xhr.status == 500) {
-        Popup("error", "Geometry validation failed!", xhr.response)
+        require('Popup')("error", "Geometry validation failed!", xhr.response)
       }
     }
 
@@ -1119,18 +1102,18 @@ define([
    */
   ExportManager.prototype.cellBoundaryObj4Factory = function(docId, parentId, transDot) {
     var cellBoundaries = {};
-    var conditions = window.conditions.exportConditions.CellSpaceBoundary;
-    var geometries = window.storage.geometryContainer.cellBoundaryGeometry;
-    var properties = window.storage.propertyContainer.cellBoundaryProperties;
-    var floorProperties = window.storage.propertyContainer.floorProperties;
-    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
-    var geoType = window.conditions.exportConditions.Geometry;
+    var conditions = require('Conditions').getInstance().exportConditions.CellSpaceBoundary;
+    var geometries = require('Storage').getInstance().getGeometryContainer().cellBoundaryGeometry;
+    var properties = require('Storage').getInstance().getPropertyContainer().cellBoundaryProperties;
+    var floorProperties = require('Storage').getInstance().getPropertyContainer().floorProperties;
+    var manager = require('Broker').getInstance().getManager('exporttofactory', 'ExportManager');
+    var geoType = require('Conditions').getInstance().exportConditions.Geometry;
     var codeList = {};
 
     // copy geometry coordinates
     for (var key in geometries) {
 
-      var tmp = new FeatureFactory4Factory('CellSpaceBoundary', conditions);
+      var tmp = require('FeatureFactory4Factory')('CellSpaceBoundary', conditions);
       tmp.setId(geometries[key].id);
       tmp.setDocId(docId);
       tmp.setParentId(parentId);
@@ -1140,7 +1123,7 @@ define([
 
     }
 
-    var cl = Property.CODE_LIST.getInstance();
+    var cl = require('Property').CODE_LIST.getInstance();
 
     // copy attributes
     for (var key in properties) {
@@ -1174,7 +1157,7 @@ define([
         var reverseObj = null;
 
         // make reverse
-        reverseObj = new FeatureFactory4Factory('CellSpaceBoundary', conditions);
+        reverseObj = require('FeatureFactory4Factory')('CellSpaceBoundary', conditions);
         reverseObj.copy(cellBoundaries[id]);
         reverseObj.setId(reverseObj.id + '-REVERSE');
         reverseObj.setGeometryId(cellBoundaries[id].geometry.properties.id + '-REVERSE');
@@ -1230,10 +1213,10 @@ define([
     };
 
     // add hatch
-    var hatchs = window.storage.geometryContainer.hatchGeometry;
+    var hatchs = require('Storage').getInstance().getGeometryContainer().hatchGeometry;
     for (var h of hatchs) {
 
-      var tmp = new FeatureFactory4Factory('CellSpaceBoundary', conditions);
+      var tmp = require('FeatureFactory4Factory')('CellSpaceBoundary', conditions);
       log.info(h);
       tmp.setId(h.id);
       tmp.setName(h.name);
@@ -1255,7 +1238,7 @@ define([
       result.connectionboundary.push(tmp);
 
 
-      var tmp_ = new FeatureFactory4Factory('CellSpaceBoundary', conditions);
+      var tmp_ = require('FeatureFactory4Factory')('CellSpaceBoundary', conditions);
       log.info(h);
       tmp_.setId(h.id + "-REVERSE");
       tmp_.setDocId(docId);
@@ -1297,16 +1280,16 @@ define([
   ExportManager.prototype.stateObj4Factory = function(docId, nodes, transDot) {
     var states = {};
     var result = [];
-    var conditions = window.conditions.exportConditions.State;
-    var geometries = window.storage.geometryContainer.stateGeometry;
-    var properties = window.storage.propertyContainer.stateProperties;
-    var floorProperties = window.storage.propertyContainer.floorProperties;
-    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+    var conditions = require('Conditions').getInstance().exportConditions.State;
+    var geometries = require('Storage').getInstance().getGeometryContainer().stateGeometry;
+    var properties = require('Storage').getInstance().getPropertyContainer().stateProperties;
+    var floorProperties = require('Storage').getInstance().getPropertyContainer().floorProperties;
+    var manager = require('Broker').getInstance().getManager('exporttofactory', 'ExportManager');
 
     // copy geometry coordinates
     for (var key in geometries) {
 
-      var tmp = new FeatureFactory4Factory('State', conditions);
+      var tmp = require('FeatureFactory4Factory')('State', conditions);
       tmp.setId(geometries[key].id);
       tmp.setDocId(docId);
       tmp.setGeometryId("SG-" + geometries[key].id);
@@ -1365,16 +1348,16 @@ define([
   ExportManager.prototype.transitionObj4Factory = function(docId, edges, transDot) {
     var transitions = {};
     var result = [];
-    var conditions = window.conditions.exportConditions.Transition;
-    var geometries = window.storage.geometryContainer.transitionGeometry;
-    var properties = window.storage.propertyContainer.transitionProperties;
-    var floorProperties = window.storage.propertyContainer.floorProperties;
-    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+    var conditions = require('Conditions').getInstance().exportConditions.Transition;
+    var geometries = require('Storage').getInstance().getGeometryContainer().transitionGeometry;
+    var properties = require('Storage').getInstance().getPropertyContainer().transitionProperties;
+    var floorProperties = require('Storage').getInstance().getPropertyContainer().floorProperties;
+    var manager = require('Broker').getInstance().getManager('exporttofactory', 'ExportManager');
 
     // copy geometry coordinates
     for (var key in geometries) {
 
-      var tmp = new FeatureFactory4Factory('Transition', conditions);
+      var tmp = require('FeatureFactory4Factory')('Transition', conditions);
       tmp.setId(geometries[key].id);
       tmp.setDocId(docId);
       tmp.setGeometryId("TG-" + geometries[key].id);
@@ -1411,7 +1394,7 @@ define([
 
       for (var transitionKey in transitionKeyInFloor) {
 
-        var reverseObj = new FeatureFactory4Factory('Transition', conditions);
+        var reverseObj = require('FeatureFactory4Factory')('Transition', conditions);
         reverseObj.copy(transitions[transitionKeyInFloor[transitionKey]]);
         reverseObj.setId(reverseObj.id + '-REVERSE');
         reverseObj.setGeometryId(reverseObj.geometry.properties.id + '-REVERSE');
@@ -1443,10 +1426,10 @@ define([
 
   ExportManager.prototype.interlayerConnectionObj4Factory = function(docId, interEdges) {
     var result = [];
-    var properties = window.storage.propertyContainer.interlayerConnections;
+    var properties = require('Storage').getInstance().getPropertyContainer().interlayerConnections;
 
     for (var key in properties) {
-      var tmp = new FeatureFactory4Factory('InterlayerConnection');
+      var tmp = require('FeatureFactory4Factory')('InterlayerConnection');
       tmp.id = properties[key].id;
       tmp.docId = docId;
       tmp.parentId = interEdges.id;
@@ -1748,8 +1731,8 @@ define([
   ExportManager.prototype.transAllDots = function(dotPools, floorProperties) {
 
     var result = {};
-    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
-    var pp = window.storage.propertyContainer.projectProperty;
+    var manager = require('Broker').getInstance().getManager('exporttofactory', 'ExportManager');
+    var pp = require('Storage').getInstance().getPropertyContainer().projectProperty;
 
     if (pp.isRealCoor && pp.realCoorFloor != "")
       result = manager.transAllDotsUsingTool(dotPools, floorProperties, pp);
@@ -1758,7 +1741,7 @@ define([
 
 
     //change state height
-    var proeprtyContainer = window.storage.propertyContainer;
+    var proeprtyContainer = require('Storage').getInstance().getPropertyContainer();
     for (var key in result) {
       if (result[key].isState()) {
         var index = Object.values(result[key].memberOf).indexOf('state');
@@ -1780,6 +1763,7 @@ define([
   ExportManager.prototype.transAllDotsUsingMatrix = function(dotPools, floorProperties) {
 
     function copyDot(obj) {
+      var Dot = require('Dot');
       var copiedDot = new Dot(obj.point.x, obj.point.y);
       copiedDot.uuid = obj.uuid;
       copiedDot.memberOf = copyObject(obj.memberOf);
@@ -1804,12 +1788,12 @@ define([
     }
 
     let result = {};
-    var manager = window.broker.getManager('exporttofactory', 'ExportManager');
+    var manager = require('Broker').getInstance().getManager('exporttofactory', 'ExportManager');
 
     for (var dotPoolKey in dotPools) {
       //function(pixelHeight, pixeWidth, worldURC, worldLLC, point)
 
-      let stage = window.storage.canvasContainer.stages[floorProperties[dotPoolKey].id].stage;
+      let stage = require('Storage').getInstance().getCanvasContainer().stages[floorProperties[dotPoolKey].id].stage;
       let height = floorProperties[dotPoolKey].groundHeight * 1;
       let worldLLC = [floorProperties[dotPoolKey].lowerCorner[0] * 1, floorProperties[dotPoolKey].lowerCorner[1] * 1, 0];
       let worldURC = [floorProperties[dotPoolKey].upperCorner[0] * 1, floorProperties[dotPoolKey].upperCorner[1] * 1, 0];
@@ -1848,6 +1832,7 @@ define([
     }
 
     function copyDot(obj) {
+      var Dot = require('Dot');
       var copiedDot = new Dot(obj.point.x, obj.point.y);
       copiedDot.uuid = obj.uuid;
       copiedDot.memberOf = copyObject(obj.memberOf);
@@ -1875,7 +1860,7 @@ define([
     let allCoorArr = [];
     let result = {};
 
-    let canvasCoor = window.storage.canvasContainer.stages[projectProperty.realCoorFloor].getWD();
+    let canvasCoor = require('Storage').getInstance().getCanvasContainer().stages[projectProperty.realCoorFloor].getWD();
     let lowerCorner = floorProperties[projectProperty.realCoorFloor].lowerCorner;
     let upperCorner = floorProperties[projectProperty.realCoorFloor].upperCorner;
 

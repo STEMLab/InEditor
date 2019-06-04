@@ -2,14 +2,7 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define([
-  "../PubSub/Message.js",
-  "./Result.js"
-], function(
-  Message,
-  Result
-) {
-  'use strict';
+define(function(require) {
 
   /**
    * @desc This handler deal with events which request change ui.<br>e.g. click tree view content.
@@ -44,7 +37,7 @@ define([
       'click': this.showModal
     };
 
-    handlerBinder['viewer-btn'] = {
+    handlerBinder['btn__viewer'] = {
       'click': this.showModal
     };
 
@@ -102,14 +95,14 @@ define([
 
       if (broker.isPublishable('activateworkspace') && broker.isPublishable('setpropertyview')) {
 
-        broker.publish(new Message('activateworkspace', {
+        broker.publish(require('Message')('activateworkspace', {
           'id': data.node.key
         }));
 
-        broker.publish(new Message('setpropertyview', {
+        broker.publish(require('Message')('setpropertyview', {
           'type': data.node.type,
           'id': data.node.key,
-          'storage': window.storage
+          'storage': require('Storage').getInstance()
         }));
 
         result.result = true;
@@ -119,10 +112,10 @@ define([
     } else if (broker.isPublishable('setpropertyview')) {
 
       // Converts the contents of the sidebar > property to the contents of the selected element.
-      broker.publish(new Message('setpropertyview', {
+      broker.publish(require('Message')('setpropertyview', {
         'type': data.node.type,
         'id': data.node.key,
-        'storage': window.storage
+        'storage': require('Storage').getInstance()
       }));
 
     } else {
@@ -145,14 +138,17 @@ define([
       'msg': null
     };
 
+    var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+
+
     if (broker.isPublishable('zoomworkspace')) {
 
       //data.preventDefault();
 
       var target = data.path[2].id;
-      var oldScale = window.storage.canvasContainer.stages[target].stage.scaleX();
+      var oldScale = canvasContainer.stages[target].stage.scaleX();
 
-      if (data.deltaY > 0 && oldScale <= window.conditions.scaleMin) {
+      if (data.deltaY > 0 && oldScale <= require('Conditions').getInstance().scaleMin) {
 
         result = {
           'result': false,
@@ -160,7 +156,7 @@ define([
         };
 
 
-      } else if (data.deltaY < 0 && oldScale >= window.conditions.scaleMax) {
+      } else if (data.deltaY < 0 && oldScale >= require('Conditions').getInstance().scaleMax) {
 
         result = {
           'result': false,
@@ -170,12 +166,12 @@ define([
       } else {
 
         var mousePoint = {
-          x: window.storage.canvasContainer.stages[target].stage.getPointerPosition().x / oldScale - window.storage.canvasContainer.stages[target].stage.x() / oldScale,
-          y: window.storage.canvasContainer.stages[target].stage.getPointerPosition().y / oldScale - window.storage.canvasContainer.stages[target].stage.y() / oldScale,
+          x: canvasContainer.stages[target].stage.getPointerPosition().x / oldScale - canvasContainer.stages[target].stage.x() / oldScale,
+          y: canvasContainer.stages[target].stage.getPointerPosition().y / oldScale - canvasContainer.stages[target].stage.y() / oldScale,
         };
 
-        var newScale = data.deltaY < 0 ? oldScale * window.conditions.scaleFactor : oldScale / window.conditions.scaleFactor;
-        window.storage.canvasContainer.stages[target].stage.scale({
+        var newScale = data.deltaY < 0 ? oldScale * require('Conditions').getInstance().scaleFactor : oldScale / require('Conditions').getInstance().scaleFactor;
+        canvasContainer.stages[target].stage.scale({
           x: newScale,
           y: newScale
         });
@@ -192,13 +188,13 @@ define([
         } else {
 
           newPos = {
-            x: -(mousePoint.x - window.storage.canvasContainer.stages[target].stage.getPointerPosition().x / newScale) * newScale,
-            y: -(mousePoint.y - window.storage.canvasContainer.stages[target].stage.getPointerPosition().y / newScale) * newScale
+            x: -(mousePoint.x - canvasContainer.stages[target].stage.getPointerPosition().x / newScale) * newScale,
+            y: -(mousePoint.y - canvasContainer.stages[target].stage.getPointerPosition().y / newScale) * newScale
           };
 
         }
 
-        broker.publish(new Message('zoomworkspace', {
+        broker.publish(require('Message')('zoomworkspace', {
           'id': target,
           'newScale': newScale,
           'newPos': newPos
@@ -234,7 +230,7 @@ define([
     };
 
     if (broker.isPublishable('addfloorplan') && document.getElementById(data.target.id).files[0] != null) {
-      broker.publish(new Message('addfloorplan', {
+      broker.publish(require('Message')('addfloorplan', {
         'id': document.getElementById('id-text').value,
         'img': document.getElementById(data.target.id).files[0]
       }));
@@ -282,20 +278,20 @@ define([
         $('#go-viewer-modal').modal('show');
         break;
       case 'conditions':
-        if (window.broker.isPublishable('showconditionmodal')) {
-          broker.publish(new Message('showconditionmodal', {}));
+        if (broker.isPublishable('showconditionmodal')) {
+          broker.publish(require('Message')('showconditionmodal', {}));
         }
         break;
       case 'desc':
         if (broker.isPublishable('updatedesclist')) {
-          broker.publish(new Message('updatedesclist', {}));
+          broker.publish(require('Message')('updatedesclist', {}));
         }
 
         $('#setting-desc-modal').modal('show');
         break;
       case 'code':
-        if (window.broker.isPublishable('showcodemodal')) {
-          broker.publish(new Message('showcodemodal', {}));
+        if (broker.isPublishable('showcodemodal')) {
+          broker.publish(require('Message')('showcodemodal', {}));
         }
       default:
 
@@ -310,14 +306,14 @@ define([
   }
 
   UIChangeEventHandler.prototype.showFeatureTypeAttr = function(broker, previousMsg, data) {
-    var result = new Result;
+    var result = require('./Result.js');
     var pre = data.target.dataset.pre;
     var selected = data.target.selectedOptions.length != 0 ?
       data.target.selectedOptions[0].innerHTML :
       "";
 
     if (broker.isPublishable('shownaviattr')) {
-      broker.publish(new Message('shownaviattr', {
+      broker.publish(require('Message')('shownaviattr', {
         'pre': data.target.dataset.pre,
         'selected': selected,
         'table': document.getElementById("property-extension-table").childNodes[0]
@@ -334,14 +330,14 @@ define([
   }
 
   UIChangeEventHandler.prototype.showExtensionAttr = function(broker, previousMsg, data) {
-    var result = new Result;
+    var result = require('./Result.js');
     var pre = data.target.dataset.pre;
     var selected = data.target.selectedOptions.length != 0 ?
       data.target.selectedOptions[0].innerHTML :
       "";
 
     if (broker.isPublishable('showextensionattr')) {
-      broker.publish(new Message('showextensionattr', {
+      broker.publish(require('Message')('showextensionattr', {
         'pre': data.target.dataset.pre,
         'selected': selected,
         'moduleType': document.getElementById("module-type-text").value,
@@ -369,7 +365,7 @@ define([
     };
 
     if ((x != "" || y != "") && broker.isPublishable('addmap')) {
-      broker.publish(new Message('addmap', {
+      broker.publish(require('Message')('addmap', {
         'floor': document.getElementById('id-text').value,
         'coor': [x * 1, y * 1]
       }));
@@ -386,8 +382,8 @@ define([
       'msg': null
     };
 
-    if (!window.conditions.activateMap) {
-      window.conditions.activateMap = true;
+    if (!require('Conditions').getInstance().activateMap) {
+      require('Conditions').getInstance().activateMap = true;
       var id = document.getElementById('id-text').value;
       document.getElementById(id + '-map').style.zIndex = "1";
     }
@@ -402,8 +398,8 @@ define([
       'msg': null
     };
 
-    if (window.conditions.activateMap) {
-      window.conditions.activateMap = false;
+    if (require('Conditions').getInstance().activateMap) {
+      require('Conditions').getInstance().activateMap = false;
       var id = document.getElementById('id-text').value;
       document.getElementById(id + '-map').style.zIndex = "0";
     }
@@ -414,7 +410,7 @@ define([
   UIChangeEventHandler.prototype.removeFloorplan = function(broker, previousMsg, data){
     var result = { result: true, msg: null }
     if (broker.isPublishable('removefloorplan')) {
-      broker.publish(new Message('removefloorplan', {
+      broker.publish(require('Message')('removefloorplan', {
         floor: document.getElementById('id-text').value
       }));
 

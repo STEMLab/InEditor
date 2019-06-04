@@ -35,8 +35,7 @@ define([], function() {
     this.workspaceLayout.init();
 
     $(window).resize(function() {
-      window.uiContainer.resize();
-
+      // document.getElementById('workspace').resize();
     });
 
 
@@ -44,6 +43,7 @@ define([], function() {
 
   /**
   * @memberof Workspace
+  * @test
   */
   Workspace.prototype.addNewWorkspace = function(_id, _name) {
 
@@ -54,14 +54,10 @@ define([], function() {
       id: _id
     };
 
-    if(window.uiContainer.workspace.workspaceLayout.root.contentItems.length == 0){
-
+    if(this.workspaceLayout.root.contentItems.length == 0)
       this.init();
 
-
-    }
-
-    var contentItems = window.uiContainer.workspace.workspaceLayout.root.contentItems[0];
+    var contentItems = this.workspaceLayout.root.contentItems[0];
     contentItems.addChild(newItemConfig);
 
     var index = contentItems.contentItems.length - 1;
@@ -70,11 +66,6 @@ define([], function() {
     var viewport = "<div class=\"Panel\" id=\"viewport\" style=\"position:absoulte;\"><div id=" + _id + " class=\"container\"></div></div>";
     contentItems.contentItems[index].element[0].innerHTML = viewport;
 
-
-    $(window).resize(function() {
-      window.uiContainer.resize();
-    });
-
   }
 
   /**
@@ -82,19 +73,14 @@ define([], function() {
   * @param {String} id floor id
   */
   Workspace.prototype.activateWorkspace = function(id){
-
-    var tabs = window.uiContainer.workspace.workspaceLayout.root.contentItems[0].header.tabs;
-
-    var index = 0;
-    while( tabs[index].contentItem.config.id != id){
-
-      index++;
-
+    var Workspace;
+    if(this.workspaceLayout == undefined){
+      Workspace = require('UI').getInstance().workspace;
+      Workspace.workspaceLayout.root.contentItems[0].header.setActiveContentItem(Workspace.findContentItem(id));
     }
-
-    window.uiContainer.workspace.workspaceLayout.root.contentItems[0].setActiveContentItem(window.uiContainer.workspace.workspaceLayout.root.contentItems[0].contentItems[index]);
-    window.uiContainer.workspace.workspaceLayout.root.contentItems[0].header.setActiveContentItem(tabs[index].contentItem);
-
+    else{
+      this.workspaceLayout.root.contentItems[0].header.setActiveContentItem(this.findContentItem(id));
+    }
   }
 
   /**
@@ -102,15 +88,50 @@ define([], function() {
   */
   Workspace.prototype.destroy = function(condition){
 
-    window.uiContainer.workspace.workspaceLayout.destroy();
+    require('UI').getInstance().workspace.workspaceLayout.destroy();
 
   }
 
-  Workspace.prototype.deleteFirstWorkspace = function(){
+  /**
+  * @memberof Workspace
+  */
+  Workspace.prototype.deleteWorkspace = function(id){
 
-    var childerens = window.uiContainer.workspace.workspaceLayout.root.contentItems[0].contentItems;
-    window.uiContainer.workspace.workspaceLayout.root.contentItems[0].removeChild(childerens[0], false);
+    var Workspace;
+    if(this.workspaceLayout == undefined){
+      Workspace = require('UI').getInstance().workspace;
+      Workspace.workspaceLayout.root.contentItems[0].removeChild(Workspace.findContentItem(id), false);
+    }
+    else{
+      this.workspaceLayout.root.contentItems[0].removeChild(this.findContentItem(id), false);
+    }
+  }
 
+  /**
+  * @memberof Workspace
+  */
+  Workspace.prototype.findContentItem = function(id){
+
+    var workspaceLayout;
+    if(this.workspaceLayout == undefined){
+      workspaceLayout = require('UI').getInstance().workspace.workspaceLayout;
+    }else{
+      workspaceLayout = this.workspaceLayout;
+    }
+
+    var contentItem;
+    for(var stack of workspaceLayout.root.contentItems){
+      for(var item of stack.contentItems){
+        if(item.config.id === id) {
+          contentItem = item;
+          break;
+        }
+
+        if(contentItem != null) break;
+      }
+    }
+
+    return contentItem;
   }
 
   /**
@@ -128,14 +149,8 @@ define([], function() {
         }
     }
 
+
     return result;
-  }
-
-  Workspace.prototype.deleteFirstWorkspace = function(){
-
-    var childerens = window.uiContainer.workspace.workspaceLayout.root.contentItems[0].contentItems;
-    window.uiContainer.workspace.workspaceLayout.root.contentItems[0].removeChild(childerens[0], false);
-
   }
 
   return Workspace;

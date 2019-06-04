@@ -41,7 +41,7 @@ define(["./Feature"], function(Feature) {
   Transition.prototype.setWeight = function(weight){
 
     if (this.properties != null &&
-        (this.properties.weight != null || window.conditions.exportConditions[this.type].properties.weight)) {
+        (this.properties.weight != null || require('Conditions').getInstance().exportConditions[this.type].properties.weight)) {
 
       this.properties['weight'] = weight;
 

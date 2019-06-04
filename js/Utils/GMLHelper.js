@@ -53,7 +53,7 @@ define(function(require) {
 
     var floorData = getFloorData(cm, cbm, spaceLayers);
 
-    let interLayerConnectionMember = mlg.interEdges[0].interLayerConnectionMember;
+    let interLayerConnectionMember = mlg.interEdges != undefined ? mlg.interEdges[0].interLayerConnectionMember : [];
 
     return {
       docId: docId,
@@ -512,7 +512,7 @@ define(function(require) {
 
     function floorDataFactory(floor, celing, door, layer) {
       return {
-        id: window.conditions.guid(),
+        id: require('Conditions').getInstance().guid(),
         floorHight: floor,
         celingHeight: celing,
         doorHeight: door,

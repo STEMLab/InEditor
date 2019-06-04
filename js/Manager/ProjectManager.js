@@ -34,31 +34,35 @@ define(function(require) {
    * @memberof ProjectManager
    */
   ProjectManager.prototype.saveProject = function() {
+    var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+    var geometryContainer = require('Storage').getInstance().getGeometryContainer();
+    var dotPoolContainer = require('Storage').getInstance().getDotPoolContainer();
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
     // Serialize document
-    var id = window.storage.propertyContainer.projectProperty.id;
+    var id = propertyContainer.projectProperty.id;
     var doc = {};
     doc[id] = {
-      'geometryContainer': window.storage.geometryContainer,
-      'propertyContainer': window.storage.propertyContainer,
-      'dotPoolContainer': window.storage.dotPoolContainer,
+      'geometryContainer': geometryContainer,
+      'propertyContainer': propertyContainer,
+      'dotPoolContainer': dotPoolContainer,
       'canvasContainer': {}
     };
 
-    for (var key in window.storage.canvasContainer.stages) {
+    for (var key in canvasContainer.stages) {
 
       doc[id].canvasContainer[key] = {
-        width: window.storage.canvasContainer.stages[key].stage.getAttr('width'),
-        height: window.storage.canvasContainer.stages[key].stage.getAttr('height'),
-        floorplanDataURL: window.storage.canvasContainer.stages[key].backgroundLayer.floorplanDataURL[0]
+        width: canvasContainer.stages[key].stage.getAttr('width'),
+        height: canvasContainer.stages[key].stage.getAttr('height'),
+        floorplanDataURL: canvasContainer.stages[key].backgroundLayer.floorplanDataURL[0]
       };
 
     }
 
-    doc['conditions'] = window.conditions;
+    doc['conditions'] = require('Conditions').getInstance();
     doc['codeList'] = require('Property').CODE_LIST.getInstance().getList();
 
-    var filename = window.conditions.savePath + '/' + window.conditions.saveName + '-' + new Date().getTime() + '.bson';
+    var filename = require('Conditions').getInstance().savePath + '/' + require('Conditions').getInstance().saveName + '-' + new Date().getTime() + '.bson';
 
 
     // send json data to viewer
@@ -95,7 +99,7 @@ define(function(require) {
         if (xhr.readyState == 4 && xhr.status == 200) {
           var obj = JSON.parse(xhr.responseText);
 
-          window.conditions.load(obj.conditions);
+          require('Conditions').getInstance().load(obj.conditions);
           delete obj.conditions;
 
           if(obj.codeList != undefined){
@@ -106,20 +110,22 @@ define(function(require) {
 
           // manager가 load를 하도록  function move
           var loadData = obj[Object.keys(obj)[0]];
-          window.storage.propertyContainer.load(loadData.propertyContainer);
-          window.storage.dotPoolContainer.load(loadData.dotPoolContainer);
-          window.storage.geometryContainer.load(loadData.geometryContainer, window.storage.dotPoolContainer);
+          var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
-          window.storage.canvasContainer.clearCanvas();
+          propertyContainer.load(loadData.propertyContainer);
+          require('Storage').getInstance().getDotPoolContainer().load(loadData.dotPoolContainer);
+          require('Storage').getInstance().getGeometryContainer().load(loadData.geometryContainer, require('Storage').getInstance().getDotPoolContainer());
 
-          window.uiContainer.workspace.destroy();
+          require('Storage').getInstance().getCanvasContainer().clearCanvas();
 
-          var manager = window.broker.getManager('loadproject', 'ProjectManager');
+          require('UI').getInstance().workspace.destroy();
+
+          var manager = require('Broker').getInstance().getManager('loadproject', 'ProjectManager');
 
           // add workspace and stage
           for (var key in loadData.canvasContainer) {
 
-            var newFloorProperty = window.storage.propertyContainer.getElementById('floor', key);
+            var newFloorProperty = propertyContainer.getElementById('floor', key);
             manager.loadStage(
               key,
               newFloorProperty, {
@@ -132,10 +138,11 @@ define(function(require) {
           }
 
           // add object from geometry
-          window.storage.canvasContainer.addObjFromGeometries(window.storage.geometryContainer);
+          require('Storage').getInstance().getCanvasContainer().addObjFromGeometries(
+            require('Storage').getInstance().getGeometryContainer());
 
           // refresh tree view
-          window.uiContainer.sidebar.treeview.refresh(window.storage.propertyContainer);
+          require('UI').getInstance().treeView.refresh(require('Storage').getInstance().getPropertyContainer());
 
         }
 
@@ -151,9 +158,11 @@ define(function(require) {
   ProjectManager.prototype.loadStage = function(key, newFloorProperty, canvasProperty) {
 
 
-    window.uiContainer.workspace.addNewWorkspace(key, newFloorProperty.name);
+    require('UI').getInstance().workspace.addNewWorkspace(key, newFloorProperty.name);
     var Stage = require('../Storage/Canvas/Stage.js');
-    window.storage.canvasContainer.stages[key] = new Stage(
+    var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+
+    canvasContainer.stages[key] = new Stage(
       newFloorProperty.id,
       newFloorProperty.name,
       newFloorProperty.id,
@@ -162,17 +171,18 @@ define(function(require) {
       'force'
     );
 
-    window.storage.canvasContainer.stages[key].backgroundLayer.saveFloorplanDataURL(canvasProperty.dataURL);
-    window.storage.canvasContainer.stages[key].backgroundLayer.refresh();
+    canvasContainer.stages[key].backgroundLayer.saveFloorplanDataURL(canvasProperty.dataURL);
+    canvasContainer.stages[key].backgroundLayer.refresh();
 
     // bind stage click event
-    window.eventHandler.canvasObjectEventBind('stage',
-      window.storage.canvasContainer.stages[newFloorProperty.id].stage);
+    require('EventHandler').getInstance().canvasObjectEventBind(
+      'stage',
+      canvasContainer.stages[newFloorProperty.id].stage);
 
     var floorId = newFloorProperty.id;
 
     // bind right click event
-    require("../UI/ContextMenu.js").bindContextMenu(floorId);
+    require("@UI/ContextMenu.js").bindContextMenu(floorId);
 
   }
 
@@ -190,9 +200,8 @@ define(function(require) {
       xhr.onreadystatechange = function() {
 
         if (xhr.readyState == 4 && xhr.status == 200) {
-          var manager = window.broker.getManager('importgml', 'ProjectManager');
+          var manager = require('Broker').getInstance().getManager('importgml', 'ProjectManager');
           var indoor = JSON.parse(manager.xmlToJson('./output/TMP.gml'));
-          // var parsed = manager.parseJson(indoor);
           var parsed = require("../Utils/GMLHelper.js").parse(indoor);
           manager.makeObj(parsed);
         }
@@ -225,16 +234,16 @@ define(function(require) {
   }
 
   ProjectManager.prototype.makeObj = function(data) {
-    window.storage.clear();
-    window.uiContainer.workspace.destroy();
-    window.uiContainer.sidebar.treeview.init();
-    window.conditions.automGenerateState = false;
-    window.conditions.LAST_FLOOR_ID_NUM = 0;
-    window.conditions.coordinateThreshold = 0;
-    window.conditions.realCoordinateThreshold = 0;
-    window.conditions.realSnappingThreshold = 0;
-    window.conditions.snappingThreshold = 0;
-    window.conditions.descList = [];
+    require('Storage').getInstance().clear();
+    require('UI').getInstance().workspace.destroy();
+    require('UI').getInstance().treeView.init();
+    require('Conditions').getInstance().automGenerateState = false;
+    require('Conditions').getInstance().LAST_FLOOR_ID_NUM = 0;
+    require('Conditions').getInstance().coordinateThreshold = 0;
+    require('Conditions').getInstance().realCoordinateThreshold = 0;
+    require('Conditions').getInstance().realSnappingThreshold = 0;
+    require('Conditions').getInstance().snappingThreshold = 0;
+    require('Conditions').getInstance().descList = [];
 
     // extend bbox
     function extendBBox(bbox, width, height) {
@@ -253,9 +262,10 @@ define(function(require) {
     data.bbox = extendBBox(data.bbox, dataSize.width, dataSize.height);
 
     var floorId;
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
     for (floorId in data.floorData) {
 
-      window.broker.publish({
+      require('Broker').getInstance().publish({
         req: 'addnewfloor',
         reqObj: {
           'floor': floorId
@@ -263,7 +273,7 @@ define(function(require) {
       });
 
 
-      var floorProperty = window.storage.propertyContainer.getElementById('floor', floorId);
+      var floorProperty = propertyContainer.getElementById('floor', floorId);
       floorProperty.groundHeight = data.floorData[floorId].floorHight;
       floorProperty.celingHeight = data.floorData[floorId].celingHeight;
       floorProperty.lowerCorner = [data.bbox.min.x, data.bbox.min.y];
@@ -279,30 +289,31 @@ define(function(require) {
       }
     );
 
+    var canvasContainer = require('Storage').getInstance().getCanvasContainer();
     for (floorId in data.floorData) {
-      var stage = window.storage.canvasContainer.stages[floorId];
+      var stage = canvasContainer.stages[floorId];
       stage.stage.height(transResult.newCanvasSize.height);
       stage.stage.width(transResult.newCanvasSize.width);
       stage.backgroundLayer.setGrid(transResult.newCanvasSize.width, transResult.newCanvasSize.height);
     }
 
-    window.conditions.coordinateThreshold = 10;
-    window.conditions.realCoordinateThreshold = 0.0000001;
-    window.conditions.realSnappingThreshold = 0.0000001;
-    window.conditions.snappingThreshold = 10;
+    require('Conditions').getInstance().coordinateThreshold = 10;
+    require('Conditions').getInstance().realCoordinateThreshold = 0.0000001;
+    require('Conditions').getInstance().realSnappingThreshold = 0.0000001;
+    require('Conditions').getInstance().snappingThreshold = 10;
 
-    window.broker.publish({
+    require('Broker').getInstance().publish({
       req: 'addproeprtydatafromgml',
       reqObj: [transResult.data.floorData, data.interLayerConnection]
     });
 
-    window.broker.publish({
+    require('Broker').getInstance().publish({
       req: 'addobjectfromgml',
       reqObj: transResult.data.floorData
     });
 
-    window.conditions.realCoordinateThreshold = 10;
-    window.conditions.realSnappingThreshold = 10;
+    require('Conditions').getInstance().realCoordinateThreshold = 10;
+    require('Conditions').getInstance().realSnappingThreshold = 10;
 
   }
 
@@ -323,7 +334,7 @@ define(function(require) {
         log.warn('there is no target floor')
         return -1;
       } else {
-        window.broker.getManager('addnewfloor', 'GeometryManager').addObjectFromGeojson({
+        require('Broker').getInstance().getManager('addnewfloor', 'GeometryManager').addObjectFromGeojson({
           'geojson': geojson,
           'floor': reqObj.importOn,
           coor: reqObj.coordinate,
@@ -337,7 +348,7 @@ define(function(require) {
   }
 
   ProjectManager.prototype.updateConditions = function(reqObj) {
-    var conditions = window.conditions;
+    var conditions = require('Conditions').getInstance();
     conditions.pre_cell = reqObj.prefix.cell;
     conditions.pre_cellBoundary = reqObj.prefix.cellboundary;
     conditions.pre_state = reqObj.prefix.state;

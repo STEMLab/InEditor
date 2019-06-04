@@ -20,7 +20,7 @@ define([], function(){
 
   Queue.prototype.push = function(element) {
 
-    if(this.length == window.conditions.maxHistoryLen){
+    if(this.length == require('Conditions').getInstance().maxHistoryLen){
       this.dequeue();
     }
 

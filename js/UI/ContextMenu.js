@@ -13,7 +13,7 @@ define([], function() {
 
       var menu = new BootstrapMenu('#' + floorId, {
         fetchElementData: function() {
-          var selectedObj = window.broker.getManager('addnewhole', 'GeometryManager').isObjectSelected(floorId);
+          var selectedObj = require('Broker').getInstance().getManager('addnewhole', 'GeometryManager').isObjectSelected(floorId);
           return {
             type: selectedObj.type,
             id: selectedObj.result,
@@ -46,14 +46,15 @@ define([], function() {
             name: function(data) {
               var title = '<b>';
               var name;
+              var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
               if (Array.isArray(data.id)) {
                 for (var i of data.id) {
-                  name = window.storage.propertyContainer.getElementById(data.type, i).name;
+                  name = propertyContainer.getElementById(data.type, i).name;
                   title += name + '(' + i + ')  ';
                 }
               } else {
-                name = window.storage.propertyContainer.getElementById(data.type, data.id).name;
+                name = propertyContainer.getElementById(data.type, data.id).name;
                 title += name + '(' + data.id + ')';
               }
 
@@ -66,7 +67,7 @@ define([], function() {
             name: 'Edit Properties',
             iconClass: 'fa-pencil',
             onClick: function(data) {
-              window.uiContainer.sidebar.property.setPropertyTab(data.type, data.id, window.storage)
+              require('UI').getInstance().propertyTab.setPropertyTab(data.type, data.id, require('Storage').getInstance())
             }
           },
           {
@@ -90,13 +91,13 @@ define([], function() {
               if (Array.isArray(msg.reqObj.id)) {
                 var ids = data.id;
                 for (var i of ids) {
-                  if (window.broker.isPublishable(msg.req)) {
+                  if (require('Broker').getInstance().isPublishable(msg.req)) {
                     msg.reqObj.id = i;
-                    window.broker.publish(msg);
+                    require('Broker').getInstance().publish(msg);
                   }
                 }
               } else {
-                if (window.broker.isPublishable(msg.req)) window.broker.publish(msg);
+                if (require('Broker').getInstance().isPublishable(msg.req)) require('Broker').getInstance().publish(msg);
               }
             }
           },
@@ -105,14 +106,14 @@ define([], function() {
             iconClass: 'fa-repeat',
             isShown: function(data) {
               if (data.type == 'cell') {
-                var cellGeo = window.storage.geometryContainer.getElementById('cell', data.id[0]);
+                var cellGeo = require('Storage').getInstance().getGeometryContainer().getElementById('cell', data.id[0]);
                 if (cellGeo.slant != null) return true;
                 else return false;
               } else return false;
             },
             onClick: function(data) {
-              if (window.broker.isPublishable('rotateslant'))
-                window.broker.publish({
+              if (require('Broker').getInstance().isPublishable('rotateslant'))
+                require('Broker').getInstance().publish({
                   req: 'rotateslant',
                   reqObj: {
                     floor: data.floor,
