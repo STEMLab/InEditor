@@ -39,6 +39,15 @@ define(function(require) {
         else return null;
       }
 
+      this.isEmpty = function(){
+        if(_history.empty() == undefined) return true;
+        return false;
+      }
+
+      this.getLastMsg = function(){
+        return _history.empty() == true ? null : _history.back().msg;
+      }
+
 
       /**
        * @memberof History

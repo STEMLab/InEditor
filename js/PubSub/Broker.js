@@ -80,8 +80,8 @@ define(function(require) {
 
         for (var i = 0; i < subscriber.length; i++) {
           if(path[_topic][i].run(message, uuid) == false){
-            if( require('History').getInstance().history.back() != undefined &&
-                require('History').getInstance().history.back().msg == message ){
+            if( !require('History').getInstance().isEmpty() &&
+                require('History').getInstance().getLastMsg() == message ){
               require('History').getInstance().undo();
             }
 
