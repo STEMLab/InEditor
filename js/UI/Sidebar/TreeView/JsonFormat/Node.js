@@ -11,8 +11,8 @@ define(function(require) {
     else if(type === 'TRANSITION') lowType = 'transition';
 
     return {
-      title: id,
-      key: name,
+      title: name,
+      key: id,
       folder: false,
       type: lowType,
       icon: '../../assets/tree-icon/' + lowType + '.png'

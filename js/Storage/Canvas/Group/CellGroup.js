@@ -86,6 +86,18 @@ define([
   CellGroup.prototype.simpleAdd = function(obj) {
 
     var newCell = new Cell(obj.id);
+
+    // check duplicated dot
+    for(var i = 0 ; i < obj.dots.length - 1; i++){
+      if(obj.dots[i].uuid === obj.dots[i+1].uuid) {
+        obj.dots.splice(i+1, 1);
+        i--;
+      }
+    }
+
+    if(obj.dots[0].uuid === obj.dots[obj.dots.length-1].uuid)
+      obj.dots.splice(obj.dots.length-1, 1);
+
     newCell.dots = obj.dots;
     newCell.addObjectFromDots();
     newCell.corners.visible(false);

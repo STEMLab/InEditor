@@ -7,8 +7,8 @@ define(function(require) {
   var createModals = function() {
 
     this.appendModals = function(body){
-      body.appendChild(require('./GoFactory.js'));
-      body.appendChild(require('./GoViewer.js'));
+      //body.appendChild(require('./GoFactory.js'));
+      //body.appendChild(require('./GoViewer.js'));
     }
 
     this.a = 'a';

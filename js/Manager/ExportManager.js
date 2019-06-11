@@ -974,7 +974,7 @@ define(function(require) {
               '3D'
             );
         } else if (geoType == '2D') {
-          //coor.reverse();
+          //  coor.reverse();
           cells[cellId].setCoor([coor], '2D');
         }
 
@@ -1016,19 +1016,22 @@ define(function(require) {
         }
 
 
-        if (cityJSON.CityObjects[cellId] == null) {
-          var coordinates = cells[cellId].getCoordinates();
-          var jsonGeo = addVertices(JSON.parse(JSON.stringify(coordinates)));
+        if (geoType == '3D') {
+          if (cityJSON.CityObjects[cellId] == null) {
+            var coordinates = cells[cellId].getCoordinates();
+            var jsonGeo = addVertices(JSON.parse(JSON.stringify(coordinates)));
 
-          cityJSON.CityObjects[cellId] = {
-            geometry: [{
-              boundaries: jsonGeo,
-              type: cells[cellId].geometry.type == 'Solid' ? 'Solid' : 'MultiSurface',
-              lod: 1
-            }],
-            "type": "GenericCityObject"
+            cityJSON.CityObjects[cellId] = {
+              geometry: [{
+                boundaries: jsonGeo,
+                type: cells[cellId].geometry.type == 'Solid' ? 'Solid' : 'MultiSurface',
+                lod: 1
+              }],
+              "type": "GenericCityObject"
+            }
           }
         }
+
 
 
         cells[cellId].convertCoor2WKT();
@@ -1040,30 +1043,32 @@ define(function(require) {
 
 
     // validation
-    for (var i in cityJSON.vertices)
-      cityJSON.vertices[i] = JSON.parse(cityJSON.vertices[i])
+    if (geoType == '3D') {
+      for (var i in cityJSON.vertices)
+        cityJSON.vertices[i] = JSON.parse(cityJSON.vertices[i])
 
 
 
-    let xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status == 200) {
-        require('Popup')("success", "Geometry validation successed!")
-      } else if (xhr.readyState === 4 && xhr.status == 500) {
-        require('Popup')("error", "Geometry validation failed!", xhr.response)
+      let xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status == 200) {
+          require('Popup')("success", "Geometry validation successed!")
+        } else if (xhr.readyState === 4 && xhr.status == 500) {
+          require('Popup')("error", "Geometry validation failed!", xhr.response)
+        }
       }
+
+
+
+      xhr.open("POST", "http://localhost:5757/validation", false);
+      xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      let data = JSON.stringify({
+        cityJSON: cityJSON
+      });
+
+      log.info(cityJSON);
+      xhr.send(data);
     }
-
-
-
-    xhr.open("POST", "http://localhost:5757/validation", false);
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    let data = JSON.stringify({
-      cityJSON: cityJSON
-    });
-
-    log.info(cityJSON);
-    xhr.send(data);
 
 
     var result = {

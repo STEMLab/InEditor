@@ -102,7 +102,7 @@ app.post('/xml-to-json', function(req,res){
 
 app.post('/convert-bson-to-json', function(req, res){
 
-  var buffer = new Buffer(req.body, "binary");
+  var buffer = new Buffer.from(req.body, "binary");
   var bson = new BSON();
   var json = bson.deserialize(buffer);
   res.send(json);
