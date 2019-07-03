@@ -306,7 +306,7 @@ define(function(require) {
   }
 
   UIChangeEventHandler.prototype.showFeatureTypeAttr = function(broker, previousMsg, data) {
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
     var pre = data.target.dataset.pre;
     var selected = data.target.selectedOptions.length != 0 ?
       data.target.selectedOptions[0].innerHTML :
@@ -330,7 +330,7 @@ define(function(require) {
   }
 
   UIChangeEventHandler.prototype.showExtensionAttr = function(broker, previousMsg, data) {
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
     var pre = data.target.dataset.pre;
     var selected = data.target.selectedOptions.length != 0 ?
       data.target.selectedOptions[0].innerHTML :

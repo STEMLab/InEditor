@@ -100,27 +100,27 @@ define(function(require) {
 
   }
 
-  DrawEventHandler.prototype.stageDbclick = function(broker, previous, data){
+  DrawEventHandler.prototype.stageDbclick = function(broker, previous, data) {
 
-    var result = require('./Result.js');
+    let result = require('./Result.js')();
     var storage = require('Storage').getInstance();
 
     var floor = data.currentTarget.attrs.id;
     var cursor = storage.getCanvasContainer().stages[floor].tmpLayer.group.getCursor();
     var cursorData = storage.getCanvasContainer().stages[floor].tmpLayer.group.getCursorData();
 
-    if(cursorData.isSnapped == false){
+    if (cursorData.isSnapped == false) {
 
       result.msg = "There is no match function !";
 
-    } else if( cursorData.snapedObj.type == 'line' && broker.isPublishable('modifyline') ){
+    } else if (cursorData.snapedObj.type == 'line' && broker.isPublishable('modifyline')) {
 
       broker.publish(require('Message')('modifyline', {
         floor: floor,
-        line : cursorData.snapedObj.obj
+        line: cursorData.snapedObj.obj
       }));
 
-      broker.publish(require('Message')('start-modifypoint',{
+      broker.publish(require('Message')('start-modifypoint', {
         floor: floor,
         point: storage.getDotPoolContainer().getDotPool(floor).getDotByPoint(cursor.coor)
       }));
@@ -128,17 +128,17 @@ define(function(require) {
       result.result = true;
       result.msg = 'modifypoint';
 
-    } else if( cursorData.snapedObj.type == 'point' && broker.isPublishable('start-modifypoint') ){
+    } else if (cursorData.snapedObj.type == 'point' && broker.isPublishable('start-modifypoint')) {
 
       broker.publish(require('Message')('start-modifypoint', {
         floor: floor,
-        point : cursorData.snapedObj.obj
+        point: cursorData.snapedObj.obj
       }));
 
       result.result = true;
       result.msg = 'modifypoint';
 
-    } else if( broker.isPublishable('end-modifypoint') ){
+    } else if (broker.isPublishable('end-modifypoint')) {
 
       broker.publish(require('Message')('end-modifypoint', {
         floor: floor
@@ -157,10 +157,28 @@ define(function(require) {
 
   }
 
-  DrawEventHandler.prototype.mousedown = function(broker, previous, data){
+  DrawEventHandler.prototype.mousedown = function(broker, previous, data) {
     log.info('mousedown : ', data);
 
-    return require('./Result.js')
+    return require('./Result.js')()
+  }
+
+  DrawEventHandler.prototype.cancelDrawObject = function(broker, msg, resultTitle, resultMsg) {
+    var reqObj = {
+      floor: window.tmpObj != null ? window.tmpObj.floor : null
+    };
+
+    if(msg.indexOf('interlayer') > -1)
+      reqObj['interConnects'] = [...window.tmpObj.interConnects].filter(s => s!=undefined)
+
+    broker.publish(require('Message')(msg, reqObj));
+
+    let result = require('./Result.js')();
+    result.result = false;
+    result.title = resultTitle;
+    result.msg = resultMsg;
+
+    return result;
   }
 
   /**
@@ -169,7 +187,7 @@ define(function(require) {
    */
   DrawEventHandler.prototype.clickCellBtn = function(broker, previousMsg) {
 
-    var result = require('./Result.js');
+    let result = require('./Result.js')();
     var storage = require('Storage').getInstance();
 
     var isFloorExist = (storage.getPropertyContainer().floorProperties.length != 0);
@@ -186,30 +204,7 @@ define(function(require) {
 
     } else if (broker.isPublishable('end-addnewcell')) {
 
-      if (window.tmpObj.isEmpty()) {
-
-        broker.publish(require('Message')('end-addnewcell', {
-          'isEmpty': true
-        }));
-
-      } else {
-
-        var newId = null;
-        var flag = false;
-        while(!flag){
-          newId = require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM);
-          flag = storage.getPropertyContainer().getElementById('cell', newId) == null ? true : false;
-        }
-
-        broker.publish(require('Message')('end-addnewcell', {
-          'id': newId,
-          'floor': window.tmpObj.floor
-        }));
-
-      }
-
-      result.result = true;
-      result.msg = null;
+      result = require('EventHandler').getInstance().getHandlers().drawEventHandler.endAddNewCell(broker, result);
 
     } else if (!isFloorExist) {
 
@@ -225,12 +220,53 @@ define(function(require) {
 
   }
 
+  DrawEventHandler.prototype.endAddNewCell = function(broker, result) {
+    var drawEventHandler = require('EventHandler').getInstance().getHandlers().drawEventHandler;
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+
+    if (window.tmpObj.isEmpty()) {
+      result = drawEventHandler.cancelDrawObject(broker, 'cancel-addnewcell', '', '');
+      result.result = true;
+    } else if (window.tmpObj.dots.length <= 2) {
+
+      result = drawEventHandler.cancelDrawObject(
+        broker,
+        'cancel-addnewcell',
+        'INVALID POLYGON',
+        'The polygon needs at least three corners.'
+      );
+
+    } else {
+
+      var newId = null;
+      var flag = false;
+      while (!flag) {
+        newId = require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM);
+        flag = propertyContainer.getElementById('cell', newId) == null ? true : false;
+      }
+
+      broker.publish(require('Message')('end-addnewcell', {
+        'id': newId,
+        'floor': window.tmpObj.floor
+      }));
+
+      result.result = true;
+      result.msg = null;
+
+    }
+
+    return result;
+
+  }
+
   /**
    * @memberof DrawEventHandler
    */
   DrawEventHandler.prototype.clickHoleBtn = function(broker, previousMsg) {
 
-    var result = require('./Result.js');
+    let result = require('./Result.js')();
+    var drawEventHandler = require('EventHandler').getInstance().getHandlers().drawEventHandler;
+
 
     var isFloorExist = (require('Storage').getInstance().getPropertyContainer().floorProperties.length != 0);
 
@@ -248,11 +284,20 @@ define(function(require) {
 
       if (window.tmpObj.isEmpty()) {
 
-        broker.publish(require('Message')('end-addnewhole', {
-          'id': window.tmpObj.id,
-          'floor': window.tmpObj.floor,
-          'isEmpty': true
-        }));
+        result = drawEventHandler.cancelDrawObject(
+          broker,
+          'cancel-addnewhole',
+          'INVALID POLYGON',
+          'The polygon needs at least three corners.');
+
+      } else if (window.tmpObj.dots.length <= 2) {
+
+        result = drawEventHandler.cancelDrawObject(
+          broker,
+          'cancel-addnewhole',
+          'INVALID POLYGON',
+          'The polygon needs at least three corners.'
+        );
 
       } else {
 
@@ -261,10 +306,12 @@ define(function(require) {
           'floor': window.tmpObj.floor
         }));
 
+        result.result = true;
+        result.msg = null;
+
       }
 
-      result.result = true;
-      result.msg = null;
+
 
     } else if (!isFloorExist) {
 
@@ -286,7 +333,7 @@ define(function(require) {
    */
   DrawEventHandler.prototype.clickFloorBtn = function(broker, previousMsg) {
 
-    var result = require('./Result.js')
+    let result = require('./Result.js')()
 
     if (broker.isPublishable('addnewfloor')) {
 
@@ -313,7 +360,7 @@ define(function(require) {
    */
   DrawEventHandler.prototype.addNewDot = function(broker, previousMsg, data) {
 
-    var result = require('./Result.js');
+    let result = require('./Result.js')();
     var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
     if (broker.isPublishable('addnewcell')) {
@@ -333,15 +380,15 @@ define(function(require) {
 
       } else if (!isFirstClick && !isSameFloor) {
 
-        result.msg = "you clicked different floor!";
+        result.title = "YOU CLICKED DIFFERENT FLOOR!";
+        result.msg = "Please click floor " + window.tmpObj.floor + ".";
 
       } else {
 
         result.msg = "wrong state transition : " + previousMsg + " to addnewcell.";
 
       }
-    }
-    else if (broker.isPublishable('addnewslantdown')) {
+    } else if (broker.isPublishable('addnewslantdown')) {
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
       var isFirstClick = (window.tmpObj.floor == null);
@@ -355,6 +402,16 @@ define(function(require) {
         result.result = true;
         result.msg = 'addnewslantdown';
 
+        if (window.tmpObj.dots.length === 4 && broker.isPublishable('end-addnewslantdown')) {
+          broker.publish(require('Message')('end-addnewslantdown', {
+            'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
+            'floor': window.tmpObj.floor
+          }));
+
+          result.result = true;
+          result.msg = null;
+
+        }
 
       } else if (!isFirstClick && !isSameFloor) {
 
@@ -365,8 +422,7 @@ define(function(require) {
         result.msg = "wrong state transition : " + previousMsg + " to addnewslantdown.";
 
       }
-    }
-    else if (broker.isPublishable('addnewslantup')) {
+    } else if (broker.isPublishable('addnewslantup')) {
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
       var isFirstClick = (window.tmpObj.floor == null);
@@ -380,6 +436,17 @@ define(function(require) {
         result.result = true;
         result.msg = 'addnewslantup';
 
+        if (window.tmpObj.dots.length === 4 && broker.isPublishable('end-addnewslantup')) {
+          broker.publish(require('Message')('end-addnewslantup', {
+            'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
+            'floor': window.tmpObj.floor
+          }));
+
+          result.result = true;
+          result.msg = null;
+
+        }
+
 
       } else if (!isFirstClick && !isSameFloor) {
 
@@ -390,8 +457,7 @@ define(function(require) {
         result.msg = "wrong state transition : " + previousMsg + " to addnewslantup.";
 
       }
-    }
-    else if (broker.isPublishable('addnewslantupdown')) {
+    } else if (broker.isPublishable('addnewslantupdown')) {
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
       var isFirstClick = (window.tmpObj.floor == null);
@@ -405,6 +471,17 @@ define(function(require) {
         result.result = true;
         result.msg = 'addnewslantupdown';
 
+        if (window.tmpObj.dots.length === 4 && broker.isPublishable('end-addnewslantupdown')) {
+          broker.publish(require('Message')('end-addnewslantupdown', {
+            'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
+            'floor': window.tmpObj.floor
+          }));
+
+          result.result = true;
+          result.msg = null;
+
+        }
+
 
       } else if (!isFirstClick && !isSameFloor) {
 
@@ -415,20 +492,37 @@ define(function(require) {
         result.msg = "wrong state transition : " + previousMsg + " to addnewslantupdown.";
 
       }
-    }
-    else if (broker.isPublishable('addnewhole')) {
+    } else if (broker.isPublishable('addnewhole')) {
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
       var isFirstClick = (window.tmpObj.floor == null);
 
       if (isFirstClick || (!isFirstClick && isSameFloor)) {
 
-        broker.publish(require('Message')('addnewhole', {
-          'floor': data.currentTarget.attrs.id
-        }));
+        if(!isFirstClick){
 
-        result.result = true;
-        result.msg = 'addnewhole';
+
+          var reader = new jsts.io.WKTReader();
+          var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+          var cell = reader.read(canvasContainer.getElementById('cell', window.tmpObj.holeOf).getWKT());
+          var pointCoor = canvasContainer.stages[window.tmpObj.floor].tmpLayer.group.cursor.coor;
+          var point = reader.read('POINT(' + pointCoor.x + ' ' + pointCoor.y + ')');
+          if ( !cell.contains(point)) {
+            result.title = "INVALID POINT!";
+            result.msg = "Please click the insice of " + window.tmpObj.holeOf + ".";
+          }
+
+        }
+
+        if(result.title != "INVALID POINT!"){
+          broker.publish(require('Message')('addnewhole', {
+            'floor': data.currentTarget.attrs.id
+          }));
+
+          result.result = true;
+          result.msg = 'addnewhole';
+        }
+
 
 
       } else if (!isFirstClick && !isSameFloor) {
@@ -464,11 +558,10 @@ define(function(require) {
         result.msg = "wrong state transition : " + previousMsg + " to addnewfloor.";
 
       }
-    }
-    else if (broker.isPublishable('addnewcellboundary')) {
+    } else if (broker.isPublishable('addnewcellboundary')) {
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
-      var isFirstClick = (window.tmpObj.affiliatedCell == null);
+      var isFirstClick = (window.tmpObj.associationCell == null);
 
       if (isFirstClick || (!isFirstClick && isSameFloor)) {
 
@@ -481,7 +574,8 @@ define(function(require) {
 
       } else if (!isFirstClick && !isSameFloor) {
 
-        result.msg = "you clicked different floor!";
+        result.title = "YOU CLICKED DIFFERENT FLOOR!";
+        result.msg = "Please click floor " + window.tmpObj.floor + ".";
 
       } else {
 
@@ -489,17 +583,15 @@ define(function(require) {
 
       }
 
-    }
-    else if (broker.isPublishable('end-addnewstate')) {
+    } else if (broker.isPublishable('end-addnewstate')) {
 
       var floor = data.currentTarget.attrs.id;
       var isCellSelected = require('Broker').getInstance().getManager("end-addnewstate", "GeometryManager").isCellSelected(floor);
-
-      if( isCellSelected.length == 1 ){
+      if (isCellSelected.length == 1) {
 
         var newId = null;
         var flag = false;
-        while(!flag){
+        while (!flag) {
           newId = require('Conditions').getInstance().pre_state + (++require('Conditions').getInstance().LAST_STATE_ID_NUM);
           flag = propertyContainer.getElementById('state', newId) == null ? true : false;
         }
@@ -513,11 +605,14 @@ define(function(require) {
         result.result = true;
         result.msg = 'end-addnewstate';
 
-      } else if( isCellSelected.length > 1 ){
+      } else if (isCellSelected.length > 1) {
         broker.publish(require('Message')('makecellselectmenu', {
           floor: floor,
           cells: isCellSelected,
-          pageCoor:{ x: data.evt.pageX, y: data.evt.pageY }
+          pageCoor: {
+            x: data.evt.pageX,
+            y: data.evt.pageY
+          }
         }));
 
         result.result = true;
@@ -527,7 +622,7 @@ define(function(require) {
 
         var newId = null;
         var flag = false;
-        while(!flag){
+        while (!flag) {
           newId = require('Conditions').getInstance().pre_state + (++require('Conditions').getInstance().LAST_STATE_ID_NUM);
           flag = propertyContainer.getElementById('state', newId) == null ? true : false;
         }
@@ -542,13 +637,12 @@ define(function(require) {
 
       }
 
-    }
-    else if (broker.isPublishable('addnewtransition')) {
+    } else if (broker.isPublishable('addnewtransition')) {
 
       var isFirstClick = (window.tmpObj.floor == null);
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
 
-      if(isSameFloor || isFirstClick){
+      if (isSameFloor || isFirstClick) {
 
         broker.publish(require('Message')('addnewtransition', {
           'floor': data.currentTarget.attrs.id
@@ -559,15 +653,16 @@ define(function(require) {
 
       } else {
 
-        result.msg = 'Transition need states which existed same floor but you select wrong state.';
+        result.title = 'INVALID STATE';
+        result.msg = 'Transition requires State and CellSpaceBoudnary that exist on the same floor.';
 
       }
 
-      if(window.tmpObj.dots.length == 3){
+      if (window.tmpObj.dots.length == 3) {
 
         var newId = null;
         var flag = false;
-        while(!flag){
+        while (!flag) {
           newId = require('Conditions').getInstance().pre_transition + (++require('Conditions').getInstance().LAST_TRANSITION_ID_NUM);
           flag = propertyContainer.getElementById('transition', newId) == null ? true : false;
         }
@@ -581,13 +676,12 @@ define(function(require) {
         result.msg = null;
       }
 
-    }
-    else if (broker.isPublishable('addnewstair')) {
+    } else if (broker.isPublishable('addnewstair')) {
 
       var isFirstClick = (window.tmpObj.floor == null);
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
 
-      if(isFirstClick || !isSameFloor){
+      if (isFirstClick || !isSameFloor) {
 
         broker.publish(require('Message')('addnewstair', {
           'floor': data.currentTarget.attrs.id
@@ -596,8 +690,9 @@ define(function(require) {
         result.result = true;
         result.msg = 'addnewstair';
 
-      } else if( isSameFloor ) {
+      } else if (isSameFloor) {
 
+        result.title = 'INVALID STATE'
         result.msg = 'You should select state which on the different floor from the floor that the state you selected before.';
 
       } else {
@@ -606,24 +701,23 @@ define(function(require) {
 
       }
 
-      if(window.tmpObj.dots.length == 2){
+      if (window.tmpObj.dots.length == 2) {
 
         broker.publish(require('Message')('end-addnewstair', {
           floor: window.tmpObj.floor,
-          id: require('Conditions').getInstance().pre_transition+(++require('Conditions').getInstance().LAST_TRANSITION_ID_NUM)
+          id: require('Conditions').getInstance().pre_transition + (++require('Conditions').getInstance().LAST_TRANSITION_ID_NUM)
         }));
 
         result.result = true;
         result.msg = null;
       }
 
-    }
-    else if (broker.isPublishable('addnewinterlayerconnetction')) {
+    } else if (broker.isPublishable('addnewinterlayerconnetction')) {
 
       var isFirstClick = (window.tmpObj.interConnects[0] == null);
-      var isSameDifferLayer = (data.currentTarget.attrs.id == window.tmpObj.floor);
+      var isDifferLayer = propertyContainer.getElementById('floor', data.currentTarget.attrs.id).layer != window.tmpObj.connectedLayer[0];
 
-      if(isFirstClick || !isSameFloor){
+      if (isFirstClick || (!isFirstClick && isDifferLayer)) {
 
         broker.publish(require('Message')('addnewinterlayerconnetction', {
           'floor': data.currentTarget.attrs.id
@@ -632,24 +726,26 @@ define(function(require) {
         result.result = true;
         result.msg = 'addnewinterlayerconnetction';
 
-      }  else {
+      } else if(!isDifferLayer){
+
+
+      } else {
 
         result.msg = "wrong state transition : " + previousMsg + " to addnewinterlayerconnetction.";
 
       }
 
-      if(window.tmpObj.interConnects[1] != null){
+      if (window.tmpObj.interConnects[1] != null) {
 
         broker.publish(require('Message')('end-addnewinterlayerconnetction', {
-          id: require('Conditions').getInstance().pre_inter+(++require('Conditions').getInstance().LAST_INTER_ID_NUM)
+          id: require('Conditions').getInstance().pre_inter + (++require('Conditions').getInstance().LAST_INTER_ID_NUM)
         }));
 
         result.result = true;
         result.msg = null;
       }
 
-    }
-    else {
+    } else {
 
       result.msg = "no match function.";
 
@@ -664,70 +760,12 @@ define(function(require) {
    */
   DrawEventHandler.prototype.cancelDraw = function(broker, previousMsg) {
 
-    var result = require('./Result.js')
-
-    switch (previousMsg) {
-      case 'addnewcell':
-        if (broker.isPublishable('cancel-addnewcell')) {
-          broker.publish(require('Message')('cancel-addnewcell', {
-            'floor': window.tmpObj.floor
-          }));
-
-          result.result = true;
-          result.msg = null;
-        }
-        break;
-      case 'addnewcellboundary':
-        if (broker.isPublishable('cancel-addnewcellboundary')) {
-
-          broker.publish(require('Message')('cancel-addnewcellboundary', {
-            'floor': window.tmpObj.floor
-          }));
-
-          result.result = true;
-          result.msg = null;
-
-        }
-        break;
-      case 'addnewstate':
-        if (broker.isPublishable('cancel-addnewstate')) {
-
-          broker.publish(require('Message')('cancel-addnewstate', {
-            'floor': window.tmpObj.floor
-          }));
-
-          result.result = true;
-          result.msg = null;
-
-        }
-
-        break;
-      case 'addnewtransition':
-        if(broker.isPublishable('cancel-addnewtransition')){
-
-          broker.publish(require('Message')('cancel-addnewtransition', {
-            'floor': window.tmpObj.floor
-          }));
-
-          result.result = true;
-          result.msg = null;
-
-        }
-        break;
-      case 'addnewhole':
-        if(broker.isPublishable('cancel-addnewhole')){
-
-          broker.publish(require('Message')('cancel-addnewhole', {
-            'floor': window.tmpObj.floor
-          }));
-
-          result.result = true;
-          result.msg = null;
-
-        }
-        break;
-      default:
-        result.msg = "no match function.";
+    let result = require('./Result.js')()
+    var drawEventHandler = require('EventHandler').getInstance().getHandlers().drawEventHandler;
+    var msg = 'cancel-' + previousMsg;
+    if (broker.isPublishable(msg)) {
+      result = drawEventHandler.cancelDrawObject(broker, msg, '', '');
+      result.result = true;
     }
 
     return result;
@@ -738,51 +776,43 @@ define(function(require) {
    */
   DrawEventHandler.prototype.finishDraw = function(broker, previousMsg) {
 
-    var result = require('./Result.js');
+    let result = require('./Result.js')();
     var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+    var drawEventHandler = require('EventHandler').getInstance().getHandlers().drawEventHandler;
 
     if (broker.isPublishable('end-addnewcell')) {
 
+      result = drawEventHandler.endAddNewCell(broker, result);
+
+    } else if (broker.isPublishable('end-addnewslantdown')) {
+
       if (window.tmpObj.isEmpty()) {
-
-        broker.publish(require('Message')('end-addnewcell', {
-          'isEmpty': true
-        }));
-
+        result = drawEventHandler.cancelDrawCell(broker, 'cancel-addnewslantdown', '', '');
+        result.result = true;
+      } else if(window.tmpObj.floor.length < 4 ){
+        // do nothing
       } else {
-
-        var newId = null;
-        var flag = false;
-        while(!flag){
-          newId = require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM);
-          flag = propertyContainer.getElementById('cell', newId) == null ? true : false;
-        }
-
-        broker.publish(require('Message')('end-addnewcell', {
-          'id': newId,
+        broker.publish(require('Message')('end-addnewslantdown', {
+          'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
           'floor': window.tmpObj.floor
         }));
-
       }
 
       result.result = true;
       result.msg = null;
 
-    } else if (broker.isPublishable('end-addnewslantdown')) {
+    } else if (broker.isPublishable('end-addnewslantup')) {
 
       if (window.tmpObj.isEmpty()) {
-
-        broker.publish(require('Message')('end-addnewslantdown', {
-          'isEmpty': true
-        }));
-
+        result = drawEventHandler.cancelDrawCell(broker, 'cancel-addnewslantup', '', '');
+        result.result = true;
+      } else if(window.tmpObj.floor.length < 4 ){
+        // do nothing
       } else {
-
-        broker.publish(require('Message')('end-addnewslantdown', {
+        broker.publish(require('Message')('end-addnewslantup', {
           'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
           'floor': window.tmpObj.floor
         }));
-
       }
 
       result.result = true;
@@ -796,6 +826,8 @@ define(function(require) {
           'isEmpty': true
         }));
 
+      } else if(window.tmpObj.floor.length < 4 ){
+        // do nothing
       } else {
 
         broker.publish(require('Message')('end-addnewslantupdown', {
@@ -830,6 +862,12 @@ define(function(require) {
 
     } else if (broker.isPublishable('end-addnewcellboundary')) {
 
+      result = drawEventHandler.endAddNewCellBoundary(broker, result);
+
+    } else if (broker.isPublishable('end-addnewstate')) {
+
+    } else if (broker.isPublishable('end-addnewtransition')) {
+
       if (window.tmpObj.isEmpty()) {
 
         broker.publish(require('Message')('end-addnewcellboundary', {
@@ -837,38 +875,10 @@ define(function(require) {
         }));
 
       } else {
-        var newId = null;
-        var flag = false;
-        while(!flag){
-          newId = require('Conditions').getInstance().pre_cellBoundary + (++require('Conditions').getInstance().LAST_CELLBOUNDARY_ID_NUM);
-          flag = propertyContainer.getElementById('cellBoundary', newId) == null ? true : false;
-        }
-
-        broker.publish(require('Message')('end-addnewcellboundary', {
-          'id': newId,
-          'floor': window.tmpObj.floor
-        }));
-
-      }
-
-      result.result = true;
-      result.msg = null;
-
-    } else if (broker.isPublishable('end-addnewstate')) {
-
-    } else if (broker.isPublishable('end-addnewtransition')) {
-
-      if (window.tmpObj.isEmpty()){
-
-        broker.publish(require('Message')('end-addnewcellboundary', {
-          'isEmpty': true
-        }));
-
-      } else {
 
         var newId = null;
         var flag = false;
-        while(!flag){
+        while (!flag) {
           newId = require('Conditions').getInstance().pre_transition + (++require('Conditions').getInstance().LAST_TRANSITION_ID_NUM);
           flag = propertyContainer.getElementById('transition', newId) == null ? true : false;
         }
@@ -896,7 +906,7 @@ define(function(require) {
    */
   DrawEventHandler.prototype.stageMoveMouse = function(broker, previousMsg, data) {
 
-    var result = require('./Result.js')
+    let result = require('./Result.js')()
     var rect = require('Storage').getInstance().getCanvasContainer().stages[data.currentTarget.attrs.id].stage.content.getBoundingClientRect();
 
     if (broker.isPublishable('snapping')) {
@@ -950,11 +960,10 @@ define(function(require) {
    */
   DrawEventHandler.prototype.clickCellBoundaryBtn = function(broker, previousMsg) {
 
-    var result = require('./Result.js');
+    let result = require('./Result.js')();
     var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
     var isFloorExist = (propertyContainer.floorProperties.length != 0);
-    var isCellExist = (propertyContainer.cellProperties.length != 0);
 
     if (!isFloorExist) {
       result.msg = "There is no floor ...";
@@ -971,30 +980,7 @@ define(function(require) {
 
     } else if (broker.isPublishable('end-addnewcellboundary')) {
 
-      if (window.tmpObj.isEmpty()) {
-
-        broker.publish(require('Message')('end-addnewcellboundary', {
-          'isEmpty': true
-        }));
-
-      } else {
-
-        var newId = null;
-        var flag = false;
-        while(!flag){
-          newId = require('Conditions').getInstance().pre_cellBoundary + (++require('Conditions').getInstance().LAST_CELLBOUNDARY_ID_NUM);
-          flag = propertyContainer.getElementById('cellBoundary', newId) == null ? true : false;
-        }
-
-        broker.publish(require('Message')('end-addnewcellboundary', {
-          'id': newId,
-          'floor': window.tmpObj.floor
-        }));
-
-      }
-
-      result.result = true;
-      result.msg = null;
+      result = require('EventHandler').getInstance().getHandlers().drawEventHandler.endAddNewCellBoundary(broker, result);
 
     } else {
       result.msg = "wrong transition : " + previousMsg + " to start-addnewcellboundary, end-addnewcellboundary.";
@@ -1004,12 +990,49 @@ define(function(require) {
 
   }
 
-  /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickStateBtn = function(broker, previousMsg){
+  DrawEventHandler.prototype.endAddNewCellBoundary = function(broker, result) {
+    var drawEventHandler = require('EventHandler').getInstance().getHandlers().drawEventHandler;
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
-    var result = require('./Result.js');
+    if (window.tmpObj.isEmpty()) {
+      result = drawEventHandler.cancelDrawObject(broker, 'cancel-addnewcellboundary', '', '');
+      result.result = true;
+    } else if (window.tmpObj.dots.length < 2 ){
+      result = drawEventHandler.cancelDrawObject(
+        broker,
+        'cancel-addnewcellboundary',
+        'INVALID LINE',
+        'The line needs at least two points.'
+      )
+    } else {
+
+      var newId = null;
+      var flag = false;
+      while (!flag) {
+        newId = require('Conditions').getInstance().pre_cellBoundary + (++require('Conditions').getInstance().LAST_CELLBOUNDARY_ID_NUM);
+        flag = propertyContainer.getElementById('cellBoundary', newId) == null ? true : false;
+      }
+
+      broker.publish(require('Message')('end-addnewcellboundary', {
+        'id': newId,
+        'floor': window.tmpObj.floor
+      }));
+
+      result.result = true;
+      result.msg = null;
+
+    }
+
+    return result;
+
+  }
+
+  /**
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickStateBtn = function(broker, previousMsg) {
+
+    let result = require('./Result.js')();
     var propertyContainer = require('Storage').getInstance().getPropertyContainer();
     var isFloorExist = (propertyContainer.floorProperties.length != 0);
     var isCellExist = (propertyContainer.cellProperties.length >= 1);
@@ -1018,11 +1041,7 @@ define(function(require) {
 
       result.msg = "There is no floor ...";
 
-    } else if (!isCellExist){
-
-      result.msg = "There is no cell ...";
-
-    } else if(broker.isPublishable('start-addnewstate')){
+    } else if (broker.isPublishable('start-addnewstate')) {
 
       broker.publish(require('Message')('start-addnewstate', null));
 
@@ -1038,11 +1057,11 @@ define(function(require) {
   }
 
   /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickTransitionBtn = function(broker, previousMsg){
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickTransitionBtn = function(broker, previousMsg) {
 
-    var result = require('./Result.js');
+    let result = require('./Result.js')();
     var propertyContainer = require('Storage').getInstance().getPropertyContainer();
     var isFloorExist = (propertyContainer.floorProperties.length != 0);
     var isStateExist = (propertyContainer.stateProperties.length >= 2);
@@ -1051,22 +1070,22 @@ define(function(require) {
 
       result.msg = "There is no floor ...";
 
-    } else if (!isStateExist){
+    } else if (!isStateExist) {
 
       result.msg = "There is too few state ...";
 
-    } else if(broker.isPublishable('start-addnewtransition')){
+    } else if (broker.isPublishable('start-addnewtransition')) {
 
       broker.publish(require('Message')('start-addnewtransition', null));
 
       result.result = true;
       result.msg = 'start-addnewtransition';
 
-    } else if(broker.isPublishable('end-addnewtransition')){
+    } else if (broker.isPublishable('end-addnewtransition')) {
 
       var newId = null;
       var flag = false;
-      while(!flag){
+      while (!flag) {
         newId = require('Conditions').getInstance().pre_transition + (++require('Conditions').getInstance().LAST_TRANSITION_ID_NUM);
         flag = propertyContainer.getElementById('transition', newId) == null ? true : false;
       }
@@ -1089,11 +1108,11 @@ define(function(require) {
 
 
   /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickInterBtn = function(broker, previousMsg){
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickInterBtn = function(broker, previousMsg) {
 
-    var result = require('./Result.js');
+    let result = require('./Result.js')();
     var propertyContainer = require('Storage').getInstance().getPropertyContainer();
     var isFloorExist = (propertyContainer.floorProperties.length != 0);
     var isStateExist = (propertyContainer.stateProperties.length >= 2);
@@ -1102,18 +1121,18 @@ define(function(require) {
 
       result.msg = "There is no floor ...";
 
-    } else if (!isStateExist){
+    } else if (!isStateExist) {
 
       result.msg = "There is too few state ...";
 
-    } else if(broker.isPublishable('start-addnewinterlayerconnetction')){
+    } else if (broker.isPublishable('start-addnewinterlayerconnetction')) {
 
       broker.publish(require('Message')('start-addnewinterlayerconnetction', null));
 
       result.result = true;
       result.msg = 'start-addnewinterlayerconnetction';
 
-    } else if(broker.isPublishable('end-addnewinterlayerconnetction')){
+    } else if (broker.isPublishable('end-addnewinterlayerconnetction')) {
 
       broker.publish(require('Message')('start-addnewinterlayerconnetction', null));
 
@@ -1129,11 +1148,11 @@ define(function(require) {
   }
 
   /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickStairBtn = function(broker, previousMsg){
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickStairBtn = function(broker, previousMsg) {
 
-    var result = require('./Result.js')
+    let result = require('./Result.js')()
     var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
     var isFloorExist = (propertyContainer.floorProperties.length >= 2);
@@ -1143,18 +1162,18 @@ define(function(require) {
 
       result.msg = "There is too few floor ...";
 
-    } else if (!isStateExist){
+    } else if (!isStateExist) {
 
       result.msg = "There is too few state ...";
 
-    } else if(broker.isPublishable('start-addnewstair')){
+    } else if (broker.isPublishable('start-addnewstair')) {
 
       broker.publish(require('Message')('start-addnewstair', null));
 
       result.result = true;
       result.msg = 'start-addnewstair';
 
-    } else if(broker.isPublishable('end-addnewstair')){
+    } else if (broker.isPublishable('end-addnewstair')) {
 
       broker.publish(require('Message')('start-addnewstair', null));
 
@@ -1171,21 +1190,13 @@ define(function(require) {
 
   }
 
-  /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.lineDbclick = function(broker, previous, data){
-    log.info('dbclick : ', data);
-
-    return require('./Result.js')
-  }
 
   /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickSlantDownBtn = function(broker, previous, data){
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickSlantDownBtn = function(broker, previous, data) {
 
-    var result = require('./Result.js')
+    let result = require('./Result.js')()
 
     var isFloorExist = (require('Storage').getInstance().getPropertyContainer().floorProperties.length != 0);
 
@@ -1209,6 +1220,8 @@ define(function(require) {
           'isEmpty': true
         }));
 
+      } else if(window.tmpObj.floor.length < 4 ){
+        // do nothing
       } else {
 
         broker.publish(require('Message')('end-addnewslantdown', {
@@ -1236,11 +1249,11 @@ define(function(require) {
   }
 
   /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickSlantUpBtn = function(broker, previous, data){
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickSlantUpBtn = function(broker, previous, data) {
 
-    var result = require('./Result.js')
+    let result = require('./Result.js')()
 
     var isFloorExist = (require('Storage').getInstance().getPropertyContainer().floorProperties.length != 0);
 
@@ -1254,6 +1267,8 @@ define(function(require) {
         'msg': 'start-addnewslantup'
       };
 
+    } else if(window.tmpObj.floor.length < 4 ){
+      // do nothing
     } else if (broker.isPublishable('end-addnewslantup')) {
 
       if (window.tmpObj.isEmpty()) {
@@ -1291,11 +1306,11 @@ define(function(require) {
   }
 
   /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickSlantUpDownBtn = function(broker, previous, data){
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickSlantUpDownBtn = function(broker, previous, data) {
 
-    var result = require('./Result.js')
+    let result = require('./Result.js')()
 
     var isFloorExist = (require('Storage').getInstance().getPropertyContainer().floorProperties.length != 0);
 
@@ -1319,6 +1334,8 @@ define(function(require) {
           'isEmpty': true
         }));
 
+      } else if(window.tmpObj.floor.length < 4 ){
+        // do nothing
       } else {
 
         broker.publish(require('Message')('end-addnewslantupdown', {
@@ -1345,15 +1362,17 @@ define(function(require) {
 
   }
 
-  DrawEventHandler.prototype.stageContextmenu = function(broker, previous, data){
-    var result = require('./Result.js')
+  DrawEventHandler.prototype.stageContextmenu = function(broker, previous, data) {
+    let result = require('./Result.js')()
 
     var isFloorExist = (require('Storage').getInstance().getPropertyContainer().floorProperties.length != 0);
 
     if (isFloorExist && broker.isPublishable('callcontextmenu')) {
 
       // reqObj.floor will be active workspace
-      broker.publish(require('Message')('callcontextmenu', {floor: data.currentTarget.attrs.id}));
+      broker.publish(require('Message')('callcontextmenu', {
+        floor: data.currentTarget.attrs.id
+      }));
 
       result = {
         'result': true,
@@ -1369,18 +1388,18 @@ define(function(require) {
     return result;
   }
 
-  DrawEventHandler.prototype.test = function(){
-    log.info('DrawEventHandler TEST');
-  }
 
-  DrawEventHandler.prototype.copyFloor = function(broker, previous, data){
-    var result = require('./Result.js')
+  DrawEventHandler.prototype.copyFloor = function(broker, previous, data) {
+    let result = require('./Result.js')()
 
-    if ( broker.isPublishable('copyfloor')) {
+    if (broker.isPublishable('copyfloor')) {
 
       var targetFloor = document.getElementById('copyfloor-text').value;
 
-      broker.publish(require('Message')('copyfloor', {floor: document.getElementById('id-text').value, targetFloor: targetFloor}));
+      broker.publish(require('Message')('copyfloor', {
+        floor: document.getElementById('id-text').value,
+        targetFloor: targetFloor
+      }));
 
       result = {
         'result': true,
@@ -1396,8 +1415,8 @@ define(function(require) {
     return result;
   }
 
-  DrawEventHandler.prototype.clickHatchBtn = function(broker, previous, data){
-    var result = require('./Result.js');
+  DrawEventHandler.prototype.clickHatchBtn = function(broker, previous, data) {
+    let result = require('./Result.js')();
     var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
     var isFloorExist = (propertyContainer.floorProperties.length != 0);
@@ -1428,7 +1447,7 @@ define(function(require) {
 
         var newId = null;
         var flag = false;
-        while(!flag){
+        while (!flag) {
           newId = require('Conditions').getInstance().pre_cellBoundary + (++require('Conditions').getInstance().LAST_CELLBOUNDARY_ID_NUM);
           flag = propertyContainer.getElementById('hatch', newId) == null ? true : false;
         }

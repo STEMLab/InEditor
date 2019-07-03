@@ -116,7 +116,13 @@ define(function(require) {
         _reqSpecList['cancel-addnewcellboundary'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
         _reqSpecList['cancel-addnewstate'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
         _reqSpecList['cancel-addnewtransition'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
+        _reqSpecList['cancel-addnewstair'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
         _reqSpecList['cancel-addnewhole'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
+        _reqSpecList['cancel-addnewinterlayerconnetction'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
+        _reqSpecList['cancel-addnewslantdown'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
+        _reqSpecList['cancel-addnewslantup'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
+        _reqSpecList['cancel-addnewslantupdown'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
+        _reqSpecList['cancel-addnewhatch'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
 
         _reqSpecList['start-addnewcellboundary'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);
         _reqSpecList['addnewcellboundary'] = require('./MessageSpec.js')('cycle', 'including', ['draw'], true);

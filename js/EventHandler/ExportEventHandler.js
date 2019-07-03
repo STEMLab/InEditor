@@ -24,7 +24,7 @@ define(function(require) {
 
   ExportEventHandler.prototype.exportToViewer = function(broker, previousMsg) {
 
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
     var address = document.getElementById("viewer-baseURL").value+ ":" + document.getElementById("viewer-portNum").value + "/" +document.getElementById("viewer-params").value;
     var reg = /https?:\/\/(\w*:\w*@)?[-\w.]+(:\d+)?(\/([\w/_.]*(\?\S+)?)?)?/.exec(address);
 
@@ -51,7 +51,7 @@ define(function(require) {
 
   ExportEventHandler.prototype.exportToFactory = function(broker, previousMsg) {
 
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('exporttofactory')) {
       broker.publish(require('Message')('exporttofactory', {

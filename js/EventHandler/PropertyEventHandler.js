@@ -65,7 +65,7 @@ define(function(require) {
    */
   PropertyEventHandler.prototype.clickPropertySubmitBtn = function(broker, previousMsg) {
 
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('updateproperty')) {
 
@@ -94,7 +94,7 @@ define(function(require) {
    */
   PropertyEventHandler.prototype.clickPropertRefySubmitBtn = function(broker, previousMsg) {
 
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('updaterefdata')) {
 
@@ -230,7 +230,7 @@ define(function(require) {
   }
 
   PropertyEventHandler.prototype.addDescList = function(broker, previousMsg) {
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('addnewglobaldesc')) {
 
@@ -253,7 +253,7 @@ define(function(require) {
   }
 
   PropertyEventHandler.prototype.clickExtebdSubmitBtn = function(broker, previousMsg) {
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('updateproperty')) {
 
@@ -299,7 +299,7 @@ define(function(require) {
 
 
   PropertyEventHandler.prototype.clickTextureSubmitBtn = function(broker, previousMsg) {
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('updateproperty')) {
 
@@ -335,7 +335,7 @@ define(function(require) {
   }
 
   PropertyEventHandler.prototype.addLocalDesc = function(broker) {
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
     var text = $('#add-new-local-desc-text').val();
 
     if (broker.isPublishable('addlocaldesc') && (text != "" && text != null)) {
@@ -358,7 +358,7 @@ define(function(require) {
   }
 
   PropertyEventHandler.prototype.deleteLocalDesc = function(broker, previousMsg, data) {
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
     var Message = require('../PubSub/Message.js');
 
     if (broker.isPublishable('deletelocaldesc')) {
@@ -383,7 +383,7 @@ define(function(require) {
 
   PropertyEventHandler.prototype.addNewCode = function(broker, previousMsg, data) {
 
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
     var Message = require('../PubSub/Message.js');
 
     var ot = $('#setting-code-new-object-obj-type-menu').dropdown('get value');
@@ -416,7 +416,7 @@ define(function(require) {
 
   PropertyEventHandler.prototype.uploadCodeFile = function(broker, previousMsg, data) {
     var file = document.getElementById('setting-code-upload-file').files[0];
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     var Message = require('../PubSub/Message.js');
     if (broker.isPublishable('uploadcodefile')) {
@@ -432,7 +432,7 @@ define(function(require) {
 
   PropertyEventHandler.prototype.deleteCode = function(broker, previousMsg, data) {
     var path = data.target.id.split('-');
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     var Message = require('../PubSub/Message.js');
 
@@ -451,7 +451,7 @@ define(function(require) {
 
   PropertyEventHandler.prototype.getMapCoor = function(broker, previousMsg, data) {
 
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     var Message = require('../PubSub/Message.js');
     if (broker.isPublishable('getmapcoor')) {

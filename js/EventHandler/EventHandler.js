@@ -245,12 +245,10 @@ define(function(require) {
 
         var result = _handlerBinder[target][type](require('Broker').getInstance(), require('History').getInstance().getPreviousMsg(), data);
 
-        if (!result.result) {
-
-          log.warn(result.msg);
-
-        }
-
+        if (!result.result && result.msg != "" && result.msg != null &&
+             result.msg != 'There is no match function !' &&
+             result.msg != 'no match function.')
+          require('Popup')('warning', result.title, result.msg)
       }
 
     }

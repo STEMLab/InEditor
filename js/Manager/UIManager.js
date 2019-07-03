@@ -46,7 +46,14 @@ define(function(require) {
     this.addCallbackFun('cancel-addnewcell', this.cancelAddNewCell);
     this.addCallbackFun('cancel-addnewcellboundary', this.cancelAddNewCellBoundary);
     this.addCallbackFun('cancel-addnewtransition', this.cancelAddNewTransition);
-    this.addCallbackFun('cancel-addnewhole', this.endAddNewHole);
+    this.addCallbackFun('cancel-addnewstate', this.cancelAddNewState);
+    this.addCallbackFun('cancel-addnewstair', this.cancelAddNewStair);
+    this.addCallbackFun('cancel-addnewhole', this.cancelAddNewHole);
+    this.addCallbackFun("cancel-addnewinterlayerconnetction", this.cancelAddNewInterLayerConnection);
+    this.addCallbackFun('cancel-addnewslantdown', this.cancelAddNewSlantDown);
+    this.addCallbackFun('cancel-addnewslantup', this.cancelAddNewSlantUp);
+    this.addCallbackFun('cancel-addnewslantupdown', this.cancelAddNewSlantUpDown);
+    this.addCallbackFun('cancel-addnewhatch', this.cancelAddNewHatch);
 
     this.addCallbackFun('start-addnewcellboundary', this.startAddNewCellBoundary);
     this.addCallbackFun('end-addnewcellboundary', this.endAddNewCellBoundary, this.endAddNewCellBoundary_makeHistoryObj, this.removeObj);
@@ -64,17 +71,17 @@ define(function(require) {
 
     this.addCallbackFun('movetooltip', this.moveTooltip);
 
-    this.addCallbackFun('start-addnewstate', this.startAddNewState, function() {}, function() {});
-    this.addCallbackFun('end-addnewstate', this.endAddNewState, function() {}, function() {});
+    this.addCallbackFun('start-addnewstate', this.startAddNewState);
+    this.addCallbackFun('end-addnewstate', this.endAddNewState);
 
     this.addCallbackFun('start-addnewtransition', this.startAddNewTransition);
     this.addCallbackFun('end-addnewtransition', this.endAddNewTransition, this.endAddNewTransition_makeHistoryObj, this.removeObj);
 
-    this.addCallbackFun('start-addnewstair', this.startAddNewStair, function() {}, function() {});
-    this.addCallbackFun('end-addnewstair', this.endAddNewStair, function() {}, function() {});
+    this.addCallbackFun('start-addnewstair', this.startAddNewStair);
+    this.addCallbackFun('end-addnewstair', this.endAddNewStair);
 
-    this.addCallbackFun('start-addnewinterlayerconnetction', this.startAddNewInterConnetction, function() {}, function() {});
-    this.addCallbackFun('end-addnewinterlayerconnetction', this.endAddNewInterConnetction, function() {}, function() {});
+    this.addCallbackFun('start-addnewinterlayerconnetction', this.startAddNewInterConnetction);
+    this.addCallbackFun('end-addnewinterlayerconnetction', this.endAddNewInterConnetction);
 
     this.addCallbackFun('deletecell', this.removeObj);
     this.addCallbackFun('deletecellboundary', this.removeObj);
@@ -378,7 +385,7 @@ define(function(require) {
     // refresh tree view
     require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'CELL_SPACE', reqObj.floor);
 
-    if (require('Conditions').getInstance().automGenerateState){
+    if (require('Conditions').getInstance().automGenerateState) {
       var id = require('Conditions').getInstance().pre_state + (require('Conditions').getInstance().LAST_STATE_ID_NUM);
       require('UI').getInstance().treeView.addNode(id, id, 'STATE', reqObj.floor);
     }
@@ -489,17 +496,6 @@ define(function(require) {
 
   }
 
-  /**
-   * @param {Object} reqObj type<br>floor
-   * @memberof UIManager
-   * @desc change floor btn color
-   */
-  UIManager.prototype.cancelAddNewCell = function(reqObj) {
-
-    document.getElementById('btn__cellSpace').src = "../../assets/icon/cell_d.png";
-
-  }
-
 
   /**
    * @memberof UIManager
@@ -529,16 +525,6 @@ define(function(require) {
 
     // refresh tree view
     require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'CELL_SPACE_BOUNDARY', reqObj.floor);
-  }
-
-  /**
-   * @memberof UIManager
-   * @param {Object} reqObj null
-   */
-  UIManager.prototype.cancelAddNewCellBoundary = function(reqObj) {
-
-    document.getElementById('btn__cellSpaceBoundary').src = "../../assets/icon/cellboundary_d.png";
-
   }
 
   /**
@@ -722,33 +708,157 @@ define(function(require) {
     return obj;
   }
 
+  UIManager.prototype.cancelDrawObject = function(type) {
+    var id = 'btn__' + type,
+      src;
+
+    switch (type) {
+      case 'cellSpace':
+        src = '../../assets/icon/cell_d.png';
+        break;
+      case 'cellSpaceBoundary':
+        src = '../../assets/icon/cellboundary_d.png';
+        break;
+      case 'state':
+        src = '../../assets/icon/state_d.png';
+        break;
+      case 'transition':
+        src = '../../assets/icon/transition_d.png';
+        break;
+      case 'stair':
+        src = '../../assets/icon/stair_d.png';
+        break;
+      case 'hole':
+        src = '../../assets/icon/hole_d.png';
+        break;
+      case 'interlayerConnection':
+        src = '../../assets/icon/inter_d.png';
+        break;
+      case 'slant_up':
+        src = '../../assets/icon/slant_up_d.png';
+        break;
+      case 'slant_down':
+        src = '../../assets/icon/slant_down_d.png';
+        break;
+      case 'slant_up_down':
+        src = '../../assets/icon/slant_up_down_d.png';
+        break;
+      case 'hatch':
+        src = '../../assets/icon/hatch_d.png';
+        break;
+      case 'interlayerconnection':
+        src = '../../assets/icon/inter_d.png';
+        break;
+      default:
+
+    }
+
+    if (document.getElementById(id) != null)
+      document.getElementById(id).src = src;
+
+    if (type === 'transition' || type === 'stair' || type === 'hole' || type === 'interlayerconnection' || type === 'hatch') {
+      var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
+      manager.setTooltipText({
+        text: ''
+      });
+    }
+
+  }
+
+  /**
+   * @memberof UIManager
+   * @desc change floor btn color
+   */
+  UIManager.prototype.cancelAddNewCell = function(reqObj) {
+    require('Broker').getInstance().getManager('addmap', 'UIManager').cancelDrawObject('cellSpace');
+  }
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.cancelAddNewCellBoundary = function(reqObj) {
+    require('Broker').getInstance().getManager('addmap', 'UIManager').cancelDrawObject('cellSpaceBoundary');
+  }
+
+  /**
+   * @memberof UIManager
+   * @param {Object} reqObj null
+   */
+  UIManager.prototype.cancelAddNewState = function(reqObj) {
+    require('Broker').getInstance().getManager('addmap', 'UIManager').cancelDrawObject('state');
+  }
+
+
   /**
    * @memberof UIManager
    */
   UIManager.prototype.cancelAddNewTransition = function(reqObj) {
+    require('Broker').getInstance().getManager('addmap', 'UIManager').cancelDrawObject('transition');
+  }
 
-    document.getElementById('btn__transition').src = "../../assets/icon/transition_d.png";
-
-    var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
-    manager.setTooltipText({
-      text: ''
-    });
-
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.cancelAddNewStair = function(reqObj) {
+    require('Broker').getInstance().getManager('addmap', 'UIManager').cancelDrawObject('stair');
   }
 
   /**
    * @memberof UIManager
    */
   UIManager.prototype.cancelAddNewHole = function(reqObj) {
-
-    document.getElementById('btn__transition').src = "../../assets/icon/transition_d.png";
-
-    var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
-    manager.setTooltipText({
-      text: ''
-    });
-
+    require('Broker').getInstance().getManager('addmap', 'UIManager').cancelDrawObject('hole');
   }
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.cancelAddNewInterLayerConnection = function(reqObj) {
+    require('Broker').getInstance().getManager('addmap', 'UIManager').cancelDrawObject('interlayerconnection');
+
+    if (reqObj.interConnects.length > 0) {
+      var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+      var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+      reqObj.interConnects.forEach(state => {
+        if(state != undefined){
+          var floor = propertyContainer.getFloorById('state', state);
+          var canvasObj = canvasContainer.stages[floor].getElementById("state", state);
+          canvasObj.setColor('yellow');
+          canvasObj.getObj().draw();
+        }
+      })
+    }
+  }
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.cancelAddNewSlantUp = function(reqObj) {
+    require('Broker').getInstance().getManager('addmap', 'UIManager').cancelDrawObject('slant_up');
+  }
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.cancelAddNewSlantDown = function(reqObj) {
+    require('Broker').getInstance().getManager('addmap', 'UIManager').cancelDrawObject('slant_down');
+  }
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.cancelAddNewSlantUpDown = function(reqObj) {
+    require('Broker').getInstance().getManager('addmap', 'UIManager').cancelDrawObject('slant_up_down');
+  }
+
+  /**
+   * @memberof UIManager
+   */
+  UIManager.prototype.cancelAddNewHatch = function(reqObj) {
+    require('Broker').getInstance().getManager('addmap', 'UIManager').cancelDrawObject('hatch');
+  }
+
+
 
   /**
    * @memberof UIManager
@@ -838,7 +948,7 @@ define(function(require) {
     // refresh tree view
     require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'CELL_SPACE', reqObj.floor);
 
-    if (require('Conditions').getInstance().automGenerateState){
+    if (require('Conditions').getInstance().automGenerateState) {
       var id = require('Conditions').getInstance().pre_state + (require('Conditions').getInstance().LAST_STATE_ID_NUM);
       require('UI').getInstance().treeView.addNode(id, id, 'STATE', reqObj.floor);
     }
@@ -881,7 +991,7 @@ define(function(require) {
     // refresh tree view
     require('UI').getInstance().treeView.addNode(reqObj.id, reqObj.id, 'CELL_SPACE', reqObj.floor);
 
-    if (require('Conditions').getInstance().automGenerateState){
+    if (require('Conditions').getInstance().automGenerateState) {
       var id = require('Conditions').getInstance().pre_state + (require('Conditions').getInstance().LAST_STATE_ID_NUM);
       require('UI').getInstance().treeView.addNode(id, id, 'STATE', reqObj.floor);
     }
@@ -1011,10 +1121,11 @@ define(function(require) {
     let stateGroup = canvasContainer.stages[reqObj.floor].stateLayer.group;
     var peopertyContainer = propertyContainer.getElementById('floor', reqObj.floor);
     let layers = [propertyContainer.getElementById('floor', reqObj.targetFloor).layer,
-                  propertyContainer.getElementById('floor', reqObj.floor).layer]
+      propertyContainer.getElementById('floor', reqObj.floor).layer
+    ]
 
     let geometryContainer = require('Storage').getInstance().getGeometryContainer();
-    for(let state of targetStates){
+    for (let state of targetStates) {
       let newId = require('Conditions').getInstance().pre_state + ++require('Conditions').getInstance().LAST_STATE_ID_NUM;
       let targetGeo = geometryContainer.getElementById('state', state);
 
@@ -1055,7 +1166,7 @@ define(function(require) {
 
     var manager = require('Broker').getInstance().getManager('start-addnewtransition', 'UIManager');
     manager.setTooltipText({
-      text: ''
+      text: 'select state'
     });
 
   }
@@ -1065,8 +1176,31 @@ define(function(require) {
    */
   UIManager.prototype.endAddNewInterConnetction = function(reqObj) {
 
-    // change cellboundary_btw color
+    // toolbar btn
     document.getElementById('btn__interlayerconnection').src = "../../assets/icon/inter_d.png";
+
+    // tooltip
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer()
+    var floors = propertyContainer.floorProperties;
+    floors.forEach(fp => {
+      require('Broker').getInstance().getManager(
+        "start-addnewinterlayerconnetction", "UIManager"
+      ).setTooltipText({
+        floor: fp.id,
+        text: ''
+      })
+    })
+
+    // state color
+    var inter = propertyContainer.getElementById('interlayerConnection', reqObj.id);
+    var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+    inter.interConnects.forEach(stateId => {
+      var floor = propertyContainer.getFloorById('state', stateId);
+      var canvasObj = canvasContainer.stages[floor].getElementById('state', stateId);
+      canvasObj.setColor('yellow');
+      canvasObj.getObj().draw();
+    })
+
 
     // set sidebar > propertyContainer
     require('UI').getInstance().propertyTab.setPropertyTab('interlayerConnection', reqObj.id, require('Storage').getInstance());
@@ -1352,22 +1486,22 @@ define(function(require) {
 
   }
 
-  UIManager.prototype.showFeatureTypeAttr = function(reqObj){
+  UIManager.prototype.showFeatureTypeAttr = function(reqObj) {
 
     let len = reqObj.table.childNodes.length;
     while (reqObj.table.childNodes.length > 1) {
       reqObj.table.removeChild(reqObj.table.childNodes[1]);
     }
 
-    if(reqObj.selected != "" && reqObj.selected != undefined){
+    if (reqObj.selected != "" && reqObj.selected != undefined) {
       let featureTr;
 
       if (reqObj.selected == 'navi' && document.getElementById('property-table').dataset.type == "cell") {
         featureTr = require('UI').getInstance().propertyTab.getOneDropTr(
           'feature\ntype',
           'feature-type-text',
-          ["","GeneralSpace", "TransitionSpace", "ConnectionSpace", "AnchorSpace"]);
-      } else if(reqObj.selected == 'navi' && document.getElementById('property-table').dataset.type == "cellBoundary"){
+          ["", "GeneralSpace", "TransitionSpace", "ConnectionSpace", "AnchorSpace"]);
+      } else if (reqObj.selected == 'navi' && document.getElementById('property-table').dataset.type == "cellBoundary") {
         featureTr = require('UI').getInstance().propertyTab.getOneDropTr(
           'feature\ntype',
           'feature-type-text',
@@ -1376,15 +1510,14 @@ define(function(require) {
         featureTr = require('UI').getInstance().propertyTab.getOneDropTr(
           'feature\ntype',
           'feature-type-text',
-          ["","NonNavigableSpace"]);
+          ["", "NonNavigableSpace"]);
       }
 
       reqObj.table.appendChild(featureTr);
       document.getElementById('feature-type-text').addEventListener('change', function(event) {
         require('EventHandler').getInstance().callHandler('html', event);
       });
-    }
-    else {
+    } else {
       document.getElementById("type-text").dataset.pre = "";
     }
 
@@ -1394,28 +1527,26 @@ define(function(require) {
     });
   }
 
-  UIManager.prototype.showExtensionAttr = function(reqObj){
+  UIManager.prototype.showExtensionAttr = function(reqObj) {
     let len = reqObj.table.childNodes.length;
 
     while (reqObj.table.childNodes.length > 2) {
       reqObj.table.removeChild(reqObj.table.childNodes[2]);
     }
 
-    if(reqObj.selected != "" && reqObj.selected != undefined){
-      if(reqObj.moduleType == "navi" && document.getElementById('property-table').dataset.type == "cell"){
+    if (reqObj.selected != "" && reqObj.selected != undefined) {
+      if (reqObj.moduleType == "navi" && document.getElementById('property-table').dataset.type == "cell") {
         reqObj.table.appendChild(require('UI').getInstance().propertyTab.getOneCodeListTr([...reqObj.path, 'class'], 'class-text', 'class'));
         reqObj.table.appendChild(require('UI').getInstance().propertyTab.getOneCodeListTr([...reqObj.path, 'function'], 'function-text', 'function'));
         reqObj.table.appendChild(require('UI').getInstance().propertyTab.getOneCodeListTr([...reqObj.path, 'function'], 'usage-text', 'usage'));
-      }
-      else if(reqObj.moduleType == 'non-navi'){
-        reqObj.table.appendChild(require('UI').getInstance().sidebar.property.getOneCodeListTr(
+      } else if (reqObj.moduleType == 'non-navi') {
+        reqObj.table.appendChild(require('UI').getInstance().propertyTab.getOneCodeListTr(
           ['NonNavigableSpace'],
           'obstacle-type-text',
           'obtacle'
         ))
       }
-    }
-    else {
+    } else {
       document.getElementById("type-text").dataset.pre = "";
     }
 
@@ -1425,11 +1556,11 @@ define(function(require) {
     });
   }
 
-  UIManager.prototype.addMap = function(reqObj){
+  UIManager.prototype.addMap = function(reqObj) {
     require('Storage').getInstance().getCanvasContainer().stages[reqObj.floor].addMap(reqObj.coor);
   }
 
-  UIManager.prototype.startAddNewHatch = function(reqObj){
+  UIManager.prototype.startAddNewHatch = function(reqObj) {
     // change btn color
     document.getElementById('btn__hatch').src = "../../assets/icon/hatch_a.png";
 
@@ -1454,7 +1585,7 @@ define(function(require) {
 
   }
 
-  UIManager.prototype.removeFLoorplan = function(reqObj){
+  UIManager.prototype.removeFLoorplan = function(reqObj) {
     var canvasContainer = require('Storage').getInstance().getCanvasContainer();
     let stage = canvasContainer.stages[reqObj.floor].stage;
     canvasContainer.stages[reqObj.floor].backgroundLayer.setGrid(stage.width(), stage.height());

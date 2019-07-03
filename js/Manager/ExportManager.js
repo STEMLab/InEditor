@@ -230,6 +230,7 @@ define(function(require) {
 
     var cellBoundaries = {};
 
+    var conditions = require('Conditions').getInstance().exportConditions.CellSpaceBoundary;
     var geometries = require('Storage').getInstance().getGeometryContainer().cellBoundaryGeometry;
     var properties = require('Storage').getInstance().getPropertyContainer().cellBoundaryProperties;
     var floorProperties = require('Storage').getInstance().getPropertyContainer().floorProperties;

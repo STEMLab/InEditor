@@ -238,17 +238,19 @@ define(function(require) {
     var StateProperty = require('Property').STATE;
     var newState = new StateProperty(require('Conditions').getInstance().pre_state + (require('Conditions').getInstance().LAST_STATE_ID_NUM));
     if (reqObj.duality) {
-      newState.setDuality(reqObj.duality);
+      var cell = propertyContainer.getElementById('cell', reqObj.duality);
+
+      if(cell.duality === null || cell.duality === ""){
+        newState.setDuality(reqObj.duality);
+        cell.setDuality(newState.id);
+      }
+
     }
 
     propertyContainer.stateProperties.push(newState);
     propertyContainer.getElementById('floor', reqObj.floor).stateKey.push(
       newState.id
     );
-
-    if (newState.duality != "" && newState.duality != "")
-      propertyContainer.getElementById('cell', newState.duality).setDuality(newState.id);
-
   }
 
   /**

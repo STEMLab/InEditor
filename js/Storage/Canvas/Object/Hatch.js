@@ -37,7 +37,6 @@ define([
     this.hatchOf = cellId;
   }
 
-
   return Hatch;
 
 });

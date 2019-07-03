@@ -35,7 +35,7 @@
       this.addCallbackFun("end-addnewcell", this.endAddNewCell, this.makeSimpleHistoryObj, this.deleteCell);
 
       this.addCallbackFun("start-addnewhole", this.startAddNewHole, function() {}, function() {});
-      this.addCallbackFun("addnewhole", this.addNewHole, function() {}, function() {});
+      this.addCallbackFun("addnewhole", this.addNewHole, this.drawGeometry_makeHistoryObj, this.addNewCell_undo);
       this.addCallbackFun("end-addnewhole", this.endAddNewHole, function() {}, function() {});
 
       this.addCallbackFun("start-addnewcellboundary", this.startAddNewCellBoundary, function() {}, function() {});
@@ -48,10 +48,17 @@
 
       this.addCallbackFun("snapping", this.snappingMousePointer);
 
-      this.addCallbackFun("cancel-addnewcell", this.cancelDrawObj);
-      this.addCallbackFun("cancel-addnewcellboundary", this.cancelDrawObj);
-      this.addCallbackFun("cancel-addnewtransition", this.cancelDrawObj);
-      this.addCallbackFun("cancel-addnewhole", this.cancelDrawObj);
+      this.addCallbackFun('cancel-addnewcell', this.cancelDrawObj);
+      this.addCallbackFun('cancel-addnewcellboundary', this.cancelDrawObj);
+      this.addCallbackFun('cancel-addnewtransition', this.cancelDrawObj);
+      this.addCallbackFun('cancel-addnewstate', this.cancelDrawObj);
+      this.addCallbackFun('cancel-addnewstair', this.cancelDrawStair);
+      this.addCallbackFun('cancel-addnewhole', this.cancelDrawObj);
+      this.addCallbackFun("cancel-addnewinterlayerconnetction", this.cancelDrawObj);
+      this.addCallbackFun('cancel-addnewslantdown', this.cancelDrawObj);
+      this.addCallbackFun('cancel-addnewslantup', this.cancelDrawObj);
+      this.addCallbackFun('cancel-addnewslantupdown', this.cancelDrawObj);
+      this.addCallbackFun('cancel-addnewhatch', this.cancelDrawObj);
 
       this.addCallbackFun("start-addnewstate", this.startAddNewState, function() {}, function() {});
       this.addCallbackFun("end-addnewstate", this.endAddNewState, this.makeSimpleHistoryObj, this.endAddNewTransition_undo);
@@ -61,7 +68,7 @@
       this.addCallbackFun("end-addnewtransition", this.endAddNewTransition, this.makeSimpleHistoryObj, this.endAddNewTransition_undo);
 
       this.addCallbackFun("start-addnewstair", this.startAddNewStair, function() {}, function() {});
-      this.addCallbackFun("addnewstair", this.addNewStair, function() {}, function() {});
+      this.addCallbackFun("addnewstair", this.addNewStair, this.drawGeometry_makeHistoryObj, this.addNewStair_undo);
       this.addCallbackFun("end-addnewstair", this.endAddNewStair, function() {}, function() {});
 
       this.addCallbackFun("start-addnewslantdown", this.startAddNewSlantDown, function() {}, function() {});
@@ -77,7 +84,7 @@
       this.addCallbackFun("end-addnewslantupdown", this.endAddNewSlantUpDown, this.makeSimpleHistoryObj, this.deleteCell);
 
       this.addCallbackFun("start-addnewinterlayerconnetction", this.startAddNewInterConnetction, function() {}, function() {});
-      this.addCallbackFun("addnewinterlayerconnetction", this.addNewInterConnetction, function() {}, function() {});
+      this.addCallbackFun("addnewinterlayerconnetction", this.addNewInterConnetction, this.drawGeometry_makeHistoryObj, this.addNewInterConnetction_undo);
       this.addCallbackFun("end-addnewinterlayerconnetction", this.endAddNewInterConnetction, function() {}, function() {});
 
       this.addCallbackFun("modifyline", this.modifyLine);
@@ -172,9 +179,11 @@
      * @param reqObj floor
      */
     GeometryManager.prototype.drawGeometry_makeHistoryObj = function(reqObj) {
+      var uuid = window.tmpObj.getLastDot != undefined ?
+        window.tmpObj.getLastDot().uuid : null;
       return {
         floor: reqObj.floor,
-        uuid: window.tmpObj.getLastDot().uuid
+        uuid: uuid
       };
     };
 
@@ -210,26 +219,43 @@
       var canvasContainer = require('Storage').getInstance().getCanvasContainer();
 
       if (manager.isSelfIntersecting(tmpObj)) {
+        var req = 'cancel-addnewcell';
+        if (tmpObj.slant != null) {
+          if (tmpObj.slant.direction === 'up') req = 'cancel-addnewslantup';
+          else if (tmpObj.slant.direction === 'down') req = 'cancel-addnewslantdown';
+        }
+
         require('Broker').getInstance().publish({
-          req: 'cancel-addnewcell',
+          req: req,
           reqObj: {
             'floor': reqObj.floor
           }
         });
-        return false;
 
+        require('Conditions').getInstance().LAST_CELL_ID_NUM--;
+        require('Popup')('error', 'INVALID POLYGON', 'The polygon must not be self intersected.')
+
+        return false;
       }
 
-      if (tmpObj.dots.length < 3) {
+      if (manager.isOverlaped(tmpObj)) {
+        var req = 'cancel-addnewcell';
+        if (tmpObj.slant != null) {
+          if (tmpObj.slant.direction === 'up') req = 'cancel-addnewslantup';
+          else if (tmpObj.slant.direction === 'down') req = 'cancel-addnewslantdown';
+        }
         require('Broker').getInstance().publish({
-          req: 'cancel-addnewcell',
+          req: req,
           reqObj: {
             'floor': reqObj.floor
           }
         });
+
+        require('Conditions').getInstance().LAST_CELL_ID_NUM--;
+        require('Popup')('error', 'INVALID POLYGON', 'Polygons on the same layer should not overlap each other.')
+
         return false;
       }
-
 
       // clear tmp obj
       window.tmpObj = null;
@@ -493,8 +519,9 @@
       for (var i in cells) {
 
         var cell = reader.read(cells[i].getWKT());
-        var intersection = point.intersection(cell).getCoordinates();
-        if (intersection.length != 0) result.push(cells[i].id);
+        //var intersection = point.intersection(cell).getCoordinates();
+        var contains = cell.contains(point);
+        if (cell.contains(point)) result.push(cells[i].id);
 
       }
 
@@ -502,8 +529,9 @@
       for (var i in holes) {
 
         var hole = reader.read(holes[i].getWKT());
-        var intersection = point.intersection(hole).getCoordinates();
-        if (intersection.length != 0 && result.indexOf(holes[i].holeOf) != -1) result.splice(result.indexOf(holes[i].holeOf), 1);
+        //var intersection = point.intersection(hole).getCoordinates();
+        var contains = cell.contains(hole);
+        if (result.indexOf(holes[i].holeOf) != -1 && !contains) result.splice(result.indexOf(holes[i].holeOf), 1);
 
       }
 
@@ -639,6 +667,55 @@
       var tmpObj = window.tmpObj;
       var canvasContainer = require('Storage').getInstance().getCanvasContainer();
 
+      function cancel() {
+        require('Broker').getInstance().publish({
+          req: 'cancel-addnewhole',
+          reqObj: {
+            'floor': reqObj.floor
+          }
+        });
+        require('Conditions').getInstance().LAST_HOLE_ID_NUM--;
+      }
+
+      // Twisted side validation
+      if (require('Broker').getInstance()
+        .getManager("end-addnewcell", "GeometryManager")
+        .isSelfIntersecting(tmpObj)
+      ) {
+        cancel();
+        require('Popup')('error', 'INVALID POLYGON', 'The polygon must not be self intersected.')
+        return false;
+      }
+
+      function getWKT(dots) {
+        var wkt = "POLYGON ((";
+        for (var i = 0; i < dots.length; i++)
+          wkt += dots[i].point.x + " " + dots[i].point.y + ", ";
+        wkt += dots[0].point.x + " " + dots[0].point.y + "))";
+        return wkt;
+      }
+
+      function isHolesOverlaped(cellId, dots) {
+        let holes = require('Storage').getInstance().getGeometryContainer()
+          .holeGeometry.filter(h => h.holeOf === cellId);
+        var reader = new jsts.io.WKTReader();
+        var currentHole = reader.read(getWKT(dots));
+        var flag = false;
+
+        holes.forEach(h => {
+          var tmpHole = reader.read(getWKT(h.points));
+          if (!flag && currentHole.overlaps(tmpHole)) flag = true;
+        })
+
+        return flag;
+      }
+
+      if (isHolesOverlaped(tmpObj.holeOf, tmpObj.dots)) {
+        cancel();
+        require('Popup')('error', 'INVALID POLYGON', 'Holes on the same CellSpace should not overlap each other.')
+        return false;
+      }
+
       // clear tmp obj
       window.tmpObj = null;
       canvasContainer.stages[
@@ -649,15 +726,6 @@
 
       for (var key in tmpObj.dots) {
         tmpObj.dots[key].leaveObj("tmpObj");
-      }
-
-      // Twisted side validation
-      if (!require('Broker').getInstance()
-        .getManager("end-addnewcell", "GeometryManager")
-        .isSelfIntersecting(tmpObj.dots)
-      ) {
-        log.error("This object have twisted side !");
-        return false;
       }
 
       tmpObj.id = reqObj.id;
@@ -715,6 +783,32 @@
       return !r;
     };
 
+    GeometryManager.prototype.isOverlaped = function(tmpObj) {
+      var wkt = tmpObj.getWKT();
+      var reader = new jsts.io.WKTReader();
+      var target = reader.read(wkt);
+      var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+      var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+      var cells;
+
+      if (tmpObj.floor === undefined) {
+        var layer = propertyContainer.getFloorById('cell', tmpObj.id);
+        cells = canvasContainer.stages[layer].cellLayer.group.cells;
+      } else
+        cells = canvasContainer.stages[tmpObj.floor].cellLayer.group.cells;
+
+      if (cells.length < 1) return false;
+      for (var cell of cells) {
+        let tmpJstsObj = reader.read(cell.getWKT());
+        if (tmpJstsObj.overlaps(target) && !tmpJstsObj.touches(target)) {
+          if (tmpObj.slant === null) return true;
+          ////////////////////////////////
+        }
+      }
+
+      return false;
+    }
+
     /**
      * @param {Object} reqObj floor
      * @memberof GeometryManager
@@ -736,8 +830,6 @@
         ].tmpLayer.group.removeObj();
         canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
       }
-
-      require('Conditions').getInstance().LAST_CELL_ID_NUM--;
 
       // clear tmp obj
       window.tmpObj = null;
@@ -940,14 +1032,30 @@
         }
 
         if (Object.keys(window.tmpObj.associationCell) != 0) {
-          window.tmpObj.addCorner(dot);
-          canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+          var line = Object.values(window.tmpObj.associationCell)[0][0];
+          if (require('DotMath').isLineContainDot(line, dot)) {
+            window.tmpObj.addCorner(dot);
+            canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+          } else {
+            dotPoolContainer.getDotPool()[reqObj.floor].deleteDot(dot.uuid);
+            require('Popup')('warning', 'INVALID POINT', 'The selected point does not exist on the same line <br>as the other points contained in this cellspaceBoundary.')
+          }
         } else {
           window.tmpObj.associationCell = save;
-          dotPoolContainer.getDotPool()[reqObj.floor].deleteDot(dot.uuid);
-          log.warn(
-            "Selected point is not connected with another point which participated in the cellspaceboundary what you making."
-          );
+
+          if (Object.keys(window.tmpObj.associationCell).length === 2) {
+            dotPoolContainer.getDotPool()[reqObj.floor].deleteDot(dot.uuid);
+            require('Popup')('warning', 'INVALID POINT', 'The selected point does not exist on the same line <br>as the other points contained in this cellspaceBoundary.')
+          } else {
+            var line = Object.values(window.tmpObj.associationCell)[0][0];
+            if (require('DotMath').isLineContainDot(line, dot)) {
+              window.tmpObj.addCorner(dot);
+              canvasContainer.stages[reqObj.floor].tmpLayer.layer.draw();
+            } else {
+              dotPoolContainer.getDotPool()[reqObj.floor].deleteDot(dot.uuid);
+              require('Popup')('warning', 'INVALID POINT', 'The selected point does not exist on the same line <br>as the other points contained in this cellspaceBoundary.')
+            }
+          }
         }
       }
     };
@@ -1345,7 +1453,7 @@
           y: point.y
         });
 
-      if (isDotExist != null && tmpObj.dots.length <= 1 && isDotExist.isState) {
+      if (isDotExist != null && tmpObj.dots.length <= 1 && isDotExist.isState()) {
         window.tmpObj.addState(isDotExist);
         // isDotExist.participateObj('tmpObj', 'transition');
 
@@ -1364,25 +1472,18 @@
         var cellBoundaries = canvasContainer.stages[
           reqObj.floor
         ].cellBoundaryLayer.group.getObjects();
+
         for (var boundaryKey in cellBoundaries) {
           var dots = cellBoundaries[boundaryKey].getDots();
-
-          // this lines shoule activate when factory support real line string
-          // for(var i = 0 ; i < dots.length ; i ++){
-          //
-          //   var line = { dot1 : null, dot2 : null };
-          //   line.dot1 = dots[i];
-          //   if( i == dots.length - 1 ) line.dot2 = dots[0];
-          //   else line.dot2 = dots[1];
-          //
-          // }
-
           var line = {
             dot1: dots[0],
             dot2: dots[1]
           };
 
-          if (
+          var duality = require('Storage').getInstance().getPropertyContainer().getElementById('cellBoundary', cellBoundaries[boundaryKey].id).duality;
+          if (duality != '' && duality != null) {
+            require('Popup')('warning', 'INVALID CELLSPACEBOUNDARY', 'Selected CellSpaceBoudnary already has a duality');
+          } else if (
             require('DotMath').isLineContainDot(line, {
               point: point
             })
@@ -1640,6 +1741,60 @@
     /**
      * @memberof GeometryManager
      */
+    GeometryManager.prototype.addNewStair_undo = function(undoObj) {
+      let dot = window.tmpObj.dots[window.tmpObj.dots.length - 1];
+      let i = Object.values(dot.memberOf).indexOf('state');
+      let id = Object.keys(dot.memberOf)[i];
+
+      require('Broker').getInstance().getManager("addnewstair", "GeometryManager")
+        .addNewTransition_undo(undoObj);
+      window.tmpObj.floor = null;
+
+
+      ///////////////////////////////////////////////////////////////////////////////
+      /////////////////////////// move to UIManager /////////////////////////////////
+      ///////////////////////////////////////////////////////////////////////////////
+      let state = require('Storage').getInstance().getCanvasContainer()
+        .stages[undoObj.floor]
+        .getElementById('state', id);
+      state.setColor('yellow');
+      state.getObj().draw();
+
+      require('Broker').getInstance().getManager("start-addnewstair", "UIManager")
+        .setTooltipText({
+          floor: undoObj.floor,
+          text: "select state"
+        });
+    }
+
+    /**
+     * @memberof GeometryManager
+     */
+    GeometryManager.prototype.cancelDrawStair = function(reqObj) {
+      let stateIds = [];
+      window.tmpObj.dots.forEach(dot => {
+        if (dot.isState()) {
+          let i = Object.values(dot.memberOf).indexOf('state');
+          stateIds.push(Object.keys(dot.memberOf)[i]);
+        }
+      });
+
+      let stage = require('Storage').getInstance().getCanvasContainer().stages[reqObj.floor]
+
+      require('Broker').getInstance().getManager("addnewstair", "GeometryManager")
+        .cancelDrawObj(reqObj);
+
+      for (let id of stateIds) {
+        let state = stage.getElementById('state', id);
+        state.setColor('yellow');
+        state.getObj().draw();
+      }
+    }
+
+
+    /**
+     * @memberof GeometryManager
+     */
     GeometryManager.prototype.endAddNewStair = function(reqObj) {
       if (reqObj.isEmpty != null) {
         window.tmpObj = null;
@@ -1710,10 +1865,23 @@
 
       filtered = isPartOf;
 
+      window.ori = {};
+      window.modify = {
+        type: 'line',
+        uuid: newDot.uuid
+      };
+
       for (var i in filtered) {
-        var obj = canvasContainer.stages[
-          reqObj.floor
-        ].getElementById(reqObj.line.dot1.memberOf[filtered[i]], filtered[i]);
+        var type = reqObj.line.dot1.memberOf[filtered[i]];
+        var id = filtered[i];
+        window.ori[id] = {
+          type: type,
+          dots: [...require('Storage').getInstance().getGeometryContainer()
+            .getElementById(type, id).points
+          ]
+        };
+
+        var obj = canvasContainer.stages[reqObj.floor].getElementById(type, id);
         obj.insertDotIntoLine(reqObj.line, newDot);
       }
 
@@ -1725,6 +1893,25 @@
      */
     GeometryManager.prototype.startModifyPoint = function(reqObj) {
       window.tmpObj = reqObj.point;
+
+      if (window.ori === undefined) {
+        window.modify = {
+          type: 'point',
+          uuid: window.tmpObj.uuid,
+          point: JSON.parse(JSON.stringify(window.tmpObj.point))
+        };
+
+        window.ori = {};
+        var geometryContainer = require('Storage').getInstance().getGeometryContainer();
+        Object.keys(window.tmpObj.memberOf).forEach(key => {
+          window.ori[key] = {
+            type: tmpObj.memberOf[key],
+            dots: [...geometryContainer.getElementById(tmpObj.memberOf[key], key).points]
+          }
+        });
+      }
+
+      log.info(ori);
     };
 
     /**
@@ -1760,8 +1947,42 @@
       var stageObj = require('Storage').getInstance().getCanvasContainer().stages[reqObj.floor];
       var updateException = [];
 
+      // validation
+      var manager = require('Broker').getInstance().getManager("end-addnewcell", "GeometryManager");
+      var dotPool = dotPoolContainer.dotPool[reqObj.floor];
+      var flag = false;
+      Object.keys(movedDot.memberOf).forEach(key => {
+        if (movedDot.memberOf[key] != 'cell' || flag) return;
+
+        var canObj = stageObj.getElementById('cell', key);
+        if (manager.isSelfIntersecting(canObj)) flag = true;
+        else if (manager.isOverlaped(canObj)) flag = true;
+      });
+
+      // cancel modify
+      if (flag) {
+        Object.keys(window.ori).forEach(key => {
+          if (window.modify.type === 'point')
+            dotPool.getDotById(window.modify.uuid).setPoint(window.modify.point);
+
+          var canvaObj = stageObj.getElementById(window.ori[key].type, key);
+          canvaObj.dots = ori[key].dots;
+          canvaObj.addObjectFromDots();
+          geometryContainer.getElementById(window.ori[key].type, key);
+
+          if (window.modify.type === 'line')
+            dotPool.deleteDotFromObj(movedDot.uuid, key);
+
+        });
+
+        stageObj.stage.draw();
+        delete window.modify;
+        delete window.ori;
+        return;
+      }
+
       // if dot exist
-      var isDotExist = dotPoolContainer.dotPool[
+      var isDotExist = require('Storage').getInstance().getDotPoolContainer().dotPool[
         reqObj.floor
       ].getDotByPointaAllowDuplication(movedDot.point);
 
@@ -1780,9 +2001,10 @@
         }
 
         if (Object.keys(movedDot.memberOf).length == 0)
-          dotPoolContainer.dotPool[reqObj.floor].deleteDot(movedDot.uuid);
+          require('Storage').getInstance().getDotPoolContainer().dotPool[reqObj.floor].deleteDot(movedDot.uuid);
         movedDot = isDotExist[0];
 
+        /////////////////////////////////////////////////////////////////
       }
 
       // update geometry data
@@ -1806,6 +2028,8 @@
       }
 
       window.tmpObj = null;
+      delete window.modify;
+      delete window.ori;
     };
 
 
@@ -2162,7 +2386,7 @@
       );
 
       window.tmpObj.setSlant('down');
-      manager.endAddNewCell(reqObj);
+      if (!manager.endAddNewCell(reqObj)) return false;
 
       if (reqObj.isEmpty != null) {
         window.tmpObj = null;
@@ -2224,6 +2448,7 @@
         for (var i = 1; i <= dotsLen; i++) {
           tmpCell.addCorner(dots[dotsLen - i]);
         }
+        tmpCell.floor = obj.floor;
         return tmpCell;
       }
 
@@ -2277,6 +2502,19 @@
         dot = isDotExist;
       }
 
+      if (reqObj.duality != '' && reqObj.duality != null) {
+        var lines = canvasContainer.getElementById('cell', reqObj.duality).getLines();
+        var DotMath = require('DotMath');
+        for (var line of lines) {
+          if (DotMath.isLineContainDot(line, dot)) {
+            dotPoolContainer.getDotPool(reqObj.floor).deleteDot(dot.uuid);
+            require('Popup')('warning', 'INVALID POSITION', '')
+            return false;
+          }
+        }
+      }
+
+
       canvasContainer.stages[reqObj.floor].stateLayer.group.makeNewStateAndAdd(reqObj.id, dot);
 
       var StateGeometry = require('Geometry').STATE;
@@ -2329,7 +2567,51 @@
 
       if (isState) {
         window.tmpObj.addState(isState);
+
+        var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+        canvasContainer.stages[reqObj.floor]
+          .getElementById("state", isState)
+          .setColor("blue");
+
+        canvasContainer.stages[reqObj.floor]
+          .getElementById("state", isState)
+          .getObj()
+          .draw();
+
+        var floors = require('Storage').getInstance().getPropertyContainer().floorProperties;
+        floors.forEach(fp => {
+          if (fp.layer === layer)
+            require('Broker').getInstance().getManager(
+              "start-addnewinterlayerconnetction", "UIManager"
+            ).setTooltipText({
+              floor: fp.id,
+              text: 'select state on another layer'
+            })
+        })
       }
+    }
+
+    GeometryManager.prototype.addNewInterConnetction_undo = function(undoObj) {
+      if (window.tmpObj.interConnects[0] === undefined) return; // nothing to do
+      let state = window.tmpObj.interConnects[0];
+
+      // reset tool tip
+      require('Broker').getInstance().getManager(
+        "start-addnewinterlayerconnetction", "UIManager"
+      ).setTooltipText({
+        text: 'select state'
+      })
+
+      // redraw state
+      var floor = require('Storage').getInstance().getPropertyContainer().getFloorById('state', state);
+      var canvasObj = require('Storage').getInstance().getCanvasContainer().stages[floor].getElementById('state', state);
+      canvasObj.setColor('yellow');
+      canvasObj.getObj().draw();
+
+      // reset tmpObj
+      require('Broker').getInstance().getManager(
+        "start-addnewinterlayerconnetction", "GeometryManager"
+      ).startAddNewInterConnetction();
     }
 
     GeometryManager.prototype.endAddNewInterConnetction = function(reqObj) {
@@ -2340,6 +2622,8 @@
       window.tmpObj = null;
 
       require('Storage').getInstance().getPropertyContainer().interlayerConnections.push(newInter);
+
+
     }
 
     GeometryManager.prototype.addCellsFromGML = function(reqObj) {
@@ -2438,6 +2722,7 @@
       }
 
       var Dot = require('Dot');
+
       function makeDot(point, dotPool) {
         var dot = dotPool.getDotByPoint({
           x: point[0],

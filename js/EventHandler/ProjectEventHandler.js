@@ -82,7 +82,7 @@ define(function(require) {
    */
   ProjectEventHandler.prototype.saveProjectToNewPath = function(broker, previousMsg, data) {
 
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     var path = window.document.getElementById('project-save-as-file-path').value;
     var name = window.document.getElementById('project-save-as-file-name').value;
@@ -113,7 +113,7 @@ define(function(require) {
    */
   ProjectEventHandler.prototype.saveProject = function(broker, previousMsg) {
 
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('saveproject')) {
 
@@ -174,7 +174,7 @@ define(function(require) {
    */
   ProjectEventHandler.prototype.loadProject = function(broker, previousMsg, data) {
     console.log(document.getElementById(data.target.id).files)
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('loadproject') && document.getElementById(data.target.id).value != "") {
 
@@ -206,7 +206,7 @@ define(function(require) {
    * @memberof ProjectEventHandler
    */
   ProjectEventHandler.prototype.importGML = function(broker, previousMsg, data) {
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('importgml') && document.getElementById(data.target.id).value != "") {
 
@@ -253,7 +253,7 @@ define(function(require) {
    */
   ProjectEventHandler.prototype.importFile = function(broker, previousMsg, data) {
 
-    var result = require('./Result.js');
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('importfile') && document.getElementById('project-import-file').value != "") {
       var importOn = document.getElementById('project-import-option-new-project').checked;

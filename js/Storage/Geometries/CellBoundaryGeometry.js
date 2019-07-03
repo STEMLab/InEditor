@@ -30,5 +30,12 @@ define([], function() {
     this.points = values.points;
   }
 
+  /**
+  * @memberof CellBoundaryGeometry
+  */
+  CellBoundaryGeometry.prototype.updatePoints = function(newPoints){
+    this.points = newPoints;
+  }
+
   return CellBoundaryGeometry;
 });

@@ -29,6 +29,13 @@ define([], function() {
     this.point = values.point;
   }
 
+  /**
+  * @memberof StateGeometry
+  */
+  StateGeometry.prototype.updatePoints = function(newPoints){
+    this.point = point;
+  }
+
 
   return StateGeometry;
 });
