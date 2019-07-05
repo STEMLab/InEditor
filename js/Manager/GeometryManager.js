@@ -43,7 +43,7 @@
       this.addCallbackFun("end-addnewcellboundary", this.endAddNewCellBoundary, this.makeSimpleHistoryObj, this.endAddNewCellBoundary_undo);
 
       this.addCallbackFun("start-addnewhatch", this.startAddNewHatch, function() {}, function() {});
-      this.addCallbackFun("addnewhatch", this.addNewHatch, function() {}, function() {});
+      this.addCallbackFun("addnewhatch", this.addNewHatch, this.drawGeometry_makeHistoryObj, this.addNewCell_undo);
       this.addCallbackFun("end-addnewhatch", this.endAddNewHatch, function() {}, function() {});
 
       this.addCallbackFun("snapping", this.snappingMousePointer);
@@ -57,7 +57,7 @@
       this.addCallbackFun("cancel-addnewinterlayerconnetction", this.cancelDrawObj);
       this.addCallbackFun('cancel-addnewslantdown', this.cancelDrawObj);
       this.addCallbackFun('cancel-addnewslantup', this.cancelDrawObj);
-      this.addCallbackFun('cancel-addnewslantupdown', this.cancelDrawObj);
+      //this.addCallbackFun('cancel-addnewslantupdown', this.cancelDrawObj);
       this.addCallbackFun('cancel-addnewhatch', this.cancelDrawObj);
 
       this.addCallbackFun("start-addnewstate", this.startAddNewState, function() {}, function() {});
@@ -473,6 +473,7 @@
           text: ''
         });
         return reqObj;
+
       } else {
         // add corner
         var point = canvasContainer.stages[reqObj.floor].tmpLayer.group.cursor.coor;
@@ -799,9 +800,14 @@
 
       if (cells.length < 1) return false;
       for (var cell of cells) {
+        if(cell.id === tmpObj.id) continue;
+
         let tmpJstsObj = reader.read(cell.getWKT());
-        if (tmpJstsObj.overlaps(target) && !tmpJstsObj.touches(target)) {
+        let intersection = target.intersection(tmpJstsObj);
+        if (intersection.getCoordinates().length > 2) { // intersection area is polygon
           if (tmpObj.slant === null) return true;
+          else if(require('History').getInstance().getPreviousMsg() === 'addnewslantupdown' &&
+                  tmpObj.slant != null && tmpObj.slant.direction === 'down') return true;
           ////////////////////////////////
         }
       }
@@ -1858,7 +1864,14 @@
       var stage = canvasContainer.stages[reqObj.floor];
       for (var i in filtered) {
         var obj = stage.getElementById(reqObj.line.dot1.memberOf[filtered[i]], filtered[i]);
-        if (obj.isPartOf(reqObj.line.dot1, reqObj.line.dot2)) {
+        if(obj.slant != null) {
+          require('Popup')(
+            'warning',
+            'YOU CAN NOT ADD MORE CORNER ON THIS CELLSPACE.',
+            'CellSpace with slant should have four corner.');
+          return false;
+        } // slant
+        if(obj.isPartOf(reqObj.line.dot1, reqObj.line.dot2)) {
           isPartOf.push(filtered[i]);
         }
       }
@@ -1955,7 +1968,8 @@
         if (movedDot.memberOf[key] != 'cell' || flag) return;
 
         var canObj = stageObj.getElementById('cell', key);
-        if (manager.isSelfIntersecting(canObj)) flag = true;
+        if (!manager.isValidPolygon(canObj)) flag = true;
+        else if (manager.isSelfIntersecting(canObj)) flag = true;
         else if (manager.isOverlaped(canObj)) flag = true;
       });
 
@@ -2386,7 +2400,7 @@
       );
 
       window.tmpObj.setSlant('down');
-      if (!manager.endAddNewCell(reqObj)) return false;
+      if (manager.endAddNewCell(reqObj) === false) return false;
 
       if (reqObj.isEmpty != null) {
         window.tmpObj = null;
@@ -2412,7 +2426,7 @@
       );
 
       window.tmpObj.setSlant('up');
-      manager.endAddNewCell(reqObj);
+      if (manager.endAddNewCell(reqObj) === false) return false;
 
       if (reqObj.isEmpty != null) {
         window.tmpObj = null;
@@ -2454,7 +2468,16 @@
 
       var tmpObj4Up = copyCell(window.tmpObj, upId);
 
-      manager.endAddNewSlantDown(reqObj);
+      if(!manager.endAddNewSlantDown(reqObj)){
+        require('Broker').getInstance().publish({
+          req: 'cancel-addnewslantupdown',
+          reqObj: {
+            'floor': reqObj.floor
+          }
+        });
+
+        return false;
+      }
 
       window.tmpObj = tmpObj4Up;
       manager.endAddNewSlantUp({
@@ -2865,6 +2888,7 @@
           text: ''
         });
         return reqObj;
+
       } else {
         // add corner
         var dotPoolContainer = require('Storage').getInstance().getDotPoolContainer();
@@ -2954,6 +2978,12 @@
 
       // redraw stage
       canvasContainer.stages[reqObj.floor].stage.draw();
+    }
+
+    GeometryManager.prototype.isValidPolygon = function(tmpObj){
+      var wkt = tmpObj.getWKT();
+      var reader = new jsts.io.WKTReader();
+      return reader.read(wkt).isValid();
     }
 
     return GeometryManager;

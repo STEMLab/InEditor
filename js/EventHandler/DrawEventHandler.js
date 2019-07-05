@@ -501,7 +501,6 @@ define(function(require) {
 
         if(!isFirstClick){
 
-
           var reader = new jsts.io.WKTReader();
           var canvasContainer = require('Storage').getInstance().getCanvasContainer();
           var cell = reader.read(canvasContainer.getElementById('cell', window.tmpObj.holeOf).getWKT());
@@ -541,13 +540,28 @@ define(function(require) {
 
       if (isFirstClick || (!isFirstClick && isSameFloor)) {
 
-        broker.publish(require('Message')('addnewhatch', {
-          'floor': data.currentTarget.attrs.id
-        }));
+        if(!isFirstClick){
 
-        result.result = true;
-        result.msg = 'addnewhatch';
+          var reader = new jsts.io.WKTReader();
+          var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+          var cell = reader.read(canvasContainer.getElementById('cell', window.tmpObj.hatchOf).getWKT());
+          var pointCoor = canvasContainer.stages[window.tmpObj.floor].tmpLayer.group.cursor.coor;
+          var point = reader.read('POINT(' + pointCoor.x + ' ' + pointCoor.y + ')');
+          if ( !cell.contains(point)) {
+            result.title = "INVALID POINT!";
+            result.msg = "Please click the insice of " + window.tmpObj.hatchOf + ".";
+          }
 
+        }
+
+        if(result.title != "INVALID POINT!"){
+          broker.publish(require('Message')('addnewhatch', {
+            'floor': data.currentTarget.attrs.id
+          }));
+
+          result.result = true;
+          result.msg = 'addnewhatch';
+        }
 
       } else if (!isFirstClick && !isSameFloor) {
 
@@ -892,6 +906,10 @@ define(function(require) {
 
       result.result = true;
       result.msg = null;
+
+    } else if (broker.isPublishable('end-addnewhatch')){
+
+      result = require('EventHandler').getInstance().getHandlers().drawEventHandler.endAddNewHatch(broker, result);
 
     } else {
       result.mgs = "no match function."
@@ -1437,37 +1455,52 @@ define(function(require) {
 
     } else if (broker.isPublishable('end-addnewhatch')) {
 
-      if (window.tmpObj.isEmpty()) {
-
-        broker.publish(require('Message')('end-addnewhatch', {
-          'isEmpty': true
-        }));
-
-      } else {
-
-        var newId = null;
-        var flag = false;
-        while (!flag) {
-          newId = require('Conditions').getInstance().pre_cellBoundary + (++require('Conditions').getInstance().LAST_CELLBOUNDARY_ID_NUM);
-          flag = propertyContainer.getElementById('hatch', newId) == null ? true : false;
-        }
-
-        broker.publish(require('Message')('end-addnewhatch', {
-          'id': newId,
-          'floor': window.tmpObj.floor
-        }));
-
-      }
-
-      result.result = true;
-      result.msg = null;
+      result = require('EventHandler').getInstance().getHandlers().drawEventHandler.endAddNewHatch(broker, result);
 
     } else {
-      result.msg = "wrong transition : " + previousMsg + " to start-addnewcellboundary, end-addnewcellboundary.";
+      result.msg = "wrong transition : " + previousMsg + " to start-addnewhatch, end-addnewhatch.";
     }
 
     return result;
 
+  }
+
+  DrawEventHandler.prototype.endAddNewHatch = function(broker, result){
+    var drawEventHandler = require('EventHandler').getInstance().getHandlers().drawEventHandler;
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+    if (window.tmpObj.isEmpty()) {
+      result = drawEventHandler.cancelDrawObject(broker, 'cancel-hatch', '', '');
+      result.result = true;
+    } else if (window.tmpObj.dots.length < 3 ){
+      result = drawEventHandler.cancelDrawObject(
+        broker,
+        'cancel-addnewhatch',
+        'INVALID POLYGON',
+        'The polygon needs at least three points.'
+      )
+    } else {
+
+      var newId = null;
+      var flag = false;
+      while (!flag) {
+        newId = require('Conditions').getInstance().pre_cellBoundary + (++require('Conditions').getInstance().LAST_CELLBOUNDARY_ID_NUM);
+        var flaglHatch = propertyContainer.getElementById('hatch', newId) == null ? true : false;
+        var flagCB = propertyContainer.getElementById('cellBoundary', newId) == null ? true : false;
+        flag = (flaglHatch || flagCB);
+      }
+
+      broker.publish(require('Message')('end-addnewhatch', {
+        'id': newId,
+        'floor': window.tmpObj.floor
+      }));
+
+      result.result = true;
+      result.msg = null;
+
+    }
+
+
+    return result;
   }
 
 

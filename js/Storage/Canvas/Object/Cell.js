@@ -331,6 +331,17 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
     this.dots[index].leaveObj(this.id);
     this.dots.splice(index, 1);
     this.dots.splice(index, 0, dot);
+
+    if(dot.isPartOf(this.id)){
+      var i = 0, j = 1, len = this.dots.length;
+      for(; i < len; i++, j++){
+        if(j == len) j = 0;
+        if(this.dots[i] === this.dots[j]) {
+          this.dots.splice(j, 1);
+          i--; j--;
+        }
+      }
+    }
     dot.participateObj(this.id, 'cell');
     this.addObjectFromDots();
   };

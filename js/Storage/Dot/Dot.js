@@ -45,7 +45,7 @@ define([], function() {
    */
   Dot.prototype.isPartOf = function(objId) {
 
-    if (this.partOf[objId] != null) return true;
+    if (this.memberOf[objId] != null) return true;
     else return false;
 
   }
