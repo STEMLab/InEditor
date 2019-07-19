@@ -109,14 +109,21 @@ define(function(require) {
 
 
           // manager가 load를 하도록  function move
+          var storage = require('Storage').getInstance();
           var loadData = obj[Object.keys(obj)[0]];
-          var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+          var propertyContainer = storage.getPropertyContainer();
 
           propertyContainer.load(loadData.propertyContainer);
-          require('Storage').getInstance().getDotPoolContainer().load(loadData.dotPoolContainer);
-          require('Storage').getInstance().getGeometryContainer().load(loadData.geometryContainer, require('Storage').getInstance().getDotPoolContainer());
 
-          require('Storage').getInstance().getCanvasContainer().clearCanvas();
+          if(loadData.dotPoolContainer == undefined && loadData.dotFoolContainer != undefined){
+            loadData['dotPoolContainer'] = JSON.parse(JSON.stringify(loadData['dotFoolContainer']));
+            loadData.dotPoolContainer['dotPool'] = JSON.parse(JSON.stringify(loadData.dotPoolContainer.dotFool))
+          }
+
+          storage.getDotPoolContainer().load(loadData.dotPoolContainer);
+          storage.getGeometryContainer().load(loadData.geometryContainer, storage.getDotPoolContainer());
+
+          storage.getCanvasContainer().clearCanvas();
 
           require('UI').getInstance().workspace.destroy();
 
@@ -138,11 +145,11 @@ define(function(require) {
           }
 
           // add object from geometry
-          require('Storage').getInstance().getCanvasContainer().addObjFromGeometries(
-            require('Storage').getInstance().getGeometryContainer());
+          storage.getCanvasContainer().addObjFromGeometries(
+            storage.getGeometryContainer());
 
           // refresh tree view
-          require('UI').getInstance().treeView.refresh(require('Storage').getInstance().getPropertyContainer());
+          require('UI').getInstance().treeView.refresh(storage.getPropertyContainer());
 
         }
 
@@ -182,7 +189,7 @@ define(function(require) {
     var floorId = newFloorProperty.id;
 
     // bind right click event
-    require("@UI/ContextMenu.js").bindContextMenu(floorId);
+    // require("@UI/ContextMenu.js").bindContextMenu(floorId);
 
   }
 

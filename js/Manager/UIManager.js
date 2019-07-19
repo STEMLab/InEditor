@@ -465,11 +465,6 @@ define(function(require) {
     // bind stage click event
     require('EventHandler').getInstance().canvasObjectEventBind('stage', newStage.stage);
 
-
-    // bind right click event
-    require("@UI/ContextMenu.js").bindContextMenu(newFloorProperty.id);
-
-
     // refresh sidebar > tree-view
     require('UI').getInstance().treeView.addFloor(newFloorProperty);
 
@@ -820,7 +815,7 @@ define(function(require) {
       var canvasContainer = require('Storage').getInstance().getCanvasContainer();
       var propertyContainer = require('Storage').getInstance().getPropertyContainer();
       reqObj.interConnects.forEach(state => {
-        if(state != undefined){
+        if (state != undefined) {
           var floor = propertyContainer.getFloorById('state', state);
           var canvasObj = canvasContainer.stages[floor].getElementById("state", state);
           canvasObj.setColor('yellow');

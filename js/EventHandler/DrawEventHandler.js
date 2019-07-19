@@ -982,6 +982,7 @@ define(function(require) {
     var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
     var isFloorExist = (propertyContainer.floorProperties.length != 0);
+    var isCellExist = (propertyContainer.cellProperties.length >= 1);
 
     if (!isFloorExist) {
       result.msg = "There is no floor ...";

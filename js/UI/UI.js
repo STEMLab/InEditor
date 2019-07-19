@@ -12,7 +12,7 @@ define(function(require) {
 
     function UI() {
 
-      this.theme = new (require('./Theme.js'))();
+      this.theme = new(require('./Theme.js'))();
       this.header = document.getElementById('header');
       this.menubar = require('./Menubar/Menubar.js');
       this.toolbar = require('./Menubar/Toolbar.js');
@@ -47,6 +47,25 @@ define(function(require) {
       this.treeView.init();
 
       this.propertyTab = new(require('./Sidebar/PropertyTab/Property.js'))();
+
+      this.contextMenuPos = document.createElement('div');
+      this.contextMenuPos.id = 'context_menu_pos';
+      this.contextMenuPos.style = 'display:none;position:fixed;width:1px;height:1px;';
+      document.body.appendChild(this.contextMenuPos);
+
+      this.contextMenuVal = document.createElement('div');
+      this.contextMenuVal.classList.add('ui');
+      this.contextMenuVal.classList.add('custom');
+      this.contextMenuVal.classList.add('popup');
+      this.contextMenuVal.id = 'context_menu_val'
+      document.body.appendChild(this.contextMenuVal);
+
+      $('#context_menu_pos')
+        .popup({
+          popup: $('#context_menu_val')
+        })
+
+      //
 
     }
 

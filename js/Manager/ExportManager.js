@@ -868,6 +868,11 @@ define(function(require) {
       //////////////////////////////////////////////////////////////////////////////
       if (properties[key].storey != "")
         cells[id].addDesc('storey', properties[key].storey);
+      cells[id].addProperty('height', properties[key].height);
+
+      if(properties[key].bottom != 0)
+        cells[id].addProperty('bottom', properties[key].bottom);
+
       //////////////////////////////////////////////////////////////////////////////
 
 
@@ -951,7 +956,8 @@ define(function(require) {
             cells[cellId].setCoor(
               manager.extrudeCell(
                 coor,
-                cells[cellId].type != "CellSpace" ? cells[cellId].properties.height : floorProperties[floorKey].celingHeight * 1),
+                // cells[cellId].type != "CellSpace" ? cells[cellId].properties.height : floorProperties[floorKey].celingHeight),
+                cells[cellId].properties.height),
               '3D'
             );
           } else if (slantMap[cellId].direction == 'up')

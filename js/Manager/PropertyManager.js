@@ -121,7 +121,7 @@ define(function(require) {
           var floor = propertyContainer.getElementById('floor', propertyContainer.getFloorById('cell', obj.id));
           if (reqObj.updateContent.bottom * reqObj.updateContent.height < 0) {
             require('Popup')('warning', 'Invalide input : bottom(' + reqObj.updateContent.bottom + '), height(' + reqObj.updateContent.height + ')');
-          } else if (reqObj.updateContent.bottom + reqObj.updateContent.height <= floor.celingHeight) {
+          } else if (reqObj.updateContent.bottom + reqObj.updateContent.height <= floor.celingHeight + floor.groundHeight) {
             obj.height = reqObj.updateContent.height;
             obj.bottom = reqObj.updateContent.bottom;
 
@@ -154,7 +154,13 @@ define(function(require) {
       case 'state':
         obj.name = reqObj.updateContent.name;
         obj.description = reqObj.updateContent.description;
-        obj.height = reqObj.updateContent.height;
+        var floor = propertyContainer.getElementById('floor', propertyContainer.getFloorById('state', obj.id));
+        if( 0 > reqObj.updateContent.height  ||
+            reqObj.updateContent.height > floor.celingHeight )
+          require('Popup')('warning', 'Invalide input : height(' + reqObj.updateContent.height + ')');
+        else
+          obj.height = reqObj.updateContent.height;
+
         break;
       case 'transition':
         obj.name = reqObj.updateContent.name;
@@ -168,6 +174,8 @@ define(function(require) {
       default:
         console.log("PropertyManager >>> wrong reqObj.type(" + reqObj.type + ")");
     }
+
+    require('Popup')('success', 'PROPERTY UPDATED', 'Valid properties of ' + reqObj.id + ' were successfully updated.');
 
   }
 

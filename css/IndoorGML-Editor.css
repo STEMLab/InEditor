@@ -440,3 +440,12 @@ a.disabled {
 .inline .fields{
   margin: 0px !important;
 }
+
+.ui.vertical.text.menu .item {
+  margin: .01em !important;
+}
+
+.ui.vertical.text.menu {
+  min-height: 0 !important;
+  margin: 0.1em !important;
+}

@@ -1,6 +1,6 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
 
 define([], function() {
   'use strict';
@@ -15,22 +15,30 @@ define([], function() {
   }
 
   /**
-  * @memberof Workspace
-  */
-  Workspace.prototype.init = function(){
+   * @memberof Workspace
+   */
+  Workspace.prototype.init = function() {
 
     // init
-      var config = {
-        content: [{
-          type: 'stack'
-        }]
-      };
+    var config = {
+      content: [{
+        type: 'stack'
+      }]
+    };
 
     this.workspaceLayout = new GoldenLayout(config, $('#workspace-layout-container'));
 
     this.workspaceLayout.registerComponent('workspace', function(container, state) {
       // container.getElement().html(viewport);
     });
+
+    this.workspaceLayout.on('stackCreated', function(stack) {
+      stack.on('activeContentItemChanged', function(contentItem) {
+        let id = contentItem.config.id;
+        require('UI').getInstance().propertyTab.setPropertyTab('floor', id, require('Storage').getInstance());
+      });
+    });
+
 
     this.workspaceLayout.init();
 
@@ -42,9 +50,9 @@ define([], function() {
   }
 
   /**
-  * @memberof Workspace
-  * @test
-  */
+   * @memberof Workspace
+   * @test
+   */
   Workspace.prototype.addNewWorkspace = function(_id, _name) {
 
     var newItemConfig = {
@@ -54,7 +62,7 @@ define([], function() {
       id: _id
     };
 
-    if(this.workspaceLayout.root.contentItems.length == 0)
+    if (this.workspaceLayout.root.contentItems.length == 0)
       this.init();
 
     var contentItems = this.workspaceLayout.root.contentItems[0];
@@ -69,65 +77,63 @@ define([], function() {
   }
 
   /**
-  * @memberof Workspace
-  * @param {String} id floor id
-  */
-  Workspace.prototype.activateWorkspace = function(id){
+   * @memberof Workspace
+   * @param {String} id floor id
+   */
+  Workspace.prototype.activateWorkspace = function(id) {
     var Workspace;
-    if(this.workspaceLayout == undefined){
+    if (this.workspaceLayout == undefined) {
       Workspace = require('UI').getInstance().workspace;
       Workspace.workspaceLayout.root.contentItems[0].header.setActiveContentItem(Workspace.findContentItem(id));
-    }
-    else{
+    } else {
       this.workspaceLayout.root.contentItems[0].header.setActiveContentItem(this.findContentItem(id));
     }
   }
 
   /**
-  * @memberof Workspace
-  */
-  Workspace.prototype.destroy = function(condition){
+   * @memberof Workspace
+   */
+  Workspace.prototype.destroy = function(condition) {
 
     require('UI').getInstance().workspace.workspaceLayout.destroy();
 
   }
 
   /**
-  * @memberof Workspace
-  */
-  Workspace.prototype.deleteWorkspace = function(id){
+   * @memberof Workspace
+   */
+  Workspace.prototype.deleteWorkspace = function(id) {
 
     var Workspace;
-    if(this.workspaceLayout == undefined){
+    if (this.workspaceLayout == undefined) {
       Workspace = require('UI').getInstance().workspace;
       Workspace.workspaceLayout.root.contentItems[0].removeChild(Workspace.findContentItem(id), false);
-    }
-    else{
+    } else {
       this.workspaceLayout.root.contentItems[0].removeChild(this.findContentItem(id), false);
     }
   }
 
   /**
-  * @memberof Workspace
-  */
-  Workspace.prototype.findContentItem = function(id){
+   * @memberof Workspace
+   */
+  Workspace.prototype.findContentItem = function(id) {
 
     var workspaceLayout;
-    if(this.workspaceLayout == undefined){
+    if (this.workspaceLayout == undefined) {
       workspaceLayout = require('UI').getInstance().workspace.workspaceLayout;
-    }else{
+    } else {
       workspaceLayout = this.workspaceLayout;
     }
 
     var contentItem;
-    for(var stack of workspaceLayout.root.contentItems){
-      for(var item of stack.contentItems){
-        if(item.config.id === id) {
+    for (var stack of workspaceLayout.root.contentItems) {
+      for (var item of stack.contentItems) {
+        if (item.config.id === id) {
           contentItem = item;
           break;
         }
 
-        if(contentItem != null) break;
+        if (contentItem != null) break;
       }
     }
 
@@ -135,18 +141,18 @@ define([], function() {
   }
 
   /**
-  * @memberof Workspace
-  */
-  Workspace.prototype.getActivatedWorkspace = function(){
+   * @memberof Workspace
+   */
+  Workspace.prototype.getActivatedWorkspace = function() {
     var items = this.workspaceLayout.root.contentItems;
     var result = [];
 
-    if(this.workspaceLayout.root.contentItems.length == 0) return -1;
+    if (this.workspaceLayout.root.contentItems.length == 0) return -1;
 
-    for ( var i in items ){
-        for(var j in items[i].contentItems){
-          if(! items[i].contentItems[j].container.isHidden) result.push(items[i].contentItems[j].config.title);
-        }
+    for (var i in items) {
+      for (var j in items[i].contentItems) {
+        if (!items[i].contentItems[j].container.isHidden) result.push(items[i].contentItems[j].config.title);
+      }
     }
 
 

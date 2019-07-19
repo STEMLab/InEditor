@@ -566,7 +566,7 @@ define(function(require) {
       });
     }
 
-    bindEvent('property-subimt-btn', 'click', 'html');
+    //bindEvent('property-subimt-btn', 'click', 'html');
     bindEvent('add-new-local-desc-btn', 'click', 'html');
 
     var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
@@ -709,7 +709,7 @@ define(function(require) {
       });
     }
 
-    bindEvent('property-subimt-btn', 'click', 'html');
+    //bindEvent('property-subimt-btn', 'click', 'html');
     bindEvent('add-new-local-desc-btn', 'click', 'html');
 
     var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');

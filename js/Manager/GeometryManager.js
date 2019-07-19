@@ -804,7 +804,7 @@
 
         let tmpJstsObj = reader.read(cell.getWKT());
         let intersection = target.intersection(tmpJstsObj);
-        if (intersection.getCoordinates().length > 2) { // intersection area is polygon
+        if (intersection.getCoordinates().length > 2 && target.overlaps(tmpJstsObj)) { // intersection area is polygon
           if (tmpObj.slant === null) return true;
           else if(require('History').getInstance().getPreviousMsg() === 'addnewslantupdown' &&
                   tmpObj.slant != null && tmpObj.slant.direction === 'down') return true;
@@ -1917,9 +1917,15 @@
         window.ori = {};
         var geometryContainer = require('Storage').getInstance().getGeometryContainer();
         Object.keys(window.tmpObj.memberOf).forEach(key => {
+          var dots = [];
+          if(tmpObj.memberOf[key] === 'state')
+            dots = [JSON.parse(JSON.stringify(geometryContainer.getElementById(tmpObj.memberOf[key], key).point))];
+          else
+            dots = [...geometryContainer.getElementById(tmpObj.memberOf[key], key).points];
+
           window.ori[key] = {
             type: tmpObj.memberOf[key],
-            dots: [...geometryContainer.getElementById(tmpObj.memberOf[key], key).points]
+            dots: dots
           }
         });
       }
@@ -1957,6 +1963,7 @@
       var movedDot = window.tmpObj;
       var geometryContainer = require('Storage').getInstance().getGeometryContainer();
       var dotPoolContainer = require('Storage').getInstance().getDotPoolContainer();
+      var propertyContainer = require('Storage').getInstance().getPropertyContainer();
       var stageObj = require('Storage').getInstance().getCanvasContainer().stages[reqObj.floor];
       var updateException = [];
 
@@ -1965,12 +1972,49 @@
       var dotPool = dotPoolContainer.dotPool[reqObj.floor];
       var flag = false;
       Object.keys(movedDot.memberOf).forEach(key => {
-        if (movedDot.memberOf[key] != 'cell' || flag) return;
+        if(flag) return;
 
-        var canObj = stageObj.getElementById('cell', key);
-        if (!manager.isValidPolygon(canObj)) flag = true;
-        else if (manager.isSelfIntersecting(canObj)) flag = true;
-        else if (manager.isOverlaped(canObj)) flag = true;
+        if (flag) return;
+        if (movedDot.memberOf[key] === 'cell'){
+          var canObj = stageObj.getElementById('cell', key);
+          if (!manager.isValidPolygon(canObj)) flag = true;
+          else if (manager.isSelfIntersecting(canObj)) flag = true;
+          else if (manager.isOverlaped(canObj)) flag = true;
+        }
+        else if(movedDot.memberOf[key] === 'state'){
+          var duality = propertyContainer.getElementById('state', key).duality;
+          if(duality === '' || duality === null) return;
+
+          var cellObj = stageObj.getElementById('cell', duality);
+          if(!manager.isPolygonContainDot(cellObj, movedDot.point)){
+            require('Popup')(
+              'error',
+              'INVALID POSITION',
+              'STATE ' + key + ' must located the inside of CellSpace ' + duality +'.')
+            flag = true;
+          }
+        }
+        else if(movedDot.memberOf[key] === 'transition'){
+          var connects = propertyContainer.getElementById('transition', key).connects;
+          var smallFlag = false;
+          connects.forEach(state => {
+            if(smallFlag) return;
+            var duality = propertyContainer.getElementById('state', state).duality;
+            if(duality === '' || duality === null) return;
+
+            var cellObj = stageObj.getElementById('cell', duality);
+            smallFlag = manager.isPolygonContainDot(cellObj, movedDot.point);
+          })
+
+          if(!smallFlag){
+            require('Popup')(
+              'error',
+              'INVALID POSITION',
+              'TRANSITION ' + key + ' must located the inside of CellSpace ' + connects[0] + ' or ' + connects[1] +'.')
+            flag = true;
+          }
+        }
+
       });
 
       // cancel modify
@@ -1979,7 +2023,7 @@
           if (window.modify.type === 'point')
             dotPool.getDotById(window.modify.uuid).setPoint(window.modify.point);
 
-          var canvaObj = stageObj.getElementById(window.ori[key].type, key);
+          var canvaObj = stageObj.getElementById(window.ori[key].type.toLowerCase(), key);
           canvaObj.dots = ori[key].dots;
           canvaObj.addObjectFromDots();
           geometryContainer.getElementById(window.ori[key].type, key);
@@ -2984,6 +3028,14 @@
       var wkt = tmpObj.getWKT();
       var reader = new jsts.io.WKTReader();
       return reader.read(wkt).isValid();
+    }
+
+    GeometryManager.prototype.isPolygonContainDot = function(cell, dot){
+      var cellWKT = cell.getWKT();
+      var dotWKT = "POINT(" + dot.x + " " + dot.y +")";
+      var reader = new jsts.io.WKTReader();
+
+      return reader.read(cellWKT).contains(reader.read(dotWKT));
     }
 
     return GeometryManager;
