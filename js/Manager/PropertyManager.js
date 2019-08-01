@@ -708,7 +708,7 @@ define(function(require) {
         for (var i of src.split(/\r?\n|\r/)) {
           var data = i.split(',');
           if(data[0].includes("Non")){
-            codeList.addCode([data[0]], data[1] != undefined ? data[1] : "");
+            codeList.addCode([data[0]], data[1] != undefined ? data[1] : "", data[2] != undefined ? data[2] : "");
           }
           else {
             codeList.addCode(

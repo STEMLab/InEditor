@@ -635,8 +635,8 @@ define(function(require) {
     var txt = "";
     for (var m in ccl) {
       var path = m + ",";
-      if (m == 'NonNavigableSpace') {
-        for (var c in ccl[m]) txt += path + c + ', ' + ccl[m][c] + '\n';
+      if (m.toLowerCase() == 'nonnavigablespace') {
+        for (var c in ccl[m]) txt += 'NonNavigableSpace,' + c + ',' + ccl[m][c] + '\n';
       } else {
         for (var c in ccl[m]['function']) txt += path + 'function,' + c + ',' + ccl[m]['function'][c] + '\n';
         for (var c in ccl[m]['class']) txt += path + 'class,' + c + ',' + ccl[m]['class'][c] + '\n';
@@ -926,8 +926,10 @@ define(function(require) {
         for (var key in points) {
           coordinates.push(Object.values(transDot[points[key].uuid].point));
 
+          coordinates[coordinates.length - 1][2] += cells[id].properties.bottom;
+
           //test code
-          coordinates[coordinates.length - 1][2] += 0.1;
+          coordinates[coordinates.length - 1][2] += 0.0001;
         }
         coordinates.push(coordinates[0]);
 
@@ -995,7 +997,10 @@ define(function(require) {
             if (!require('DotMath').isCCWByArr(holeCoor)) holeCoor.reverse();
             // add hole func에서 solid를 뒤집어서 push 하고 있다.
 
-            if (geoType == '3D') cells[cellId].addHole(manager.extrudeCell(holeCoor, floorProperties[floorKey].celingHeight * 1 - 0.2), '3D');
+            if (geoType == '3D') {
+              // cells[cellId].addHole(manager.extrudeCell(holeCoor, floorProperties[floorKey].celingHeight * 1 - 0.2), '3D');
+              cells[cellId].addHole(manager.extrudeCell(holeCoor, cells[cellId].properties.height * 1 - 0.0002), '3D');
+            }
             else if (geoType == '2D') {
               cells[cellId].addHole(holeCoor, '2D');
             }

@@ -22,6 +22,14 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
       y: 0
     });
 
+    ///////////////////////////////////
+    ///////////////////////////////////
+    ///////////////////////////////////
+    // this.corners.visible(false);
+    ///////////////////////////////////
+    ///////////////////////////////////
+    ///////////////////////////////////
+
     /**
      * @memberof Cell
      */
@@ -29,11 +37,12 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
       points: [],
       fill: Konva.Util.getRandomColor(),
       stroke: "black",
-      strokeWidth: 1,
-      opacity: 0.3,
+      strokeWidth: 0.1,
+      opacity: 0.5,
       closed: true,
       globalCompositeOperation: 'source-over'
     });
+
 
     /**
      * @memberof Cell
@@ -45,6 +54,8 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
      * @desc null, down, up
      */
     this.slant = null;
+
+    this.type = 'cell';
   }
 
   /**
@@ -77,8 +88,8 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
       y: coor.y,
       // width: 2,
       // height: 2,
-      width: 1,
-      height: 1,
+      width: 0.5,
+      height: 0.5,
       fill: "white",
       stroke: "black",
       strokeWidth: 1
@@ -283,8 +294,8 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
    * @memberof Cell
    */
   Cell.prototype.insertDotIntoLine = function(line, point) {
-    var indexOfDot1 = this.getDotIndex(line.dot1.uuid);
-    var indexOfDot2 = this.getDotIndex(line.dot2.uuid);
+    var indexOfDot1 = this.getDotIndex(line.dot1.uuid)*1;
+    var indexOfDot2 = this.getDotIndex(line.dot2.uuid)*1;
 
     if (indexOfDot1 == -1 || indexOfDot2 == -1) {
       log.warn(
@@ -303,7 +314,7 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
 
     this.addObjectFromDots();
 
-    point.participateObj(this.id, "cell");
+    point.participateObj(this.id, this.type);
   };
 
   /**

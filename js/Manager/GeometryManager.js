@@ -531,8 +531,8 @@
 
         var hole = reader.read(holes[i].getWKT());
         //var intersection = point.intersection(hole).getCoordinates();
-        var contains = cell.contains(hole);
-        if (result.indexOf(holes[i].holeOf) != -1 && !contains) result.splice(result.indexOf(holes[i].holeOf), 1);
+        var contains = hole.contains(point);
+        if (result.indexOf(holes[i].holeOf) != -1 && contains) result.splice(result.indexOf(holes[i].holeOf), 1);
 
       }
 
@@ -794,6 +794,8 @@
 
       if (tmpObj.floor === undefined) {
         var layer = propertyContainer.getFloorById('cell', tmpObj.id);
+        if(layer === null && tmpObj.holeOf != undefined && tmpObj.holeOf != null)
+          layer = propertyContainer.getFloorById('cell', tmpObj.holeOf);
         cells = canvasContainer.stages[layer].cellLayer.group.cells;
       } else
         cells = canvasContainer.stages[tmpObj.floor].cellLayer.group.cells;

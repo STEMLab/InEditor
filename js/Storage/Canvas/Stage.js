@@ -421,6 +421,15 @@ define([
         }
 
         break;
+      case 'hole':
+        var holes = this.cellLayer.group.holes;
+        for (var key in holes) {
+          if (holes[key].id == _id) {
+            result = holes[key];
+            break;
+          }
+        }
+        break;
       case 'cellboundary':
         var cellboundaries = this.cellBoundaryLayer.group.cellBoundaries;
         for (var key in cellboundaries) {

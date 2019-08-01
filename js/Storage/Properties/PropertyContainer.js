@@ -135,6 +135,7 @@ define([
     else if(_type === 'CELL_SPACE_BOUNDARY') _type = 'cellBoundary';
     else if(_type === 'STATE') _type = 'state';
     else if(_type === 'TRANSITION') _type = 'transition';
+    else if(_type === 'HOLE') _type = 'hole';
 
     for (var key in this.floorProperties) {
       switch (_type) {

@@ -23,6 +23,7 @@ define([
 
      this.poly.globalCompositeOperation('xor');
 
+     this.type = 'hole';
   }
 
   /**
@@ -35,6 +36,15 @@ define([
   */
   Hole.prototype.setHoleOf = function(cellId){
     this.holeOf = cellId;
+  }
+
+  Hole.prototype.addNewDot = function(dot){
+    if(dot == undefined || dot == null){
+      log.info(dot);
+    }
+    dot.participateObj(this.id, "hole");
+
+    this.dots.push(dot);
   }
 
 

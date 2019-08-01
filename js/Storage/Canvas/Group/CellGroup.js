@@ -89,7 +89,15 @@ define([
 
     // check duplicated dot
     for(var i = 0 ; i < obj.dots.length - 1; i++){
-      if(obj.dots[i].uuid === obj.dots[i+1].uuid) {
+      if(obj.dots[i] == undefined ){
+        obj.dots.splice(i, 1);
+        i--;
+      }
+      else if(obj.dots[i+1] == undefined) {
+        obj.dots.splice(i+1, 1);
+        i--;
+      }
+      else if(obj.dots[i].uuid === obj.dots[i+1].uuid) {
         obj.dots.splice(i+1, 1);
         i--;
       }
@@ -287,6 +295,7 @@ define([
   CellGroup.prototype.getConnection = function() {
     var result = [];
 
+    // cell
     for (var key in this.cells) {
       for (var dotkey = 0; dotkey < this.cells[key].dots.length; dotkey++) {
         var newConnection;
@@ -299,6 +308,31 @@ define([
           newConnection = {
             'dot1': this.cells[key].dots[dotkey],
             'dot2': this.cells[key].dots[dotkey + 1]
+          };
+        }
+
+        if (result.indexOf({
+            'dot1': newConnection.dot2,
+            'dot2': newConnection.dot1
+          }) == -1) {
+          result.push(newConnection);
+        }
+      }
+    }
+
+    // hole
+    for (var key in this.holes) {
+      for (var dotkey = 0; dotkey < this.holes[key].dots.length; dotkey++) {
+        var newConnection;
+        if (dotkey == this.holes[key].dots.length - 1) {
+          newConnection = {
+            'dot1': this.holes[key].dots[dotkey],
+            'dot2': this.holes[key].dots[0]
+          };
+        } else {
+          newConnection = {
+            'dot1': this.holes[key].dots[dotkey],
+            'dot2': this.holes[key].dots[dotkey + 1]
           };
         }
 
