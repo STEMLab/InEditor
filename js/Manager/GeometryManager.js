@@ -2046,23 +2046,27 @@
         reqObj.floor
       ].getDotByPointaAllowDuplication(movedDot.point);
 
-      if (isDotExist[0] == movedDot) {} else if (isDotExist.length == 2) {
+      if (isDotExist[0] == movedDot) {}
+      else if (isDotExist.length > 1) {
         isDotExist.splice(isDotExist.indexOf(movedDot), 1);
 
-        for (var exception in isDotExist[0].memberOf) {
-          updateException.push(exception);
+        for(var combined of isDotExist){
+          for (var exception in combined.memberOf) {
+            updateException.push(exception);
+          }
+
+          for (var key in movedDot.memberOf) {
+            var obj = stageObj.getElementById(movedDot.memberOf[key], key);
+            var dotIndex = obj.getDotIndex(movedDot.uuid);
+            obj.replaceDot(combined, dotIndex);
+
+          }
+
+          if (Object.keys(movedDot.memberOf).length == 0)
+            require('Storage').getInstance().getDotPoolContainer().dotPool[reqObj.floor].deleteDot(movedDot.uuid);
+          movedDot = combined;
         }
 
-        for (var key in movedDot.memberOf) {
-          var obj = stageObj.getElementById(movedDot.memberOf[key], key);
-          var dotIndex = obj.getDotIndex(movedDot.uuid);
-          obj.replaceDot(isDotExist[0], dotIndex);
-
-        }
-
-        if (Object.keys(movedDot.memberOf).length == 0)
-          require('Storage').getInstance().getDotPoolContainer().dotPool[reqObj.floor].deleteDot(movedDot.uuid);
-        movedDot = isDotExist[0];
 
         /////////////////////////////////////////////////////////////////
       }

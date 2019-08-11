@@ -42,6 +42,7 @@ define(function(require) {
   ui.propertyTab.setPropertyTab('project', null, require('Storage').getInstance());
 
   var storage = require('Storage').getInstance();
+  conditions.saveName = storage.getPropertyContainer().projectProperty.name;
 
   var broker = require('Broker').getInstance();
 

@@ -56,7 +56,7 @@ define(function(require) {
 
     var saveAs = document.createElement('a');
     saveAs.id = 'project-saveas';
-    //saveAs.setAttribute(' data-modaltype', '#modal__project__save_as');
+    saveAs.setAttribute('data-modaltype', 'saveas');
     saveAs.innerHTML = 'Save As...';
     saveAs.classList.add('dropdown-item');
 

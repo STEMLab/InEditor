@@ -35,13 +35,6 @@ define(function(require) {
       'change': this.importGML
     };
 
-    handlerBinder['project-save-as-btn'] = {
-      'click': this.saveProjectToNewPath
-    };
-
-    handlerBinder['project-saveas'] = {
-      'click': this.clickSaveAsProjectBtn
-    };
 
     handlerBinder['project-import-modal-btn'] = {
       'click': this.importFile
@@ -58,6 +51,10 @@ define(function(require) {
     handlerBinder['setting-conditions-modal-btn'] = {
       'click': this.updateConditions
     };
+
+    handlerBinder['project-save-as-btn'] = {
+      'click' : this.saveProjectToNewPath
+    }
 
 
   }
@@ -104,7 +101,7 @@ define(function(require) {
 
     }
 
-    $('#project-save-as-modal').modal('hide');
+    $('#modal__project__save_as').modal('hide');
     return result;
   }
 
@@ -330,6 +327,9 @@ define(function(require) {
           scaleFactor : $('#setting-conditions-scale-factor').val(),
           scaleMax : $('#setting-conditions-scale-max').val(),
           automGenerateState: $('#setting-conditions-auto-create-state').is(":checked") == true ? true : false
+        },
+        save:{
+          saveWithTimeStamp: $('#setting-conditions-timestamp').is(":checked") == true ? true : false
         }
       }));
 

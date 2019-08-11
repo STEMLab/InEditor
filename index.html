@@ -97,6 +97,13 @@
     </div>
   </div>
 
+  <div class="ui modal mini" id="loading-modal">
+    <div class="header"></div>
+    <div class="content">
+      <img class="ui centered image" src="./assets/icon/ajax-loader.gif">
+    </div>
+  </div>
+
 
   <div class="ui modal small" id="go-factory-modal">
     <div class="header">Export to IndoorGML</div>
@@ -312,29 +319,29 @@
       <div>
         <div class="row" style="margin-bottom:2px">
           <div class="col-1" style="float: left;"></div>
-          <div class="col-3" style="float: left;">Cell</div>
-          <div class="col-7">
+          <div class="col-4" style="float: left;">Cell</div>
+          <div class="col-6">
             <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cell">
           </div>
         </div>
         <div class="row" style="margin-bottom:2px">
           <div class="col-1" style="float: left;"></div>
-          <div class="col-3" style="float: left;">CellSpaceBoundary</div>
-          <div class="col-7">
+          <div class="col-4" style="float: left;">CellSpaceBoundary</div>
+          <div class="col-6">
             <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-cellBoundary">
           </div>
         </div>
         <div class="row" style="margin-bottom:2px">
           <div class="col-1" style="float: left;"></div>
-          <div class="col-3" style="float: left;">State</div>
-          <div class="col-7">
+          <div class="col-4" style="float: left;">State</div>
+          <div class="col-6">
             <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-state">
           </div>
         </div>
         <div class="row" style="margin-bottom:2px">
           <div class="col-1" style="float: left;"></div>
-          <div class="col-3" style="float: left;">Transition</div>
-          <div class="col-7">
+          <div class="col-4" style="float: left;">Transition</div>
+          <div class="col-6">
             <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-pre-transition">
           </div>
         </div>
@@ -347,30 +354,41 @@
       </h5>
       <div class="row" style="margin-bottom:2px">
         <div class="col-1" style="float: left;"></div>
-        <div class="col-3" style="float: left;">Aspect ratio</div>
-        <div class="col-7">
+        <div class="col-4" style="float: left;">Aspect ratio</div>
+        <div class="col-6">
           <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-aspect-ratio">
         </div>
       </div>
       <div class="row" style="margin-bottom:2px">
         <div class="col-1" style="float: left;"></div>
-        <div class="col-3" style="float: left;">Scale Factor</div>
-        <div class="col-7">
+        <div class="col-4" style="float: left;">Scale Factor</div>
+        <div class="col-6">
           <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-factor">
         </div>
       </div>
       <div class="row" style="margin-bottom:2px">
         <div class="col-1" style="float: left;"></div>
-        <div class="col-3" style="float: left;">Scale Max</div>
-        <div class="col-7">
+        <div class="col-4" style="float: left;">Scale Max</div>
+        <div class="col-6">
           <input type="text" style="padding:1; font-size: 11px" class="form-control" id="setting-conditions-scale-max">
         </div>
       </div>
       <div class="row" style="margin-bottom:2px">
         <div class="col-1" style="float: left;"></div>
-        <div class="col-3" style="float: left;">Auto Create State</div>
-        <div class="col-7">
+        <div class="col-4" style="float: left;">Auto Create State</div>
+        <div class="col-6">
           <input type="checkbox" id="setting-conditions-auto-create-state">
+        </div>
+      </div>
+
+      <br />
+
+      <h5 class="ui horizontal divider header">Save</h5>
+      <div class="row" style="margin-bottom:2px">
+        <div class="col-1" style="float: left;"></div>
+        <div class="col-4" style="float: left;">Save project with timestamp</div>
+        <div class="col-6">
+          <input type="checkbox" id="setting-conditions-timestamp">
         </div>
       </div>
     </div>
@@ -494,92 +512,32 @@
     </div>
   </div>
 
-  <div class="modal fade" id="edit-merge-cells-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
 
-        <div class="modal-header">
-          <h5 class="modal-title">Merging</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="project-import-modal-close-btn">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="table-merged-cells"><h6>Merged Cells</h6></label>
-            <div id="table-merged-cells"></div>
-          </div>
-
-          <hr />
-
-          <div class="form-group">
-            <h6>Merge Two Cell</h6>
-            <p style="color: darkgray">
-              The two difference cell you insert theres id, will merged when export.<br /><b>Becarefull,</b> the property data of first cell will maintain but second will not.
-            </p>
-            <div>
-              <div class="row" style="margin-bottom:2px">
-                <div class="col-1" style="float: left;"></div>
-                <div class="col-3" style="float: left;">First Cell</div>
-                <div class="col-7">
-                  <input type="text" style="padding:1; font-size: 9px" class="form-control" placeholder="id" id="edit-merge-first-id">
-                </div>
-              </div>
-            </div>
-            <div class="row" style="margin-bottom:2px">
-              <div class="col-1" style="float: left;"></div>
-              <div class="col-3" style="float: left;">Second Cell</div>
-              <div class="col-7">
-                <input type="text" style="padding:1; font-size: 9px" class="form-control" placeholder="id" id="edit-merge-second-id">
-              </div>
-            </div>
-            <div>
-              <div class="col-1" style="float: left;"></div>
-              <button type="button" class="btn btn-light col-10" id="edit-merge-btn">Merge</button>
-              <div class="col-1" style="float: right;"></div>
-            </div>
-          </div>
-
-
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="project-save-as-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-body">
-          <div class="form-group">
-            <h6>Save as...</h6>
-            <br />
-            <div>
-              <div class="row" style="margin-bottom:2px">
-                <div class="col-1" style="float: left;"></div>
-                <div class="col-3" style="float: left;">File Name</div>
-                <div class="col-7">
-                  <input type="text" style="padding:1; font-size: 11px" class="form-control" id="project-save-as-file-name">
-                </div>
-              </div>
-            </div>
-            <div class="row" style="margin-bottom:2px">
-              <div class="col-1" style="float: left;"></div>
-              <div class="col-3" style="float: left;">File Path </div>
-              <div class="col-7">
-                <input type="text" style="padding:1; font-size: 11px" class="form-control" id="project-save-as-file-path">
-              </div>
-            </div>
-            <div>
-              <div class="col-1" style="float: left;"></div>
-              <button type="button" class="btn btn-light col-10" id="project-save-as-btn">Save</button>
-              <div class="col-1" style="float: right;"></div>
-            </div>
+  <div class="ui modal tiny" id="modal__project__save_as">
+    <div class="header">Save as...</div>
+    <div class="content">
+      <div>
+        <div class="row" style="margin-bottom:2px">
+          <div class="col-1" style="float: left;"></div>
+          <div class="col-3" style="float: left;">File Name</div>
+          <div class="col-7">
+            <input type="text" style="padding:1; font-size: 11px" class="form-control" id="project-save-as-file-name">
           </div>
         </div>
       </div>
+      <div class="row" style="margin-bottom:2px">
+        <div class="col-1" style="float: left;"></div>
+        <div class="col-3" style="float: left;">File Path </div>
+        <div class="col-7">
+          <input type="text" style="padding:1; font-size: 11px" class="form-control" id="project-save-as-file-path">
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="ui button" id="project-save-as-btn" aria-label="Close">Save</div>
     </div>
   </div>
+
 
   <div id="context-menu" style="display: none;position: absolute;left: 100;bottom: 100;width: 10rem;height: 10rem;z-index: 1050px;background-color: white;">
     <ul class="dropdown-menu" role="menu">

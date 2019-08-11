@@ -77,6 +77,10 @@ define(function(require) {
       'click': this.removeFloorplan
     }
 
+    handlerBinder['project-saveas'] = {
+      'click': this.showModal
+    };
+
   }
 
 
@@ -293,6 +297,12 @@ define(function(require) {
         if (broker.isPublishable('showcodemodal')) {
           broker.publish(require('Message')('showcodemodal', {}));
         }
+        break;
+      case 'saveas':
+        $('#modal__project__save_as').modal('show');
+        $('#project-save-as-file-name').val(require('Conditions').getInstance().saveName);
+        $('#project-save-as-file-path').val(require('Conditions').getInstance().savePath);
+        break;
       default:
 
     }

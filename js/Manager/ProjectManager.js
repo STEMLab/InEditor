@@ -62,7 +62,9 @@ define(function(require) {
     doc['conditions'] = require('Conditions').getInstance();
     doc['codeList'] = require('Property').CODE_LIST.getInstance().getList();
 
-    var filename = require('Conditions').getInstance().savePath + '/' + require('Conditions').getInstance().saveName + '-' + new Date().getTime() + '.bson';
+    var filename = doc.conditions.savePath + '/' + require('Conditions').getInstance().saveName
+    filename += doc.conditions.saveWithTimeStamp ? '-' + new Date().getTime() : '';
+    filename += '.bson';
 
 
     // send json data to viewer
@@ -88,6 +90,10 @@ define(function(require) {
    * @memberof ProjectManager
    */
   ProjectManager.prototype.loadProject = function(reqObj) {
+
+    $('#loading-modal')[0].children[0].innerHTML = "Load Project";
+    $('#loading-modal').modal("show");
+
 
     var reader = new FileReader();
     reader.readAsBinaryString(reqObj.file);
@@ -151,6 +157,7 @@ define(function(require) {
           // refresh tree view
           require('UI').getInstance().treeView.refresh(storage.getPropertyContainer());
 
+          $('#loading-modal').modal("hide");
         }
 
       }
@@ -197,6 +204,8 @@ define(function(require) {
    * @memberof ProjectManager
    */
   ProjectManager.prototype.importGML = function(reqObj) {
+    $('#loading-modal')[0].children[0].innerHTML = "Import IndoorGML file";
+    $('#loading-modal').modal("show");
 
     var reader = new FileReader();
     reader.readAsText(reqObj.file);
@@ -212,6 +221,8 @@ define(function(require) {
           var parsed = require("../Utils/GMLHelper.js").parse(indoor);
           manager.makeObj(parsed);
         }
+
+        $('#loading-modal').modal("hide");
       }
 
       xhr.open("POST", "http://localhost:5757/save-gml/TMP", false);
@@ -329,6 +340,7 @@ define(function(require) {
    * @memberof ProjectManager
    */
   ProjectManager.prototype.importFile = function(reqObj) {
+
     var reader = new FileReader();
     reader.readAsText(reqObj.file);
     reader.onload = function(e) {
@@ -361,10 +373,25 @@ define(function(require) {
     conditions.pre_state = reqObj.prefix.state;
     conditions.pre_transition = reqObj.prefix.trnsition;
 
-    // conditions.aspectRatio = reqObj.aspectRatio;
+    var ratio = reqObj.canvas.aspectRatio.split(':');
+
+    if(ratio.length != 2){
+      require('Popup')('error', 'Invalid Input', reqObj.canvas.aspectRatio);
+    }
+    else{
+      conditions.aspectRatio = {
+        x: ratio[0]*1,
+        y: ratio[1]*1
+      };
+    }
+
     conditions.scaleFactor = reqObj.canvas.scaleFactor;
     conditions.scaleMax = reqObj.canvas.scaleMax;
     conditions.automGenerateState = reqObj.canvas.automGenerateState;
+
+    conditions.saveWithTimeStamp = reqObj.save.saveWithTimeStamp;
+
+    require('Popup')('success', 'General Conditons updated');
 
     $('#setting-conditions-modal').modal('hide');
   }

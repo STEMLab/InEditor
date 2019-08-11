@@ -1276,6 +1276,9 @@ define(function(require) {
     if (conditions.automGenerateState) $('#setting-conditions-auto-create-state').prop("checked", true);
     else $('#setting-conditions-auto-create-state').prop("checked", false);
 
+    if (conditions.saveWithTimeStamp) $('#setting-conditions-timestamp').prop("checked", true);
+    else $('#setting-conditions-timestamp').prop("checked", false);
+
   }
 
   UIManager.prototype.addDescList = function(reqObj) {

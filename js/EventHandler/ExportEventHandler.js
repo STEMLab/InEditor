@@ -28,7 +28,6 @@ define(function(require) {
     var address = document.getElementById("viewer-baseURL").value+ ":" + document.getElementById("viewer-portNum").value + "/" +document.getElementById("viewer-params").value;
     var reg = /https?:\/\/(\w*:\w*@)?[-\w.]+(:\d+)?(\/([\w/_.]*(\?\S+)?)?)?/.exec(address);
 
-
     if(reg[0] == address){
 
       if (broker.isPublishable('exporttoviewer')) {
@@ -43,28 +42,32 @@ define(function(require) {
 
     }
 
-
-
     return result;
 
   }
 
   ExportEventHandler.prototype.exportToFactory = function(broker, previousMsg) {
 
+    $("#go-factory-modal").modal("hide");
+    $("#go-factory-loading").modal("show");
+
     var result = require('./Result.js')();
 
-    if (broker.isPublishable('exporttofactory')) {
-      broker.publish(require('Message')('exporttofactory', {
-        baseURL: window.document.getElementById('factory-baseURL').value + ":" + window.document.getElementById('factory-portNum').value
-      }));
+    if (!broker.isPublishable('exporttofactory')){
+      result.msg = "wrong state transition : " + previousMsg + " to exporttojson.";
+    }
+    else{
       result.result = true;
       result.msg = null;
-    } else {
-      result.msg = "wrong state transition : " + previousMsg + " to exporttojson.";
+
+      setTimeout(function() {
+        broker.publish(require('Message')('exporttofactory', {
+          baseURL: window.document.getElementById('factory-baseURL').value + ":" + window.document.getElementById('factory-portNum').value
+        }))
+      }, 100);
     }
 
     return result;
-
   }
 
   return ExportEventHandler;
