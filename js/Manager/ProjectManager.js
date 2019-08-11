@@ -368,10 +368,26 @@ define(function(require) {
 
   ProjectManager.prototype.updateConditions = function(reqObj) {
     var conditions = require('Conditions').getInstance();
-    conditions.pre_cell = reqObj.prefix.cell;
-    conditions.pre_cellBoundary = reqObj.prefix.cellboundary;
-    conditions.pre_state = reqObj.prefix.state;
-    conditions.pre_transition = reqObj.prefix.trnsition;
+
+    if(conditions.pre_cell != reqObj.prefix.cell){
+      conditions.LAST_CELL_ID_NUM = 0;
+      conditions.pre_cell = reqObj.prefix.cell;
+    }
+
+    if(conditions.pre_cellBoundary != reqObj.prefix.cellboundary){
+      conditions.LAST_CELLBOUNDARY_ID_NUM = 0;
+      conditions.pre_cellBoundary = reqObj.prefix.cellboundary;
+    }
+
+    if(conditions.pre_state != reqObj.prefix.state){
+      conditions.LAST_STATE_ID_NUM = 0;
+      conditions.pre_state = reqObj.prefix.state;
+    }
+
+    if(conditions.pre_transition != reqObj.prefix.trnsition){
+      conditions.LAST_TRANSITION_ID_NUM = 0;
+      conditions.pre_transition = reqObj.prefix.trnsition;
+    }
 
     var ratio = reqObj.canvas.aspectRatio.split(':');
 

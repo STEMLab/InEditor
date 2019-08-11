@@ -149,7 +149,7 @@ define(function(require) {
 
     } else {
 
-      result.msg = 'ERROR !! There is some erroe with cursor data ' + cursorData;
+      // result.msg = 'ERROR !! There is some error with cursor data ' + cursorData;
 
     }
 

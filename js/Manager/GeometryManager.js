@@ -338,8 +338,10 @@
         var Dot = require('Dot');
         var centroidDot = new Dot(intersection[0].x, intersection[0].y);
 
-        var stateId =
-          require('Conditions').getInstance().pre_state + ++require('Conditions').getInstance().LAST_STATE_ID_NUM;
+
+        var stateId = require('Conditions').getInstance().getNewId('state');
+        // var stateId =
+        //   require('Conditions').getInstance().pre_state + ++require('Conditions').getInstance().LAST_STATE_ID_NUM;
         require('Storage').getInstance().getCanvasContainer().stages[
           floor
         ].stateLayer.group.makeNewStateAndAdd(stateId, centroidDot);

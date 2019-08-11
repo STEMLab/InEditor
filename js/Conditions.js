@@ -3,62 +3,58 @@
  */
 
 define(function(require) {
-
   /**
    * @class
    * @name Conditions
    */
   var singleton = (function() {
-
     function Conditions() {
-
       /**
        * @desc Prefix of cell object
        * @default C
        */
-      this.pre_cell = 'C';
+      this.pre_cell = "C";
 
       /**
        * @desc Prefix of hole object
        * @default H
        */
-      this.pre_hole = 'H';
+      this.pre_hole = "H";
 
       /**
        * @desc Prefix of cellBoundary object
        * @memberof Conditions
        * @default B
        */
-      this.pre_cellBoundary = 'B';
+      this.pre_cellBoundary = "B";
 
       /**
        * @desc Prefix of floor object
        * @memberof Conditions
        * @default F
        */
-      this.pre_floor = 'F';
+      this.pre_floor = "F";
 
       /**
        * @desc Prefix of state object
        * @memberof Conditions
        * @default S
        */
-      this.pre_state = 'S';
+      this.pre_state = "S";
 
       /**
        * @desc Prefix of transtiion object
        * @memberof Conditions
        * @default T
        */
-      this.pre_transition = 'T';
+      this.pre_transition = "T";
 
       /**
        * @desc Prefix of interlayerConnection object
        * @memberof Conditions
        * @default I
        */
-      this.pre_inter = 'I';
-
+      this.pre_inter = "I";
 
       this.LAST_CELL_ID_NUM = 0;
       this.LAST_CELLBOUNDARY_ID_NUM = 0;
@@ -136,14 +132,13 @@ define(function(require) {
       /**
        * @memberof Conditions
        */
-      this.cursorColor = 'red';
+      this.cursorColor = "red";
 
       /**
        * @memberof  Conditions
        */
       // this.automGenerateState = false;
       this.automGenerateState = true;
-
 
       /**
        * @memberof  Conditions
@@ -153,15 +148,14 @@ define(function(require) {
       /**
        * @memberof  Conditions
        */
-      this.savePath = './output';
-
+      this.savePath = "./output";
 
       this.saveWithTimeStamp = true;
 
       /**
        * @memberof  Conditions
        */
-      this.saveName = '';
+      this.saveName = "";
 
       this.descList = [];
 
@@ -172,48 +166,48 @@ define(function(require) {
        * @desc If the value is 'true', the attribute will included json which exported.
        */
       this.exportConditions = {
-        'CellSpace': {
-          'properties': {
-            'name': true,
-            'description': true,
-            'partialboundedBy': true,
-            'externalReference': true,
-            'duality': false
+        CellSpace: {
+          properties: {
+            name: true,
+            description: true,
+            partialboundedBy: true,
+            externalReference: true,
+            duality: false
           },
-          'geometry': {
-            'extrude': true
+          geometry: {
+            extrude: true
           }
         },
-        'CellSpaceBoundary': {
-          'properties': {
-            'name': true,
-            'description': true,
-            'externalReference': true,
-            'duality': false
+        CellSpaceBoundary: {
+          properties: {
+            name: true,
+            description: true,
+            externalReference: true,
+            duality: false
           },
-          'geometry': {
-            'extrude': true
+          geometry: {
+            extrude: true
           }
         },
-        'State': {
-          'properties': {
-            'name': true,
-            'description': true,
-            'duality': false,
-            'connects': true
+        State: {
+          properties: {
+            name: true,
+            description: true,
+            duality: false,
+            connects: true
           }
         },
-        'Transition': {
-          'properties': {
-            'name': true,
-            'description': true,
-            'duality': false,
-            'weight': true,
-            'connects': true
+        Transition: {
+          properties: {
+            name: true,
+            description: true,
+            duality: false,
+            weight: true,
+            connects: true
           }
         },
-        'MultiLayer': false,
-        'Geometry': '3D'
+        MultiLayer: false,
+        Geometry: "3D"
       };
 
       /**
@@ -221,37 +215,37 @@ define(function(require) {
        * @desc This this value is true, the attribute will remain even it's value is null("").
        */
       this.exportSimplifyCondition = {
-        'CellSpace': {
-          'properties': {
-            'name': true,
-            'description': true,
-            'partialboundedBy': false,
-            'externalReference': false,
-            'duality': true
+        CellSpace: {
+          properties: {
+            name: true,
+            description: true,
+            partialboundedBy: false,
+            externalReference: false,
+            duality: true
           }
         },
-        'CellSpaceBoundary': {
-          'properties': {
-            'name': true,
-            'description': true,
-            'externalReference': false,
-            'duality': true
+        CellSpaceBoundary: {
+          properties: {
+            name: true,
+            description: true,
+            externalReference: false,
+            duality: true
           }
         },
-        'State': {
-          'properties': {
-            'name': true,
-            'description': true,
-            'duality': true,
-            'connects': true
+        State: {
+          properties: {
+            name: true,
+            description: true,
+            duality: true,
+            connects: true
           }
         },
-        'Transition': {
-          'properties': {
-            'name': true,
-            'description': true,
-            'duality': true,
-            'weight': false
+        Transition: {
+          properties: {
+            name: true,
+            description: true,
+            duality: true,
+            weight: false
           }
         }
       };
@@ -262,15 +256,30 @@ define(function(require) {
      */
     Conditions.prototype.guid = function() {
       function s4() {
-        return ((1 + Math.random()) * 0x10000 | 0).toString(16).substring(1);
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
       }
-      function replaceFirstCharToChar(val){
-        var possible = 'abcdefghijklmnopqrstuvwxyz';
-        var first = possible.charAt(Math.floor(Math.random() * possible.length));
+      function replaceFirstCharToChar(val) {
+        var possible = "abcdefghijklmnopqrstuvwxyz";
+        var first = possible.charAt(
+          Math.floor(Math.random() * possible.length)
+        );
         return first + val.slice(1, 4);
       }
-      return replaceFirstCharToChar(s4()) + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-    }
+      return (
+        replaceFirstCharToChar(s4()) +
+        s4() +
+        "-" +
+        s4() +
+        "-" +
+        s4() +
+        "-" +
+        s4() +
+        "-" +
+        s4() +
+        s4() +
+        s4()
+      );
+    };
 
     /**
      * @memberof Conditions
@@ -279,26 +288,27 @@ define(function(require) {
       var d = new Date();
 
       var s =
-        this.leadingZeros(d.getFullYear(), 4) + '-' +
-        this.leadingZeros(d.getMonth() + 1, 2) + '-' +
+        this.leadingZeros(d.getFullYear(), 4) +
+        "-" +
+        this.leadingZeros(d.getMonth() + 1, 2) +
+        "-" +
         this.leadingZeros(d.getDate(), 2);
 
       return s;
-    }
+    };
 
     /**
      * @memberof Conditions
      */
     Conditions.prototype.leadingZeros = function(n, digits) {
-      var zero = '';
+      var zero = "";
       n = n.toString();
 
       if (n.length < digits) {
-        for (var i = 0; i < digits - n.length; i++)
-          zero += '0';
+        for (var i = 0; i < digits - n.length; i++) zero += "0";
       }
       return zero + n;
-    }
+    };
 
     /**
      * @memberof Conditions
@@ -331,8 +341,48 @@ define(function(require) {
 
       this.exportConditions = values.exportConditions;
       this.exportSimplifyCondition = values.exportSimplifyCondition;
-    }
+    };
 
+    Conditions.prototype.getNewId = function(type) {
+      var pre;
+      var num;
+      var lawtype;
+      var flag = false;
+      var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+
+      switch (type) {
+        case "cellSpace":
+          while (!flag) {
+            newId = this.pre_cell + (++this.LAST_CELL_ID_NUM);
+            flag = propertyContainer.getElementById('cell', newId) == null ? true : false;
+          }
+          break;
+        case "cellSpaceBoundary":
+          while (!flag) {
+            newId = this.pre_cellBoundary + (++this.LAST_CELLBOUNDARY_ID_NUM);
+            flag = propertyContainer.getElementById('cellBoundary', newId) == null ? true : false;
+          }
+          break;
+        case "state":
+          while (!flag) {
+            newId = this.pre_state + (++this.LAST_STATE_ID_NUM);
+            flag = propertyContainer.getElementById('state', newId) == null ? true : false;
+          }
+          break;
+        case "transition":
+          while (!flag) {
+            newId = this.pre_transition + (++this.LAST_TRANSITION_ID_NUM);
+            flag = propertyContainer.getElementById('transition', newId) == null ? true : false;
+          }
+          break;
+        default:
+      }
+
+
+
+
+      return newId;
+    };
 
     var INSTANCE;
 
@@ -344,7 +394,6 @@ define(function(require) {
         return INSTANCE;
       }
     };
-
   })();
 
   return singleton;
