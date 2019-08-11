@@ -2,18 +2,13 @@
  * @author suheeeee<lalune1120@hotmail.com>
  */
 
-define([
-  "./Dot.js"
-], function(
-  Dot
-) {
-  'use strict';
+define(["./Dot.js"], function(Dot) {
+  "use strict";
 
   /**
    * @class DotPool
    */
   function DotPool(floor) {
-
     /**
      * @memberof DotPool
      */
@@ -23,7 +18,6 @@ define([
      * @memberof DotPool
      */
     this.floor = floor;
-
   }
 
   /**
@@ -32,27 +26,20 @@ define([
    */
   DotPool.prototype.push = function(dot) {
     if (this.dots[dot.uuid] != null) {
-
       this.dots[dot.uuid].participateObj(dot.partOf[0]);
       info.error(dot.uuid + " is alreay exist!");
       return;
-
     } else {
-
       this.dots[dot.uuid] = dot;
-
     }
-  }
-
+  };
 
   /**
    * @memberof DotPool
    */
   DotPool.prototype.getDotById = function(id) {
-
     return this.dots[id];
-
-  }
+  };
 
   /**
    * @memberof DotPool
@@ -60,12 +47,16 @@ define([
    */
   DotPool.prototype.getDotByPoint = function(point, type) {
     var value = Object.values(this.dots);
-    var coordinateThreshold = require('Conditions').getInstance().realCoordinateThreshold;
+    var coordinateThreshold = require("Conditions").getInstance()
+      .realCoordinateThreshold;
 
     // If value exist in boundry, return true.
     // If you want to adjust the recognition sensitivity, modify conditions.coordinateThreshold.
     function isDotExist(value) {
-      var d = Math.sqrt(Math.pow(Math.abs(value.point.x - point.x), 2) + Math.pow(Math.abs(value.point.y - point.y), 2));
+      var d = Math.sqrt(
+        Math.pow(Math.abs(value.point.x - point.x), 2) +
+          Math.pow(Math.abs(value.point.y - point.y), 2)
+      );
       return d < coordinateThreshold;
     }
 
@@ -74,11 +65,15 @@ define([
     if (filtered.length == 0) return null;
     if (filtered.length == 1) return filtered[0];
     else {
-      log.error("Duplicate dots exist : ", filtered);
+      require("Popup")(
+        "warning",
+        "The dots are too close!",
+        "It is recommended to zoom further."
+      );
 
       return null;
     }
-  }
+  };
 
   /**
    * @memberof DotPool
@@ -86,12 +81,16 @@ define([
    */
   DotPool.prototype.getDotByPointaAllowDuplication = function(point) {
     var value = Object.values(this.dots);
-    var coordinateThreshold = require('Conditions').getInstance().realCoordinateThreshold;
+    var coordinateThreshold = require("Conditions").getInstance()
+      .realCoordinateThreshold;
 
     // If value exist in boundry, return true.
     // If you want to adjust the recognition sensitivity, modify conditions.coordinateThreshold.
     function isDotExist(value) {
-      var d = Math.sqrt(Math.pow(Math.abs(value.point.x - point.x), 2) + Math.pow(Math.abs(value.point.y - point.y), 2));
+      var d = Math.sqrt(
+        Math.pow(Math.abs(value.point.x - point.x), 2) +
+          Math.pow(Math.abs(value.point.y - point.y), 2)
+      );
       return d < coordinateThreshold;
     }
 
@@ -99,21 +98,23 @@ define([
 
     if (filtered.length == 0) return null;
     else return filtered;
-  }
+  };
 
-  DotPool.prototype.combineDuplicatedDots = function(dot1, dot2){
-
-    var coordinateThreshold = require('Conditions').getInstance().realCoordinateThreshold;
+  DotPool.prototype.combineDuplicatedDots = function(dot1, dot2) {
+    var coordinateThreshold = require("Conditions").getInstance()
+      .realCoordinateThreshold;
 
     function isSameDot(dot1, dot2) {
-      var d = Math.sqrt(Math.pow(Math.abs(dot1.point.x - dot2.point.x), 2) + Math.pow(Math.abs(dot1.point.y - dot2.point.y), 2));
+      var d = Math.sqrt(
+        Math.pow(Math.abs(dot1.point.x - dot2.point.x), 2) +
+          Math.pow(Math.abs(dot1.point.y - dot2.point.y), 2)
+      );
       return d < coordinateThreshold;
     }
 
-    if(!isSameDot(dot1, dot2)){
-      log.error('Two dots are not duplicated !');
-    }
-    else {
+    if (!isSameDot(dot1, dot2)) {
+      log.error("Two dots are not duplicated !");
+    } else {
       // combind dot2 to dot1
       var keys = Object.keys(dot2.memberOf);
 
@@ -128,17 +129,14 @@ define([
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     }
-
-  }
+  };
 
   /**
    * @memberof DotPool
    * @return true : successed to delete dot<br>false : fail to delete dot
    */
   DotPool.prototype.deleteDot = function(uuid) {
-
     if (this.dots[uuid] == null) return false;
 
     /**
@@ -147,14 +145,12 @@ define([
     delete this.dots[uuid];
 
     return true;
-
-  }
+  };
 
   /**
    * @memberof DotPool
    */
   DotPool.prototype.deleteDotFromObj = function(dotUuid, objId) {
-
     var dot = this.getDotById(dotUuid);
 
     // Leave Obj
@@ -163,15 +159,13 @@ define([
     if (Object.keys(this.dots[dotUuid].memberOf).length == 0) {
       this.deleteDot(dotUuid);
     }
-
-  }
+  };
 
   /**
    * @memberof DotPool
    * @deprecated
    */
   DotPool.prototype.connectTwoDot = function(uuid1, uuid2, relation, obj) {
-
     var connection1 = this.getDotById(uuid1).isConnected(uuid2, obj);
     var connection2 = this.getDotById(uuid2).isConnected(uuid1, obj);
 
@@ -182,15 +176,13 @@ define([
     if (!this.getDotById(uuid2).isConnected(uuid1, obj)) {
       this.getDotById(uuid2).connect(uuid1, relation, obj);
     }
-
-  }
+  };
 
   /**
    * @memberof DotPool
    * @return {Boolean}
    */
   DotPool.prototype.isConnected = function(uuid1, uuid2) {
-
     var dot1 = this.getDotById(uuid1);
     var dot2 = this.getDotById(uuid2);
 
@@ -204,27 +196,35 @@ define([
       }
     }
 
-    var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+    var canvasContainer = require("Storage")
+      .getInstance()
+      .getCanvasContainer();
     for (var key in commonObj) {
       var type = dot1.memberOf[result[key]];
       var obj;
 
       switch (type) {
-        case 'cell':
-          obj = canvasContainer.getElementById('cell', commonObj[key]);
+        case "cell":
+          obj = canvasContainer.getElementById("cell", commonObj[key]);
           break;
-        case 'cellBoundary':
-          obj = canvasContainer.getElementById('cellBoundary', commonObj[key]);
+        case "cellBoundary":
+          obj = canvasContainer.getElementById("cellBoundary", commonObj[key]);
           break;
-        case 'transition':
-          obj = canvasContainer.getElementById('transition', commonObj[key]);
+        case "transition":
+          obj = canvasContainer.getElementById("transition", commonObj[key]);
           break;
-        case 'state':
+        case "state":
           log.error("Two different dot present on state ! Something wrong.. ");
           return false;
           break;
         default:
-          log.error("The value of dot.memberOf is something wrong... Plz check dot : " + uuid1 + " and dot : " + uuid2 + ".");
+          log.error(
+            "The value of dot.memberOf is something wrong... Plz check dot : " +
+              uuid1 +
+              " and dot : " +
+              uuid2 +
+              "."
+          );
           return false;
       }
 
@@ -245,8 +245,7 @@ define([
     }
 
     return false;
-
-  }
+  };
 
   /**
    * @memberof DotPool
@@ -254,13 +253,12 @@ define([
    */
   DotPool.prototype.getDots = function() {
     return this.dots;
-  }
+  };
 
   /**
    * @memberof DotPool
    */
   DotPool.prototype.load = function(values) {
-
     this.floor = values.floor;
     this.dots = {};
 
@@ -269,8 +267,7 @@ define([
       tmp.load(values.dots[key]);
       this.push(tmp);
     }
-
-  }
+  };
 
   return DotPool;
 });

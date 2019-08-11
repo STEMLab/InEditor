@@ -65,7 +65,6 @@ define(function(require) {
           popup: $('#context_menu_val')
         })
 
-      //
 
     }
 
