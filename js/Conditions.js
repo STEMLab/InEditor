@@ -155,10 +155,13 @@ define(function(require) {
        */
       this.savePath = './output';
 
+
+      this.saveWithTimeStamp = true;
+
       /**
        * @memberof  Conditions
        */
-      this.saveName = 'editor-project';
+      this.saveName = '';
 
       this.descList = [];
 
