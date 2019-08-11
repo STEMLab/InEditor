@@ -27,7 +27,6 @@ define(function(require) {
 
     this.bottom = 0; // floor ~ bottom
     this.height = 0; // bottom ~ top
-
   }
 
   CellProperty.prototype = Object.create(require('./PropertyBase.js').prototype);

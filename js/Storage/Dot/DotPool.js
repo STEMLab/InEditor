@@ -75,6 +75,7 @@ define([
     if (filtered.length == 1) return filtered[0];
     else {
       log.error("Duplicate dots exist : ", filtered);
+
       return null;
     }
   }

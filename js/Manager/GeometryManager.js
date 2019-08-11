@@ -1873,7 +1873,7 @@
             'CellSpace with slant should have four corner.');
           return false;
         } // slant
-        if(obj.isPartOf(reqObj.line.dot1, reqObj.line.dot2)) {
+        if(obj.isPartOf(reqObj.line.dot1.point, reqObj.line.dot2.point).length != 0) {
           isPartOf.push(filtered[i]);
         }
       }

@@ -297,7 +297,7 @@ define([], function() {
       }
 
       wkt += dots[0].point.x + " " + dots[0].point.y + " 0))";
-      log.info(wkt);
+      // log.info(wkt);
 
       var reader = new jsts.io.WKTReader();
       var c = reader.read(wkt);
