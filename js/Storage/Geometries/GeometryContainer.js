@@ -106,13 +106,13 @@ define([
   /**
    * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.load = function(values, dotFoolContainer) {
+  GeometryContainer.prototype.load = function(values, dotPoolContainer) {
 
-    this.loadCells(values.cellGeometry, dotFoolContainer);
-    this.loadCellBoundary(values.cellBoundaryGeometry, dotFoolContainer);
-    this.loadState(values.stateGeometry, dotFoolContainer);
-    this.loadTransition(values.transitionGeometry, dotFoolContainer);
-    this.loadHole(values.holeGeometry, dotFoolContainer);
+    this.loadCells(values.cellGeometry, dotPoolContainer);
+    this.loadCellBoundary(values.cellBoundaryGeometry, dotPoolContainer);
+    this.loadState(values.stateGeometry, dotPoolContainer);
+    this.loadTransition(values.transitionGeometry, dotPoolContainer);
+    this.loadHole(values.holeGeometry, dotPoolContainer);
 
   }
 
@@ -120,7 +120,7 @@ define([
   /**
    * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.loadCells = function(values, dotFoolContainer) {
+  GeometryContainer.prototype.loadCells = function(values, dotPoolContainer) {
 
     this.cellGeometry = [];
 
@@ -130,7 +130,7 @@ define([
       tmp.load(values[index]);
 
       for(var key in tmp.points){
-        tmp.points[key] = dotFoolContainer.getDotById(tmp.points[key].uuid);
+        tmp.points[key] = dotPoolContainer.getDotById(tmp.points[key].uuid);
       }
 
       this.cellGeometry.push(tmp);
@@ -142,7 +142,7 @@ define([
   /**
    * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.loadCellBoundary = function(values, dotFoolContainer) {
+  GeometryContainer.prototype.loadCellBoundary = function(values, dotPoolContainer) {
 
     this.cellBoundaryGeometry = [];
 
@@ -152,7 +152,7 @@ define([
       tmp.load(values[index]);
 
       for(var key in tmp.points){
-        tmp.points[key] = dotFoolContainer.getDotById(tmp.points[key].uuid);
+        tmp.points[key] = dotPoolContainer.getDotById(tmp.points[key].uuid);
       }
 
       this.cellBoundaryGeometry.push(tmp);
@@ -164,7 +164,7 @@ define([
   /**
    * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.loadState = function(values, dotFoolContainer) {
+  GeometryContainer.prototype.loadState = function(values, dotPoolContainer) {
 
     this.stateGeometry = [];
 
@@ -172,7 +172,7 @@ define([
 
       var tmp = new StateGeometry();
       tmp.load(values[index]);
-      tmp.point = dotFoolContainer.getDotById(tmp.point.uuid);
+      tmp.point = dotPoolContainer.getDotById(tmp.point.uuid);
       this.stateGeometry.push(tmp);
 
     }
@@ -182,7 +182,7 @@ define([
   /**
    * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.loadTransition = function(values, dotFoolContainer) {
+  GeometryContainer.prototype.loadTransition = function(values, dotPoolContainer) {
 
     this.transitionGeometry = [];
 
@@ -192,7 +192,7 @@ define([
       tmp.load(values[index]);
 
       for(var key in tmp.points){
-        tmp.points[key] = dotFoolContainer.getDotById(tmp.points[key].uuid);
+        tmp.points[key] = dotPoolContainer.getDotById(tmp.points[key].uuid);
       }
 
       this.transitionGeometry.push(tmp);
@@ -203,7 +203,7 @@ define([
   /**
    * @memberof GeometryContainer
    */
-  GeometryContainer.prototype.loadHole = function(values, dotFoolContainer) {
+  GeometryContainer.prototype.loadHole = function(values, dotPoolContainer) {
 
     this.holeGeometry = [];
 
@@ -213,7 +213,7 @@ define([
       tmp.load(values[index]);
 
       for(var key in tmp.points){
-        tmp.points[key] = dotFoolContainer.getDotById(tmp.points[key].uuid);
+        tmp.points[key] = dotPoolContainer.getDotById(tmp.points[key].uuid);
       }
 
       this.holeGeometry.push(tmp);

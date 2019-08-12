@@ -26,7 +26,7 @@ define([], function(){
    * @memberof Deque
    */
   Deque.prototype.max_size = function(){
-    return window.conditions.maxHistoryLen;
+    return require('Conditions').getInstance().maxHistoryLen;
   }
 
   /**

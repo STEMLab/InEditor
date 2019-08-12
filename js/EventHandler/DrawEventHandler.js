@@ -2,70 +2,63 @@
  * @author suheeeee <lalune1120@hotmail.com>
  */
 
-define([
-  "../PubSub/Message.js",
-  "./Result.js"
-], function(
-  Message,
-  Result
-) {
-  'use strict';
+define(function(require) {
 
   /**
    * @class DrawEventHandler
    */
-  function DrawEventHandler() { }
+  function DrawEventHandler() {}
 
   /**
    * @memberof DrawEventHandler
    */
   DrawEventHandler.prototype.setHandlerBinder = function(handlerBinder) {
 
-    handlerBinder['floor-btn'] = {
+    handlerBinder['btn__floor'] = {
       'click': this.clickFloorBtn
     };
 
-    handlerBinder['cell-btn'] = {
+    handlerBinder['btn__cellSpace'] = {
       'click': this.clickCellBtn
     };
 
-    handlerBinder['hole-btn'] = {
+    handlerBinder['btn__hole'] = {
       'click': this.clickHoleBtn
     };
 
-    handlerBinder['cellboundary-btn'] = {
+    handlerBinder['btn__cellSpaceBoundary'] = {
       'click': this.clickCellBoundaryBtn
     };
 
-    handlerBinder['hatch-btn'] = {
+    handlerBinder['btn__hatch'] = {
       'click': this.clickHatchBtn
     };
 
-    handlerBinder['state-btn'] = {
+    handlerBinder['btn__state'] = {
       'click': this.clickStateBtn
     };
 
-    handlerBinder['transition-btn'] = {
+    handlerBinder['btn__transition'] = {
       'click': this.clickTransitionBtn
     }
 
-    handlerBinder['interlayerconnection-btn'] = {
+    handlerBinder['btn__interlayerconnection'] = {
       'click': this.clickInterBtn
     }
 
-    handlerBinder['stair-btn'] = {
+    handlerBinder['btn__stair'] = {
       'click': this.clickStairBtn
     }
 
-    handlerBinder['slant-down-btn'] = {
+    handlerBinder['btn__slant_down'] = {
       'click': this.clickSlantDownBtn
     }
 
-    handlerBinder['slant-up-btn'] = {
+    handlerBinder['btn__slant_up'] = {
       'click': this.clickSlantUpBtn
     }
 
-    handlerBinder['slant-up-down-btn'] = {
+    handlerBinder['btn__slant_up_down'] = {
       'click': this.clickSlantUpDownBtn
     }
 
@@ -107,48 +100,47 @@ define([
 
   }
 
-  DrawEventHandler.prototype.stageDbclick = function(broker, previous, data){
+  DrawEventHandler.prototype.stageDbclick = function(broker, previous, data) {
 
-    log.info('stage dbclick called');
-
-    var result = new Result();
+    let result = require('./Result.js')();
+    var storage = require('Storage').getInstance();
 
     var floor = data.currentTarget.attrs.id;
-    var cursor = window.storage.canvasContainer.stages[floor].tmpLayer.group.getCursor();
-    var cursorData =  window.storage.canvasContainer.stages[floor].tmpLayer.group.getCursorData();
+    var cursor = storage.getCanvasContainer().stages[floor].tmpLayer.group.getCursor();
+    var cursorData = storage.getCanvasContainer().stages[floor].tmpLayer.group.getCursorData();
 
-    if(cursorData.isSnapped == false){
+    if (cursorData.isSnapped == false) {
 
       result.msg = "There is no match function !";
 
-    } else if( cursorData.snapedObj.type == 'line' && broker.isPublishable('modifyline') ){
+    } else if (cursorData.snapedObj.type == 'line' && broker.isPublishable('modifyline')) {
 
-      broker.publish(new Message('modifyline', {
+      broker.publish(require('Message')('modifyline', {
         floor: floor,
-        line : cursorData.snapedObj.obj
+        line: cursorData.snapedObj.obj
       }));
 
-      broker.publish(new Message('start-modifypoint',{
+      broker.publish(require('Message')('start-modifypoint', {
         floor: floor,
-        point: window.storage.dotFoolContainer.getDotFool(floor).getDotByPoint(cursor.coor)
-      }));
-
-      result.result = true;
-      result.msg = 'modifypoint';
-
-    } else if( cursorData.snapedObj.type == 'point' && broker.isPublishable('start-modifypoint') ){
-
-      broker.publish(new Message('start-modifypoint', {
-        floor: floor,
-        point : cursorData.snapedObj.obj
+        point: storage.getDotPoolContainer().getDotPool(floor).getDotByPoint(cursor.coor)
       }));
 
       result.result = true;
       result.msg = 'modifypoint';
 
-    } else if( broker.isPublishable('end-modifypoint') ){
+    } else if (cursorData.snapedObj.type == 'point' && broker.isPublishable('start-modifypoint')) {
 
-      broker.publish(new Message('end-modifypoint', {
+      broker.publish(require('Message')('start-modifypoint', {
+        floor: floor,
+        point: cursorData.snapedObj.obj
+      }));
+
+      result.result = true;
+      result.msg = 'modifypoint';
+
+    } else if (broker.isPublishable('end-modifypoint')) {
+
+      broker.publish(require('Message')('end-modifypoint', {
         floor: floor
       }));
 
@@ -157,7 +149,7 @@ define([
 
     } else {
 
-      result.msg = 'ERROR !! There is some erroe with cursor data ' + cursorData;
+      // result.msg = 'ERROR !! There is some error with cursor data ' + cursorData;
 
     }
 
@@ -165,10 +157,28 @@ define([
 
   }
 
-  DrawEventHandler.prototype.mousedown = function(broker, previous, data){
+  DrawEventHandler.prototype.mousedown = function(broker, previous, data) {
     log.info('mousedown : ', data);
 
-    return new Result();
+    return require('./Result.js')()
+  }
+
+  DrawEventHandler.prototype.cancelDrawObject = function(broker, msg, resultTitle, resultMsg) {
+    var reqObj = {
+      floor: window.tmpObj != null ? window.tmpObj.floor : null
+    };
+
+    if(msg.indexOf('interlayer') > -1)
+      reqObj['interConnects'] = [...window.tmpObj.interConnects].filter(s => s!=undefined)
+
+    broker.publish(require('Message')(msg, reqObj));
+
+    let result = require('./Result.js')();
+    result.result = false;
+    result.title = resultTitle;
+    result.msg = resultMsg;
+
+    return result;
   }
 
   /**
@@ -177,14 +187,15 @@ define([
    */
   DrawEventHandler.prototype.clickCellBtn = function(broker, previousMsg) {
 
-    var result = new Result();
+    let result = require('./Result.js')();
+    var storage = require('Storage').getInstance();
 
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
+    var isFloorExist = (storage.getPropertyContainer().floorProperties.length != 0);
 
     if (isFloorExist && broker.isPublishable('start-addnewcell')) {
 
       // reqObj.floor will be active workspace
-      broker.publish(new Message('start-addnewcell', null));
+      broker.publish(require('Message')('start-addnewcell', null));
 
       result = {
         'result': true,
@@ -193,30 +204,7 @@ define([
 
     } else if (broker.isPublishable('end-addnewcell')) {
 
-      if (window.tmpObj.isEmpty()) {
-
-        broker.publish(new Message('end-addnewcell', {
-          'isEmpty': true
-        }));
-
-      } else {
-
-        var newId = null;
-        var flag = false;
-        while(!flag){
-          newId = window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM);
-          flag = window.storage.propertyContainer.getElementById('cell', newId) == null ? true : false;
-        }
-
-        broker.publish(new Message('end-addnewcell', {
-          'id': newId,
-          'floor': window.tmpObj.floor
-        }));
-
-      }
-
-      result.result = true;
-      result.msg = null;
+      result = require('EventHandler').getInstance().getHandlers().drawEventHandler.endAddNewCell(broker, result);
 
     } else if (!isFloorExist) {
 
@@ -232,19 +220,60 @@ define([
 
   }
 
+  DrawEventHandler.prototype.endAddNewCell = function(broker, result) {
+    var drawEventHandler = require('EventHandler').getInstance().getHandlers().drawEventHandler;
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+
+    if (window.tmpObj.isEmpty()) {
+      result = drawEventHandler.cancelDrawObject(broker, 'cancel-addnewcell', '', '');
+      result.result = true;
+    } else if (window.tmpObj.dots.length <= 2) {
+
+      result = drawEventHandler.cancelDrawObject(
+        broker,
+        'cancel-addnewcell',
+        'INVALID POLYGON',
+        'The polygon needs at least three corners.'
+      );
+
+    } else {
+
+      var newId = null;
+      var flag = false;
+      while (!flag) {
+        newId = require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM);
+        flag = propertyContainer.getElementById('cell', newId) == null ? true : false;
+      }
+
+      broker.publish(require('Message')('end-addnewcell', {
+        'id': newId,
+        'floor': window.tmpObj.floor
+      }));
+
+      result.result = true;
+      result.msg = null;
+
+    }
+
+    return result;
+
+  }
+
   /**
-=   * @memberof DrawEventHandler
+   * @memberof DrawEventHandler
    */
   DrawEventHandler.prototype.clickHoleBtn = function(broker, previousMsg) {
 
-    var result = new Result();
+    let result = require('./Result.js')();
+    var drawEventHandler = require('EventHandler').getInstance().getHandlers().drawEventHandler;
 
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
+
+    var isFloorExist = (require('Storage').getInstance().getPropertyContainer().floorProperties.length != 0);
 
     if (isFloorExist && broker.isPublishable('start-addnewhole')) {
 
       // reqObj.floor will be active workspace
-      broker.publish(new Message('start-addnewhole', null));
+      broker.publish(require('Message')('start-addnewhole', null));
 
       result = {
         'result': true,
@@ -255,23 +284,34 @@ define([
 
       if (window.tmpObj.isEmpty()) {
 
-        broker.publish(new Message('end-addnewhole', {
-          'id': window.tmpObj.id,
-          'floor': window.tmpObj.floor,
-          'isEmpty': true
-        }));
+        result = drawEventHandler.cancelDrawObject(
+          broker,
+          'cancel-addnewhole',
+          'INVALID POLYGON',
+          'The polygon needs at least three corners.');
+
+      } else if (window.tmpObj.dots.length <= 2) {
+
+        result = drawEventHandler.cancelDrawObject(
+          broker,
+          'cancel-addnewhole',
+          'INVALID POLYGON',
+          'The polygon needs at least three corners.'
+        );
 
       } else {
 
-        broker.publish(new Message('end-addnewhole', {
-          'id': window.conditions.pre_hole + (++window.conditions.LAST_HOLE_ID_NUM),
+        broker.publish(require('Message')('end-addnewhole', {
+          'id': require('Conditions').getInstance().pre_hole + (++require('Conditions').getInstance().LAST_HOLE_ID_NUM),
           'floor': window.tmpObj.floor
         }));
 
+        result.result = true;
+        result.msg = null;
+
       }
 
-      result.result = true;
-      result.msg = null;
+
 
     } else if (!isFloorExist) {
 
@@ -293,12 +333,12 @@ define([
    */
   DrawEventHandler.prototype.clickFloorBtn = function(broker, previousMsg) {
 
-    var result = new Result();
+    let result = require('./Result.js')()
 
     if (broker.isPublishable('addnewfloor')) {
 
-      broker.publish(new Message('addnewfloor', {
-        'floor': window.conditions.pre_floor + (++window.conditions.LAST_FLOOR_ID_NUM)
+      broker.publish(require('Message')('addnewfloor', {
+        'floor': require('Conditions').getInstance().pre_floor + (++require('Conditions').getInstance().LAST_FLOOR_ID_NUM)
       }));
 
       result.result = true;
@@ -320,7 +360,8 @@ define([
    */
   DrawEventHandler.prototype.addNewDot = function(broker, previousMsg, data) {
 
-    var result = new Result();
+    let result = require('./Result.js')();
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
     if (broker.isPublishable('addnewcell')) {
 
@@ -329,7 +370,7 @@ define([
 
       if (isFirstClick || (!isFirstClick && isSameFloor)) {
 
-        broker.publish(new Message('addnewcell', {
+        broker.publish(require('Message')('addnewcell', {
           'floor': data.currentTarget.attrs.id
         }));
 
@@ -339,28 +380,38 @@ define([
 
       } else if (!isFirstClick && !isSameFloor) {
 
-        result.msg = "you clicked different floor!";
+        result.title = "YOU CLICKED DIFFERENT FLOOR!";
+        result.msg = "Please click floor " + window.tmpObj.floor + ".";
 
       } else {
 
         result.msg = "wrong state transition : " + previousMsg + " to addnewcell.";
 
       }
-    }
-    else if (broker.isPublishable('addnewslantdown')) {
+    } else if (broker.isPublishable('addnewslantdown')) {
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
       var isFirstClick = (window.tmpObj.floor == null);
 
       if (isFirstClick || (!isFirstClick && isSameFloor)) {
 
-        broker.publish(new Message('addnewslantdown', {
+        broker.publish(require('Message')('addnewslantdown', {
           'floor': data.currentTarget.attrs.id
         }));
 
         result.result = true;
         result.msg = 'addnewslantdown';
 
+        if (window.tmpObj.dots.length === 4 && broker.isPublishable('end-addnewslantdown')) {
+          broker.publish(require('Message')('end-addnewslantdown', {
+            'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
+            'floor': window.tmpObj.floor
+          }));
+
+          result.result = true;
+          result.msg = null;
+
+        }
 
       } else if (!isFirstClick && !isSameFloor) {
 
@@ -371,20 +422,30 @@ define([
         result.msg = "wrong state transition : " + previousMsg + " to addnewslantdown.";
 
       }
-    }
-    else if (broker.isPublishable('addnewslantup')) {
+    } else if (broker.isPublishable('addnewslantup')) {
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
       var isFirstClick = (window.tmpObj.floor == null);
 
       if (isFirstClick || (!isFirstClick && isSameFloor)) {
 
-        broker.publish(new Message('addnewslantup', {
+        broker.publish(require('Message')('addnewslantup', {
           'floor': data.currentTarget.attrs.id
         }));
 
         result.result = true;
         result.msg = 'addnewslantup';
+
+        if (window.tmpObj.dots.length === 4 && broker.isPublishable('end-addnewslantup')) {
+          broker.publish(require('Message')('end-addnewslantup', {
+            'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
+            'floor': window.tmpObj.floor
+          }));
+
+          result.result = true;
+          result.msg = null;
+
+        }
 
 
       } else if (!isFirstClick && !isSameFloor) {
@@ -396,20 +457,30 @@ define([
         result.msg = "wrong state transition : " + previousMsg + " to addnewslantup.";
 
       }
-    }
-    else if (broker.isPublishable('addnewslantupdown')) {
+    } else if (broker.isPublishable('addnewslantupdown')) {
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
       var isFirstClick = (window.tmpObj.floor == null);
 
       if (isFirstClick || (!isFirstClick && isSameFloor)) {
 
-        broker.publish(new Message('addnewslantupdown', {
+        broker.publish(require('Message')('addnewslantupdown', {
           'floor': data.currentTarget.attrs.id
         }));
 
         result.result = true;
         result.msg = 'addnewslantupdown';
+
+        if (window.tmpObj.dots.length === 4 && broker.isPublishable('end-addnewslantupdown')) {
+          broker.publish(require('Message')('end-addnewslantupdown', {
+            'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
+            'floor': window.tmpObj.floor
+          }));
+
+          result.result = true;
+          result.msg = null;
+
+        }
 
 
       } else if (!isFirstClick && !isSameFloor) {
@@ -421,20 +492,36 @@ define([
         result.msg = "wrong state transition : " + previousMsg + " to addnewslantupdown.";
 
       }
-    }
-    else if (broker.isPublishable('addnewhole')) {
+    } else if (broker.isPublishable('addnewhole')) {
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
       var isFirstClick = (window.tmpObj.floor == null);
 
       if (isFirstClick || (!isFirstClick && isSameFloor)) {
 
-        broker.publish(new Message('addnewhole', {
-          'floor': data.currentTarget.attrs.id
-        }));
+        if(!isFirstClick){
 
-        result.result = true;
-        result.msg = 'addnewhole';
+          var reader = new jsts.io.WKTReader();
+          var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+          var cell = reader.read(canvasContainer.getElementById('cell', window.tmpObj.holeOf).getWKT());
+          var pointCoor = canvasContainer.stages[window.tmpObj.floor].tmpLayer.group.cursor.coor;
+          var point = reader.read('POINT(' + pointCoor.x + ' ' + pointCoor.y + ')');
+          if ( !cell.contains(point)) {
+            result.title = "INVALID POINT!";
+            result.msg = "Please click the insice of " + window.tmpObj.holeOf + ".";
+          }
+
+        }
+
+        if(result.title != "INVALID POINT!"){
+          broker.publish(require('Message')('addnewhole', {
+            'floor': data.currentTarget.attrs.id
+          }));
+
+          result.result = true;
+          result.msg = 'addnewhole';
+        }
+
 
 
       } else if (!isFirstClick && !isSameFloor) {
@@ -453,13 +540,28 @@ define([
 
       if (isFirstClick || (!isFirstClick && isSameFloor)) {
 
-        broker.publish(new Message('addnewhatch', {
-          'floor': data.currentTarget.attrs.id
-        }));
+        if(!isFirstClick){
 
-        result.result = true;
-        result.msg = 'addnewhatch';
+          var reader = new jsts.io.WKTReader();
+          var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+          var cell = reader.read(canvasContainer.getElementById('cell', window.tmpObj.hatchOf).getWKT());
+          var pointCoor = canvasContainer.stages[window.tmpObj.floor].tmpLayer.group.cursor.coor;
+          var point = reader.read('POINT(' + pointCoor.x + ' ' + pointCoor.y + ')');
+          if ( !cell.contains(point)) {
+            result.title = "INVALID POINT!";
+            result.msg = "Please click the insice of " + window.tmpObj.hatchOf + ".";
+          }
 
+        }
+
+        if(result.title != "INVALID POINT!"){
+          broker.publish(require('Message')('addnewhatch', {
+            'floor': data.currentTarget.attrs.id
+          }));
+
+          result.result = true;
+          result.msg = 'addnewhatch';
+        }
 
       } else if (!isFirstClick && !isSameFloor) {
 
@@ -470,15 +572,14 @@ define([
         result.msg = "wrong state transition : " + previousMsg + " to addnewfloor.";
 
       }
-    }
-    else if (broker.isPublishable('addnewcellboundary')) {
+    } else if (broker.isPublishable('addnewcellboundary')) {
 
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
-      var isFirstClick = (window.tmpObj.affiliatedCell == null);
+      var isFirstClick = (window.tmpObj.associationCell == null);
 
       if (isFirstClick || (!isFirstClick && isSameFloor)) {
 
-        broker.publish(new Message('addnewcellboundary', {
+        broker.publish(require('Message')('addnewcellboundary', {
           'floor': data.currentTarget.attrs.id
         }));
 
@@ -487,7 +588,8 @@ define([
 
       } else if (!isFirstClick && !isSameFloor) {
 
-        result.msg = "you clicked different floor!";
+        result.title = "YOU CLICKED DIFFERENT FLOOR!";
+        result.msg = "Please click floor " + window.tmpObj.floor + ".";
 
       } else {
 
@@ -495,22 +597,20 @@ define([
 
       }
 
-    }
-    else if (broker.isPublishable('end-addnewstate')) {
+    } else if (broker.isPublishable('end-addnewstate')) {
 
       var floor = data.currentTarget.attrs.id;
-      var isCellSelected = window.broker.getManager("end-addnewstate", "GeometryManager").isCellSelected(floor);
-
-      if( isCellSelected.length == 1 ){
+      var isCellSelected = require('Broker').getInstance().getManager("end-addnewstate", "GeometryManager").isCellSelected(floor);
+      if (isCellSelected.length == 1) {
 
         var newId = null;
         var flag = false;
-        while(!flag){
-          newId = window.conditions.pre_state + (++window.conditions.LAST_STATE_ID_NUM);
-          flag = window.storage.propertyContainer.getElementById('state', newId) == null ? true : false;
+        while (!flag) {
+          newId = require('Conditions').getInstance().pre_state + (++require('Conditions').getInstance().LAST_STATE_ID_NUM);
+          flag = propertyContainer.getElementById('state', newId) == null ? true : false;
         }
 
-        broker.publish(new Message('end-addnewstate', {
+        broker.publish(require('Message')('end-addnewstate', {
           floor: floor,
           id: newId,
           duality: isCellSelected[0]
@@ -519,11 +619,14 @@ define([
         result.result = true;
         result.msg = 'end-addnewstate';
 
-      } else if( isCellSelected.length > 1 ){
-        broker.publish(new Message('makecellselectmenu', {
+      } else if (isCellSelected.length > 1) {
+        broker.publish(require('Message')('makecellselectmenu', {
           floor: floor,
           cells: isCellSelected,
-          pageCoor:{ x: data.evt.pageX, y: data.evt.pageY }
+          pageCoor: {
+            x: data.evt.pageX,
+            y: data.evt.pageY
+          }
         }));
 
         result.result = true;
@@ -533,12 +636,12 @@ define([
 
         var newId = null;
         var flag = false;
-        while(!flag){
-          newId = window.conditions.pre_state + (++window.conditions.LAST_STATE_ID_NUM);
-          flag = window.storage.propertyContainer.getElementById('state', newId) == null ? true : false;
+        while (!flag) {
+          newId = require('Conditions').getInstance().pre_state + (++require('Conditions').getInstance().LAST_STATE_ID_NUM);
+          flag = propertyContainer.getElementById('state', newId) == null ? true : false;
         }
 
-        broker.publish(new Message('end-addnewstate', {
+        broker.publish(require('Message')('end-addnewstate', {
           floor: floor,
           id: newId,
         }));
@@ -548,15 +651,14 @@ define([
 
       }
 
-    }
-    else if (broker.isPublishable('addnewtransition')) {
+    } else if (broker.isPublishable('addnewtransition')) {
 
       var isFirstClick = (window.tmpObj.floor == null);
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
 
-      if(isSameFloor || isFirstClick){
+      if (isSameFloor || isFirstClick) {
 
-        broker.publish(new Message('addnewtransition', {
+        broker.publish(require('Message')('addnewtransition', {
           'floor': data.currentTarget.attrs.id
         }));
 
@@ -565,21 +667,22 @@ define([
 
       } else {
 
-        result.msg = 'Transition need states which existed same floor but you select wrong state.';
+        result.title = 'INVALID STATE';
+        result.msg = 'Transition requires State and CellSpaceBoudnary that exist on the same floor.';
 
       }
 
-      if(window.tmpObj.dots.length == 3){
+      if (window.tmpObj.dots.length == 3) {
 
         var newId = null;
         var flag = false;
-        while(!flag){
-          newId = window.conditions.pre_transition + (++window.conditions.LAST_TRANSITION_ID_NUM);
-          flag = window.storage.propertyContainer.getElementById('transition', newId) == null ? true : false;
+        while (!flag) {
+          newId = require('Conditions').getInstance().pre_transition + (++require('Conditions').getInstance().LAST_TRANSITION_ID_NUM);
+          flag = propertyContainer.getElementById('transition', newId) == null ? true : false;
         }
 
-        broker.publish(new Message('end-addnewtransition', {
-          floor: data.currentTarget.attrs.id,
+        broker.publish(require('Message')('end-addnewtransition', {
+          floor: window.tmpObj.floor,
           id: newId
         }));
 
@@ -587,23 +690,23 @@ define([
         result.msg = null;
       }
 
-    }
-    else if (broker.isPublishable('addnewstair')) {
+    } else if (broker.isPublishable('addnewstair')) {
 
       var isFirstClick = (window.tmpObj.floor == null);
       var isSameFloor = (data.currentTarget.attrs.id == window.tmpObj.floor);
 
-      if(isFirstClick || !isSameFloor){
+      if (isFirstClick || !isSameFloor) {
 
-        broker.publish(new Message('addnewstair', {
+        broker.publish(require('Message')('addnewstair', {
           'floor': data.currentTarget.attrs.id
         }));
 
         result.result = true;
         result.msg = 'addnewstair';
 
-      } else if( isSameFloor ) {
+      } else if (isSameFloor) {
 
+        result.title = 'INVALID STATE'
         result.msg = 'You should select state which on the different floor from the floor that the state you selected before.';
 
       } else {
@@ -612,50 +715,51 @@ define([
 
       }
 
-      if(window.tmpObj.dots.length == 2){
+      if (window.tmpObj.dots.length == 2) {
 
-        broker.publish(new Message('end-addnewstair', {
+        broker.publish(require('Message')('end-addnewstair', {
           floor: window.tmpObj.floor,
-          id: window.conditions.pre_transition+(++window.conditions.LAST_TRANSITION_ID_NUM)
+          id: require('Conditions').getInstance().pre_transition + (++require('Conditions').getInstance().LAST_TRANSITION_ID_NUM)
         }));
 
         result.result = true;
         result.msg = null;
       }
 
-    }
-    else if (broker.isPublishable('addnewinterlayerconnetction')) {
+    } else if (broker.isPublishable('addnewinterlayerconnetction')) {
 
       var isFirstClick = (window.tmpObj.interConnects[0] == null);
-      var isSameDifferLayer = (data.currentTarget.attrs.id == window.tmpObj.floor);
+      var isDifferLayer = propertyContainer.getElementById('floor', data.currentTarget.attrs.id).layer != window.tmpObj.connectedLayer[0];
 
-      if(isFirstClick || !isSameFloor){
+      if (isFirstClick || (!isFirstClick && isDifferLayer)) {
 
-        broker.publish(new Message('addnewinterlayerconnetction', {
+        broker.publish(require('Message')('addnewinterlayerconnetction', {
           'floor': data.currentTarget.attrs.id
         }));
 
         result.result = true;
         result.msg = 'addnewinterlayerconnetction';
 
-      }  else {
+      } else if(!isDifferLayer){
+
+
+      } else {
 
         result.msg = "wrong state transition : " + previousMsg + " to addnewinterlayerconnetction.";
 
       }
 
-      if(window.tmpObj.interConnects[1] != null){
+      if (window.tmpObj.interConnects[1] != null) {
 
-        broker.publish(new Message('end-addnewinterlayerconnetction', {
-          id: window.conditions.pre_inter+(++window.conditions.LAST_INTER_ID_NUM)
+        broker.publish(require('Message')('end-addnewinterlayerconnetction', {
+          id: require('Conditions').getInstance().pre_inter + (++require('Conditions').getInstance().LAST_INTER_ID_NUM)
         }));
 
         result.result = true;
         result.msg = null;
       }
 
-    }
-    else {
+    } else {
 
       result.msg = "no match function.";
 
@@ -670,70 +774,12 @@ define([
    */
   DrawEventHandler.prototype.cancelDraw = function(broker, previousMsg) {
 
-    var result = new Result();
-
-    switch (previousMsg) {
-      case 'addnewcell':
-        if (broker.isPublishable('cancel-addnewcell')) {
-          broker.publish(new Message('cancel-addnewcell', {
-            'floor': window.tmpObj.floor
-          }));
-
-          result.result = true;
-          result.msg = null;
-        }
-        break;
-      case 'addnewcellboundary':
-        if (broker.isPublishable('cancel-addnewcellboundary')) {
-
-          broker.publish(new Message('cancel-addnewcellboundary', {
-            'floor': window.tmpObj.floor
-          }));
-
-          result.result = true;
-          result.msg = null;
-
-        }
-        break;
-      case 'addnewstate':
-        if (broker.isPublishable('cancel-addnewstate')) {
-
-          broker.publish(new Message('cancel-addnewstate', {
-            'floor': window.tmpObj.floor
-          }));
-
-          result.result = true;
-          result.msg = null;
-
-        }
-
-        break;
-      case 'addnewtransition':
-        if(broker.isPublishable('cancel-addnewtransition')){
-
-          broker.publish(new Message('cancel-addnewtransition', {
-            'floor': window.tmpObj.floor
-          }));
-
-          result.result = true;
-          result.msg = null;
-
-        }
-        break;
-      case 'addnewhole':
-        if(broker.isPublishable('cancel-addnewhole')){
-
-          broker.publish(new Message('cancel-addnewhole', {
-            'floor': window.tmpObj.floor
-          }));
-
-          result.result = true;
-          result.msg = null;
-
-        }
-        break;
-      default:
-        result.msg = "no match function.";
+    let result = require('./Result.js')()
+    var drawEventHandler = require('EventHandler').getInstance().getHandlers().drawEventHandler;
+    var msg = 'cancel-' + previousMsg;
+    if (broker.isPublishable(msg)) {
+      result = drawEventHandler.cancelDrawObject(broker, msg, '', '');
+      result.result = true;
     }
 
     return result;
@@ -744,50 +790,43 @@ define([
    */
   DrawEventHandler.prototype.finishDraw = function(broker, previousMsg) {
 
-    var result = new Result();
+    let result = require('./Result.js')();
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+    var drawEventHandler = require('EventHandler').getInstance().getHandlers().drawEventHandler;
 
     if (broker.isPublishable('end-addnewcell')) {
 
+      result = drawEventHandler.endAddNewCell(broker, result);
+
+    } else if (broker.isPublishable('end-addnewslantdown')) {
+
       if (window.tmpObj.isEmpty()) {
-
-        broker.publish(new Message('end-addnewcell', {
-          'isEmpty': true
-        }));
-
+        result = drawEventHandler.cancelDrawCell(broker, 'cancel-addnewslantdown', '', '');
+        result.result = true;
+      } else if(window.tmpObj.floor.length < 4 ){
+        // do nothing
       } else {
-
-        var newId = null;
-        var flag = false;
-        while(!flag){
-          newId = window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM);
-          flag = window.storage.propertyContainer.getElementById('cell', newId) == null ? true : false;
-        }
-
-        broker.publish(new Message('end-addnewcell', {
-          'id': newId,
+        broker.publish(require('Message')('end-addnewslantdown', {
+          'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
           'floor': window.tmpObj.floor
         }));
-
       }
 
       result.result = true;
       result.msg = null;
 
-    } else if (broker.isPublishable('end-addnewslantdown')) {
+    } else if (broker.isPublishable('end-addnewslantup')) {
 
       if (window.tmpObj.isEmpty()) {
-
-        broker.publish(new Message('end-addnewslantdown', {
-          'isEmpty': true
-        }));
-
+        result = drawEventHandler.cancelDrawCell(broker, 'cancel-addnewslantup', '', '');
+        result.result = true;
+      } else if(window.tmpObj.floor.length < 4 ){
+        // do nothing
       } else {
-
-        broker.publish(new Message('end-addnewslantdown', {
-          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+        broker.publish(require('Message')('end-addnewslantup', {
+          'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
           'floor': window.tmpObj.floor
         }));
-
       }
 
       result.result = true;
@@ -797,14 +836,16 @@ define([
 
       if (window.tmpObj.isEmpty()) {
 
-        broker.publish(new Message('end-addnewslantupdown', {
+        broker.publish(require('Message')('end-addnewslantupdown', {
           'isEmpty': true
         }));
 
+      } else if(window.tmpObj.floor.length < 4 ){
+        // do nothing
       } else {
 
-        broker.publish(new Message('end-addnewslantupdown', {
-          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+        broker.publish(require('Message')('end-addnewslantupdown', {
+          'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
           'floor': window.tmpObj.floor
         }));
 
@@ -817,14 +858,14 @@ define([
 
       if (window.tmpObj.isEmpty()) {
 
-        broker.publish(new Message('end-addnewhole', {
+        broker.publish(require('Message')('end-addnewhole', {
           'isEmpty': true
         }));
 
       } else {
 
-        broker.publish(new Message('end-addnewhole', {
-          'id': window.conditions.pre_hole + (++window.conditions.LAST_HOLE_ID_NUM),
+        broker.publish(require('Message')('end-addnewhole', {
+          'id': require('Conditions').getInstance().pre_hole + (++require('Conditions').getInstance().LAST_HOLE_ID_NUM),
           'floor': window.tmpObj.floor
         }));
 
@@ -835,37 +876,15 @@ define([
 
     } else if (broker.isPublishable('end-addnewcellboundary')) {
 
-      if (window.tmpObj.isEmpty()) {
-
-        broker.publish(new Message('end-addnewcellboundary', {
-          'isEmpty': true
-        }));
-
-      } else {
-        var newId = null;
-        var flag = false;
-        while(!flag){
-          newId = window.conditions.pre_cellBoundary + (++window.conditions.LAST_CELLBOUNDARY_ID_NUM);
-          flag = window.storage.propertyContainer.getElementById('cellBoundary', newId) == null ? true : false;
-        }
-
-        broker.publish(new Message('end-addnewcellboundary', {
-          'id': newId,
-          'floor': window.tmpObj.floor
-        }));
-
-      }
-
-      result.result = true;
-      result.msg = null;
+      result = drawEventHandler.endAddNewCellBoundary(broker, result);
 
     } else if (broker.isPublishable('end-addnewstate')) {
 
     } else if (broker.isPublishable('end-addnewtransition')) {
 
-      if (window.tmpObj.isEmpty()){
+      if (window.tmpObj.isEmpty()) {
 
-        broker.publish(new Message('end-addnewcellboundary', {
+        broker.publish(require('Message')('end-addnewcellboundary', {
           'isEmpty': true
         }));
 
@@ -873,13 +892,13 @@ define([
 
         var newId = null;
         var flag = false;
-        while(!flag){
-          newId = window.conditions.pre_transition + (++window.conditions.LAST_TRANSITION_ID_NUM);
-          flag = window.storage.propertyContainer.getElementById('transition', newId) == null ? true : false;
+        while (!flag) {
+          newId = require('Conditions').getInstance().pre_transition + (++require('Conditions').getInstance().LAST_TRANSITION_ID_NUM);
+          flag = propertyContainer.getElementById('transition', newId) == null ? true : false;
         }
 
-        broker.publish(new Message('end-addnewtransition', {
-          floor: data.currentTarget.attrs.id,
+        broker.publish(require('Message')('end-addnewtransition', {
+          floor: window.tmpObj.floor,
           id: newId
         }));
 
@@ -887,6 +906,10 @@ define([
 
       result.result = true;
       result.msg = null;
+
+    } else if (broker.isPublishable('end-addnewhatch')){
+
+      result = require('EventHandler').getInstance().getHandlers().drawEventHandler.endAddNewHatch(broker, result);
 
     } else {
       result.mgs = "no match function."
@@ -901,8 +924,8 @@ define([
    */
   DrawEventHandler.prototype.stageMoveMouse = function(broker, previousMsg, data) {
 
-    var result = new Result();
-    var rect = window.storage.canvasContainer.stages[data.currentTarget.attrs.id].stage.content.getBoundingClientRect();
+    let result = require('./Result.js')()
+    var rect = require('Storage').getInstance().getCanvasContainer().stages[data.currentTarget.attrs.id].stage.content.getBoundingClientRect();
 
     if (broker.isPublishable('snapping')) {
 
@@ -914,9 +937,9 @@ define([
         }
       };
 
-      broker.publish(new Message('snapping', reqObj));
+      broker.publish(require('Message')('snapping', reqObj));
 
-      broker.publish(new Message('movetooltip', reqObj));
+      broker.publish(require('Message')('movetooltip', reqObj));
 
       result.result = true;
       result.msg = 'snapping';
@@ -931,9 +954,9 @@ define([
         }
       };
 
-      broker.publish(new Message('snapping', reqObj));
+      broker.publish(require('Message')('snapping', reqObj));
 
-      broker.publish(new Message('modifypoint', {
+      broker.publish(require('Message')('modifypoint', {
         floor: data.currentTarget.attrs.id
       }));
 
@@ -955,10 +978,11 @@ define([
    */
   DrawEventHandler.prototype.clickCellBoundaryBtn = function(broker, previousMsg) {
 
-    var result = new Result();
+    let result = require('./Result.js')();
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
-    var isCellExist = (window.storage.propertyContainer.cellProperties.length != 0);
+    var isFloorExist = (propertyContainer.floorProperties.length != 0);
+    var isCellExist = (propertyContainer.cellProperties.length >= 1);
 
     if (!isFloorExist) {
       result.msg = "There is no floor ...";
@@ -966,7 +990,7 @@ define([
       result.msg = "There is no cell ...";
     } else if (broker.isPublishable('start-addnewcellboundary')) {
 
-      broker.publish(new Message('start-addnewcellboundary', null));
+      broker.publish(require('Message')('start-addnewcellboundary', null));
 
       result = {
         'result': true,
@@ -975,30 +999,7 @@ define([
 
     } else if (broker.isPublishable('end-addnewcellboundary')) {
 
-      if (window.tmpObj.isEmpty()) {
-
-        broker.publish(new Message('end-addnewcellboundary', {
-          'isEmpty': true
-        }));
-
-      } else {
-
-        var newId = null;
-        var flag = false;
-        while(!flag){
-          newId = window.conditions.pre_cellBoundary + (++window.conditions.LAST_CELLBOUNDARY_ID_NUM);
-          flag = window.storage.propertyContainer.getElementById('cellBoundary', newId) == null ? true : false;
-        }
-
-        broker.publish(new Message('end-addnewcellboundary', {
-          'id': newId,
-          'floor': window.tmpObj.floor
-        }));
-
-      }
-
-      result.result = true;
-      result.msg = null;
+      result = require('EventHandler').getInstance().getHandlers().drawEventHandler.endAddNewCellBoundary(broker, result);
 
     } else {
       result.msg = "wrong transition : " + previousMsg + " to start-addnewcellboundary, end-addnewcellboundary.";
@@ -1008,26 +1009,60 @@ define([
 
   }
 
-  /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickStateBtn = function(broker, previousMsg){
+  DrawEventHandler.prototype.endAddNewCellBoundary = function(broker, result) {
+    var drawEventHandler = require('EventHandler').getInstance().getHandlers().drawEventHandler;
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
-    var result = new Result();
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
-    var isCellExist = (window.storage.propertyContainer.cellProperties.length >= 1);
+    if (window.tmpObj.isEmpty()) {
+      result = drawEventHandler.cancelDrawObject(broker, 'cancel-addnewcellboundary', '', '');
+      result.result = true;
+    } else if (window.tmpObj.dots.length < 2 ){
+      result = drawEventHandler.cancelDrawObject(
+        broker,
+        'cancel-addnewcellboundary',
+        'INVALID LINE',
+        'The line needs at least two points.'
+      )
+    } else {
+
+      var newId = null;
+      var flag = false;
+      while (!flag) {
+        newId = require('Conditions').getInstance().pre_cellBoundary + (++require('Conditions').getInstance().LAST_CELLBOUNDARY_ID_NUM);
+        flag = propertyContainer.getElementById('cellBoundary', newId) == null ? true : false;
+      }
+
+      broker.publish(require('Message')('end-addnewcellboundary', {
+        'id': newId,
+        'floor': window.tmpObj.floor
+      }));
+
+      result.result = true;
+      result.msg = null;
+
+    }
+
+    return result;
+
+  }
+
+  /**
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickStateBtn = function(broker, previousMsg) {
+
+    let result = require('./Result.js')();
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+    var isFloorExist = (propertyContainer.floorProperties.length != 0);
+    var isCellExist = (propertyContainer.cellProperties.length >= 1);
 
     if (!isFloorExist) {
 
       result.msg = "There is no floor ...";
 
-    } else if (!isCellExist){
+    } else if (broker.isPublishable('start-addnewstate')) {
 
-      result.msg = "There is no cell ...";
-
-    } else if(broker.isPublishable('start-addnewstate')){
-
-      broker.publish(new Message('start-addnewstate', null));
+      broker.publish(require('Message')('start-addnewstate', null));
 
       result.result = true;
       result.msg = 'start-addnewstate';
@@ -1041,32 +1076,43 @@ define([
   }
 
   /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickTransitionBtn = function(broker, previousMsg){
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickTransitionBtn = function(broker, previousMsg) {
 
-    var result = new Result();
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
-    var isStateExist = (window.storage.propertyContainer.stateProperties.length >= 2);
+    let result = require('./Result.js')();
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+    var isFloorExist = (propertyContainer.floorProperties.length != 0);
+    var isStateExist = (propertyContainer.stateProperties.length >= 2);
 
     if (!isFloorExist) {
 
       result.msg = "There is no floor ...";
 
-    } else if (!isStateExist){
+    } else if (!isStateExist) {
 
       result.msg = "There is too few state ...";
 
-    } else if(broker.isPublishable('start-addnewtransition')){
+    } else if (broker.isPublishable('start-addnewtransition')) {
 
-      broker.publish(new Message('start-addnewtransition', null));
+      broker.publish(require('Message')('start-addnewtransition', null));
 
       result.result = true;
       result.msg = 'start-addnewtransition';
 
-    } else if(broker.isPublishable('end-addnewtransition')){
+    } else if (broker.isPublishable('end-addnewtransition')) {
 
-      broker.publish(new Message('start-addnewtransition', null));
+      var newId = null;
+      var flag = false;
+      while (!flag) {
+        newId = require('Conditions').getInstance().pre_transition + (++require('Conditions').getInstance().LAST_TRANSITION_ID_NUM);
+        flag = propertyContainer.getElementById('transition', newId) == null ? true : false;
+      }
+
+      broker.publish(require('Message')('end-addnewtransition', {
+        floor: window.tmpObj.floor,
+        id: newId
+      }));
 
       result.result = true;
       result.msg = null;
@@ -1081,32 +1127,33 @@ define([
 
 
   /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickInterBtn = function(broker, previousMsg){
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickInterBtn = function(broker, previousMsg) {
 
-    var result = new Result();
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
-    var isStateExist = (window.storage.propertyContainer.stateProperties.length >= 2);
+    let result = require('./Result.js')();
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+    var isFloorExist = (propertyContainer.floorProperties.length != 0);
+    var isStateExist = (propertyContainer.stateProperties.length >= 2);
 
     if (!isFloorExist) {
 
       result.msg = "There is no floor ...";
 
-    } else if (!isStateExist){
+    } else if (!isStateExist) {
 
       result.msg = "There is too few state ...";
 
-    } else if(broker.isPublishable('start-addnewinterlayerconnetction')){
+    } else if (broker.isPublishable('start-addnewinterlayerconnetction')) {
 
-      broker.publish(new Message('start-addnewinterlayerconnetction', null));
+      broker.publish(require('Message')('start-addnewinterlayerconnetction', null));
 
       result.result = true;
       result.msg = 'start-addnewinterlayerconnetction';
 
-    } else if(broker.isPublishable('end-addnewinterlayerconnetction')){
+    } else if (broker.isPublishable('end-addnewinterlayerconnetction')) {
 
-      broker.publish(new Message('start-addnewinterlayerconnetction', null));
+      broker.publish(require('Message')('start-addnewinterlayerconnetction', null));
 
       result.result = true;
       result.msg = null;
@@ -1120,32 +1167,34 @@ define([
   }
 
   /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickStairBtn = function(broker, previousMsg){
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickStairBtn = function(broker, previousMsg) {
 
-    var result = new Result();
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length >= 2);
-    var isStateExist = (window.storage.propertyContainer.stateProperties.length >= 2);
+    let result = require('./Result.js')()
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+
+    var isFloorExist = (propertyContainer.floorProperties.length >= 2);
+    var isStateExist = (propertyContainer.stateProperties.length >= 2);
 
     if (!isFloorExist) {
 
       result.msg = "There is too few floor ...";
 
-    } else if (!isStateExist){
+    } else if (!isStateExist) {
 
       result.msg = "There is too few state ...";
 
-    } else if(broker.isPublishable('start-addnewstair')){
+    } else if (broker.isPublishable('start-addnewstair')) {
 
-      broker.publish(new Message('start-addnewstair', null));
+      broker.publish(require('Message')('start-addnewstair', null));
 
       result.result = true;
       result.msg = 'start-addnewstair';
 
-    } else if(broker.isPublishable('end-addnewstair')){
+    } else if (broker.isPublishable('end-addnewstair')) {
 
-      broker.publish(new Message('start-addnewstair', null));
+      broker.publish(require('Message')('start-addnewstair', null));
 
       result.result = true;
       result.msg = null;
@@ -1160,28 +1209,20 @@ define([
 
   }
 
-  /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.lineDbclick = function(broker, previous, data){
-    log.info('dbclick : ', data);
-
-    return new Result();
-  }
 
   /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickSlantDownBtn = function(broker, previous, data){
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickSlantDownBtn = function(broker, previous, data) {
 
-    var result = new Result();
+    let result = require('./Result.js')()
 
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
+    var isFloorExist = (require('Storage').getInstance().getPropertyContainer().floorProperties.length != 0);
 
     if (isFloorExist && broker.isPublishable('start-addnewslantdown')) {
 
       // reqObj.floor will be active workspace
-      broker.publish(new Message('start-addnewslantdown', null));
+      broker.publish(require('Message')('start-addnewslantdown', null));
 
       result = {
         'result': true,
@@ -1192,16 +1233,18 @@ define([
 
       if (window.tmpObj.isEmpty()) {
 
-        broker.publish(new Message('end-addnewslantdown', {
-          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+        broker.publish(require('Message')('end-addnewslantdown', {
+          'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
           'floor': window.tmpObj.floor,
           'isEmpty': true
         }));
 
+      } else if(window.tmpObj.floor.length < 4 ){
+        // do nothing
       } else {
 
-        broker.publish(new Message('end-addnewslantdown', {
-          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+        broker.publish(require('Message')('end-addnewslantdown', {
+          'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
           'floor': window.tmpObj.floor
         }));
 
@@ -1225,38 +1268,40 @@ define([
   }
 
   /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickSlantUpBtn = function(broker, previous, data){
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickSlantUpBtn = function(broker, previous, data) {
 
-    var result = new Result();
+    let result = require('./Result.js')()
 
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
+    var isFloorExist = (require('Storage').getInstance().getPropertyContainer().floorProperties.length != 0);
 
     if (isFloorExist && broker.isPublishable('start-addnewslantup')) {
 
       // reqObj.floor will be active workspace
-      broker.publish(new Message('start-addnewslantup', null));
+      broker.publish(require('Message')('start-addnewslantup', null));
 
       result = {
         'result': true,
         'msg': 'start-addnewslantup'
       };
 
+    } else if(window.tmpObj.floor.length < 4 ){
+      // do nothing
     } else if (broker.isPublishable('end-addnewslantup')) {
 
       if (window.tmpObj.isEmpty()) {
 
-        broker.publish(new Message('end-addnewslantup', {
-          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+        broker.publish(require('Message')('end-addnewslantup', {
+          'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
           'floor': window.tmpObj.floor,
           'isEmpty': true
         }));
 
       } else {
 
-        broker.publish(new Message('end-addnewslantup', {
-          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+        broker.publish(require('Message')('end-addnewslantup', {
+          'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
           'floor': window.tmpObj.floor
         }));
 
@@ -1280,18 +1325,18 @@ define([
   }
 
   /**
-  * @memberof DrawEventHandler
-  */
-  DrawEventHandler.prototype.clickSlantUpDownBtn = function(broker, previous, data){
+   * @memberof DrawEventHandler
+   */
+  DrawEventHandler.prototype.clickSlantUpDownBtn = function(broker, previous, data) {
 
-    var result = new Result();
+    let result = require('./Result.js')()
 
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
+    var isFloorExist = (require('Storage').getInstance().getPropertyContainer().floorProperties.length != 0);
 
     if (isFloorExist && broker.isPublishable('start-addnewslantupdown')) {
 
       // reqObj.floor will be active workspace
-      broker.publish(new Message('start-addnewslantupdown', null));
+      broker.publish(require('Message')('start-addnewslantupdown', null));
 
       result = {
         'result': true,
@@ -1302,16 +1347,18 @@ define([
 
       if (window.tmpObj.isEmpty()) {
 
-        broker.publish(new Message('end-addnewslantupdown', {
-          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+        broker.publish(require('Message')('end-addnewslantupdown', {
+          'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
           'floor': window.tmpObj.floor,
           'isEmpty': true
         }));
 
+      } else if(window.tmpObj.floor.length < 4 ){
+        // do nothing
       } else {
 
-        broker.publish(new Message('end-addnewslantupdown', {
-          'id': window.conditions.pre_cell + (++window.conditions.LAST_CELL_ID_NUM),
+        broker.publish(require('Message')('end-addnewslantupdown', {
+          'id': require('Conditions').getInstance().pre_cell + (++require('Conditions').getInstance().LAST_CELL_ID_NUM),
           'floor': window.tmpObj.floor
         }));
 
@@ -1334,15 +1381,17 @@ define([
 
   }
 
-  DrawEventHandler.prototype.stageContextmenu = function(broker, previous, data){
-    var result = new Result();
+  DrawEventHandler.prototype.stageContextmenu = function(broker, previous, data) {
+    let result = require('./Result.js')()
 
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
+    var isFloorExist = (require('Storage').getInstance().getPropertyContainer().floorProperties.length != 0);
 
     if (isFloorExist && broker.isPublishable('callcontextmenu')) {
 
       // reqObj.floor will be active workspace
-      broker.publish(new Message('callcontextmenu', {floor: data.currentTarget.attrs.id}));
+      broker.publish(require('Message')('callcontextmenu', {
+        floor: data.currentTarget.attrs.id
+      }));
 
       result = {
         'result': true,
@@ -1358,18 +1407,18 @@ define([
     return result;
   }
 
-  DrawEventHandler.prototype.test = function(){
-    log.info('DrawEventHandler TEST');
-  }
 
-  DrawEventHandler.prototype.copyFloor = function(broker, previous, data){
-    var result = new Result();
+  DrawEventHandler.prototype.copyFloor = function(broker, previous, data) {
+    let result = require('./Result.js')()
 
-    if ( broker.isPublishable('copyfloor')) {
+    if (broker.isPublishable('copyfloor')) {
 
       var targetFloor = document.getElementById('copyfloor-text').value;
 
-      broker.publish(new Message('copyfloor', {floor: document.getElementById('id-text').value, targetFloor: targetFloor}));
+      broker.publish(require('Message')('copyfloor', {
+        floor: document.getElementById('id-text').value,
+        targetFloor: targetFloor
+      }));
 
       result = {
         'result': true,
@@ -1385,11 +1434,12 @@ define([
     return result;
   }
 
-  DrawEventHandler.prototype.clickHatchBtn = function(broker, previous, data){
-    var result = new Result();
+  DrawEventHandler.prototype.clickHatchBtn = function(broker, previous, data) {
+    let result = require('./Result.js')();
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
 
-    var isFloorExist = (window.storage.propertyContainer.floorProperties.length != 0);
-    var isCellExist = (window.storage.propertyContainer.cellProperties.length != 0);
+    var isFloorExist = (propertyContainer.floorProperties.length != 0);
+    var isCellExist = (propertyContainer.cellProperties.length != 0);
 
     if (!isFloorExist) {
       result.msg = "There is no floor ...";
@@ -1397,7 +1447,7 @@ define([
       result.msg = "There is no cell ...";
     } else if (broker.isPublishable('start-addnewhatch')) {
 
-      broker.publish(new Message('start-addnewhatch', null));
+      broker.publish(require('Message')('start-addnewhatch', null));
 
       result = {
         'result': true,
@@ -1406,37 +1456,52 @@ define([
 
     } else if (broker.isPublishable('end-addnewhatch')) {
 
-      if (window.tmpObj.isEmpty()) {
-
-        broker.publish(new Message('end-addnewhatch', {
-          'isEmpty': true
-        }));
-
-      } else {
-
-        var newId = null;
-        var flag = false;
-        while(!flag){
-          newId = window.conditions.pre_cellBoundary + (++window.conditions.LAST_CELLBOUNDARY_ID_NUM);
-          flag = window.storage.propertyContainer.getElementById('hatch', newId) == null ? true : false;
-        }
-
-        broker.publish(new Message('end-addnewhatch', {
-          'id': newId,
-          'floor': window.tmpObj.floor
-        }));
-
-      }
-
-      result.result = true;
-      result.msg = null;
+      result = require('EventHandler').getInstance().getHandlers().drawEventHandler.endAddNewHatch(broker, result);
 
     } else {
-      result.msg = "wrong transition : " + previousMsg + " to start-addnewcellboundary, end-addnewcellboundary.";
+      result.msg = "wrong transition : " + previousMsg + " to start-addnewhatch, end-addnewhatch.";
     }
 
     return result;
 
+  }
+
+  DrawEventHandler.prototype.endAddNewHatch = function(broker, result){
+    var drawEventHandler = require('EventHandler').getInstance().getHandlers().drawEventHandler;
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+    if (window.tmpObj.isEmpty()) {
+      result = drawEventHandler.cancelDrawObject(broker, 'cancel-hatch', '', '');
+      result.result = true;
+    } else if (window.tmpObj.dots.length < 3 ){
+      result = drawEventHandler.cancelDrawObject(
+        broker,
+        'cancel-addnewhatch',
+        'INVALID POLYGON',
+        'The polygon needs at least three points.'
+      )
+    } else {
+
+      var newId = null;
+      var flag = false;
+      while (!flag) {
+        newId = require('Conditions').getInstance().pre_cellBoundary + (++require('Conditions').getInstance().LAST_CELLBOUNDARY_ID_NUM);
+        var flaglHatch = propertyContainer.getElementById('hatch', newId) == null ? true : false;
+        var flagCB = propertyContainer.getElementById('cellBoundary', newId) == null ? true : false;
+        flag = (flaglHatch || flagCB);
+      }
+
+      broker.publish(require('Message')('end-addnewhatch', {
+        'id': newId,
+        'floor': window.tmpObj.floor
+      }));
+
+      result.result = true;
+      result.msg = null;
+
+    }
+
+
+    return result;
   }
 
 

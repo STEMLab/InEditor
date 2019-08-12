@@ -52,7 +52,7 @@ define(["./Feature"], function(Feature) {
       log.warn("The given parameter is not an Array type.");
 
     } else if (this.properties != null &&
-        (this.properties.connects != null || window.conditions.exportConditions[this.type].properties.connects)) {
+        (this.properties.connects != null || require('Conditions').getInstance().exportConditions[this.type].properties.connects)) {
 
       this.properties['connects'] = connects;
 
@@ -71,7 +71,7 @@ define(["./Feature"], function(Feature) {
 
     if(this.properties != null &&
        this.properties.connected == null &&
-       window.conditions.exportConditions[this.type].properties.connected){
+       require('Conditions').getInstance().exportConditions[this.type].properties.connected){
 
       this.properties['connected'] = [state];
 

@@ -52,12 +52,14 @@ define([
    * @memberof StateGroup
    */
    StateGroup.prototype.delete = function(id, floor){
+     var dotPoolContainer = require('Storage').getInstance().getDotPoolContainer();
+
      for(var i in this.states){
        if(this.states[i].id == id){
 
          if(floor != undefined){
-           var dotFool = window.storage.dotFoolContainer.getDotFool(floor);
-           dotFool.deleteDotFromObj(this.states[i].dot.uuid, this.states[i].id);
+           var dotPool = dotPoolContainer.getDotPool(floor);
+           dotPool.deleteDotFromObj(this.states[i].dot.uuid, this.states[i].id);
          } else {
            log.warn('StateGroup.delete:: there is no floor data for state, you need to free dots of', id, 'manually.');
          }

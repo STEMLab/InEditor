@@ -24,7 +24,7 @@ define([], function() {
      * @memberof InterLayerConnectionProperty
      * @desc This attribute can contain an additional description for the InterLayerConnection.
      */
-    this.commnet = "";
+    this.comment = "";
 
     /**
      * @memberof InterLayerConnectionProperty
@@ -57,8 +57,8 @@ define([], function() {
       return;
     }
 
-    var floorId = window.storage.propertyContainer.getFloorById('state', state);
-    var layer = window.storage.propertyContainer.getElementById('floor', floorId).layer;
+    var floorId = require('Storage').getInstance().getPropertyContainer().getFloorById('state', state);
+    var layer = require('Storage').getInstance().getPropertyContainer().getElementById('floor', floorId).layer;
 
     if (index == 0) {
       this.interConnects[0] = state;

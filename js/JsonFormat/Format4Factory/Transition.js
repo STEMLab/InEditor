@@ -45,7 +45,7 @@ define(["./Feature", "js/Storage/Dot/DotMath.js"], function(Feature, DotMath) {
   Transition.prototype.setWeight = function(weight) {
 
     if (this.properties != null &&
-      (this.properties.weight != null || window.conditions.exportConditions[this.type].properties.weight)) {
+      (this.properties.weight != null || require('Conditions').getInstance().exportConditions[this.type].properties.weight)) {
 
       this.properties['weight'] = weight;
 
@@ -241,12 +241,12 @@ define(["./Feature", "js/Storage/Dot/DotMath.js"], function(Feature, DotMath) {
   Transition.prototype.setDuality = function(duality) {
 
     if (this.properties != null &&
-      (this.properties.duality != null || window.conditions.exportConditions[this.type].properties.duality)) {
+      (this.properties.duality != null || require('Conditions').getInstance().exportConditions[this.type].properties.duality)) {
 
       if (duality == null || duality == "") delete this.properties['duality'];
       else {
 
-        var boundaryGeo = window.storage.geometryContainer.getElementById('cellBoundary', duality);
+        var boundaryGeo = require('Storage').getInstance().getGeometryContainer().getElementById('cellBoundary', duality);
         var startPoint = boundaryGeo.points[0];
         var endPoint = boundaryGeo.points[1];
 

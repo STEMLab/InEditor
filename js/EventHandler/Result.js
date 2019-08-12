@@ -1,15 +1,8 @@
 /**
 * @author suheeeee<lalune1120@hotmail.com>
 */
-
-define([], function(){
-  'user strict';
-
-  function Result(){
-    this.msg;
-    this.result = false;
+define(function(require) {
+  return function result(){
+    return { title: "", msg : "", result : false };
   }
-
-  return Result;
-
 });

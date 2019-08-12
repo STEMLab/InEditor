@@ -1,61 +1,107 @@
 /**
-* @author suheeeee<lalune1120@hotmail.com>
-*/
-
-define([
-  "./Geometries/GeometryContainer.js",
-  "./Properties/PropertyContainer.js",
-  "./Canvas/CanvasContainer.js",
-  "./Dot/DotFoolContainer.js"
-],function(
-  GeometryContainer,
-  PropertyContainer,
-  CanvasContainer,
-  DotFoolContainer
-) {
-  'use strict';
+ * @author suheeeee<lalune1120@hotmail.com>
+ */
+define(function(require) {
 
   /**
-  * @class Storage
-  */
-  function Storage() {
+   * @class
+   * @name Storage
+   */
+  let singleton = (function() {
 
-    /**
-    * @memberof Storage
-    * @see GeometryContainer
-    */
-    this.geometryContainer = new GeometryContainer();
+    function Storage() {
 
-    /**
-    * @memberof Storage
-    * @see PropertyContainer
-    */
-    this.propertyContainer = new PropertyContainer();
+      /**
+       * @private
+       * @name Storage#_geometryContainer
+       */
+      let GeometryContainer = require('./Geometries/GeometryContainer.js');
+      let _geometryContainer = new GeometryContainer();
 
-    /**
-    * @memberof Storage
-    * @see CanvasContainer
-    */
-    this.canvasContainer = new CanvasContainer();
+      /**
+       * @private
+       * @name Storage#_propertyContainer
+       */
+      let PropertyContainer = require('./Properties/PropertyContainer.js');
+      let _propertyContainer = new PropertyContainer();
 
-    /**
-    * @memberof Storage
-    * @see DotFoolContainer
-    */
-    this.dotFoolContainer = new DotFoolContainer();
+      /**
+       * @private
+       * @name Storage#_canvasContainer
+       */
+      let CanvasContainer = require('./Canvas/CanvasContainer.js');
+      let _canvasContainer = new CanvasContainer();
 
-  }
+      /**
+       * @private
+       * @name Storage#_dotPoolContainer
+       */
+      let DotPoolContainer = require('./Dot/DotPoolContainer.js');
+      let _dotPoolContainer = new DotPoolContainer();
 
-  Storage.prototype.show = function(){
-    log.info(this);
-  }
 
-  Storage.prototype.clear = function(){
-    this.geometryContainer.clear();
-    this.propertyContainer.clear();
-    this.canvasContainer.clear();
-    this.dotFoolContainer.clear();
-  }
+      /**
+       * @function
+       * @name Storage#getGeometryContainer
+       */
+      this.getGeometryContainer = function(){
+        return _geometryContainer;
+      }
 
-  return Storage;
+      /**
+       * @function
+       * @name Storage#getPropertyContainer
+       */
+      this.getPropertyContainer = function(){
+        return _propertyContainer;
+      }
+
+      /**
+       * @function
+       * @name Storage#getCanvasContainer
+       */
+      this.getCanvasContainer = function(){
+        return _canvasContainer;
+      }
+
+      /**
+       * @function
+       * @name Storage#getDotPoolContainer
+       */
+      this.getDotPoolContainer = function(){
+        return _dotPoolContainer;
+      }
+    }
+
+    Storage.prototype.clear = function() {
+      this.getGeometryContainer().clear();
+      this.getPropertyContainer().clear();
+      this.getCanvasContainer().clear();
+      this.getDotPoolContainer().clear();
+    }
+
+    Storage.prototype.show = function(){
+      log.info({
+        'geometryContainer' : this.getGeometryContainer(),
+        'propertyContainer' : this.getPropertyContainer(),
+        'canvasContainer' : this.getCanvasContainer(),
+        'dotPoolContainer' : this.getDotPoolContainer()
+      })
+    }
+
+
+    let INSTANCE;
+
+    return {
+      getInstance: function(args) {
+        if (INSTANCE === undefined) {
+          INSTANCE = new Storage(args);
+        }
+        return INSTANCE;
+      }
+    };
+
+  })();
+
+  return singleton;
 });

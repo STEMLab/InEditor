@@ -86,6 +86,26 @@ define([
   CellGroup.prototype.simpleAdd = function(obj) {
 
     var newCell = new Cell(obj.id);
+
+    // check duplicated dot
+    for(var i = 0 ; i < obj.dots.length - 1; i++){
+      if(obj.dots[i] == undefined ){
+        obj.dots.splice(i, 1);
+        i--;
+      }
+      else if(obj.dots[i+1] == undefined) {
+        obj.dots.splice(i+1, 1);
+        i--;
+      }
+      else if(obj.dots[i].uuid === obj.dots[i+1].uuid) {
+        obj.dots.splice(i+1, 1);
+        i--;
+      }
+    }
+
+    if(obj.dots[0].uuid === obj.dots[obj.dots.length-1].uuid)
+      obj.dots.splice(obj.dots.length-1, 1);
+
     newCell.dots = obj.dots;
     newCell.addObjectFromDots();
     newCell.corners.visible(false);
@@ -275,6 +295,7 @@ define([
   CellGroup.prototype.getConnection = function() {
     var result = [];
 
+    // cell
     for (var key in this.cells) {
       for (var dotkey = 0; dotkey < this.cells[key].dots.length; dotkey++) {
         var newConnection;
@@ -287,6 +308,31 @@ define([
           newConnection = {
             'dot1': this.cells[key].dots[dotkey],
             'dot2': this.cells[key].dots[dotkey + 1]
+          };
+        }
+
+        if (result.indexOf({
+            'dot1': newConnection.dot2,
+            'dot2': newConnection.dot1
+          }) == -1) {
+          result.push(newConnection);
+        }
+      }
+    }
+
+    // hole
+    for (var key in this.holes) {
+      for (var dotkey = 0; dotkey < this.holes[key].dots.length; dotkey++) {
+        var newConnection;
+        if (dotkey == this.holes[key].dots.length - 1) {
+          newConnection = {
+            'dot1': this.holes[key].dots[dotkey],
+            'dot2': this.holes[key].dots[0]
+          };
+        } else {
+          newConnection = {
+            'dot1': this.holes[key].dots[dotkey],
+            'dot2': this.holes[key].dots[dotkey + 1]
           };
         }
 
@@ -359,13 +405,15 @@ define([
    * @memberof CellGroup
    */
    CellGroup.prototype.delete = function(id, floor){
+     var dotPoolContainer = require('Storage').getInstance().getDotPoolContainer();
+
      for(var i in this.cells){
        if(this.cells[i].id == id){
 
          if(floor != undefined){
-           var dotFool = window.storage.dotFoolContainer.getDotFool(floor);
+           var dotPool = dotPoolContainer.getDotPool(floor);
            for(var j in this.cells[i].dots){
-             dotFool.deleteDotFromObj(this.cells[i].dots[j].uuid, this.cells[i].id);
+             dotPool.deleteDotFromObj(this.cells[i].dots[j].uuid, this.cells[i].id);
            }
          } else {
            log.warn('CellGroup.delete:: there is no floor data for cell, you need to free dots of', id, 'manually.');

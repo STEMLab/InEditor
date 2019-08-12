@@ -1,0 +1,16 @@
+@import url("goldenlayout-light-theme.css");
+
+:root{
+  --body-bg-color: #f3f3f3;
+  --menubar-bg-color: #f3f3f3;
+  --toolbar-bg-color: #f3f3f3;
+  --sidebar-bg-color: #f3f3f3;
+  --content-background: #f3f3f3;
+  --treeview-bg-color: #e1e1e1;
+  --workspace-bg-color: #e1e1e1;
+  --viewport-bg-color: #f3f3f3;
+  --property-tab-title-color: #777777;
+  --font-color: #777777;
+  --workspace-border-color: #cccccc;
+  --property-tab-value-color: #777777;
+}

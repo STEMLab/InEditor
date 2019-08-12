@@ -413,7 +413,7 @@ define(function(require) {
           }
         },
         "NonNavigableSpace": {
-          '1000': 'non-navi test'
+
         }
       }
 

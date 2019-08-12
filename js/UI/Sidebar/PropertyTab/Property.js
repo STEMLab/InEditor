@@ -28,13 +28,13 @@ define(function(require) {
   Property.prototype.setPropertyTab = function(type, id, storage) {
     log.info("> set property tab :", type, id);
 
-    if (type == "floor") this.setFloorProperty(id, storage);
-    else if (type == "cell") this.setCellProperty(id, storage);
-    else if (type == "cellBoundary") this.setCellBoundaryProperty(id, storage);
-    else if (type == "state") this.setStateProperty(id, storage);
-    else if (type == "transition") this.setTransitionProperty(id, storage);
-    else if (type == "project") this.setProjectProperty(id, storage);
-    else if (type == "interlayerConnection") this.setInterLayerConnectionProperty(id, storage);
+    if (type == "floor") this.setFloorProperty(id, storage.getPropertyContainer());
+    else if (type == "cell") this.setCellProperty(id, storage.getPropertyContainer());
+    else if (type == "cellBoundary") this.setCellBoundaryProperty(id, storage.getPropertyContainer());
+    else if (type == "state") this.setStateProperty(id, storage.getPropertyContainer());
+    else if (type == "transition") this.setTransitionProperty(id, storage.getPropertyContainer());
+    else if (type == "project") this.setProjectProperty(id, storage.getPropertyContainer());
+    else if (type == "interlayerConnection") this.setInterLayerConnectionProperty(id, storage.getPropertyContainer());
 
   }
 
@@ -57,7 +57,7 @@ define(function(require) {
     // event binding
     document.getElementById('property-subimt-btn').addEventListener('click', function(event) {
 
-      window.eventHandler.callHandler('html', event);
+      require('EventHandler').getInstance().callHandler('html', event);
 
     });
   }
@@ -67,7 +67,7 @@ define(function(require) {
    */
   Property.prototype.setFloorView = function(config, floorProperty) {
 
-    var floors = window.storage.propertyContainer.floorProperties;
+    var floors = require('Storage').getInstance().getPropertyContainer().floorProperties;
 
     var floorKeys = [];
     for (var floor of floors) {
@@ -77,8 +77,13 @@ define(function(require) {
     $('#property-container').empty();
 
     var propertyLayout = new GoldenLayout(config, $('#property-container'));
+    var tableClass = "property-table ui compact table";
+    tableClass += require('UI').getInstance().theme.getTheme() === 'dark' ? " inverted" : "";
 
-    var canvasDiv = "<table id=\"property-canvas-table\" data-type=\"floor\" class=\"property-table ui compact table inverted \">";
+    var iconClass = "grey check icon";
+    iconClass += require('UI').getInstance().theme.getTheme() === 'dark' ? " inverted" : "";
+
+    var canvasDiv = "<table id=\"property-canvas-table\" data-type=\"floor\" class=\"" + tableClass + "\">";
     canvasDiv += "<tr><td class=\"title\">Upload floor plan</td><td class=\"value\"><input id=\"floorplan-file\" type=\"file\" style=\"width:100%\" accept=\".jpg,.jpeg,.png,.gif,.bmp\"></td></tr>";
 
     canvasDiv += "<tr><td class=\"title\">Copy another floor</td><td class=\"value\"><select id=\"copyfloor-text\" class=\"ui compact selection dropdown\">"
@@ -92,29 +97,30 @@ define(function(require) {
     canvasDiv += "</select></td><td>";
 
     canvasDiv += "<button class=\"ui icon button\" style=\"width:20%;\">";
-    canvasDiv += "<i id=\"copyfloor-btn\" class=\"inverted grey check icon\"></i></button>";
+    canvasDiv += "<i id=\"copyfloor-btn\" class=\"" + iconClass + "\"></i></button>";
+
+    canvasDiv += "<tr><td class=\"title\">Remove<br>floor plan</td>";
+    canvasDiv += "<td class=\"value\"><button class=\"ui icon button\">";
+    canvasDiv += "<i id=\"remove-floorplan-btn\" class=\"" + iconClass + "\" style=\"width: max-content;\"></i></button></td></tr>";
 
     canvasDiv += "<tr><td class=\"title\" >Add<br>Map</td>";
     canvasDiv += "<td><table>" + this.getBasicTr('map-x', 'x', '129.08242187295514', false);
     canvasDiv += this.getBasicTr('map-y', 'y', '35.234839296124264', false) + "</table></td>";
 
     canvasDiv += "<td><button class=\"ui icon button\" style=\"width:20%;\">";
-    canvasDiv += "<i id=\"add-map-btn\" class=\"inverted grey check icon\"></i></button></td></tr>";
+    canvasDiv += "<i id=\"add-map-btn\" class=\"" + iconClass + "\"></i></button></td></tr>";
 
     canvasDiv += "<tr><td class=\"title\" >Map control</td><td colspan=\"2\"><table style=\"width:100%\">";
     canvasDiv += "<tr><td><button class=\"ui icon button\">";
-    canvasDiv += "<i id=\"activate-map-btn\" class=\"inverted grey check icon\" style=\"width: max-content;\"> Activate Map</i></button></td></tr>";
+    canvasDiv += "<i id=\"activate-map-btn\" class=\"" + iconClass + "\" style=\"width: max-content;\"> Activate Map</i></button></td></tr>";
     canvasDiv += "<tr><td><button class=\"ui icon button\">";
-    canvasDiv += "<i id=\"get-map-coor-btn\" class=\"inverted grey check icon\" style=\"width: max-content;\"> Get Map Coor</i></button></td></tr>";
+    canvasDiv += "<i id=\"get-map-coor-btn\" class=\"" + iconClass + "\" style=\"width: max-content;\"> Get Map Coor</i></button></td></tr>";
     canvasDiv += "<tr><td><button class=\"ui icon button\">";
-    canvasDiv += "<i id=\"deactivate-map-btn\" class=\"inverted grey check icon\" style=\"width: max-content;\"> Deactivate Map</i></button></td></tr></table></td></tr>"
+    canvasDiv += "<i id=\"deactivate-map-btn\" class=\"" + iconClass + "\" style=\"width: max-content;\"> Deactivate Map</i></button></td></tr></table></td></tr>"
     canvasDiv += "</table>";
 
 
-
-
-
-    var propertiesDiv = "<table id=\"property-table\" data-type=\"floor\" class=\"property-table ui compact table inverted \">";
+    var propertiesDiv = "<table id=\"property-table\" data-type=\"floor\" class=\"" + tableClass + "\">";
     propertiesDiv += this.getBasicTr('id', 'id', floorProperty.id, true);
     propertiesDiv += this.getBasicTr('name', 'name', floorProperty.name, false);
     propertiesDiv += this.getBasicTr('layer', 'layer', floorProperty.layer, false);
@@ -152,7 +158,7 @@ define(function(require) {
 
     function bindEvent(id, action, type) {
       document.getElementById(id).addEventListener(action, function(event) {
-        window.eventHandler.callHandler(type, event);
+        require('EventHandler').getInstance().callHandler(type, event);
       });
     }
 
@@ -164,12 +170,13 @@ define(function(require) {
     bindEvent('get-map-coor-btn', 'click', 'html');
     bindEvent('activate-map-btn', 'click', 'html');
     bindEvent('deactivate-map-btn', 'click', 'html');
+    bindEvent('remove-floorplan-btn', 'click', 'html');
 
     var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
     for (var obj of deleteLocalDescIcons)
       obj.addEventListener('click', function(event) {
         event.target.id = 'delete-local-desc-btn';
-        window.eventHandler.callHandler('html', event);
+        require('EventHandler').getInstance().callHandler('html', event);
       });
   }
 
@@ -260,7 +267,7 @@ define(function(require) {
     // event binding
     function bindEvent(id, action, type) {
       document.getElementById(id).addEventListener(action, function(event) {
-        window.eventHandler.callHandler(type, event);
+        require('EventHandler').getInstance().callHandler(type, event);
       });
     }
 
@@ -275,7 +282,7 @@ define(function(require) {
     for (var obj of deleteLocalDescIcons)
       obj.addEventListener('click', function(event) {
         event.target.id = 'delete-local-desc-btn';
-        window.eventHandler.callHandler('html', event);
+        require('EventHandler').getInstance().callHandler('html', event);
       });
 
 
@@ -348,7 +355,7 @@ define(function(require) {
     // event binding
     function bindEvent(id, action, type) {
       document.getElementById(id).addEventListener(action, function(event) {
-        window.eventHandler.callHandler(type, event);
+        require('EventHandler').getInstance().callHandler(type, event);
       });
     }
 
@@ -363,7 +370,7 @@ define(function(require) {
     for (var obj of deleteLocalDescIcons)
       obj.addEventListener('click', function(event) {
         event.target.id = 'delete-local-desc-btn';
-        window.eventHandler.callHandler('html', event);
+        require('EventHandler').getInstance().callHandler('html', event);
       });
 
   }
@@ -407,7 +414,7 @@ define(function(require) {
       }]
     };
 
-    this.setFloorView(config, storage.propertyContainer.getElementById('floor', id));
+    this.setFloorView(config, storage.getElementById('floor', id));
 
   }
 
@@ -449,7 +456,7 @@ define(function(require) {
       }]
     };
 
-    this.setViewWithRef(config, storage.propertyContainer.getElementById('cell', id), 'cell');
+    this.setViewWithRef(config, storage.getElementById('cell', id), 'cell');
 
   }
 
@@ -491,7 +498,7 @@ define(function(require) {
       }]
     };
 
-    this.setCellBoundaryView(config, storage.propertyContainer.getElementById('cellBoundary', id), 'cellBoundary');
+    this.setCellBoundaryView(config, storage.getElementById('cellBoundary', id), 'cellBoundary');
 
   }
 
@@ -524,7 +531,7 @@ define(function(require) {
       }]
     };
 
-    this.setStateyView(config, storage.propertyContainer.getElementById('state', id), 'state');
+    this.setStateyView(config, storage.getElementById('state', id), 'state');
 
   }
 
@@ -555,18 +562,18 @@ define(function(require) {
     // event binding
     function bindEvent(id, action, type) {
       document.getElementById(id).addEventListener(action, function(event) {
-        window.eventHandler.callHandler(type, event);
+        require('EventHandler').getInstance().callHandler(type, event);
       });
     }
 
-    bindEvent('property-subimt-btn', 'click', 'html');
+    //bindEvent('property-subimt-btn', 'click', 'html');
     bindEvent('add-new-local-desc-btn', 'click', 'html');
 
     var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
     for (var obj of deleteLocalDescIcons)
       obj.addEventListener('click', function(event) {
         event.target.id = 'delete-local-desc-btn';
-        window.eventHandler.callHandler('html', event);
+        require('EventHandler').getInstance().callHandler('html', event);
       });
 
   }
@@ -600,7 +607,7 @@ define(function(require) {
       }]
     };
 
-    this.setTransitionView(config, storage.propertyContainer.getElementById('transition', id), 'transition');
+    this.setTransitionView(config, storage.getElementById('transition', id), 'transition');
 
   }
 
@@ -633,7 +640,7 @@ define(function(require) {
       }]
     };
 
-    var projectProperty = storage.propertyContainer.getElementById('project', id);
+    var projectProperty = storage.getElementById('project', id);
 
     var divContent = "<table id=\"property-table\" data-type=\"project\" class=\"ui inverted table property-table\">";
     divContent += this.getBasicTr('id', 'id', projectProperty.id, true);
@@ -649,7 +656,7 @@ define(function(require) {
     // event binding
     function bindEvent(id, action, type) {
       document.getElementById(id).addEventListener(action, function(event) {
-        window.eventHandler.callHandler(type, event);
+        require('EventHandler').getInstance().callHandler(type, event);
       });
     }
 
@@ -660,7 +667,7 @@ define(function(require) {
     for (var obj of deleteLocalDescIcons)
       obj.addEventListener('click', function(event) {
         event.target.id = 'delete-local-desc-btn';
-        window.eventHandler.callHandler('html', event);
+        require('EventHandler').getInstance().callHandler('html', event);
       });
 
   }
@@ -698,18 +705,18 @@ define(function(require) {
     // event binding
     function bindEvent(id, action, type) {
       document.getElementById(id).addEventListener(action, function(event) {
-        window.eventHandler.callHandler(type, event);
+        require('EventHandler').getInstance().callHandler(type, event);
       });
     }
 
-    bindEvent('property-subimt-btn', 'click', 'html');
+    //bindEvent('property-subimt-btn', 'click', 'html');
     bindEvent('add-new-local-desc-btn', 'click', 'html');
 
     var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
     for (var obj of deleteLocalDescIcons)
       obj.addEventListener('click', function(event) {
         event.target.id = 'delete-local-desc-btn';
-        window.eventHandler.callHandler('html', event);
+        require('EventHandler').getInstance().callHandler('html', event);
       });
 
   }
@@ -737,7 +744,7 @@ define(function(require) {
       }]
     };
 
-    this.setInterLayerView(config, storage.propertyContainer.getElementById('interlayerConnection', id), 'interlayerConnection');
+    this.setInterLayerView(config, storage.getElementById('interlayerConnection', id), 'interlayerConnection');
   }
 
   Property.prototype.setInterLayerView = function(config, property, type) {
@@ -752,7 +759,7 @@ define(function(require) {
     propertiesDiv += this.getBasicTr('connectedLayer', 'connected\nLayer', "\"" + property.getConnectedLayerString() + "\"", true);
     propertiesDiv += this.getDropDownTr('topoExpression-text', 'Topo\nExpression', [property.typeOfTopoExpression, 'CONTAINS', 'OVERLAPS', 'EQUALS', 'WITHIN', 'CROSSES', 'INTERSECTS']);
 
-    propertiesDiv += this.getDescString(property.commnet);
+    propertiesDiv += this.getDescString(property.comment);
     propertiesDiv += "</table>";
     propertiesDiv += "<div class=\"ui inverted basic olive bottom attached button\" tabindex=\"0\" id=\"property-subimt-btn\">Submit</div>";
 
@@ -760,37 +767,50 @@ define(function(require) {
     this.setView(config, propertiesDiv);
 
     document.getElementById('add-new-local-desc-btn').addEventListener('click', function(event) {
-      window.eventHandler.callHandler('html', event);
+      require('EventHandler').getInstance().callHandler('html', event);
     });
 
     var deleteLocalDescIcons = document.getElementsByClassName('delete-local-desc-icon');
     for (var obj of deleteLocalDescIcons)
       obj.addEventListener('click', function(event) {
         event.target.id = 'delete-local-desc-btn';
-        window.eventHandler.callHandler('html', event);
+        require('EventHandler').getInstance().callHandler('html', event);
       });
 
   }
 
   Property.prototype.getDescString = function(desc) {
+    var theme = require('UI').getInstance().theme.getTheme();
     var num = Object.keys(desc).length;
     var i = 0;
     var descString = "";
-    descString += "<tr><td colspan=\"2\">Desc";
+    descString += "<tr><td colspan=\"2\"class=\"title\">Desc";
     descString += "<div style=\"padding-left: .5rem;\">";
     descString += "<table style=\"width:100%\">";
+
+    var inputContainerClass = "value ui transparent input";
+    inputContainerClass += theme === 'dark' ? " inverted" : "";
+
+    var trhashClass = "fitted trash alternate icon delete-local-desc-icon";
+    trhashClass += theme === 'dark' ? " inverted" : "";
+
+    var newDescInputContainerClass = "value ui transparent icon input";
+    newDescInputContainerClass += theme === 'dark' ? " inverted" : "";
+
+    var plusClass = "plus icon";
+    plusClass += theme === 'dark' ? " inverted" : "";
 
     for (var key in desc) {
       descString += "<tr>";
       descString += "<td>" + key + "</td>";
-      descString += "<td><div class=\"ui transparent inverted input value\"><input type=\"text\" id=\"desc-text-" + key + "\" value=\"" + desc[key] + "\"></div></td>";
-      descString += "<td><i class=\"fitted trash alternate inverted icon delete-local-desc-icon\" data-key=" + key + "></i></td>";
+      descString += "<td><div class=\"" + inputContainerClass + "\"><input type=\"text\" id=\"desc-text-" + key + "\" value=\"" + desc[key] + "\"></div></td>";
+      descString += "<td><i class=\"" + trhashClass + "\" data-key=" + key + "></i></td>";
       descString += "<tr>";
       i++;
     }
     descString += "</table><div class=\"ui divider\"></div>";
     descString += "Add Local Desc";
-    descString += "<div class=\"ui transparent icon inverted input\"><input type=\"text\" id=\"add-new-local-desc-text\" placeHolder=\"New Desc...\"><button class=\"mini ui icon button\"><i id=\"add-new-local-desc-btn\" class=\"plus icon inverted\"></i></button>";
+    descString += "<div class=\"" + newDescInputContainerClass + "\"><input type=\"text\" id=\"add-new-local-desc-text\" placeHolder=\"New Desc...\"><button class=\"mini ui icon button\"><i id=\"add-new-local-desc-btn\" class=\"" + plusClass + "\"></i></button>";
     descString += "</div></div></td></tr>";
 
     return descString;
@@ -798,8 +818,8 @@ define(function(require) {
 
   Property.prototype.getBasicTr = function(id, title, value, disable) {
     var str = "<tr><td class=\"title\">" + title + "</td><td class=\"value\">";
-    str += "<div class=\"ui transparent inverted input\">";
-    str += "<input id=\"" + id + "-text\" type=\"text\" value=" + value;
+    str += "<div class=\"ui transparent inverted input \">";
+    str += "<input id=\"" + id + "-text\" class=\"value-input\" type=\"text\" value=" + value;
 
     if (disable == true) str += " disabled";
 

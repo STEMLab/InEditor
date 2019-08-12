@@ -7,19 +7,13 @@ define([
   "../Manager/ProjectManager.js",
   "../Manager/PropertyManager.js",
   "../Manager/UIManager.js",
-  "../Manager/DotFoolManager.js",
-  "../Manager/ExportManager.js",
-  "../UI/UIContainer.js",
-  "../UI/Workspace.js"
+  "../Manager/ExportManager.js"
 ], function(
   GeometryManager,
   ProjectManager,
   PropertyManager,
   UIManager,
-  DotFoolManager,
-  ExportManager,
-  UIContainer,
-  Workspace
+  ExportManager
 ) {
 
   /**
@@ -42,7 +36,6 @@ define([
       new ProjectManager(),
       new PropertyManager(),
       new UIManager(),
-      new DotFoolManager(),
       new ExportManager()
     ];
 

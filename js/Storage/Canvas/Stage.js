@@ -31,9 +31,12 @@ define([
    */
   function Stage(_id, _name, _container, _width, _height, _size_type) {
 
-    var calculatedWH = { width : _width, height : _height };
-    if(_size_type != 'force')
-    calculatedWH = this.calculateWH(_width, _height);
+    var calculatedWH = {
+      width: _width,
+      height: _height
+    };
+    if (_size_type != 'force')
+      calculatedWH = this.calculateWH(_width, _height);
     // var calculatedHeight = this.calculateHeight(_width);
 
     /**
@@ -85,7 +88,7 @@ define([
       scaleX: 1,
       scaleY: 1,
       dragBoundFunc: function(pos) {
-        return window.storage.canvasContainer.stages[_id].zoomFun(_id, pos);
+        return require('Storage').getInstance().getCanvasContainer().stages[_id].zoomFun(_id, pos);
       }
     });
 
@@ -102,6 +105,144 @@ define([
     this.stage.add(this.stateLayer.getLayer());
     this.stage.add(this.tmpLayer.getLayer());
 
+
+    // bind right click event
+    // require("@UI/ContextMenu.js").bindContextMenu(newFloorProperty.id);
+    this.stage.on('contentContextmenu', (e) => {
+      e.evt.preventDefault();
+    });
+
+    // do something else on right click
+    this.stage.on('click', (e) => {
+      if (e.evt.button === 2) {
+        var contextMenuPos = require('UI').getInstance().contextMenuPos;
+        var x = e.evt.pageX + 'px';
+        var y = e.evt.pageY + 'px';
+        contextMenuPos.style.display = 'block';
+        contextMenuPos.style.left = x;
+        contextMenuPos.style.top = y;
+        contextMenuPos.setAttribute('data-floor', this.id);
+
+        $('#context_menu_pos').popup('show', function(e) {
+          let floorId = e.getAttribute('data-floor');
+          let selectedObj = require('Broker').getInstance().getManager('addnewcell', 'GeometryManager').isObjectSelected(floorId);
+          let contextMenuVal = require('UI').getInstance().contextMenuVal;
+
+          while (contextMenuVal.hasChildNodes())
+            contextMenuVal.removeChild(contextMenuVal.firstChild);
+
+          let lastObjId = selectedObj.result.length == 0 ? null : selectedObj.result[selectedObj.result.length - 1];
+
+          selectedObj.result.forEach(function(id) {
+            let menu = document.createElement('div');
+            menu.classList.add('ui');
+            menu.classList.add('vertical');
+            menu.classList.add('text');
+            menu.classList.add('compact');
+            menu.classList.add('menu');
+
+            function getSubMenu(val, icons) {
+              let sub = document.createElement('div');
+
+              function getHeader(id) {
+                let item = document.createElement('a');
+                item.classList.add('item');
+                item.classList.add('head');
+                item.innerHTML = id + '(' +
+                  require('Storage').getInstance().getPropertyContainer().getElementById(selectedObj.type, id).name + ')';
+
+                return item;
+              }
+
+              function getItem(_val, _icons, _onclick) {
+                let item = document.createElement('a');
+                item.classList.add('item');
+                item.innerHTML = _val;
+
+                if (_icons != null && _icons != undefined) {
+                  let icon = document.createElement('i');
+                  _icons.forEach(function(n) {
+                    icon.classList.add(n)
+                  })
+
+                  item.appendChild(icon);
+                }
+
+                item.onclick = _onclick;
+
+                return item;
+              }
+
+              sub.appendChild(getHeader(val));
+              sub.appendChild(getItem(
+                'Edit Properties　',
+                ['pencil', 'alternate', 'icon'],
+                function() {
+                  require('UI').getInstance().propertyTab.setPropertyTab(selectedObj.type, val, require('Storage').getInstance())
+                  $('#context_menu_pos').popup('hide')
+                }
+              ));
+
+              sub.appendChild(getItem(
+                'Delete　',
+                ['trash', 'alternate', 'outline', 'icon'],
+                function() {
+                  var msg = {
+                    req: "",
+                    reqObj: {
+                      floor: floorId,
+                      id: val
+                    }
+                  };
+
+                  if (selectedObj.type == 'floor') msg.req = 'deletefloor';
+                  else if (selectedObj.type == 'cell') msg.req = 'deletecell';
+                  else if (selectedObj.type == 'cellboundary') msg.req = 'deletecellboundary';
+                  else if (selectedObj.type == 'transition') msg.req = 'deletetransition';
+                  else if (selectedObj.type == 'state') msg.req = 'deletestate';
+
+                  if (Array.isArray(msg.reqObj.id)) {
+                    var ids = data.id;
+                    for (var i of ids) {
+                      if (require('Broker').getInstance().isPublishable(msg.req)) {
+                        msg.reqObj.id = i;
+                        require('Broker').getInstance().publish(msg);
+                      }
+                    }
+                  } else {
+                    if (require('Broker').getInstance().isPublishable(msg.req)) require('Broker').getInstance().publish(msg);
+                  }
+
+                  $('#context_menu_pos').popup('hide')
+                }
+              ));
+
+              return sub;
+            }
+
+            selectedObj.result.forEach(function(obj) {
+              menu.appendChild(getSubMenu(obj));
+            })
+
+
+            /// trash
+            contextMenuVal.appendChild(menu);
+
+            if (id != lastObjId) {
+              let divider = document.createElement('div');
+              divider.classList.add('ui');
+              divider.classList.add('divider');
+              contextMenuVal.appendChild(divider);
+            }
+
+          })
+
+        });
+
+      } else
+        $('#context_menu_pos').popup('hide');
+    });
+
   }
 
   /**
@@ -112,15 +253,21 @@ define([
    */
   Stage.prototype.calculateHeight = function(_width) {
 
-    return _width * (window.conditions.aspectRatio.y / window.conditions.aspectRatio.x);
+    return _width * (require('Conditions').getInstance().aspectRatio.y / require('Conditions').getInstance().aspectRatio.x);
 
   }
 
   Stage.prototype.calculateWH = function(_width, _height) {
 
-    var calH = _width * (window.conditions.aspectRatio.y / window.conditions.aspectRatio.x);
-    if( calH < _height ) return { width : _width, height : calH };
-    else return { width :  _height * (window.conditions.aspectRatio.x / window.conditions.aspectRatio.y), height : _height };
+    var calH = _width * (require('Conditions').getInstance().aspectRatio.y / require('Conditions').getInstance().aspectRatio.x);
+    if (calH < _height) return {
+      width: _width,
+      height: calH
+    };
+    else return {
+      width: _height * (require('Conditions').getInstance().aspectRatio.x / require('Conditions').getInstance().aspectRatio.y),
+      height: _height
+    };
 
   }
 
@@ -133,15 +280,20 @@ define([
    */
   Stage.prototype.zoomFun = function(_id, pos) {
 
-    if(window.storage.canvasContainer.stages[_id].stage.attrs.scaleX <= 1){
-      return {x: 0, y: 0};
+    if (require('Storage').getInstance().getCanvasContainer().stages[_id].stage.attrs.scaleX <= 1) {
+      return {
+        x: 0,
+        y: 0
+      };
     }
+
+    var canvasContainer = require('Storage').getInstance().getCanvasContainer();
 
     var divWidth = document.getElementById(_id).children[0].clientWidth;
     var divHeight = document.getElementById(_id).children[0].clientHeight;
 
-    var stageWidth = window.storage.canvasContainer.stages[_id].stage.attrs.width * window.storage.canvasContainer.stages[_id].stage.attrs.scaleX;
-    var stageHeight = window.storage.canvasContainer.stages[_id].stage.attrs.height * window.storage.canvasContainer.stages[_id].stage.attrs.scaleY;
+    var stageWidth = canvasContainer.stages[_id].stage.attrs.width * canvasContainer.stages[_id].stage.attrs.scaleX;
+    var stageHeight = canvasContainer.stages[_id].stage.attrs.height * canvasContainer.stages[_id].stage.attrs.scaleY;
 
     var up = divHeight - stageHeight;
     var down = 0;
@@ -174,7 +326,7 @@ define([
     if (this.stage == null) {
       stage = this.stage;
     } else {
-      stage = window.storage.canvasContainer.stages[floor].stage;
+      stage = require('Storage').getInstance().getCanvasContainer().stages[floor].stage;
     }
 
     var x = stage.getAbsolutePosition();
@@ -218,10 +370,12 @@ define([
     var reduced = [];
 
     var reduced = connection.reduce(function(a, b) {
-      if (a.indexOf({dot1:b.dot2, dot2:b.dot1}) > -1 ) {
+      if (a.indexOf({
+          dot1: b.dot2,
+          dot2: b.dot1
+        }) > -1) {
         // do nothing
-      }
-      else if (a.indexOf(b) < 0){
+      } else if (a.indexOf(b) < 0) {
         a.push(b);
       }
       return a;
@@ -231,18 +385,18 @@ define([
   }
 
   /**
-  * @memberof Stage
-  * @return {Array} Object array. key of attribute is connection { dot1, dot2 }, value of attribute is array of cell id which is contain the line consisting of key.
-  */
-  Stage.prototype.getCellConnectionWithID = function(){
+   * @memberof Stage
+   * @return {Array} Object array. key of attribute is connection { dot1, dot2 }, value of attribute is array of cell id which is contain the line consisting of key.
+   */
+  Stage.prototype.getCellConnectionWithID = function() {
     var cellConnections = this.cellLayer.getBoundaries();
     return cellConnections;
   }
 
   /**
-  * @memberof Stage
-  */
-  Stage.prototype.getElementById = function(_type, _id){
+   * @memberof Stage
+   */
+  Stage.prototype.getElementById = function(_type, _id) {
 
     var result = null;
 
@@ -256,7 +410,7 @@ define([
           }
         }
 
-        if(result == null){
+        if (result == null) {
           var holes = this.cellLayer.group.holes;
           for (var key in holes) {
             if (holes[key].id == _id) {
@@ -266,6 +420,15 @@ define([
           }
         }
 
+        break;
+      case 'hole':
+        var holes = this.cellLayer.group.holes;
+        for (var key in holes) {
+          if (holes[key].id == _id) {
+            result = holes[key];
+            break;
+          }
+        }
         break;
       case 'cellboundary':
         var cellboundaries = this.cellBoundaryLayer.group.cellBoundaries;
@@ -326,8 +489,11 @@ define([
     this.map.addControl(zoomslider);
   }
 
-  Stage.prototype.getWD = function(){
-    return {width : this.stage.width(), height : this.stage.height()};
+  Stage.prototype.getWD = function() {
+    return {
+      width: this.stage.width(),
+      height: this.stage.height()
+    };
   }
 
   return Stage;

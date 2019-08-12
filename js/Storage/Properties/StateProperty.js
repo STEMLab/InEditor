@@ -24,7 +24,7 @@ define([], function() {
      * @memberof StateProperty
      */
      this.description = {};
-     var list = window.conditions.descList;
+     var list = require('Conditions').getInstance().descList;
      for(var l of list){
        this.description[l] = "";
      }

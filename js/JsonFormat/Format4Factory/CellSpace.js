@@ -263,10 +263,11 @@ define([
         log.warn("The given parameter is not an Array type.");
 
       } else {
-        var cellGeo = window.storage.geometryContainer.getElementById('cell', this.id).points;
+        var geometryContainer = require('Storage').getInstance().getGeometryContainer();
+        var cellGeo = geometryContainer.getElementById('cell', this.id).points;
 
         for (var key of partialboundedBy) {
-          var obj = window.storage.geometryContainer.getElementById('cellBoundary', key);
+          var obj = geometryContainer.getElementById('cellBoundary', key);
           if (obj == null){
             if(key.indexOf("HATCH") != -1){
               if(key.indexOf("UP") != -1)

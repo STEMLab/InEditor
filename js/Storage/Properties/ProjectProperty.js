@@ -13,7 +13,7 @@ define([], function() {
     /**
      * @memberof ProjectProperty
      */
-    this.id = window.conditions.guid();
+    this.id = require('Conditions').getInstance().guid();
 
     /**
      * @memberof ProjectProperty
@@ -23,7 +23,7 @@ define([], function() {
     /**
      * @memberof ProjectProperty
      */
-    this.date = window.conditions.getDate();
+    this.date = require('Conditions').getInstance().getDate();
 
     /**
      * @memberof ProjectProperty
@@ -37,7 +37,7 @@ define([], function() {
      * @memberof ProjectProperty
      */
      this.description = {};
-     var list = window.conditions.descList;
+     var list = require('Conditions').getInstance().descList;
      for(var l of list){
        this.description[l] = "";
      }

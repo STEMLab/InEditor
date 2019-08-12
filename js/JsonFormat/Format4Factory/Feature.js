@@ -45,7 +45,7 @@ define([], function() {
   Feature.prototype.setName = function(name) {
 
     if (this.properties != null &&
-      (this.properties.name != null || window.conditions.exportConditions[this.type].properties.name)) {
+      (this.properties.name != null || require('Conditions').getInstance().exportConditions[this.type].properties.name)) {
 
       this.properties['name'] = name;
 
@@ -61,7 +61,7 @@ define([], function() {
    */
   Feature.prototype.setDescription = function(description) {
     if (this.properties != null &&
-      (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
+      (this.properties.description != null || require('Conditions').getInstance().exportConditions[this.type].properties.description)) {
 
       this.properties['description'] = description;
 
@@ -74,7 +74,7 @@ define([], function() {
 
   Feature.prototype.addPrtDesc = function(prtDesc){
     if (this.properties != null &&
-      (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
+      (this.properties.description != null || require('Conditions').getInstance().exportConditions[this.type].properties.description)) {
 
       for(var key in prtDesc){
         if(this.properties.description[key] == undefined) {}
@@ -90,7 +90,7 @@ define([], function() {
 
   Feature.prototype.addDesc = function(key, value){
     if (this.properties != null &&
-      (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
+      (this.properties.description != null || require('Conditions').getInstance().exportConditions[this.type].properties.description)) {
 
       if(this.properties.description[key] == undefined)
         this.properties.description[key] = value;
@@ -103,7 +103,7 @@ define([], function() {
 
   Feature.prototype.convertDescObj2Str = function(){
     if (this.properties != null &&
-      (this.properties.description != null || window.conditions.exportConditions[this.type].properties.description)) {
+      (this.properties.description != null || require('Conditions').getInstance().exportConditions[this.type].properties.description)) {
 
       var str = "";
       for(var key in this.properties.description)
@@ -122,7 +122,7 @@ define([], function() {
   Feature.prototype.setDuality = function(duality) {
 
     if (this.properties != null &&
-      (this.properties.duality != null || window.conditions.exportConditions[this.type].properties.duality)) {
+      (this.properties.duality != null || require('Conditions').getInstance().exportConditions[this.type].properties.duality)) {
 
       if (duality == null || duality == "") delete this.properties['duality'];
       else this.properties['duality'] = duality;
@@ -184,11 +184,11 @@ define([], function() {
 
     var condition;
     if (this.type.indexOf('Space') != -1)
-      condition = window.conditions.exportSimplifyCondition["CellSpace"].properties;
+      condition = require('Conditions').getInstance().exportSimplifyCondition["CellSpace"].properties;
     else if (this.type.indexOf('Boundary') != -1)
-      condition = window.conditions.exportSimplifyCondition["CellSpaceBoundary"].properties;
+      condition = require('Conditions').getInstance().exportSimplifyCondition["CellSpaceBoundary"].properties;
     else
-      condition = window.conditions.exportSimplifyCondition[this.type].properties;
+      condition = require('Conditions').getInstance().exportSimplifyCondition[this.type].properties;
 
     var keys = Object.keys(condition);
 

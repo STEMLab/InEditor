@@ -1,0 +1,15 @@
+@import url("goldenlayout-dark-theme.css");
+
+:root {
+  --body-bg-color: black;
+  --menubar-bg-color: black;
+  --toolbar-bg-color: black;
+  --sidebar-bg-color: black;
+  --treeview-bg-color: #222222;
+  --workspace-bg-color: #222222;
+  --content-background: #black;
+  --viewport-bg-color: #eaeaea;
+  --property-tab-title-color: #eaeaea;
+  --font-color: #e5e5e5;
+  --workspace-border-color: #222222;
+}

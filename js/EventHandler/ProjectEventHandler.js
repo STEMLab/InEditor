@@ -1,15 +1,7 @@
 /**
  * @author suheeeee<lalune1120@hotmail.com>
  */
-
-define([
-  "./Result.js",
-  "../PubSub/Message.js"
-], function(
-  Result,
-  Message
-) {
-  'use strict';
+define(function(require) {
 
   /**
    * @class ProjectEventHandler
@@ -43,13 +35,6 @@ define([
       'change': this.importGML
     };
 
-    handlerBinder['project-save-as-btn'] = {
-      'click': this.saveProjectToNewPath
-    };
-
-    handlerBinder['project-saveas'] = {
-      'click': this.clickSaveAsProjectBtn
-    };
 
     handlerBinder['project-import-modal-btn'] = {
       'click': this.importFile
@@ -67,6 +52,10 @@ define([
       'click': this.updateConditions
     };
 
+    handlerBinder['project-save-as-btn'] = {
+      'click' : this.saveProjectToNewPath
+    }
+
 
   }
 
@@ -75,8 +64,8 @@ define([
    */
   ProjectEventHandler.prototype.clickSaveAsProjectBtn = function(broker, previousMsg) {
 
-    window.document.getElementById("project-save-as-file-name").value = window.conditions.saveName;
-    window.document.getElementById("project-save-as-file-path").value = window.conditions.savePath;
+    window.document.getElementById("project-save-as-file-name").value = require('Conditions').getInstance().saveName;
+    window.document.getElementById("project-save-as-file-path").value = require('Conditions').getInstance().savePath;
 
     return {
       'result': true,
@@ -90,7 +79,7 @@ define([
    */
   ProjectEventHandler.prototype.saveProjectToNewPath = function(broker, previousMsg, data) {
 
-    var result = new Result();
+    var result = require('./Result.js')();
 
     var path = window.document.getElementById('project-save-as-file-path').value;
     var name = window.document.getElementById('project-save-as-file-name').value;
@@ -98,16 +87,13 @@ define([
 
     if (broker.isPublishable('saveproject')) {
 
-      window.conditions.saveName = name;
-      window.conditions.savePath = path;
+      require('Conditions').getInstance().saveName = name;
+      require('Conditions').getInstance().savePath = path;
 
       // reqObj.floor will be active workspace
-      broker.publish(new Message('saveproject', null));
+      broker.publish(require('Message')('saveproject', null));
 
-      result = {
-        'result': true,
-        'msg': 'saveproject'
-      };
+      result.result = true;
 
     } else {
 
@@ -115,7 +101,7 @@ define([
 
     }
 
-    $('#project-save-as-modal').modal('hide');
+    $('#modal__project__save_as').modal('hide');
     return result;
   }
 
@@ -124,17 +110,16 @@ define([
    */
   ProjectEventHandler.prototype.saveProject = function(broker, previousMsg) {
 
-    var result = new Result();
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('saveproject')) {
 
       // reqObj.floor will be active workspace
-      broker.publish(new Message('saveproject', null));
+      broker.publish(require('Message')('saveproject', null));
 
-      result = {
-        'result': true,
-        'msg': 'saveproject'
-      };
+      result.result = true;
+      result.msg = 'saveproject'
+      ;
     } else {
 
       result.msg = "wrong state transition : " + previousMsg + " to saveproject.";
@@ -151,7 +136,7 @@ define([
   ProjectEventHandler.prototype.clickLoadProjectBtn = function(broker, previousMsg) {
 
     window.document.getElementById("project-load-file").addEventListener("change", function(e) {
-      window.eventHandler.callHandler('html', e);
+      require('EventHandler').getInstance().callHandler('html', e);
     });
 
     $('#project-load-file').click();
@@ -169,7 +154,7 @@ define([
   ProjectEventHandler.prototype.clickImporttBtn = function(broker, previousMsg) {
 
     window.document.getElementById("project-import-file").addEventListener("change", function(e) {
-      window.eventHandler.callHandler('html', e);
+      require('EventHandler').getInstance().callHandler('html', e);
     });
 
     $('#project-import-file').click();
@@ -186,21 +171,20 @@ define([
    */
   ProjectEventHandler.prototype.loadProject = function(broker, previousMsg, data) {
     console.log(document.getElementById(data.target.id).files)
-    var result = new Result();
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('loadproject') && document.getElementById(data.target.id).value != "") {
 
       // reqObj.floor will be active workspace
-      broker.publish(new Message('loadproject', {
+      broker.publish(require('Message')('loadproject', {
         file: document.getElementById(data.target.id).files[0]
       }));
 
       document.getElementById(data.target.id).value = '';
 
-      result = {
-        'result': true,
-        'msg': 'loadproject'
-      };
+      result.result = true;
+      result.msg = 'loadproject';
+
     } else if (document.getElementById(data.target.id).value == "") {
 
       result.msg = "clear file input ...";
@@ -219,22 +203,20 @@ define([
    * @memberof ProjectEventHandler
    */
   ProjectEventHandler.prototype.importGML = function(broker, previousMsg, data) {
-    console.log(document.getElementById(data.target.id).files)
-    var result = new Result();
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('importgml') && document.getElementById(data.target.id).value != "") {
 
       // reqObj.floor will be active workspace
-      broker.publish(new Message('importgml', {
+      broker.publish(require('Message')('importgml', {
         file: document.getElementById(data.target.id).files[0]
       }));
 
       document.getElementById(data.target.id).value = '';
 
-      result = {
-        'result': true,
-        'msg': 'importgml'
-      };
+      result.result = true;
+      result.msg = 'importgml';
+
     } else if (document.getElementById(data.target.id).value == "") {
 
       result.msg = "clear file input ...";
@@ -268,15 +250,15 @@ define([
    */
   ProjectEventHandler.prototype.importFile = function(broker, previousMsg, data) {
 
-    var result = new Result();
+    var result = require('./Result.js')();
 
     if (broker.isPublishable('importfile') && document.getElementById('project-import-file').value != "") {
       var importOn = document.getElementById('project-import-option-new-project').checked;
       var realCoor = document.getElementById('project-import-option-boundingbox').checked;
 
-      broker.publish(new Message('importfile', {
+      broker.publish(require('Message')('importfile', {
         file: document.getElementById('project-import-file').files[0],
-        importOn: importOn ? 'new-project' : window.uiContainer.workspace.getActivatedWorkspace(),
+        importOn: importOn ? 'new-project' : require('UI').getInstance().workspace.getActivatedWorkspace(),
         coordinate: realCoor ? {
           type: 'boundingBox',
           data: null
@@ -293,10 +275,9 @@ define([
 
       document.getElementById(data.target.id).value = '';
 
-      result = {
-        'result': true,
-        'msg': 'importfile'
-      };
+      result.result = true;
+      result.msg = 'importfile';
+
     } else if (document.getElementById(data.target.id).value == "") {
 
       result.msg = "clear file input ...";
@@ -313,7 +294,7 @@ define([
 
   ProjectEventHandler.prototype.clickSettingConditions = function(broker, previousMsg, data) {
 
-    var conditions = window.conditions;
+    var conditions = require('Conditions').getInstance();
 
     window.document.getElementById('setting-conditions-pre-cell').value = conditions.pre_cell;
     window.document.getElementById('setting-conditions-pre-cellBoundary').value = conditions.pre_cellBoundary;
@@ -324,6 +305,9 @@ define([
     window.document.getElementById('setting-conditions-scale-factor').value = conditions.scaleFactor;
     window.document.getElementById('setting-conditions-scale-max').value = conditions.scaleMax;
 
+    window.document.getElementById('setting-conditions-timestamp').value = conditions.timestamp;
+    window.document.getElementById('setting-conditions-interlayerCopy').value = conditions.interlayerCopy;
+
     return {
       'result': true,
       'msg': null
@@ -333,8 +317,8 @@ define([
 
   ProjectEventHandler.prototype.updateConditions = function(broker, previousMsg, data){
 
-    if(window.broker.isPublishable('updateconditions')){
-      broker.publish(new Message('updateconditions', {
+    if(broker.isPublishable('updateconditions')){
+      broker.publish(require('Message')('updateconditions', {
         prefix :{
           cell : $('#setting-conditions-pre-cell').val(),
           cellboundary : $('#setting-conditions-pre-cellBoundary').val(),
@@ -346,6 +330,10 @@ define([
           scaleFactor : $('#setting-conditions-scale-factor').val(),
           scaleMax : $('#setting-conditions-scale-max').val(),
           automGenerateState: $('#setting-conditions-auto-create-state').is(":checked") == true ? true : false
+        },
+        etc:{
+          saveWithTimeStamp: $('#setting-conditions-timestamp').is(":checked") == true ? true : false,
+          interlayerCopy: $('#setting-conditions-interlayerCopy').is(":checked") == true ? true : false
         }
       }));
 

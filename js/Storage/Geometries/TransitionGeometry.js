@@ -57,5 +57,12 @@ define([], function() {
 
   }
 
+  /**
+  * @memberof TransitionGeometry
+  */
+  TransitionGeometry.prototype.updatePoints = function(newPoints){
+    this.points = newPoints;
+  }
+
   return TransitionGeometry;
 });

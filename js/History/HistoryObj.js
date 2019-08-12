@@ -37,7 +37,6 @@
    HistoryObj.prototype.pushObj = function(manager, obj){
 
      this.undoObj[manager].obj = obj;
-     console.info(window.myhistory);
 
    }
 
