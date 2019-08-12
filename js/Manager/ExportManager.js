@@ -474,7 +474,7 @@ define(function(require) {
     var document = {
       id: require("Storage")
         .getInstance()
-        .getPropertyContainer().projectProperty.id
+        .getPropertyContainer().projectProperty.name
     };
 
     var indoorfeatures = {

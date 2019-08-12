@@ -46,6 +46,7 @@ define([], function() {
     for(var key of keys){
       if(this[key] != undefined) this[key] = values[key];
     }
+	if(this.name == undefined) this.name = this.id;
   }
 
   InterLayerConnectionProperty.prototype.addState = function(state) {
