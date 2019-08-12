@@ -1104,51 +1104,54 @@ define(function(require) {
 
     ////////////////// test code  //////////////////
     ////////////////// copy state //////////////////
-    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
-    let targetStates = propertyContainer.getElementById('floor', reqObj.targetFloor).stateKey;
-    let canvasConstructure = require('../Storage/Canvas/Object/State.js');
-    let geometryConstructure = require('../Storage/Geometries/StateGeometry.js');
-    let propertyConstructure = require('Property').STATE;
-    let dotConstructure = require('../Storage/Dot/Dot.js');
-    let interConstructure = require('Property').INTERLAYER_CONNECTION;
+    if(require('Conditions').getInstance().interlayerCopy){
+      var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+      let targetStates = propertyContainer.getElementById('floor', reqObj.targetFloor).stateKey;
+      let canvasConstructure = require('../Storage/Canvas/Object/State.js');
+      let geometryConstructure = require('../Storage/Geometries/StateGeometry.js');
+      let propertyConstructure = require('Property').STATE;
+      let dotConstructure = require('../Storage/Dot/Dot.js');
+      let interConstructure = require('Property').INTERLAYER_CONNECTION;
 
-    let dotPool = require('Storage').getInstance().getDotPoolContainer().getDotPool(reqObj.floor);
-    let stateGroup = canvasContainer.stages[reqObj.floor].stateLayer.group;
-    var peopertyContainer = propertyContainer.getElementById('floor', reqObj.floor);
-    let layers = [propertyContainer.getElementById('floor', reqObj.targetFloor).layer,
-      propertyContainer.getElementById('floor', reqObj.floor).layer
-    ]
+      let dotPool = require('Storage').getInstance().getDotPoolContainer().getDotPool(reqObj.floor);
+      let stateGroup = canvasContainer.stages[reqObj.floor].stateLayer.group;
+      var peopertyContainer = propertyContainer.getElementById('floor', reqObj.floor);
+      let layers = [propertyContainer.getElementById('floor', reqObj.targetFloor).layer,
+        propertyContainer.getElementById('floor', reqObj.floor).layer
+      ]
 
-    let geometryContainer = require('Storage').getInstance().getGeometryContainer();
-    for (let state of targetStates) {
-      let newId = require('Conditions').getInstance().pre_state + ++require('Conditions').getInstance().LAST_STATE_ID_NUM;
-      let targetGeo = geometryContainer.getElementById('state', state);
+      let geometryContainer = require('Storage').getInstance().getGeometryContainer();
+      for (let state of targetStates) {
+        let newId = require('Conditions').getInstance().pre_state + ++require('Conditions').getInstance().LAST_STATE_ID_NUM;
+        let targetGeo = geometryContainer.getElementById('state', state);
 
-      // canvas
-      let newDot = new dotConstructure(targetGeo.point.point.x, targetGeo.point.point.y);
-      dotPool.push(newDot);
-      stateGroup.makeNewStateAndAdd(newId, newDot);
+        // canvas
+        let newDot = new dotConstructure(targetGeo.point.point.x, targetGeo.point.point.y);
+        dotPool.push(newDot);
+        stateGroup.makeNewStateAndAdd(newId, newDot);
 
-      // geometry
-      geometryContainer.stateGeometry.push(new geometryConstructure(newId, newDot));
+        // geometry
+        geometryContainer.stateGeometry.push(new geometryConstructure(newId, newDot));
 
-      // prpoerty
-      let newStateProperty = new propertyConstructure(newId);
-      propertyContainer.stateProperties.push(newStateProperty);
-      peopertyContainer.stateKey.push(newId);
+        // prpoerty
+        let newStateProperty = new propertyConstructure(newId);
+        propertyContainer.stateProperties.push(newStateProperty);
+        peopertyContainer.stateKey.push(newId);
 
-      // interlayer connection
-      let newInterId = require('Conditions').getInstance().pre_inter + ++require('Conditions').getInstance().LAST_INTER_ID_NUM;
-      let newInter = new interConstructure(newInterId);
-      newInter.interConnects = [state, newId];
-      newInter.connectedLayer = [...layers];
-      propertyContainer.interlayerConnections.push(newInter);
+        // interlayer connection
+        let newInterId = require('Conditions').getInstance().pre_inter + ++require('Conditions').getInstance().LAST_INTER_ID_NUM;
+        let newInter = new interConstructure(newInterId);
+        newInter.interConnects = [state, newId];
+        newInter.connectedLayer = [...layers];
+        propertyContainer.interlayerConnections.push(newInter);
 
-      require('UI').getInstance().treeView.addNode(newId, newId, 'State', reqObj.floor);
-      require('UI').getInstance().treeView.addNode(newInterId, newInterId, 'INTERLAYER_CONNECTION', reqObj.floor);
+        require('UI').getInstance().treeView.addNode(newId, newId, 'STATE', reqObj.floor);
+        require('UI').getInstance().treeView.addNode(newInterId, newInterId, 'INTERLAYER_CONNECTION', reqObj.floor);
+      }
+
+      canvasContainer.stages[reqObj.floor].stateLayer.layer.draw();
     }
 
-    canvasContainer.stages[reqObj.floor].stateLayer.layer.draw();
   }
 
 

@@ -88,8 +88,8 @@ define(["../../Dot/DotMath.js"], function(DotMath) {
       y: coor.y,
       width: 2,
       height: 2,
-      width: 0.5,
-      height: 0.5,
+      // width: 0.5,
+      // height: 0.5,
       fill: "white",
       stroke: "black",
       strokeWidth: 1

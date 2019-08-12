@@ -405,7 +405,8 @@ define(function(require) {
     conditions.scaleMax = reqObj.canvas.scaleMax;
     conditions.automGenerateState = reqObj.canvas.automGenerateState;
 
-    conditions.saveWithTimeStamp = reqObj.save.saveWithTimeStamp;
+    conditions.saveWithTimeStamp = reqObj.etc.saveWithTimeStamp;
+    conditions.interlayerCopy = reqObj.etc.interlayerCopy;
 
     require('Popup')('success', 'General Conditons updated');
 

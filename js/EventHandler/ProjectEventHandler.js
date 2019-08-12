@@ -305,6 +305,9 @@ define(function(require) {
     window.document.getElementById('setting-conditions-scale-factor').value = conditions.scaleFactor;
     window.document.getElementById('setting-conditions-scale-max').value = conditions.scaleMax;
 
+    window.document.getElementById('setting-conditions-timestamp').value = conditions.timestamp;
+    window.document.getElementById('setting-conditions-interlayerCopy').value = conditions.interlayerCopy;
+
     return {
       'result': true,
       'msg': null
@@ -328,8 +331,9 @@ define(function(require) {
           scaleMax : $('#setting-conditions-scale-max').val(),
           automGenerateState: $('#setting-conditions-auto-create-state').is(":checked") == true ? true : false
         },
-        save:{
-          saveWithTimeStamp: $('#setting-conditions-timestamp').is(":checked") == true ? true : false
+        etc:{
+          saveWithTimeStamp: $('#setting-conditions-timestamp').is(":checked") == true ? true : false,
+          interlayerCopy: $('#setting-conditions-interlayerCopy').is(":checked") == true ? true : false
         }
       }));
 

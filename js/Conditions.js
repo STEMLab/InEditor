@@ -152,6 +152,8 @@ define(function(require) {
 
       this.saveWithTimeStamp = true;
 
+      this.interlayerCopy = false;
+
       /**
        * @memberof  Conditions
        */
