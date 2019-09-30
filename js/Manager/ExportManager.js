@@ -560,65 +560,32 @@ define(function(require) {
     var address = {
       "delete-document": baseURL + "/documents/" + document.id,
       "post-document": baseURL + "/documents/" + document.id,
-      "post-indoorfeatures":
-        baseURL +
-        "/documents/" +
-        document.id +
-        "/indoorfeatures/" +
-        indoorfeatures.id,
-      "post-primalspacefeatures":
-        baseURL +
-        "/documents/" +
-        document.id +
-        "/primalspacefeatures/" +
-        primalspacefeatures.id,
+      "post-indoorfeatures": baseURL +"/documents/" + document.id + "/indoorfeatures/" + indoorfeatures.id,
+      "post-primalspacefeatures": baseURL + "/documents/" + document.id + "/primalspacefeatures/" + primalspacefeatures.id,
       "post-cell": baseURL + "/documents/" + document.id + "/cellspace/",
-      "post-navigablespace":
-        baseURL + "/documents/" + document.id + "/navigablespace/",
-      "post-generalspace":
-        baseURL + "/documents/" + document.id + "/generalspace/",
-      "post-transferspace":
-        baseURL + "/documents/" + document.id + "/transferspace/",
-      "post-transitionspace":
-        baseURL + "/documents/" + document.id + "/transitionspace/",
-      "post-connectionspace":
-        baseURL + "/documents/" + document.id + "/connectionspace/",
-      "post-anchorspace":
-        baseURL + "/documents/" + document.id + "/anchorspace/",
-      "post-cellspaceboundary":
-        baseURL + "/documents/" + document.id + "/cellspaceboundary/",
-      "post-connectionboundary":
-        baseURL + "/documents/" + document.id + "/connectionboundary/",
-      "post-anchorboundary":
-        baseURL + "/documents/" + document.id + "/anchorboundary/",
-      "post-nonnavigablespace":
-        baseURL + "/documents/" + document.id + "/nonnavigablespace/",
-      "post-multiLayeredGraph":
-        baseURL +
-        "/documents/" +
-        document.id +
-        "/multilayeredgraph/" +
-        multiLayeredGraph.id,
-      "post-spacelayers":
-        baseURL +
-        "/documents/" +
-        document.id +
-        "/spacelayers/" +
-        spaceLayers.id,
+      "post-navigablespace": baseURL + "/documents/" + document.id + "/navigablespace/",
+      "post-generalspace": baseURL + "/documents/" + document.id + "/generalspace/",
+      "post-transferspace": baseURL + "/documents/" + document.id + "/transferspace/",
+      "post-transitionspace": baseURL + "/documents/" + document.id + "/transitionspace/",
+      "post-connectionspace": baseURL + "/documents/" + document.id + "/connectionspace/",
+      "post-anchorspace": baseURL + "/documents/" + document.id + "/anchorspace/",
+      "post-cellspaceboundary": baseURL + "/documents/" + document.id + "/cellspaceboundary/",
+      "post-connectionboundary": baseURL + "/documents/" + document.id + "/connectionboundary/",
+      "post-anchorboundary": baseURL + "/documents/" + document.id + "/anchorboundary/",
+      "post-nonnavigablespace": baseURL + "/documents/" + document.id + "/nonnavigablespace/",
+      "post-multiLayeredGraph": baseURL + "/documents/" + document.id + "/multilayeredgraph/" + multiLayeredGraph.id,
+      "post-spacelayers": baseURL + "/documents/" + document.id + "/spacelayers/" + spaceLayers.id,
       "post-spacelayer": baseURL + "/documents/" + document.id + "/spacelayer/",
       "post-nodes": baseURL + "/documents/" + document.id + "/nodes/",
       "post-edges": baseURL + "/documents/" + document.id + "/edges/",
       "post-state": baseURL + "/documents/" + document.id + "/state/",
       "post-transition": baseURL + "/documents/" + document.id + "/transition/",
-      "post-interEdges":
-        baseURL + "/documents/" + document.id + "/interedges/" + interEdges.id,
-      "post-interlayerConnection":
-        baseURL + "/documents/" + document.id + "/interlayerconnection/",
+      "post-interEdges": baseURL + "/documents/" + document.id + "/interedges/" + interEdges.id,
+      "post-interlayerConnection": baseURL + "/documents/" + document.id + "/interlayerconnection/",
       "get-document": baseURL + "/documents/" + document.id
     };
 
-    if(!manager.deleteJson(address["delete-document"]))
-      return;
+    if (!manager.deleteJson(address["delete-document"])) return;
 
     manager.postJson(address["post-document"], JSON.stringify(document));
 
@@ -687,10 +654,10 @@ define(function(require) {
         );
 
       for (var i = 0; i < cells.nonnavigableSpace.length; i++)
-        manager.postJson(
-          address["post-nonnavigablespace"] + cells.nonnavigableSpace[i].id,
-          JSON.stringify(cells.nonnavigableSpace[i])
-        );
+       manager.postJson(
+         address["post-nonnavigablespace"] + cells.nonnavigableSpace[i].id,
+         JSON.stringify(cells.nonnavigableSpace[i])
+       );
 
       for (var i = 0; i < cellBoundaries.cellboundary.length; i++)
         manager.postJson(
@@ -785,11 +752,7 @@ define(function(require) {
       xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
       xhr.send(data);
     } catch (error) {
-      require("Popup")(
-        "error",
-        "Status " + xhr.status,
-        error
-      );
+      require("Popup")("error", "Status " + xhr.status, error);
     }
   };
 
@@ -797,7 +760,7 @@ define(function(require) {
    * @memberof ExportManager
    */
   ExportManager.prototype.deleteJson = function(address) {
-    log.info('DELETE : ' + address);
+    log.info("DELETE : " + address);
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
@@ -810,7 +773,6 @@ define(function(require) {
       xhr.open("DELETE", address, false);
       xhr.send(null);
       return 1;
-
     } catch (error) {
       require("Popup")(
         "error",
@@ -1256,7 +1218,7 @@ define(function(require) {
               manager.extrudeCell(
                 coor,
                 // cells[cellId].type != "CellSpace" ? cells[cellId].properties.height : floorProperties[floorKey].celingHeight),
-                cells[cellId].properties.height*1
+                cells[cellId].properties.height * 1
               ),
               "3D"
             );
