@@ -1078,7 +1078,9 @@
 
       for (var key in cells) {
         var isPartOf = cells[key].isPartOf(point);
-        if (isPartOf.length != 0) result[cells[key].id] = isPartOf;
+
+        if (isPartOf.length != 0)
+          result[cells[key].id] = isPartOf;
       }
 
       return result;
@@ -1328,6 +1330,8 @@
           }
         };
       }
+
+
 
       var cursor = canvasContainer.stages[reqObj.floor].tmpLayer.group.getCursor();
 
@@ -2058,7 +2062,7 @@
           }
 
           for (var key in movedDot.memberOf) {
-            var obj = stageObj.getElementById(movedDot.memberOf[key], key);
+            var obj = stageObj.getElementById(movedDot.memberOf[key].toLowerCase(), key);
             var dotIndex = obj.getDotIndex(movedDot.uuid);
             obj.replaceDot(combined, dotIndex);
 

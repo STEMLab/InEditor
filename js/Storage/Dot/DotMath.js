@@ -189,12 +189,16 @@ define([], function() {
         y: dot.point.y - line.dot1.point.y
       }
 
+      function isZeroVec(v){
+        return (v.x == 0 && v.y == 0) ? true : false;
+      }
+
       // V2 projection
       var V2prj = this.dotProduct(V1, V2) / this.dotProduct(V1,V1);
       // log.info('V2prj : ', V2prj);
-      if ( V2prj == 0 ) return true;
-      // else if( V2prj < 0 || 1 < V2prj ) return false;
       if( V2prj < 0 || 1 < V2prj ) return false;
+      if( V2prj == 0 && (isZeroVec(V1) || isZeroVec(V2)) )
+        return true;
 
       var cos = (V1.x * V2.x + V1.y * V2.y) /
                 ( Math.sqrt(Math.pow(V1.x, 2) + Math.pow(V1.y, 2))
