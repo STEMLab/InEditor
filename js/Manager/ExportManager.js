@@ -589,6 +589,11 @@ define(function(require) {
 
     manager.postJson(address["post-document"], JSON.stringify(document));
 
+    manager.postJson(
+      address["post-indoorfeatures"],
+      JSON.stringify(indoorfeatures)
+    );
+
     if (
       cells.cell.length != 0 ||
       cells.navigableSpace.length != 0 ||
@@ -602,10 +607,7 @@ define(function(require) {
       cellBoundaries.connectionboundary.length != 0 ||
       cellBoundaries.anchorboundary.length != 0
     ) {
-      manager.postJson(
-        address["post-indoorfeatures"],
-        JSON.stringify(indoorfeatures)
-      );
+
       manager.postJson(
         address["post-primalspacefeatures"],
         JSON.stringify(primalspacefeatures)
