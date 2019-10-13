@@ -150,7 +150,7 @@ define(function(require) {
        */
       this.savePath = "./output";
 
-      this.saveWithTimeStamp = true;
+      this.saveWithTimeStamp = false;
 
       this.interlayerCopy = false;
 
@@ -331,6 +331,7 @@ define(function(require) {
         x: values.aspectRatio.x,
         y: values.aspectRatio.y
       };
+
       this.scaleFactor = values.scaleFactor;
       this.scaleMin = values.scaleMin;
       this.scaleMax = values.scaleMax;
@@ -343,6 +344,8 @@ define(function(require) {
 
       this.exportConditions = values.exportConditions;
       this.exportSimplifyCondition = values.exportSimplifyCondition;
+
+      this.saveName = values.saveName;
     };
 
     Conditions.prototype.getNewId = function(type) {
