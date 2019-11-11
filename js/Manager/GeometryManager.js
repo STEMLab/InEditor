@@ -2052,8 +2052,7 @@
         reqObj.floor
       ].getDotByPointaAllowDuplication(movedDot.point);
 
-      if (isDotExist[0] == movedDot) {}
-      else if (isDotExist.length > 1) {
+      if (isDotExist.length > 1) {
         isDotExist.splice(isDotExist.indexOf(movedDot), 1);
 
         for(var combined of isDotExist){

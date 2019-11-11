@@ -225,10 +225,12 @@ define(function(require) {
           width: imageObj.width,
           height: imageObj.height
         };
+
         var stageSize = {
-          width: document.getElementById(reqObj.id).clientWidth,
-          height: document.getElementById(reqObj.id).clientHeight
+          width: layer.canvas.width,
+          height: layer.canvas.height
         };
+
         var imageRatio = (imageSize.width > imageSize.height) ? {
           width: imageSize.width / imageSize.height,
           height: 1
@@ -236,6 +238,7 @@ define(function(require) {
           width: 1,
           height: imageSize.height / imageSize.width
         };
+
         var stageRatio = (stageSize.width > stageSize.height) ? {
           width: stageSize.width / stageSize.height,
           height: 1
@@ -244,7 +247,8 @@ define(function(require) {
           height: stageSize.height / stageSize.width
         };
 
-        if (imageSize.width <= stageSize.width && imageSize.height <= stageSize.width) {
+
+        if(imageSize.width <= stageSize.width && imageSize.height <= stageSize.width) {
 
         } else if (imageRatio.height == 1) {
           imageSize = {

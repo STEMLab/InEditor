@@ -1327,6 +1327,7 @@ define(function(require) {
           }
         }
 
+        cells[cellId].properties.description.storey = floorProperties[floorKey].name;
         cells[cellId].convertCoor2WKT();
         cells[cellId].addPrtDesc(prtDesc);
         cells[cellId].convertDescObj2Str();
