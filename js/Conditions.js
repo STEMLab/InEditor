@@ -321,12 +321,14 @@ define(function(require) {
       this.pre_floor = values.pre_floor;
       this.pre_state = values.pre_state;
       this.pre_transition = values.pre_transition;
+      this.pre_inter = values.pre_inter;
 
       this.LAST_CELL_ID_NUM = values.LAST_CELL_ID_NUM;
       this.LAST_CELLBOUNDARY_ID_NUM = values.LAST_CELLBOUNDARY_ID_NUM;
       this.LAST_FLOOR_ID_NUM = values.LAST_FLOOR_ID_NUM;
       this.LAST_STATE_ID_NUM = values.LAST_STATE_ID_NUM;
       this.LAST_TRANSITION_ID_NUM = values.LAST_TRANSITION_ID_NUM;
+      this.LAST_INTER_ID_NUM = values.LAST_INTER_ID_NUM;
       this.aspectRatio = {
         x: values.aspectRatio.x,
         y: values.aspectRatio.y

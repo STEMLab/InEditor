@@ -64,7 +64,7 @@ define(function(require) {
 
     var filename = doc.conditions.savePath + '/' + require('Conditions').getInstance().saveName
     filename += doc.conditions.saveWithTimeStamp ? '-' + new Date().getTime() : '';
-    filename += '.bson';
+    filename += '.json';
 
 
     // send json data to viewer
@@ -99,74 +99,81 @@ define(function(require) {
     reader.readAsBinaryString(reqObj.file);
     reader.onload = function(e) {
 
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
+      if(reqObj.file.name.lastIndexOf('.bson') == reqObj.file.name.length-5){
+        // if file type is bson
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
 
-        if (xhr.readyState == 4 && xhr.status == 200) {
-          var obj = JSON.parse(xhr.responseText);
-
-          require('Conditions').getInstance().load(obj.conditions);
-          delete obj.conditions;
-
-          if(obj.codeList != undefined){
-            require('Property').CODE_LIST.getInstance().load(obj.codeList);
-            delete obj.codeList;
+          if (xhr.readyState == 4 && xhr.status == 200) {
+            var obj = JSON.parse(xhr.responseText);
+            require('Broker').getInstance().getManager('loadproject', 'ProjectManager').makeObjFromJson(obj);
+            $('#loading-modal').modal("hide");
           }
-
-
-          // manager가 load를 하도록  function move
-          var storage = require('Storage').getInstance();
-          var loadData = obj[Object.keys(obj)[0]];
-          var propertyContainer = storage.getPropertyContainer();
-
-          propertyContainer.load(loadData.propertyContainer);
-
-          if(loadData.dotPoolContainer == undefined && loadData.dotFoolContainer != undefined){
-            loadData['dotPoolContainer'] = JSON.parse(JSON.stringify(loadData['dotFoolContainer']));
-            loadData.dotPoolContainer['dotPool'] = JSON.parse(JSON.stringify(loadData.dotPoolContainer.dotFool))
-          }
-
-          storage.getDotPoolContainer().load(loadData.dotPoolContainer);
-          storage.getGeometryContainer().load(loadData.geometryContainer, storage.getDotPoolContainer());
-
-          storage.getCanvasContainer().clearCanvas();
-
-          require('UI').getInstance().workspace.destroy();
-
-          var manager = require('Broker').getInstance().getManager('loadproject', 'ProjectManager');
-
-          // add workspace and stage
-          for (var key in loadData.canvasContainer) {
-
-            var newFloorProperty = propertyContainer.getElementById('floor', key);
-            manager.loadStage(
-              key,
-              newFloorProperty, {
-                width: loadData.canvasContainer[key].width,
-                height: loadData.canvasContainer[key].height,
-                dataURL: loadData.canvasContainer[key].floorplanDataURL
-              }
-
-            );
-          }
-
-          // add object from geometry
-          storage.getCanvasContainer().addObjFromGeometries(
-            storage.getGeometryContainer());
-
-          // refresh tree view
-          require('UI').getInstance().treeView.refresh(storage.getPropertyContainer());
-
-          $('#loading-modal').modal("hide");
         }
 
+        xhr.open("POST", "http://127.0.0.1:5757/convert-bson-to-json", true);
+        xhr.send(reader.result);
       }
+      else {
+        var obj = JSON.parse(reader.result);
+        require('Broker').getInstance().getManager('loadproject', 'ProjectManager').makeObjFromJson(obj);
+        $('#loading-modal').modal("hide");
+      }
+    }
+  }
 
-      xhr.open("POST", "http://127.0.0.1:5757/convert-bson-to-json", true);
-      xhr.send(reader.result);
+  ProjectManager.prototype.makeObjFromJson = function(obj){
+    require('Conditions').getInstance().load(obj.conditions);
+    delete obj.conditions;
 
+    if(obj.codeList != undefined){
+      require('Property').CODE_LIST.getInstance().load(obj.codeList);
+      delete obj.codeList;
     }
 
+
+    // manager가 load를 하도록  function move
+    var storage = require('Storage').getInstance();
+    var loadData = obj[Object.keys(obj)[0]];
+    var propertyContainer = storage.getPropertyContainer();
+
+    propertyContainer.load(loadData.propertyContainer);
+
+    if(loadData.dotPoolContainer == undefined && loadData.dotFoolContainer != undefined){
+      loadData['dotPoolContainer'] = JSON.parse(JSON.stringify(loadData['dotFoolContainer']));
+      loadData.dotPoolContainer['dotPool'] = JSON.parse(JSON.stringify(loadData.dotPoolContainer.dotFool))
+    }
+
+    storage.getDotPoolContainer().load(loadData.dotPoolContainer);
+    storage.getGeometryContainer().load(loadData.geometryContainer, storage.getDotPoolContainer());
+
+    storage.getCanvasContainer().clearCanvas();
+
+    require('UI').getInstance().workspace.destroy();
+
+    var manager = require('Broker').getInstance().getManager('loadproject', 'ProjectManager');
+
+    // add workspace and stage
+    for (var key in loadData.canvasContainer) {
+
+      var newFloorProperty = propertyContainer.getElementById('floor', key);
+      manager.loadStage(
+        key,
+        newFloorProperty, {
+          width: loadData.canvasContainer[key].width,
+          height: loadData.canvasContainer[key].height,
+          dataURL: loadData.canvasContainer[key].floorplanDataURL
+        }
+
+      );
+    }
+
+    // add object from geometry
+    storage.getCanvasContainer().addObjFromGeometries(
+      storage.getGeometryContainer());
+
+    // refresh tree view
+    require('UI').getInstance().treeView.refresh(storage.getPropertyContainer());
   }
 
   ProjectManager.prototype.loadStage = function(key, newFloorProperty, canvasProperty) {

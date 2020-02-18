@@ -44,8 +44,7 @@ app.post('/save-json', function(req, res) {
 
 app.post('/save-project', function(req, res) {
 
-  var bson = new BSON();
-  var data = bson.serialize(req.body.doc);
+  const data = JSON.stringify(req.body.doc);
 
   fs.writeFile(req.body.path, data, function(err) {
 
