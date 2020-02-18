@@ -15,7 +15,7 @@ define(function(require) {
   };
 
   Solid.prototype.geojson2wkt = function(gj){
-    
+
     var result = "SOLID (";
 
     for(var solid in gj){
@@ -25,7 +25,7 @@ define(function(require) {
         var converter = require('js/JsonFormat/GeometryConverter.js');
         var surfaceWKT = new converter('Surface').geojson2wkt(gj[solid][surface][0]);
         result += surfaceWKT.substring(surfaceWKT.indexOf('('), surfaceWKT.length);
-        if(surface != gj[solid].length - 1) result +=", ";
+        if(surface*1 != gj[solid].length - 1) result +=", ";
       }
 
       result += ")";
