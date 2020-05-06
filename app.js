@@ -47,9 +47,7 @@ app.post('/save-project', function(req, res) {
   const data = JSON.stringify(req.body.doc);
 
   fs.writeFile(req.body.path, data, function(err) {
-
     if (err)  return res.status(500).send(err);
-
     res.json('success');
 
   });
@@ -61,13 +59,11 @@ app.get('/load-project', function(req, res) {
   var bson = new BSON();
 
   fs.readFile('./output/save-project.bson', function(err, data) {
-
     if (err) return res.status(500).send(err);
 
     var bson = new BSON();
     var json = bson.deserialize(data);
     res.json(json);
-
   });
 
 });
@@ -156,41 +152,28 @@ app.post('/trans-dot', function(req, res) {
 
 
 app.post('/validation', function(req, res) {
-
   let cityJSON = req.body.cityJSON;
 
-  fs.writeFile('./output/tmpJSON.json', vkbeautify.json(JSON.stringify(cityJSON)), function(err) {
-    if (err)  {
-      console.log(err);
-      return res.status(500).send(err);
-    }
-
-    validate('.\\output\\tmpJSON.json', res);
-
-  });
-
-});
-
-function validate(path, res) {
-  Promise.coroutine(function *() {
-    console.log('---------------------------- validation ----------------------------\n');
-    yield cmd.run('.\\lib\\val3dity-2.1.0-windows-x64\\val3dity-2.1.0\\val3dity ' + path + ' --report_json .\\output\\repo');
-
-
-    fs.readFile('./output/repo.json', function(err, data) {
-
-      if (err)  {
-        console.log(err);
-        return res.status(500).send(err);
-      }
-
-      data = JSON.parse(data);
-      if(data.invalid_features == 0 && data.invalid_primitives == 0) res.send(true);
-      else res.status(500).send(data.invalid_primitives + " errors founded.\nFull validation report saved to \".\output\repo.json\"" );
-
+  var appendFile = Promise.promisify(require("fs").appendFile);
+  var readFile = Promise.promisify(require("fs").readFile);
+  let validation = Promise.coroutine(function *() {
+      console.log('---------------------------- validation ----------------------------\n');
+      yield cmd.run('.\\lib\\val3dity-2.1.0-windows-x64\\val3dity-2.1.0\\val3dity .\\output\\tmpJSON.json --report_json .\\output\\repo');
+      console.log('--------------------------------------------------------------------\n\n');
     });
 
-
-    console.log('--------------------------------------------------------------------\n\n');
-  })();
-}
+  appendFile('./output/tmpJSON.json', vkbeautify.json(JSON.stringify(cityJSON)))
+    .then(()=> appendFile('./output/repo.json', ''))
+    .then(()=> validation())
+    .then(()=> readFile('./output/repo.json'))
+    .then(content => {
+      let data = JSON.parse(content);
+      if(JSON.stringify({}) === JSON.stringify(data)) res.status(500).send("error! validation report is empty." );
+      else if(data.invalid_features == 0 && data.invalid_primitives == 0) res.send(true);
+      else res.status(500).send(data.invalid_primitives + " errors founded.\nFull validation report saved to \".\output\repo.json\"" );
+    })
+    .catch(function(e){
+      console.log(e);
+      return res.status(500).send(e);
+    });
+});
