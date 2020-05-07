@@ -450,19 +450,13 @@ define([
    * @memberof Fromat4Factory.CellSpace
    */
   CellSpace.prototype.addSolidHole = function(solid) {
-    for (var s of solid) {
-      var index = 0;
-      var len = this.geometry.coordinates[0].length - 2;
-      for (var surface of s) {
-        surface[0][0].reverse();
-        if (index === 0) this.geometry.coordinates[0][0].push(surface[0]);
-        else if (index == s.length - 1)
-          this.geometry.coordinates[0][
-            this.geometry.coordinates[0].length - 1
-          ].push(surface[0]);
-        else this.geometry.coordinates[0].splice(len + index, 0, surface);
-        index++;
-      }
+    for(let i in solid[0]){
+      if( i == 0 )
+        this.geometry.coordinates[0][i] = this.geometry.coordinates[0][i].concat(solid[0][i]);
+      else if ( i == solid[0].length - 1 )
+        this.geometry.coordinates[0][this.geometry.coordinates[0].length-1].push(solid[0][i][0])
+      else
+        this.geometry.coordinates[0].splice(this.geometry.coordinates[0].length-1, 0, solid[0][i])
     }
   };
 

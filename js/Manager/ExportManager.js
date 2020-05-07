@@ -1189,11 +1189,7 @@ define(function(require) {
 
         for (var key in points) {
           coordinates.push(Object.values(transDot[points[key].uuid].point));
-
           coordinates[coordinates.length - 1][2] += cells[id].properties.bottom;
-
-          //test code
-          coordinates[coordinates.length - 1][2] += 0.0001;
         }
         coordinates.push(coordinates[0]);
 
@@ -1219,7 +1215,6 @@ define(function(require) {
             cells[cellId].setCoor(
               manager.extrudeCell(
                 coor,
-                // cells[cellId].type != "CellSpace" ? cells[cellId].properties.height : floorProperties[floorKey].celingHeight),
                 cells[cellId].properties.height * 1
               ),
               "3D"
@@ -1273,11 +1268,10 @@ define(function(require) {
             // add hole func에서 solid를 뒤집어서 push 하고 있다.
 
             if (geoType == "3D") {
-              // cells[cellId].addHole(manager.extrudeCell(holeCoor, floorProperties[floorKey].celingHeight * 1 - 0.2), '3D');
               cells[cellId].addHole(
                 manager.extrudeCell(
                   holeCoor,
-                  cells[cellId].properties.height * 1 - 0.0002
+                  cells[cellId].properties.height*1
                 ),
                 "3D"
               );
@@ -1874,7 +1868,7 @@ define(function(require) {
       up.push(tmp);
     }
 
-    surfaces.push([[up]]);
+    surfaces.push([up]);
 
     for (var i = 0; i < down.length - 1; i++) {
       var downLeft = JSON.parse(JSON.stringify(down[i]));
@@ -1882,13 +1876,13 @@ define(function(require) {
       var upRigth = JSON.parse(JSON.stringify(up[i + 1]));
       var upLeft = JSON.parse(JSON.stringify(up[i]));
 
-      surfaces.push([[[downLeft, downRight, upRigth, upLeft, downLeft]]]);
+      surfaces.push([[downLeft, downRight, upRigth, upLeft, downLeft]]);
     }
 
     // rotate down surface
     down.reverse();
 
-    surfaces.push([[down]]);
+    surfaces.push([down]);
 
     return [surfaces];
   };
