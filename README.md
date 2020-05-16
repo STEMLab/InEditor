@@ -8,7 +8,7 @@ IndoorGML-Editor is an open source Javascript program that provides tools for ed
 1. You need to install several modules. Please follow the steps below. `npm install`
 2. Start server by executing `npm start` and launch a web browser and open the editor `http://127.0.0.1:5757`
 <img width="700px" src="assets/readme/01_start.PNG" style="margin:10px"></img>
-3. In order to create IndoorGML documents, you must install [InFactory](https://github.com/STEMLab/InFactory) that a restful server and library to create OGC IndoorGML
+3. In order to create IndoorGML documents, you must install [InFactory](https://github.com/STEMLab/InFactory), which is a restful server and library to create OGC IndoorGML
    * Prerequisites
        - Maven : over 3.5 version.
        - Java : JDK over 1.8 version. JAVA 8 is not working at the upper version
