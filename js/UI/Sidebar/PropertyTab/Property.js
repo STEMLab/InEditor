@@ -144,7 +144,7 @@ define(function(require) {
 
 
     var divs = {
-      "cavas": canvasDiv,
+      "canvas": canvasDiv,
       "properties": propertiesDiv
     };
 
