@@ -21,8 +21,7 @@ define([], function() {
 
       result += "(";
       for(var j in gj[i]){
-        result += gj[i][j][0] + " " + gj[i][j][1] + " " + gj[i][j][2];
-
+        result += gj[i][j].join(" ");
         if(j != gj[i].length - 1) result +=  ", ";
       }
 

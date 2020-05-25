@@ -46,7 +46,7 @@ define(function(require) {
     var loadFile = document.createElement('input');
     loadFile.id = 'project-load-file';
     loadFile.setAttribute('type', 'file');
-    loadFile.setAttribute('accept', '.bson');
+    loadFile.setAttribute('accept', '.bson,.json');
     loadFile.classList.add('d-none');
 
     var save = document.createElement('a');
