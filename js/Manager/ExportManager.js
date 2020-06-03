@@ -534,6 +534,28 @@ define(function(require) {
       primalspacefeatures.id,
       transDots
     );
+
+    var envelop = {
+        parentId: indoorfeatures.id,
+        id: require("Conditions")
+        .getInstance()
+        .guid(),
+        upperCorner: {
+			coordinates:"POINT (" + cells.bbox.max.x + " " +  cells.bbox.max.y + " " + cells.bbox.max.z + ")"
+		},
+		lowerCorner:{
+			coordinates:"POINT (" + cells.bbox.min.x + " " +  cells.bbox.min.y + " " + cells.bbox.min.z + ")"
+		}
+    }
+
+    var pp = require("Storage")
+    .getInstance()
+    .getPropertyContainer().projectProperty;
+
+    if (pp.isRealCoor && pp.realCoorFloor != "")
+        envelop['srsName'] = 'EPSG:4326'
+
+
     var cellBoundaries = manager.cellBoundaryObj4Factory(
       document.id,
       primalspacefeatures.id,
@@ -561,6 +583,7 @@ define(function(require) {
       "delete-document": baseURL + "/documents/" + document.id,
       "post-document": baseURL + "/documents/" + document.id,
       "post-indoorfeatures": baseURL +"/documents/" + document.id + "/indoorfeatures/" + indoorfeatures.id,
+      "post-envelop": baseURL + "/documents/" + document.id + "/envelope/" + envelop.id,
       "post-primalspacefeatures": baseURL + "/documents/" + document.id + "/primalspacefeatures/" + primalspacefeatures.id,
       "post-cell": baseURL + "/documents/" + document.id + "/cellspace/",
       "post-navigablespace": baseURL + "/documents/" + document.id + "/navigablespace/",
@@ -593,6 +616,12 @@ define(function(require) {
       address["post-indoorfeatures"],
       JSON.stringify(indoorfeatures)
     );
+
+    manager.postJson(
+        address["post-envelop"],
+        JSON.stringify(envelop)
+    );
+  
 
     if (
       cells.cell.length != 0 ||
@@ -741,7 +770,8 @@ define(function(require) {
    * @memberof ExportManager
    */
   ExportManager.prototype.postJson = function(address, data) {
-    // log.info('POST : ' + address, data);
+    log.info('POST : ' + address, data);
+    log.info('POST : ' + address);
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function(e) {
       if (xhr.status == 200) {
@@ -964,12 +994,6 @@ define(function(require) {
     if ($("#factory-property-transition-duality").prop("checked"))
       exportConditions.Transition.properties.duality = true;
     else exportConditions.Transition.properties.duality = false;
-
-    // MultiLayer
-    if ($("#factory-multilayer-one").prop("checked"))
-      exportConditions.MultiLayer = false;
-    if ($("#factory-multilayer-multi").prop("checked"))
-      exportConditions.MultiLayer = true;
 
     // geometry type
     if ($("#factory-geometry-type-2D").prop("checked"))
@@ -1209,6 +1233,10 @@ define(function(require) {
         var coor = cells[cellId].getCoordinates()[0];
         if (!require("DotMath").isCCWByArr(coor)) coor.reverse();
         // 이해를 위해 extrude cell  func를 수정하는 것이 좋을 듯 하다.
+        
+        var p = [...cells[cellId].geometry.coordinates[0][0]]
+        p[2] += cells[cellId].properties.height
+        transDot.bbox = manager.getBbox(transDot.bbox, p)
 
         if (geoType == "3D") {
           if (slantMap[cellId] == undefined) {
@@ -1298,6 +1326,33 @@ define(function(require) {
             solid[0][surfaceIndex][0] = polygon_;
           }
           return solid;
+
+          // var result = [];
+          // for(var s of solid){
+          //     var solid_ = [];
+          //     for(var surface of s){
+          //         var surface_ = [];
+          //         for(var polygon of surface[0]){
+          //             var polygon_ = [];
+          //             for(var vertexIndex in polygon){
+          //                 if(vertexIndex == polygon.length - 1) continue;
+          //                 var vertex = polygon[vertexIndex];
+          //                 var index = cityJSON.vertices.indexOf(JSON.stringify(vertex));
+          //                 if (index == -1) {
+          //                   cityJSON.vertices.push(JSON.stringify(vertex));
+          //                   index = cityJSON.vertices.length - 1;
+          //                 }
+          //                 polygon_.push(index);
+          //             }
+          //             surface_.push(polygon_);
+          //         }
+          //         solid_.push(surface_);
+          //     }
+          //     result.push(solid_);
+          // }
+          // console.log('cityJSON', cityJSON);
+          // console.log('result', JSON.stringify(result));
+          // return result;
         }
 
         if (geoType == "3D") {
@@ -1313,7 +1368,7 @@ define(function(require) {
                     cells[cellId].geometry.type == "Solid"
                       ? "Solid"
                       : "MultiSurface",
-                  lod: 1
+                  lod: 2
                 }
               ],
               type: "GenericCityObject"
@@ -1321,6 +1376,7 @@ define(function(require) {
           }
         }
 
+        cells[cellId].properties.description.storey = floorProperties[floorKey].name;
         cells[cellId].convertCoor2WKT();
         cells[cellId].addPrtDesc(prtDesc);
         cells[cellId].convertDescObj2Str();
@@ -1364,7 +1420,8 @@ define(function(require) {
       connectionSpace: [],
       anchorSpace: [],
       nonnavigableSpace: [],
-      codeList: codeList
+      codeList: codeList,
+      bbox : transDot.bbox
     };
 
     for (var key in cells) {
@@ -1385,7 +1442,6 @@ define(function(require) {
         result.anchorSpace.push(cells[key]);
       else if (cells[key].type == "NonNavigableSpace")
         result.nonnavigableSpace.push(cells[key]);
-      //else if (cells[key].type == "NonNavigableSpace") result.cell.push(cells[key]);
     }
 
     return result;
@@ -2072,6 +2128,29 @@ define(function(require) {
    */
   ExportManager.prototype.transAllDots = function(dotPools, floorProperties) {
     var result = {};
+    var VERY_SMALL_VALUE = -999999;
+    var VERY_BIG_VALUE = 999999;
+    var bbox = {
+        max: {
+            x: VERY_SMALL_VALUE,
+            y: VERY_SMALL_VALUE,
+            z: VERY_SMALL_VALUE
+        },
+        min : {
+            x: VERY_BIG_VALUE,
+            y: VERY_BIG_VALUE,
+            z: VERY_BIG_VALUE
+        }
+    }
+
+    function getBbox(point) {
+        for(var d in point){
+            if(point[d] > bbox.max[d]) bbox.max[d] = point[d]
+            if(point[d] < bbox.min[d]) bbox.min[d] = point[d]
+        }
+        return bbox;
+    }
+
     var manager = require("Broker")
       .getInstance()
       .getManager("exporttofactory", "ExportManager");
@@ -2099,7 +2178,12 @@ define(function(require) {
             proeprtyContainer.getElementById("state", stateId).height * 1;
         }
       }
+
+      // set bbox for envelop
+      getBbox(result[key].point)
     }
+
+    result['bbox'] = bbox;
 
     return result;
   };
@@ -2235,11 +2319,22 @@ define(function(require) {
     let upperCorner =
       floorProperties[projectProperty.realCoorFloor].upperCorner;
 
-    constArr.push([...lowerCorner, 0, 0]);
-    constArr.push([...upperCorner, canvasCoor.width, canvasCoor.height]);
-    constArr.push([lowerCorner[0], upperCorner[1], 0, canvasCoor.height]);
-    constArr.push([upperCorner[0], lowerCorner[1], canvasCoor.width, 0]);
+    constArr.push([lowerCorner[0], upperCorner[1], 0, 0])// LEFT TOP
+    constArr.push([...lowerCorner, 0, canvasCoor.height])// LEFT BOTTOM
+    constArr.push([upperCorner[0], lowerCorner[1], canvasCoor.width, canvasCoor.height])// RIGHT BOTTOM
+    constArr.push([...upperCorner, canvasCoor.width, 0])// RIGHT TOP
 
+    console.log(lowerCorner[0], upperCorner[1])
+    console.log(...lowerCorner, 0, canvasCoor.height)
+    console.log(upperCorner[0], lowerCorner[1])
+    console.log(...upperCorner, canvasCoor.width)
+
+
+    // constArr.push([...lowerCorner, 0, 0]); // LEFT TOP
+    // constArr.push([...upperCorner, canvasCoor.width, canvasCoor.height]); // LEFT BOTTOM
+    // constArr.push([lowerCorner[0], upperCorner[1], 0, canvasCoor.height]); // RIGHT BOTTOM
+    // constArr.push([upperCorner[0], lowerCorner[1], canvasCoor.width, 0]);
+    
     for (let dotPoolKey in dotPools) {
       for (let dotKey in dotPools[dotPoolKey].dots)
         allCoorArr.push([
@@ -2298,5 +2393,24 @@ define(function(require) {
     return result;
   };
 
+  ExportManager.prototype.getBbox = function(bbox, point){
+    if(Array.isArray(point)){
+        var keys = ['x', 'y','z']
+        for(var d in point){
+            if(point[d] > bbox.max[keys[d]]) bbox.max[keys[d]] = point[d]
+            if(point[d] < bbox.min[keys[d]]) bbox.min[keys[d]] = point[d]
+        }
+    }
+    else {
+        for(var d in point){
+            if(point[d] > bbox.max[d]) bbox.max[d] = point[d]
+            if(point[d] < bbox.min[d]) bbox.min[d] = point[d]
+        }
+    }
+    return bbox;
+  }
+
   return ExportManager;
 });
+
+

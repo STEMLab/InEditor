@@ -52,7 +52,6 @@ body {
 
 .toolbar {
   max-height: 2.0rem;
-  border-top: solid 0.01rem #e5e5e5f5;
   background-color: var(--toolbar-bg-color);
 }
 
@@ -179,7 +178,7 @@ td select {
   text-align: center;
 }
 
-.property-table .inner-tag {value
+.property-table .inner-tag {
   font-weight: bold;
   text-align: center;
 }
@@ -214,6 +213,10 @@ td select {
   width: 100%;
   font-weight: lighter !important;
   color: var(--property-tab-value-color) !important;
+}
+
+.property-table .input{
+  width: inherit;
 }
 
 /* custom scrollbar */
