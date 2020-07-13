@@ -21,7 +21,7 @@ define([], function() {
     this.line = new Konva.Line({
       points: [],
       stroke: Konva.Util.getRandomColor(),
-      strokeWidth: 1,
+      strokeWidth: 4,
       lineCap: 'round'
     });
 
@@ -232,11 +232,18 @@ define([], function() {
   * @param line Object { dot1 ,dot2 }
   */
   Transition.prototype.isPartOf = function(point1, point2){
+    function isSamePoint(p1, p2){
+      if(p1.x === p2.x && p1.y === p2.y )
+        return true;
+      return false;
+    }
+
     for(var i = 0; i < this.dots.length - 1; i++){
-      if((this.dots[i].uuid == point1.uuid && this.dots[i+1].uuid == point2.uuid) ||
-         (this.dots[i].uuid == point2.uuid && this.dots[i+1].uuid == point1.uuid))
+      if((isSamePoint(this.dots[i].point, point1) && isSamePoint(this.dots[i+1].point, point2)) ||
+         (isSamePoint(this.dots[i+1].point, point1) && isSamePoint(this.dots[i].point, point2)))
          return true;
     }
+
     return false;
   }
 
