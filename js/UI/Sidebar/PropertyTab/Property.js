@@ -144,7 +144,7 @@ define(function(require) {
 
 
     var divs = {
-      "cavas": canvasDiv,
+      "canvas": canvasDiv,
       "properties": propertiesDiv
     };
 
@@ -404,10 +404,10 @@ define(function(require) {
           {
             type: 'component',
             componentName: 'property-component',
-            title: 'cavas',
+            title: 'canvas',
             isClosable: false,
             componentState: {
-              id: 'cavas'
+              id: 'canvas'
             }
           }
         ]
