@@ -474,6 +474,12 @@ define(function(require) {
 
   PropertyManager.prototype.deleteTransition = function(reqObj) {
 
+    var connects = require('Storage').getInstance().getPropertyContainer().getElementById('transition', reqObj.id).connects;
+    for(var connectedState of connects){
+      var stateProperty = require('Storage').getInstance().getPropertyContainer().getElementById('state', connectedState);
+      stateProperty.connects.splice(stateProperty.connects.indexOf(reqObj.id), 1)
+    }
+
     require('Broker').getInstance().getManager('end-addnewcell', 'PropertyManager').deletePropertyObj({
       type: 'transition',
       target: reqObj
@@ -784,9 +790,14 @@ define(function(require) {
   PropertyManager.prototype.getMapCoor = function(reqObj) {
     var map = require('Storage').getInstance().getCanvasContainer().getElementById('stage', reqObj.floor).map;
     var extent = map.getView().calculateExtent(map.getSize());
-    var bottomLeft = ol.proj.toLonLat(ol.extent.getBottomLeft(extent));
-    var topRight = ol.proj.toLonLat(ol.extent.getTopRight(extent));
-    var center = ol.proj.toLonLat(ol.extent.getCenter(extent));
+    let canvasCoor = require("Storage")
+    .getInstance()
+    .getCanvasContainer()
+    .stages[reqObj.floor].getWD();
+    
+    var bottomLeft = ol.proj.toLonLat(map.getCoordinateFromPixel([0,canvasCoor.height]));
+    var topRight   = ol.proj.toLonLat(map.getCoordinateFromPixel([canvasCoor.width,0]));
+    var center     = ol.proj.toLonLat(map.getCoordinateFromPixel([canvasCoor.width/2,canvasCoor.height/2]));
 
     var fp = require('Storage').getInstance().getPropertyContainer().getElementById('floor', reqObj.floor);
     fp.setMapCoor(bottomLeft, topRight);
