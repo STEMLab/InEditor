@@ -79,6 +79,18 @@ define([
 
     var path;
     var result = null;
+    var objectType = require('ObjectType');
+
+    switch (_type) {
+      case objectType.CELL_SPACE:
+        _type = 'cell'
+      break;
+      case objectType.CELL_SPACE_BOUNDARY:
+        _type = 'cellBoundary'
+      break;
+      default:
+    }
+
 
     if (this.projectProperty == null) path = require('Storage').getInstance().getPropertyContainer();
     else path = this;
