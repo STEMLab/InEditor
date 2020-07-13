@@ -37,7 +37,14 @@ var server = app.listen(5757, function() {
         console.log('***')
     }
   })();
-  
+
+  fs.exists('./output/repo.json', function (exists) { 
+      if(!exists){
+        fs.writeFile('./output/repo.json', '{}', function(err){
+            console.log('write repo.json') 
+        })
+      }
+  });  
   
 
 });
@@ -175,7 +182,7 @@ app.post('/validation', function(req, res) {
       res.status(500).send("warn! validation only work at Windows" );
   }
   else {
-    var appendFile = Promise.promisify(require("fs").appendFile);
+    var writeFile = Promise.promisify(require("fs").writeFile);
     var readFile = Promise.promisify(require("fs").readFile);
     let validation = Promise.coroutine(function *() {
         console.log('---------------------------- validation ----------------------------\n');
@@ -183,8 +190,8 @@ app.post('/validation', function(req, res) {
         console.log('--------------------------------------------------------------------\n\n');
       })
   
-    appendFile('./output/tmpJSON.json', vkbeautify.json(JSON.stringify(cityJSON)))
-      .then(()=> appendFile('./output/repo.json', ''))
+      writeFile('./output/tmpJSON.json', vkbeautify.json(JSON.stringify(cityJSON)))
+      .then(()=> writeFile('./output/repo.json', '{}'))
       .then(()=> validation())
       .then(()=> readFile('./output/repo.json'))
       .then(content => {

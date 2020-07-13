@@ -1311,7 +1311,7 @@ define(function(require) {
 
         function addVertices(solid) {
           for (var surfaceIndex in solid[0]) {
-            var polygon = solid[0][surfaceIndex][0][0];
+            var polygon = solid[0][surfaceIndex][0];
             var polygon_ = [];
 
             for (var i = 0; i < polygon.length - 1; i++) {
@@ -1326,33 +1326,6 @@ define(function(require) {
             solid[0][surfaceIndex][0] = polygon_;
           }
           return solid;
-
-          // var result = [];
-          // for(var s of solid){
-          //     var solid_ = [];
-          //     for(var surface of s){
-          //         var surface_ = [];
-          //         for(var polygon of surface[0]){
-          //             var polygon_ = [];
-          //             for(var vertexIndex in polygon){
-          //                 if(vertexIndex == polygon.length - 1) continue;
-          //                 var vertex = polygon[vertexIndex];
-          //                 var index = cityJSON.vertices.indexOf(JSON.stringify(vertex));
-          //                 if (index == -1) {
-          //                   cityJSON.vertices.push(JSON.stringify(vertex));
-          //                   index = cityJSON.vertices.length - 1;
-          //                 }
-          //                 polygon_.push(index);
-          //             }
-          //             surface_.push(polygon_);
-          //         }
-          //         solid_.push(surface_);
-          //     }
-          //     result.push(solid_);
-          // }
-          // console.log('cityJSON', cityJSON);
-          // console.log('result', JSON.stringify(result));
-          // return result;
         }
 
         if (geoType == "3D") {
