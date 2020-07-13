@@ -805,5 +805,20 @@ define(function(require) {
 
   }
 
+  PropertyManager.prototype.copyFloor = function(reqObj) {
+
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+    var src = propertyContainer.getElementById('floor', reqObj.targetFloor);
+    var dst = propertyContainer.getElementById('floor', reqObj.floor);
+
+    dst.celingHeight = src.celingHeight;
+    dst.doorHeight = src.doorHeight;
+    dst.lowerCorner = [...src.lowerCorner];
+    dst.upperCorner = [...src.upperCorner];
+  }
+
+
+
+
   return PropertyManager;
 });
