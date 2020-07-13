@@ -8,8 +8,8 @@ var earcut = require('earcut');
 var opn = require('opn');
 var cmd     = require('node-command-line'),
     Promise = require('bluebird');
+var os = require('os');
 var app = express();
-
 
 app.use('/', express.static(__dirname));
 app.use(cors());
@@ -24,9 +24,21 @@ var server = app.listen(5757, function() {
   console.log('IndoorGML-Editor App listening on port 5757...');
   opn('http://127.0.0.1:5757/', {app: 'chrome'});
 
+  //console.log(process.env)
   Promise.coroutine(function *() {
-    yield cmd.run('javac ./lib/coor-converter/Convert.java -classpath ./lib/coor-converter/gdal.jar');
+    var res = yield cmd.run('javac ./lib/coor-converter/Convert.java -classpath ./lib/coor-converter/gdal.jar')
+    if(res.success){
+        // no message
+    } else{
+        console.log('error. failed to build convert module')
+        console.log('To use convert module(set coordinates using map) you must set java anc gdal libary. Check description of ./lib/coor-converter/Convert.java')
+        console.log('\n***')
+        console.log(res.error)
+        console.log('***')
+    }
   })();
+  
+  
 
 });
 
@@ -112,16 +124,20 @@ app.post('/triangulate', function(req, res){
 });
 
 function convert(res) {
-  console.log('----------------------- convert coordinates -----------------------\n');
+  console.log('------------------ convert to real world coordinates ------------------\n');
 
   Promise.coroutine(function *() {
-    yield cmd.run('java -cp ./lib/coor-converter;./lib/coor-converter/gdal.jar Convert ./lib/coor-converter/const.txt ./lib/coor-converter/target.txt ./lib/coor-converter/result.txt');
-
-    console.log('--------------------------------------------------------------------\n\n');
-    fs.readFile('./lib/coor-converter/result.txt', function(err, data) {
-      if (err) return res.status(500).send(err);
-      res.send(data);
-    });
+    var cmdres = yield cmd.run('java -cp ./lib/coor-converter;./lib/coor-converter/gdal.jar Convert ./lib/coor-converter/const.txt ./lib/coor-converter/target.txt ./lib/coor-converter/result.txt');
+    if(cmdres.success){
+        console.log('--------------------------------------------------------------------\n\n');
+        fs.readFile('./lib/coor-converter/result.txt', function(err, data) {
+            if (err) return res.status(500).send(err);
+            res.send(data);
+        });
+    } else{
+        console.log('error. failed to convert real world coordinates')
+        console.log(cmdres.error)
+    }
   })();
 }
 
@@ -154,26 +170,32 @@ app.post('/trans-dot', function(req, res) {
 app.post('/validation', function(req, res) {
   let cityJSON = req.body.cityJSON;
 
-  var appendFile = Promise.promisify(require("fs").appendFile);
-  var readFile = Promise.promisify(require("fs").readFile);
-  let validation = Promise.coroutine(function *() {
-      console.log('---------------------------- validation ----------------------------\n');
-      yield cmd.run('.\\lib\\val3dity-2.1.0-windows-x64\\val3dity-2.1.0\\val3dity .\\output\\tmpJSON.json --report_json .\\output\\repo');
-      console.log('--------------------------------------------------------------------\n\n');
-    });
-
-  appendFile('./output/tmpJSON.json', vkbeautify.json(JSON.stringify(cityJSON)))
-    .then(()=> appendFile('./output/repo.json', ''))
-    .then(()=> validation())
-    .then(()=> readFile('./output/repo.json'))
-    .then(content => {
-      let data = JSON.parse(content);
-      if(JSON.stringify({}) === JSON.stringify(data)) res.status(500).send("error! validation report is empty." );
-      else if(data.invalid_features == 0 && data.invalid_primitives == 0) res.send(true);
-      else res.status(500).send(data.invalid_primitives + " errors founded.\nFull validation report saved to \".\output\repo.json\"" );
-    })
-    .catch(function(e){
-      console.log(e);
-      return res.status(500).send(e);
-    });
+  if(os.type() != 'Windows_NT') {
+      console.log('validation only working on Windowss')
+      res.status(500).send("warn! validation only work at Windows" );
+  }
+  else {
+    var appendFile = Promise.promisify(require("fs").appendFile);
+    var readFile = Promise.promisify(require("fs").readFile);
+    let validation = Promise.coroutine(function *() {
+        console.log('---------------------------- validation ----------------------------\n');
+        yield cmd.run('.\\lib\\val3dity-2.1.0-windows-x64\\val3dity-2.1.0\\val3dity .\\output\\tmpJSON.json --report_json .\\output\\repo');
+        console.log('--------------------------------------------------------------------\n\n');
+      })
+  
+    appendFile('./output/tmpJSON.json', vkbeautify.json(JSON.stringify(cityJSON)))
+      .then(()=> appendFile('./output/repo.json', ''))
+      .then(()=> validation())
+      .then(()=> readFile('./output/repo.json'))
+      .then(content => {
+        let data = JSON.parse(content);
+        if(JSON.stringify({}) === JSON.stringify(data)) res.status(500).send("error! validation report is empty." );
+        else if(data.invalid_features == 0 && data.invalid_primitives == 0) res.send(true);
+        else res.status(500).send(data.invalid_primitives + " errors founded.\nFull validation report saved to \".\output\repo.json\"" );
+      })
+      .catch(function(e){
+        console.log(e);
+        return res.status(500).send(e);
+      });
+  }
 });
