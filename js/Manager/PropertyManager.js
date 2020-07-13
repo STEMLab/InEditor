@@ -43,6 +43,7 @@ define(function(require) {
     this.addCallbackFun('deletecellboundary', this.deleteCellBoundary);
     this.addCallbackFun('deletestate', this.deleteState);
     this.addCallbackFun('deletetransition', this.deleteTransition);
+    this.addCallbackFun('deleteinterlayerconnection', this.deleteInterlayerConnection);
 
     this.addCallbackFun('deletedesclist', this.deleteDescList);
     this.addCallbackFun('addnewglobaldesc', this.addDescList);
@@ -58,6 +59,9 @@ define(function(require) {
     this.addCallbackFun('deletecode', this.deleteCode);
 
     this.addCallbackFun('getmapcoor', this.getMapCoor);
+
+    this.addCallbackFun('copyfloor', this.copyFloor);
+
 
 
   }
@@ -311,7 +315,7 @@ define(function(require) {
 
     var propertyContainer = require('Storage').getInstance().getPropertyContainer();
     var obj = propertyContainer.getElementById(reqObj.type, reqObj.target.id);
-    var duality = obj.duality;
+    var duality = obj.duality ? obj.duality : null;
 
     var floor = propertyContainer.getElementById('floor', reqObj.target.floor);
     var propertiesList, index, keyList, dualityType, pbb;
@@ -339,6 +343,9 @@ define(function(require) {
         index = floor.stateKey.indexOf(reqObj.target.id);
         floor.stateKey.splice(index, 1);
         dualityType = 'cell';
+        break;
+    case 'interlayerConnection':
+        propertiesList = propertyContainer.interlayerConnections;
         break;
       default:
     }
@@ -786,6 +793,15 @@ define(function(require) {
     require('Storage').getInstance().getPropertyContainer().projectProperty.isRealCoor = true;
     require('Storage').getInstance().getPropertyContainer().projectProperty.realCoorFloor = fp.id;
     alert('bottom left : ' + bottomLeft + '\ntop right : ' + topRight + '\ncenter : ' + center);
+
+  }
+
+  PropertyManager.prototype.deleteInterlayerConnection = function(reqObj) {
+
+    require('Broker').getInstance().getManager('end-addnewcell', 'PropertyManager').deletePropertyObj({
+      type: 'interlayerConnection',
+      target: reqObj
+    });
 
   }
 

@@ -87,6 +87,7 @@ define(function(require) {
     this.addCallbackFun('deletecellboundary', this.removeObj);
     this.addCallbackFun('deletestate', this.removeObj);
     this.addCallbackFun('deletetransition', this.removeObj);
+    this.addCallbackFun('deleteinterlayerconnection', this.removeObj);
 
     this.addCallbackFun('makecellselectmenu', this.makeCellSelectMenu);
 
@@ -1102,7 +1103,6 @@ define(function(require) {
     backgroundLayer.layer.draw();
 
 
-    ////////////////// test code  //////////////////
     ////////////////// copy state //////////////////
     if(require('Conditions').getInstance().interlayerCopy){
       var propertyContainer = require('Storage').getInstance().getPropertyContainer();

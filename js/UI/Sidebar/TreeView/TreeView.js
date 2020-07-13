@@ -271,7 +271,7 @@ define(function(require) {
       else if (type == 'CELL_SPACE_BOUNDARY') req = 'deletecellboundary';
       else if (type == 'STATE') req = 'deletestate';
       else if (type == 'TRANSITION') req = 'deletetransition';
-      else if (type == 'INTERLAYER_CONNECTION') req = 'interlayerConnection';
+      else if (type == 'INTERLAYER_CONNECTION') req = 'deleteinterlayerconnection';
 
       var divIds = [];
       if (type != 'INTERLAYER_CONNECTION') divIds.push(this.getFloorTree().getNodeByKey(id).li.id);
@@ -322,8 +322,11 @@ define(function(require) {
           this.getClassTree().fancytree("getTree").getNodeByKey(id[i]).remove();
         }
       } else if (typeof id === 'string') {
-        this.getFloorTree().getNodeByKey(id).remove();
-        this.getClassTree().getNodeByKey(id).remove();
+        var treeNode = this.getFloorTree().getNodeByKey(id);
+        if(treeNode) treeNode.remove();
+
+        var classNode = this.getClassTree().getNodeByKey(id);
+        if(classNode) classNode.remove();
       }
 
     }
