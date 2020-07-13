@@ -548,7 +548,7 @@ define(function(require) {
 
     var propertiesDiv = "<table id=\"property-table\" data-type=\"state\" class=\"property-table ui compact table inverted \">";
     propertiesDiv += this.getBasicTr('id', 'id', property.id, true);
-    propertiesDiv += this.getBasicTr('name', 'name', property.name, false);
+    propertiesDiv += this.getBasicTr('name', 'name', "\"" + property.name + "\"", false);
     propertiesDiv += this.getBasicTr('duality', 'duality', property.duality != "" ? property.duality : 'none', true);
     propertiesDiv += this.getBasicTr('height', 'height', property.height, false);
     propertiesDiv += this.getDropDownTr('connects-text', 'connects', property.connects);
@@ -784,7 +784,7 @@ define(function(require) {
     var num = Object.keys(desc).length;
     var i = 0;
     var descString = "";
-    descString += "<tr><td colspan=\"2\"class=\"title\">Desc";
+    descString += "<tr><td colspan=\"2\"class=\"title\">Description";
     descString += "<div style=\"padding-left: .5rem;\">";
     descString += "<table style=\"width:100%\">";
 
@@ -809,8 +809,7 @@ define(function(require) {
       i++;
     }
     descString += "</table><div class=\"ui divider\"></div>";
-    descString += "Add Local Desc";
-    descString += "<div class=\"" + newDescInputContainerClass + "\"><input type=\"text\" id=\"add-new-local-desc-text\" placeHolder=\"New Desc...\"><button class=\"mini ui icon button\"><i id=\"add-new-local-desc-btn\" class=\"" + plusClass + "\"></i></button>";
+    descString += "<div class=\"" + newDescInputContainerClass + "\"><input type=\"text\" id=\"add-new-local-desc-text\" placeHolder=\"add new desc key\"><button class=\"mini ui icon button\"><i id=\"add-new-local-desc-btn\" class=\"" + plusClass + "\"></i></button>";
     descString += "</div></div></td></tr>";
 
     return descString;
@@ -894,7 +893,7 @@ define(function(require) {
     let tr = document.createElement('tr');
     let td = document.createElement('td');
     td.setAttribute('colspan', '2');
-    td.appendChild(document.createTextNode('Desc'));
+    td.appendChild(document.createTextNode('Description'));
 
     let div = document.createElement('div');
     div.style.cssText = 'padding-left: .5rem;';
@@ -940,7 +939,7 @@ define(function(require) {
 
     let input = document.createElement('input');
     input.id = 'add-new-local-desc-text';
-    input.setAttribute('placeHolder', 'New Desc...');
+    input.setAttribute('placeHolder', 'add new description key');
 
     let addBtn = document.createElement('button');
     addBtn.classList.add('mini', 'ui', 'icon', 'button');
