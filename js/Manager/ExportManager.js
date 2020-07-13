@@ -1735,6 +1735,11 @@ define(function(require) {
       .getInstance()
       .getManager("exporttofactory", "ExportManager");
 
+    // error for trasition what connected same state
+    let error_key = new Array();
+    let error_trasition = new Array();
+    // error for trasition what connected same state
+
     // copy geometry coordinates
     for (var key in geometries) {
       var tmp = require("FeatureFactory4Factory")("Transition", conditions);
@@ -1745,6 +1750,13 @@ define(function(require) {
       tmp.pushCoordinatesFromDots(geometries[key].points, transDot);
       transitions[geometries[key].id] = tmp;
     }
+
+    // error for trasition what connected same state
+    error_key.map((element,index)=>{
+      geometries.splice(element-index,1);
+      error_trasition.push(properties.splice(element-index,1)[0].id);
+    })
+    // error for trasition what connected same state
 
     // copy attributes
     for (var key in properties) {

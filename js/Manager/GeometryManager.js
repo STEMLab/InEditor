@@ -1974,6 +1974,7 @@
      * @memberof GeometryManager
      * @param {Object} reqObj floor: floor id
      */
+
      GeometryManager.prototype.endModifyPoint = function(reqObj) {
        var movedDot = window.tmpObj;
        var geometryContainer = require('Storage').getInstance().getGeometryContainer();
