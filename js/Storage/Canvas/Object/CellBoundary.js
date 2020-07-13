@@ -33,7 +33,7 @@ define([
     this.line = new Konva.Line({
           points:[],
           stroke: 'black',
-          strokeWidth: 2
+          strokeWidth: 4
     });
 
     /**
@@ -111,8 +111,8 @@ define([
     var rect = new Konva.Rect({
       x: coor.x,
       y: coor.y,
-      width: 2,
-      height: 2,
+      width: 4,
+      height: 4,
       fill: 'white',
       stroke: 'blue',
       strokeWidth: 1

@@ -471,10 +471,10 @@ define(function(require) {
 
     var result = {};
 
+    var docProperty = require("Storage").getInstance().getPropertyContainer().projectProperty;
     var document = {
-      id: require("Storage")
-        .getInstance()
-        .getPropertyContainer().projectProperty.name
+      id: docProperty.id,
+      name: docProperty.name
     };
 
     var indoorfeatures = {
@@ -761,7 +761,7 @@ define(function(require) {
         );
     }
 
-    manager.getDocument(address["get-document"], document.id);
+    manager.getDocument(address["get-document"], document.id, document.name);
 
     manager.getCodeListFile(cells.codeList);
   };
@@ -819,7 +819,7 @@ define(function(require) {
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.getDocument = function(address, documentId) {
+  ExportManager.prototype.getDocument = function(address, documentId, documentName) {
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
@@ -837,7 +837,7 @@ define(function(require) {
 
         getXhr.open(
           "POST",
-          "http://localhost:5757/save-gml/" + documentId,
+          "http://localhost:5757/save-gml/" + documentName,
           false
         );
         getXhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
@@ -1311,7 +1311,7 @@ define(function(require) {
 
         function addVertices(solid) {
           for (var surfaceIndex in solid[0]) {
-            var polygon = solid[0][surfaceIndex][0][0];
+            var polygon = solid[0][surfaceIndex][0];
             var polygon_ = [];
 
             for (var i = 0; i < polygon.length - 1; i++) {
@@ -1326,33 +1326,6 @@ define(function(require) {
             solid[0][surfaceIndex][0] = polygon_;
           }
           return solid;
-
-          // var result = [];
-          // for(var s of solid){
-          //     var solid_ = [];
-          //     for(var surface of s){
-          //         var surface_ = [];
-          //         for(var polygon of surface[0]){
-          //             var polygon_ = [];
-          //             for(var vertexIndex in polygon){
-          //                 if(vertexIndex == polygon.length - 1) continue;
-          //                 var vertex = polygon[vertexIndex];
-          //                 var index = cityJSON.vertices.indexOf(JSON.stringify(vertex));
-          //                 if (index == -1) {
-          //                   cityJSON.vertices.push(JSON.stringify(vertex));
-          //                   index = cityJSON.vertices.length - 1;
-          //                 }
-          //                 polygon_.push(index);
-          //             }
-          //             surface_.push(polygon_);
-          //         }
-          //         solid_.push(surface_);
-          //     }
-          //     result.push(solid_);
-          // }
-          // console.log('cityJSON', cityJSON);
-          // console.log('result', JSON.stringify(result));
-          // return result;
         }
 
         if (geoType == "3D") {
@@ -1699,8 +1672,12 @@ define(function(require) {
         states[id].setDescription(properties[key].description);
       if (conditions.properties.duality)
         states[id].setDuality(properties[key].duality);
-      if (conditions.properties.connects)
-        states[id].setConnects(properties[key].connects);
+      if (conditions.properties.connects){
+        var connects = [ ...properties[key].connects]
+        connects.forEach(item => connects.push(item + '-REVERSE'))
+        states[id].setConnects(connects);
+      }
+        
     }
 
     // pixel to real world coordinates

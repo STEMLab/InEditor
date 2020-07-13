@@ -43,6 +43,7 @@ define(function(require) {
     this.addCallbackFun('deletecellboundary', this.deleteCellBoundary);
     this.addCallbackFun('deletestate', this.deleteState);
     this.addCallbackFun('deletetransition', this.deleteTransition);
+    this.addCallbackFun('deleteinterlayerconnection', this.deleteInterlayerConnection);
 
     this.addCallbackFun('deletedesclist', this.deleteDescList);
     this.addCallbackFun('addnewglobaldesc', this.addDescList);
@@ -58,6 +59,9 @@ define(function(require) {
     this.addCallbackFun('deletecode', this.deleteCode);
 
     this.addCallbackFun('getmapcoor', this.getMapCoor);
+
+    this.addCallbackFun('copyfloor', this.copyFloor);
+
 
 
   }
@@ -311,7 +315,7 @@ define(function(require) {
 
     var propertyContainer = require('Storage').getInstance().getPropertyContainer();
     var obj = propertyContainer.getElementById(reqObj.type, reqObj.target.id);
-    var duality = obj.duality;
+    var duality = obj.duality ? obj.duality : null;
 
     var floor = propertyContainer.getElementById('floor', reqObj.target.floor);
     var propertiesList, index, keyList, dualityType, pbb;
@@ -339,6 +343,9 @@ define(function(require) {
         index = floor.stateKey.indexOf(reqObj.target.id);
         floor.stateKey.splice(index, 1);
         dualityType = 'cell';
+        break;
+    case 'interlayerConnection':
+        propertiesList = propertyContainer.interlayerConnections;
         break;
       default:
     }
@@ -466,6 +473,12 @@ define(function(require) {
   }
 
   PropertyManager.prototype.deleteTransition = function(reqObj) {
+
+    var connects = require('Storage').getInstance().getPropertyContainer().getElementById('transition', reqObj.id).connects;
+    for(var connectedState of connects){
+      var stateProperty = require('Storage').getInstance().getPropertyContainer().getElementById('state', connectedState);
+      stateProperty.connects.splice(stateProperty.connects.indexOf(reqObj.id), 1)
+    }
 
     require('Broker').getInstance().getManager('end-addnewcell', 'PropertyManager').deletePropertyObj({
       type: 'transition',
@@ -777,9 +790,14 @@ define(function(require) {
   PropertyManager.prototype.getMapCoor = function(reqObj) {
     var map = require('Storage').getInstance().getCanvasContainer().getElementById('stage', reqObj.floor).map;
     var extent = map.getView().calculateExtent(map.getSize());
-    var bottomLeft = ol.proj.toLonLat(ol.extent.getBottomLeft(extent));
-    var topRight = ol.proj.toLonLat(ol.extent.getTopRight(extent));
-    var center = ol.proj.toLonLat(ol.extent.getCenter(extent));
+    let canvasCoor = require("Storage")
+    .getInstance()
+    .getCanvasContainer()
+    .stages[reqObj.floor].getWD();
+    
+    var bottomLeft = ol.proj.toLonLat(map.getCoordinateFromPixel([0,canvasCoor.height]));
+    var topRight   = ol.proj.toLonLat(map.getCoordinateFromPixel([canvasCoor.width,0]));
+    var center     = ol.proj.toLonLat(map.getCoordinateFromPixel([canvasCoor.width/2,canvasCoor.height/2]));
 
     var fp = require('Storage').getInstance().getPropertyContainer().getElementById('floor', reqObj.floor);
     fp.setMapCoor(bottomLeft, topRight);
@@ -788,6 +806,30 @@ define(function(require) {
     alert('bottom left : ' + bottomLeft + '\ntop right : ' + topRight + '\ncenter : ' + center);
 
   }
+
+  PropertyManager.prototype.deleteInterlayerConnection = function(reqObj) {
+
+    require('Broker').getInstance().getManager('end-addnewcell', 'PropertyManager').deletePropertyObj({
+      type: 'interlayerConnection',
+      target: reqObj
+    });
+
+  }
+
+  PropertyManager.prototype.copyFloor = function(reqObj) {
+
+    var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+    var src = propertyContainer.getElementById('floor', reqObj.targetFloor);
+    var dst = propertyContainer.getElementById('floor', reqObj.floor);
+
+    dst.celingHeight = src.celingHeight;
+    dst.doorHeight = src.doorHeight;
+    dst.lowerCorner = [...src.lowerCorner];
+    dst.upperCorner = [...src.upperCorner];
+  }
+
+
+
 
   return PropertyManager;
 });

@@ -228,9 +228,9 @@ define(["./Feature", "js/Storage/Dot/DotMath.js"], function(Feature, DotMath) {
 
   Transition.prototype.reverseDuality = function() {
     if (this.properties.duality != "" && this.properties.duality != undefined && this.properties.duality != null) {
-      var word = this.properties.duality.split("-");
-      if (word.length == 1) this.properties.duality = word[0] + '-REVERSE';
-      else this.properties.duality = word[0];
+      //var word = this.properties.duality.split("-");
+      if (this.properties.duality.indexOf('-REVERSE') === -1) this.properties.duality = this.properties.duality + '-REVERSE'
+      else this.properties.duality = this.properties.duality.substring(0, this.properties.duality.indexOf('-REVERSE'))  ;
     }
   }
 

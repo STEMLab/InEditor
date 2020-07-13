@@ -2,6 +2,9 @@ import java.io.*;
 import java.util.*;
 import org.gdal.gdal.GCP;
 import org.gdal.gdal.gdal;
+import org.gdal.osr.CoordinateTransformation;
+import org.gdal.osr.SpatialReference;
+
 
 //
 // Usage for poets.
@@ -22,12 +25,16 @@ import org.gdal.gdal.gdal;
 //   "C:\gdal\bin"
 //   "C:\gdal\bin\gdal\apps"
 //
-// 5. Compile
+// 5. Set environment value GDAL_DATA=C:\gdal\bin\gdal-data
+//
+// 6. Compile
 //    javac Convert.java -classpath c:\gdal\bin\gdal\java\gdal.jar
 //
-// 6. Run with samples
+// 7. Run with samples
 //    java -cp .;c:\gdal\bin\gdal\java\gdal.jar Convert GCP-201-IndoorGML.txt TARGET-IndoorGML.txt result.txt
 //    java -cp .;c:\gdal\bin\gdal\java\gdal.jar Convert GCP-201-Pixel.txt TARGET-Pixel.txt result-pixel.txt
+//
+
 
 public class Convert {
     public static void main(String[] args) {
@@ -88,9 +95,27 @@ public class Convert {
 
                 double resultX = myGT[0] + Xpoint * myGT[1] + Yline * myGT[2];
                 double resultY = myGT[3] + Xpoint * myGT[4] + Yline * myGT[5];
+				
+                SpatialReference s_srs = new SpatialReference();
+                SpatialReference t_srs = new SpatialReference();
+                s_srs.ImportFromEPSG(4326);
+                t_srs.ImportFromEPSG(3857);
 
+                CoordinateTransformation ct =  CoordinateTransformation.CreateCoordinateTransformation(s_srs, t_srs);
+
+                double[] epsg3857 = ct.TransformPoint(resultX, resultY);
+				
+                // System.out.println(String.format("[%.6f %.6f]", epsg3857[0], epsg3857[1]));
                 ////////////////////////////////////////////////////////////////
-                out.write(String.format("%f, %f", resultY, resultX));
+		    
+                // If you want EPSG:3857 use a line below.
+                //
+                //out.write(String.format("%.8f, %.8f", epsg3857[0], epsg3857[1]));
+                //
+		    
+                // If you want EPSG:4326 use a line below.
+                out.write(String.format("%f, %f", resultX, resultY));
+
                 out.newLine();
                 ////////////////////////////////////////////////////////////////
             }

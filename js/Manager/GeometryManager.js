@@ -545,15 +545,16 @@
     GeometryManager.prototype.isThisTypeObjectSeleted = function(type, floor) {
       var reader = new jsts.io.WKTReader();
       var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+      var ObjectType = require('ObjectType');
 
       var pointCoor = canvasContainer.stages[floor].tmpLayer.group.cursor.coor;
       var point = reader.read('POINT(' + pointCoor.x + ' ' + pointCoor.y + ')');
 
       var objects;
-      if (type == 'cell') objects = canvasContainer.stages[floor].cellLayer.group.getCells();
-      else if (type == 'cellBoundary') objects = canvasContainer.stages[floor].cellBoundaryLayer.group.getObjects();
-      else if (type == 'transition') objects = canvasContainer.stages[floor].transitionLayer.group.getObjects();
-      else if (type == 'state') {
+      if (type == ObjectType.CELL_SPACE) objects = canvasContainer.stages[floor].cellLayer.group.getCells();
+      else if (type == ObjectType.CELL_SPACE_BOUNDARY) objects = canvasContainer.stages[floor].cellBoundaryLayer.group.getObjects();
+      else if (type == ObjectType.TRANSITION) objects = canvasContainer.stages[floor].transitionLayer.group.getObjects();
+      else if (type == ObjectType.STATE) {
         var isDotExist = require('Storage').getInstance().getDotPoolContainer().getDotPool(floor).getDotByPoint({
           x: pointCoor.x,
           y: pointCoor.y
@@ -567,7 +568,7 @@
 
       for (var o of objects) {
         var obj = reader.read(o.getWKT());
-        if (type == 'cellBoundary' || type == 'transition') {
+        if (type == ObjectType.CELL_SPACE_BOUNDARY || type == ObjectType.TRANSITION) {
           if (point.distance(obj) < require('Conditions').getInstance().realSnappingThreshold) result.push(o.id);
         } else {
           var intersection = [];
@@ -580,7 +581,7 @@
         }
       }
 
-      if (type == 'cell') {
+      if (type == ObjectType.CELL_SPACE) {
         var holes = canvasContainer.stages[floor].cellLayer.group.getHoles();
         for (var i in holes) {
 
@@ -626,22 +627,23 @@
      */
     GeometryManager.prototype.isObjectSelected = function(floor) {
       var manager = require('Broker').getInstance().getManager("end-addnewcell", "GeometryManager");
+      var ObjectType = require('ObjectType');
 
-      var type = 'state';
+      var type = ObjectType.STATE;
       var result = manager.isThisTypeObjectSeleted(type, floor);
 
       if (result.length == 0) {
-        type = 'transition';
+        type = ObjectType.TRANSITION;
         result = manager.isThisTypeObjectSeleted(type, floor);
       }
 
       if (result.length == 0) {
-        type = 'cellBoundary';
+        type = ObjectType.CELL_SPACE_BOUNDARY;
         result = manager.isThisTypeObjectSeleted(type, floor);
       }
 
       if (result.length == 0) {
-        type = 'cell';
+        type = ObjectType.CELL_SPACE;
         result = manager.isThisTypeObjectSeleted(type, floor);
       }
 
@@ -1495,13 +1497,17 @@
           };
 
           var duality = require('Storage').getInstance().getPropertyContainer().getElementById('cellBoundary', cellBoundaries[boundaryKey].id).duality;
-          if (duality != '' && duality != null) {
-            require('Popup')('warning', 'INVALID CELLSPACEBOUNDARY', 'Selected CellSpaceBoudnary already has a duality');
-          } else if (
+          if (
             require('DotMath').isLineContainDot(line, {
               point: point
             })
           ) {
+
+            if (duality != '' && duality != null) {
+              require('Popup')('warning', 'INVALID CELLSPACEBOUNDARY', 'Selected CellSpaceBoudnary already has a duality');
+              return false;
+            }
+
             var Dot = require('Dot');
             var newDot = new Dot(point.x, point.y);
             dotPoolContainer.getDotPool(reqObj.floor).push(newDot);
@@ -1846,67 +1852,70 @@
      * @memberof GeometryManager
      * @param {Object} reqObj floor: floor id<br>line : {dot1, dot2}
      */
-    GeometryManager.prototype.modifyLine = function(reqObj) {
-      var canvasContainer = require('Storage').getInstance().getCanvasContainer();
+     GeometryManager.prototype.modifyLine = function(reqObj) {
+       var canvasContainer = require('Storage').getInstance().getCanvasContainer();
 
-      // add dot in cursor point
-      var point = canvasContainer.stages[
-        reqObj.floor
-      ].tmpLayer.group.getCursor().coor;
+       // add dot in cursor point
+       var point = canvasContainer.stages[
+         reqObj.floor
+       ].tmpLayer.group.getCursor().coor;
 
-      var Dot = require('Dot');
-      var newDot = new Dot(point.x, point.y);
-      require('Storage').getInstance().getDotPoolContainer().getDotPool(reqObj.floor).push(newDot);
+       var Dot = require('Dot');
+       var newDot = new Dot(point.x, point.y);
+       require('Storage').getInstance().getDotPoolContainer().getDotPool(reqObj.floor).push(newDot);
 
-      // find thd objects containg the line
-      var array1 = Object.keys(reqObj.line.dot1.memberOf);
-      var array2 = Object.keys(reqObj.line.dot2.memberOf);
+       // find thd objects containg the line
+       var array1 = Object.keys(reqObj.line.dot1.memberOf);
+       var array2 = Object.keys(reqObj.line.dot2.memberOf);
 
-      function isMemberOfArray1(value) {
-        return array1.indexOf(value) != -1;
-      }
+       function isMemberOfArray1(value) {
+         return array1.indexOf(value) != -1;
+       }
 
-      var filtered = array2.filter(isMemberOfArray1);
+       var filtered = array2.filter(isMemberOfArray1);
 
-      var isPartOf = [];
-      var stage = canvasContainer.stages[reqObj.floor];
-      for (var i in filtered) {
-        var obj = stage.getElementById(reqObj.line.dot1.memberOf[filtered[i]], filtered[i]);
-        if(obj.slant != null) {
-          require('Popup')(
-            'warning',
-            'YOU CAN NOT ADD MORE CORNER ON THIS CELLSPACE.',
-            'CellSpace with slant should have four corner.');
-          return false;
-        } // slant
-        if(obj.isPartOf(reqObj.line.dot1.point, reqObj.line.dot2.point).length != 0) {
-          isPartOf.push(filtered[i]);
-        }
-      }
+       var isPartOf = [];
+       var stage = canvasContainer.stages[reqObj.floor];
+       for (var i in filtered) {
+         var obj = stage.getElementById(reqObj.line.dot1.memberOf[filtered[i]], filtered[i]);
+         if (obj.slant != null) {
+           require('Popup')(
+             'warning',
+             'YOU CAN NOT ADD MORE CORNER ON THIS CELLSPACE.',
+             'CellSpace with slant should have four corner.');
+           return false;
+         } // slant
+         var isObjContainLine = obj.isPartOf(reqObj.line.dot1.point, reqObj.line.dot2.point);
+         if (Array.isArray(isObjContainLine) && isObjContainLine.length != 0) {
+           isPartOf.push(filtered[i]);
+         } else if (typeof isObjContainLine === 'boolean' && isObjContainLine) {
+           isPartOf.push(filtered[i]);
+         }
+       }
 
-      filtered = isPartOf;
+       filtered = isPartOf;
 
-      window.ori = {};
-      window.modify = {
-        type: 'line',
-        uuid: newDot.uuid
-      };
+       window.ori = {};
+       window.modify = {
+         type: 'line',
+         uuid: newDot.uuid
+       };
 
-      for (var i in filtered) {
-        var type = reqObj.line.dot1.memberOf[filtered[i]];
-        var id = filtered[i];
-        window.ori[id] = {
-          type: type,
-          dots: [...require('Storage').getInstance().getGeometryContainer()
-            .getElementById(type, id).points
-          ]
-        };
+       for (var i in filtered) {
+         var type = reqObj.line.dot1.memberOf[filtered[i]];
+         var id = filtered[i];
+         window.ori[id] = {
+           type: type,
+           dots: [...require('Storage').getInstance().getGeometryContainer()
+             .getElementById(type, id).points
+           ]
+         };
 
-        var obj = canvasContainer.stages[reqObj.floor].getElementById(type, id);
-        obj.insertDotIntoLine(reqObj.line, newDot);
-      }
+         var obj = canvasContainer.stages[reqObj.floor].getElementById(type, id);
+         obj.insertDotIntoLine(reqObj.line, newDot);
+       }
 
-    };
+     };
 
     /**
      * @memberof GeometryManager
@@ -1915,7 +1924,7 @@
     GeometryManager.prototype.startModifyPoint = function(reqObj) {
       window.tmpObj = reqObj.point;
 
-      if (window.ori === undefined) {
+      if (window.ori === undefined || !Object.keys(window.ori).length) {
         window.modify = {
           type: 'point',
           uuid: window.tmpObj.uuid,
@@ -1937,8 +1946,6 @@
           }
         });
       }
-
-      log.info(ori);
     };
 
     /**
@@ -1967,139 +1974,145 @@
      * @memberof GeometryManager
      * @param {Object} reqObj floor: floor id
      */
-    GeometryManager.prototype.endModifyPoint = function(reqObj) {
-      var movedDot = window.tmpObj;
-      var geometryContainer = require('Storage').getInstance().getGeometryContainer();
-      var dotPoolContainer = require('Storage').getInstance().getDotPoolContainer();
-      var propertyContainer = require('Storage').getInstance().getPropertyContainer();
-      var stageObj = require('Storage').getInstance().getCanvasContainer().stages[reqObj.floor];
-      var updateException = [];
 
-      // validation
-      var manager = require('Broker').getInstance().getManager("end-addnewcell", "GeometryManager");
-      var dotPool = dotPoolContainer.dotPool[reqObj.floor];
-      var flag = false;
-      Object.keys(movedDot.memberOf).forEach(key => {
-        if(flag) return;
+     GeometryManager.prototype.endModifyPoint = function(reqObj) {
+       var movedDot = window.tmpObj;
+       var geometryContainer = require('Storage').getInstance().getGeometryContainer();
+       var dotPoolContainer = require('Storage').getInstance().getDotPoolContainer();
+       var propertyContainer = require('Storage').getInstance().getPropertyContainer();
+       var stageObj = require('Storage').getInstance().getCanvasContainer().stages[reqObj.floor];
+       var updateException = [];
 
-        if (flag) return;
-        if (movedDot.memberOf[key] === 'cell'){
-          var canObj = stageObj.getElementById('cell', key);
-          if (!manager.isValidPolygon(canObj)) flag = true;
-          else if (manager.isSelfIntersecting(canObj)) flag = true;
-          else if (manager.isOverlaped(canObj)) flag = true;
-        }
-        else if(movedDot.memberOf[key] === 'state'){
-          var duality = propertyContainer.getElementById('state', key).duality;
-          if(duality === '' || duality === null) return;
+       // validation
+       var manager = require('Broker').getInstance().getManager("end-addnewcell", "GeometryManager");
+       var dotPool = dotPoolContainer.dotPool[reqObj.floor];
+       var flag = false;
+       Object.keys(movedDot.memberOf).forEach(key => {
+         if (flag) return;
 
-          var cellObj = stageObj.getElementById('cell', duality);
-          if(!manager.isPolygonContainDot(cellObj, movedDot.point)){
-            require('Popup')(
-              'error',
-              'INVALID POSITION',
-              'STATE ' + key + ' must located the inside of CellSpace ' + duality +'.')
-            flag = true;
-          }
-        }
-        else if(movedDot.memberOf[key] === 'transition'){
-          var connects = propertyContainer.getElementById('transition', key).connects;
-          var smallFlag = false;
-          connects.forEach(state => {
-            if(smallFlag) return;
-            var duality = propertyContainer.getElementById('state', state).duality;
-            if(duality === '' || duality === null) return;
+         if (flag) return;
+         if (movedDot.memberOf[key] === 'cell') {
+           var canObj = stageObj.getElementById('cell', key);
+           if (!manager.isValidPolygon(canObj)) flag = true;
+           else if (manager.isSelfIntersecting(canObj)) flag = true;
+           else if (manager.isOverlaped(canObj)) flag = true;
+         } else if (movedDot.memberOf[key] === 'state') {
+           var duality = propertyContainer.getElementById('state', key).duality;
+           if (duality === '' || duality === null) return;
 
-            var cellObj = stageObj.getElementById('cell', duality);
-            smallFlag = manager.isPolygonContainDot(cellObj, movedDot.point);
-          })
+           var cellObj = stageObj.getElementById('cell', duality);
+           if (!manager.isPolygonContainDot(cellObj, movedDot.point)) {
+             require('Popup')(
+               'error',
+               'INVALID POSITION',
+               'STATE ' + key + ' must located the inside of CellSpace ' + duality + '.')
+             flag = true;
+           }
+         } else if (movedDot.memberOf[key] === 'transition') {
+           var connects = propertyContainer.getElementById('transition', key).connects;
+           var smallFlag = false;
 
-          if(!smallFlag){
-            require('Popup')(
-              'error',
-              'INVALID POSITION',
-              'TRANSITION ' + key + ' must located the inside of CellSpace ' + connects[0] + ' or ' + connects[1] +'.')
-            flag = true;
-          }
-        }
-
-      });
-
-      // cancel modify
-      if (flag) {
-        Object.keys(window.ori).forEach(key => {
-          if (window.modify.type === 'point')
-            dotPool.getDotById(window.modify.uuid).setPoint(window.modify.point);
-
-          var canvaObj = stageObj.getElementById(window.ori[key].type.toLowerCase(), key);
-          canvaObj.dots = ori[key].dots;
-          canvaObj.addObjectFromDots();
-          geometryContainer.getElementById(window.ori[key].type, key);
-
-          if (window.modify.type === 'line')
-            dotPool.deleteDotFromObj(movedDot.uuid, key);
-
-        });
-
-        stageObj.stage.draw();
-        delete window.modify;
-        delete window.ori;
-        return;
-      }
-
-      // if dot exist
-      var isDotExist = require('Storage').getInstance().getDotPoolContainer().dotPool[
-        reqObj.floor
-      ].getDotByPointaAllowDuplication(movedDot.point);
-
-      if (isDotExist.length > 1) {
-        isDotExist.splice(isDotExist.indexOf(movedDot), 1);
-
-        for(var combined of isDotExist){
-          for (var exception in combined.memberOf) {
-            updateException.push(exception);
-          }
-
-          for (var key in movedDot.memberOf) {
-            var obj = stageObj.getElementById(movedDot.memberOf[key].toLowerCase(), key);
-            var dotIndex = obj.getDotIndex(movedDot.uuid);
-            obj.replaceDot(combined, dotIndex);
-
-          }
-
-          if (Object.keys(movedDot.memberOf).length == 0)
-            require('Storage').getInstance().getDotPoolContainer().dotPool[reqObj.floor].deleteDot(movedDot.uuid);
-          movedDot = combined;
-        }
+           var dualities = [propertyContainer.getElementById('state', connects[0]).duality,
+             propertyContainer.getElementById('state', connects[1]).duality
+           ]
+           if ((dualities[0] == null || dualities[0] == "") &&
+             (dualities[1] == null || dualities[1] == "")) {
+             smallFlag = true;;
+           } else {
+             dualities.forEach(duality => {
+               if (smallFlag) return;
+               var cellObj = stageObj.getElementById('cell', duality);
+               smallFlag = manager.isPolygonContainDot(cellObj, movedDot.point);
+             })
+           }
 
 
-        /////////////////////////////////////////////////////////////////
-      }
+           if (!smallFlag) {
+             require('Popup')(
+               'error',
+               'INVALID POSITION',
+               'TRANSITION ' + key + ' must located the inside of CellSpace ' + connects[0] + ' or ' + connects[1] + '.')
+             flag = true;
+           }
+         }
 
-      // update geometry data
-      for (var key in movedDot.memberOf) {
-        if (movedDot.memberOf[key] == "state") {
-          var dot = stageObj.getElementById(movedDot.memberOf[key], key).getDot();
-          geometryContainer.getElementById(
-            movedDot.memberOf[key],
-            key
-          ).point = dot;
-        } else if (updateException.indexOf(key) == -1) {
+       });
 
-          var dots = stageObj
-            .getElementById(movedDot.memberOf[key].toLowerCase(), key)
-            .getDots();
-          geometryContainer.getElementById(
-            movedDot.memberOf[key],
-            key
-          ).points = dots;
-        }
-      }
+       // cancel modify
+       if (flag) {
+         Object.keys(window.ori).forEach(key => {
+           if (window.modify.type === 'point')
+             dotPool.getDotById(window.modify.uuid).setPoint(window.modify.point);
 
-      window.tmpObj = null;
-      delete window.modify;
-      delete window.ori;
-    };
+           var canvaObj = stageObj.getElementById(window.ori[key].type.toLowerCase(), key);
+           canvaObj.dots = ori[key].dots;
+           canvaObj.addObjectFromDots();
+           geometryContainer.getElementById(window.ori[key].type, key);
+
+           if (window.modify.type === 'line')
+             dotPool.deleteDotFromObj(movedDot.uuid, key);
+
+         });
+
+         stageObj.stage.draw();
+         delete window.modify;
+         delete window.ori;
+         return;
+       }
+
+       // if dot exist
+       var isDotExist = require('Storage').getInstance().getDotPoolContainer().dotPool[
+         reqObj.floor
+       ].getDotByPointaAllowDuplication(movedDot.point);
+
+       if (isDotExist.length > 1) {
+         isDotExist.splice(isDotExist.indexOf(movedDot), 1);
+
+         for (var combined of isDotExist) {
+           for (var exception in combined.memberOf) {
+             updateException.push(exception);
+           }
+
+           for (var key in movedDot.memberOf) {
+             var obj = stageObj.getElementById(movedDot.memberOf[key].toLowerCase(), key);
+             var dotIndex = obj.getDotIndex(movedDot.uuid);
+             obj.replaceDot(combined, dotIndex);
+
+           }
+
+           if (Object.keys(movedDot.memberOf).length == 0)
+             require('Storage').getInstance().getDotPoolContainer().dotPool[reqObj.floor].deleteDot(movedDot.uuid);
+           movedDot = combined;
+         }
+
+
+         /////////////////////////////////////////////////////////////////
+       }
+
+       // update geometry data
+       for (var key in movedDot.memberOf) {
+         if (movedDot.memberOf[key] == "state") {
+           var dot = stageObj.getElementById(movedDot.memberOf[key], key).getDot();
+           geometryContainer.getElementById(
+             movedDot.memberOf[key],
+             key
+           ).point = dot;
+         } else if (updateException.indexOf(key) == -1) {
+
+           var dots = stageObj
+             .getElementById(movedDot.memberOf[key].toLowerCase(), key)
+             .getDots();
+           geometryContainer.getElementById(
+             movedDot.memberOf[key],
+             key
+           ).points = dots;
+         }
+       }
+
+       window.tmpObj = null;
+       delete window.modify;
+       delete window.ori;
+     };
 
 
     /**
@@ -2700,8 +2713,6 @@
       window.tmpObj = null;
 
       require('Storage').getInstance().getPropertyContainer().interlayerConnections.push(newInter);
-
-
     }
 
     GeometryManager.prototype.addCellsFromGML = function(reqObj) {

@@ -178,6 +178,11 @@ define([
                 'Edit Properties　',
                 ['pencil', 'alternate', 'icon'],
                 function() {
+                  // TODO: Need to change the expression of the object type from just string to GlobalConst module.
+                  var objectType = require('ObjectType');
+                  if(selectedObj.type == objectType.CELL_SPACE) selectedObj.type = 'cell';
+                  else if(selectedObj.type == objectType.CELL_SPACE_BOUNDARY) selectedObj.type = 'cellBoundary';
+
                   require('UI').getInstance().propertyTab.setPropertyTab(selectedObj.type, val, require('Storage').getInstance())
                   $('#context_menu_pos').popup('hide')
                 }
@@ -195,9 +200,12 @@ define([
                     }
                   };
 
+                  var objectType = require('ObjectType');
+
+                  // TODO: Need to change the expression of the object type from just string to GlobalConst module.
                   if (selectedObj.type == 'floor') msg.req = 'deletefloor';
-                  else if (selectedObj.type == 'cell') msg.req = 'deletecell';
-                  else if (selectedObj.type == 'cellboundary') msg.req = 'deletecellboundary';
+                  else if (selectedObj.type == 'cell' || selectedObj.type == objectType.CELL_SPACE ) msg.req = 'deletecell';
+                  else if (selectedObj.type == 'cellboundary' || selectedObj.type == objectType.CELL_SPACE_BOUNDARY ) msg.req = 'deletecellboundary';
                   else if (selectedObj.type == 'transition') msg.req = 'deletetransition';
                   else if (selectedObj.type == 'state') msg.req = 'deletestate';
 

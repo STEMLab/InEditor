@@ -177,6 +177,7 @@ define(function(require) {
         _reqSpecList['deletetransition'] = require('./MessageSpec.js')('single', 'including', null, true);
         _reqSpecList['deletestate'] = require('./MessageSpec.js')('single', 'including', null, true);
         _reqSpecList['deletefloor'] = require('./MessageSpec.js')('single', 'including', null, true);
+        _reqSpecList['deleteinterlayerconnection'] = require('./MessageSpec.js')('single', 'including', null, true);
 
         _reqSpecList['makecellselectmenu'] = require('./MessageSpec.js')('single', 'including', ['draw'], false);
 
