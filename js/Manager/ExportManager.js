@@ -471,10 +471,10 @@ define(function(require) {
 
     var result = {};
 
+    var docProperty = require("Storage").getInstance().getPropertyContainer().projectProperty;
     var document = {
-      id: require("Storage")
-        .getInstance()
-        .getPropertyContainer().projectProperty.id
+      id: docProperty.id,
+      name: docProperty.name
     };
 
     var indoorfeatures = {
@@ -761,7 +761,7 @@ define(function(require) {
         );
     }
 
-    manager.getDocument(address["get-document"], document.id);
+    manager.getDocument(address["get-document"], document.id, document.name);
 
     manager.getCodeListFile(cells.codeList);
   };
@@ -819,7 +819,7 @@ define(function(require) {
   /**
    * @memberof ExportManager
    */
-  ExportManager.prototype.getDocument = function(address, documentId) {
+  ExportManager.prototype.getDocument = function(address, documentId, documentName) {
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function() {
@@ -837,7 +837,7 @@ define(function(require) {
 
         getXhr.open(
           "POST",
-          "http://localhost:5757/save-gml/" + documentId,
+          "http://localhost:5757/save-gml/" + documentName,
           false
         );
         getXhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
@@ -1699,8 +1699,12 @@ define(function(require) {
         states[id].setDescription(properties[key].description);
       if (conditions.properties.duality)
         states[id].setDuality(properties[key].duality);
-      if (conditions.properties.connects)
-        states[id].setConnects(properties[key].connects);
+      if (conditions.properties.connects){
+        var connects = [ ...properties[key].connects]
+        connects.forEach(item => connects.push(item + '-REVERSE'))
+        states[id].setConnects(connects);
+      }
+        
     }
 
     // pixel to real world coordinates
