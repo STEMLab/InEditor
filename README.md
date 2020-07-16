@@ -22,7 +22,7 @@
     ·
     <a href="https://youtu.be/eW2Tpq2Yk_c">View Demo</a>
     ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Wiki</a>
+    <a href="https://github.com/STEMLab/InEditor/wiki">Wiki</a>
   </p>
 </p>
 
