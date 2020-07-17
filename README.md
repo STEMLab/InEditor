@@ -51,7 +51,7 @@ IndoorGML-Editor is an open source Javascript program that provides tools for si
     ```
     git clone https://github.com/STEMLab/InEditor.git
     ```
-     <img width="70%" src="assets/readme/07_download.png" style="margin:10px"></img>
+     <img width="70%" src="assets/readme/07_download.PNG" style="margin:10px"></img>
 2. Install NPM packages
     ```
     npm install
