@@ -290,7 +290,6 @@ define([
 
           var tmp = [];
           dots.map(function(d) {
-            console.log(d);
             if (Object.values(d.memberOf).indexOf("transition") === -1)
               tmp.push(d);
           });
