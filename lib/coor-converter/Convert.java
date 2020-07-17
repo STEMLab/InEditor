@@ -114,7 +114,7 @@ public class Convert {
                 //
 		    
                 // If you want EPSG:4326 use a line below.
-                out.write(String.format("%f, %f", resultX, resultY));
+                out.write(String.format("%.8f, %.8f", resultX, resultY));
 
                 out.newLine();
                 ////////////////////////////////////////////////////////////////
