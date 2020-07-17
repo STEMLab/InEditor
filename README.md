@@ -36,7 +36,7 @@ IndoorGML-Editor is an open source Javascript program that provides tools for si
 
 ## Getting Started
 ### Prerequisites
-1. OS : Windows recommaned. The exe file based on the Windows([val3dity](https://github.com/tudelft3d/val3dity.git)) is used for simple geometry validation.
+1. OS : Windows recommended. The exe file based on the Windows([val3dity](https://github.com/tudelft3d/val3dity.git)) is used for simple geometry validation.
 2. Node.js : You need to install Node.js and set PATH
     * [link](https://nodejs.org/)
 3. Maven : over 3.5 version. You need to install Maven and set MAVEN_HOME & PATH for InFactory
@@ -72,7 +72,7 @@ IndoorGML-Editor is an open source Javascript program that provides tools for si
             git clone https://github.com/STEMLab/InFactory.git
             ```
     2. Build Project : Open command prompt on project folder and build project
-        * If you install mavend and set PATH,
+        * If you install maven and set PATH,
             ```
             mvn clean install
             ```
