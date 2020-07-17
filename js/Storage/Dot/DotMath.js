@@ -324,6 +324,14 @@ define([], function() {
       var c = reader.read(wkt);
 
       return jsts.algorithm.Orientation.isCCW(c.getCoordinates());
+    },
+
+    normalize : function(vector){
+        let size = Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2));
+        return {
+          x : vector.x / size,
+          y : vector.y / size
+        }
     }
 
 
