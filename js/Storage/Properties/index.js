@@ -9,7 +9,7 @@ define(function(require) {
     'CELL_SPACE_BOUNDARY': require('./CellBoundaryProperty.js'),
     'STATE': require('./StateProperty.js'),
     'TRANSITION': require('./TransitionProperty.js'),
-    'PROJECT': require('./projectProperty.js'),
+    'PROJECT': require('./ProjectProperty.js'),
     'FLOOR': require('./FloorProperty.js'),
     'INTERLAYER_CONNECTION': require('./InterLayerConnectionProperty.js'),
     'CODE_LIST': require('./CodeList.js'),
