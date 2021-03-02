@@ -448,16 +448,24 @@ define([
   /**
    * @memberof Fromat4Factory.CellSpace
    */
-  CellSpace.prototype.addSolidHole = function(solid) {
-    for(let i in solid[0]){
-      if( i == 0 )
-        this.geometry.coordinates[0][i] = this.geometry.coordinates[0][i].concat(solid[0][i]);
-      else if ( i == solid[0].length - 1 )
-        this.geometry.coordinates[0][this.geometry.coordinates[0].length-1].push(solid[0][i][0])
-      else
-        this.geometry.coordinates[0].splice(this.geometry.coordinates[0].length-1, 0, solid[0][i])
+    CellSpace.prototype.addSolidHole = function(solid) {
+    for(var s of solid){
+      // for (var surface of i) {
+      //   // surface[0][0].reverse();
+      // }
+      this.geometry.coordinates.push(s);
     }
   };
+//  CellSpace.prototype.addSolidHole = function(solid) {
+//    for(let i in solid[0]){
+//      if( i == 0 )
+//        this.geometry.coordinates[0][i] = this.geometry.coordinates[0][i].concat(solid[0][i]);
+//      else if ( i == solid[0].length - 1 )
+//        this.geometry.coordinates[0][this.geometry.coordinates[0].length-1].push(solid[0][i][0])
+//      else
+//        this.geometry.coordinates[0].splice(this.geometry.coordinates[0].length-1, 0, solid[0][i])
+//    }
+//  };
 
   /**
    * @memberof Fromat4Factory.CellSpace
