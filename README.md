@@ -43,7 +43,7 @@ IndoorGML-Editor is an open source Javascript program that provides tools for si
     * How to set MAVEN_HOME : [link for Window](https://www.mkyong.com/maven/how-to-install-maven-in-windows/) , [link for Linux](https://maven.apache.org/install.html)
     * If you do not want to install Maven, check Maven wrapper at [InFactroy](https://github.com/STEMLab/InFactory).
 4. Java : JDK over 1.8 version. You need to install JDK and set JAVA_HOME & PATH.
-    * **JAVA 8; not working at the upper version** 
+    * **ONLY JDK 1.8; NOT upper version** 
     * How to set JAVA_HOME : [link](https://docs.oracle.com/cd/E19182-01/820-7851/inst_cli_jdk_javahome_t/)
 
 ### Installation
